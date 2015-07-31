@@ -238,3 +238,14 @@ FakesAssemblies/
 
 # Visual Studio 6 workspace options file
 *.opt
+*.tlog
+*.idb
+MAPI&AD/Store&CompondFile/lhy.msg
+MAPI&AD/Store&CompondFile/GenerateByCode/Modify/GarbageWithMulti.msg
+MAPI&AD/Store&CompondFile/GenerateByCode/Modify/Garbage.msg
+MAPI&AD/Store&CompondFile/GenerateByCode/Modify/Correct.msg
+MAPI&AD/Store&CompondFile/GenerateByCode/Correct.msg
+MAPI&AD/Store&CompondFile/GenerateByCode/Garbage.msg
+MAPI&AD/Store&CompondFile/Correct.msg
+MAPI&AD/DomainSearch/DomainSearch.zip
+EWS/ParseItemFromEWSExportFunction/ManagedCOM.zip

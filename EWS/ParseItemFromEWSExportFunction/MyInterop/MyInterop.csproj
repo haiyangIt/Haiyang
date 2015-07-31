@@ -1,0 +1,302 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <PropertyGroup>
+    <ProjectType>Local</ProjectType>
+    <ProductVersion>7.10.3077</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{EE468AC7-9B91-481E-9393-48F02000BADD}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ApplicationIcon />
+    <AssemblyKeyContainerName />
+    <AssemblyName>MyInterop</AssemblyName>
+    <AssemblyOriginatorKeyFile>MyKeyPair.snk</AssemblyOriginatorKeyFile>
+    <DefaultClientScript>JScript</DefaultClientScript>
+    <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
+    <DefaultTargetSchema>IE50</DefaultTargetSchema>
+    <DelaySign>false</DelaySign>
+    <OutputType>Library</OutputType>
+    <RootNamespace>MyInterop</RootNamespace>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <StartupObject />
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>0.0</OldToolsVersion>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile />
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DocumentationFile />
+    <DebugSymbols>true</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn />
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>true</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <DebugType>full</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile />
+    <DefineConstants>TRACE</DefineConstants>
+    <DocumentationFile />
+    <DebugSymbols>false</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn />
+    <Optimize>true</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <DebugType>none</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Exchange.WebServices, Version=15.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Microsoft\Exchange\Web Services\2.2\Microsoft.Exchange.WebServices.dll</HintPath>
+    </Reference>
+    <Reference Include="System">
+      <Name>System</Name>
+    </Reference>
+    <Reference Include="System.Data">
+      <Name>System.Data</Name>
+    </Reference>
+    <Reference Include="System.DirectoryServices" />
+    <Reference Include="System.Windows.Forms">
+      <Name>System.Windows.Forms</Name>
+    </Reference>
+    <Reference Include="System.XML">
+      <Name>System.XML</Name>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EWSUtil\ActiveDirectoryHelper.cs" />
+    <Compile Include="EWSUtil\CertificateValidationHelper.cs" />
+    <Compile Include="EWSUtil\EWSException.cs" />
+    <Compile Include="EWSUtil\EwsProxyFactory.cs" />
+    <Compile Include="EWSUtil\ExportUploadHelper.cs" />
+    <Compile Include="EWSUtil\Extensions\ExchangeServiceExtensions.cs" />
+    <Compile Include="EWSUtil\FileHelper.cs" />
+    <Compile Include="EWSUtil\Resource\TemplateEwsRequests.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>TemplateEwsRequests.resx</DependentUpon>
+    </Compile>
+    <Compile Include="EWSUtil\Setting\GlobalSettings.cs" />
+    <Compile Include="EWSUtil\Setting\Internals\ExceptionHResult.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>ExceptionHResult.settings</DependentUpon>
+    </Compile>
+    <Compile Include="EWSUtil\Setting\Internals\UserSettings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>UserSettings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="EWSUtil\ValidationCallbackHelper.cs" />
+    <Compile Include="FTStreamUtil\Build\E15PropertyItem.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FTStreamUtil\Build\IAttachmentBuild.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FTStreamUtil\Build\IAttachmentCollectionBuild.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FTStreamUtil\Build\IBuild.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FTStreamUtil\Build\IEmbeddedMessageBuild.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FTStreamUtil\Build\IItemBuild.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FTStreamUtil\Build\Implement\AttachmentBuild.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FTStreamUtil\Build\Implement\AttachmentCollectionBuild.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FTStreamUtil\Build\Implement\BuildConst.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FTStreamUtil\Build\Implement\ConvertE15PropertyToUnit.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FTStreamUtil\Build\Implement\EmbeddedMessageBuild.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FTStreamUtil\Build\Implement\ItemBuild.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FTStreamUtil\Build\Implement\PropertyBuildBase.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FTStreamUtil\Build\Implement\PropListBuild.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FTStreamUtil\Build\Implement\RecipientBuild.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FTStreamUtil\Build\Implement\RecipientCollectionBuild.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FTStreamUtil\Build\Implement\RestoreMsg.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FTStreamUtil\Build\IPropListBuild.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FTStreamUtil\Build\IRecipientBuild.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FTStreamUtil\Build\IRecipientCollectionBuild.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FTStreamUtil\Build\IRestoreMsg.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FTStreamUtil\FTFactory.cs" />
+    <Compile Include="FTStreamUtil\FTMessageTreeRoot.cs" />
+    <Compile Include="FTStreamUtil\FTNodeBase.cs" />
+    <Compile Include="FTStreamUtil\FTNodeCollection.cs" />
+    <Compile Include="FTStreamUtil\FTNodeLeaf.cs" />
+    <Compile Include="FTStreamUtil\FTOneNode.cs" />
+    <Compile Include="FTStreamUtil\FTParserUtil.cs" />
+    <Compile Include="FTStreamUtil\FTStream\FTBufferRead.cs" />
+    <Compile Include="FTStreamUtil\FTStream\ByteArrayTransferUnit.cs" />
+    <Compile Include="FTStreamUtil\Build\Implement\FTFileStream.cs" />
+    <Compile Include="FTStreamUtil\FTStream\FTStreamConst.cs" />
+    <Compile Include="FTStreamUtil\FTStream\FTStreamReader.cs" />
+    <Compile Include="FTStreamUtil\FTStream\FTStreamReaderForPage.cs" />
+    <Compile Include="FTStreamUtil\FTStream\FTStreamWriter.cs" />
+    <Compile Include="FTStreamUtil\FTStream\FTStreamWriterForPage.cs" />
+    <Compile Include="FTStreamUtil\FTStream\FxOpcodes.cs" />
+    <Compile Include="FTStreamUtil\FTStream\IFTPage.cs" />
+    <Compile Include="FTStreamUtil\FTStream\IFTSerialize .cs" />
+    <Compile Include="FTStreamUtil\FTStream\IFTStreamReader.cs" />
+    <Compile Include="FTStreamUtil\FTStream\IFTStreamWriter.cs" />
+    <Compile Include="FTStreamUtil\FTStream\IFTTransferUnit.cs" />
+    <Compile Include="FTStreamUtil\IFTParseEvent.cs" />
+    <Compile Include="FTStreamUtil\IFTTreeLeaf.cs" />
+    <Compile Include="FTStreamUtil\IFTTreeNode.cs" />
+    <Compile Include="FTStreamUtil\IPropertyProcess.cs" />
+    <Compile Include="FTStreamUtil\Item\Attachment.cs" />
+    <Compile Include="FTStreamUtil\Item\AttachmentCollection.cs" />
+    <Compile Include="FTStreamUtil\Item\AttachmentContent.cs" />
+    <Compile Include="FTStreamUtil\Item\EmbeddedMessage.cs" />
+    <Compile Include="FTStreamUtil\Item\Marker\EndAttachMarker.cs" />
+    <Compile Include="FTStreamUtil\Item\Marker\EndEmbedMarker.cs" />
+    <Compile Include="FTStreamUtil\Item\Marker\EndRecipientMarker.cs" />
+    <Compile Include="FTStreamUtil\Item\Marker\MarkerBase.cs" />
+    <Compile Include="FTStreamUtil\Item\Marker\NewAttachmentMarker.cs" />
+    <Compile Include="FTStreamUtil\Item\Marker\StartEmbedMarker.cs" />
+    <Compile Include="FTStreamUtil\Item\Marker\StartRecipientMarker.cs" />
+    <Compile Include="FTStreamUtil\Item\MessageChildren.cs" />
+    <Compile Include="FTStreamUtil\Item\MessageContent.cs" />
+    <Compile Include="FTStreamUtil\Item\PropertyTag.cs" />
+    <Compile Include="FTStreamUtil\Item\PropertyType.cs" />
+    <Compile Include="FTStreamUtil\Item\PropValue\AttachmentNumberTag.cs" />
+    <Compile Include="FTStreamUtil\Item\PropValue\FixedPropType.cs" />
+    <Compile Include="FTStreamUtil\Item\PropValue\FixPropValue.cs" />
+    <Compile Include="FTStreamUtil\Item\PropValue\IFixedSizeValue.cs" />
+    <Compile Include="FTStreamUtil\Item\PropValue\IPropInfo.cs" />
+    <Compile Include="FTStreamUtil\Item\PropValue\IPropValue.cs" />
+    <Compile Include="FTStreamUtil\Item\PropValue\ISizeValue.cs" />
+    <Compile Include="FTStreamUtil\Item\PropValue\IVarSizeValue.cs" />
+    <Compile Include="FTStreamUtil\Item\PropValue\MetaPropertyBase.cs" />
+    <Compile Include="FTStreamUtil\Item\PropValue\MetaPropertyFxDelTag.cs" />
+    <Compile Include="FTStreamUtil\Item\PropValue\MvPropType.cs" />
+    <Compile Include="FTStreamUtil\Item\PropValue\MvPropValue.cs" />
+    <Compile Include="FTStreamUtil\Item\PropValue\PropList.cs" />
+    <Compile Include="FTStreamUtil\Item\PropValue\PropValueLength.cs" />
+    <Compile Include="FTStreamUtil\Item\PropValue\VarPropType.cs" />
+    <Compile Include="FTStreamUtil\Item\PropValue\VarPropValue.cs" />
+    <Compile Include="FTStreamUtil\Item\Recipient.cs" />
+    <Compile Include="FTStreamUtil\Item\RecipientCollection.cs" />
+    <Compile Include="FTStreamUtil\LogWriter.cs" />
+    <Compile Include="FTStreamUtil\Log\FtTraceListener.cs" />
+    <Compile Include="FTStreamUtil\Log\ITraceLog.cs" />
+    <Compile Include="FTStreamUtil\Log\TraceLog.cs" />
+    <Compile Include="FTStreamUtil\Log\TraceLogLevel.cs" />
+    <Compile Include="FTStreamUtil\Log\TraceSourceLog.cs" />
+    <Compile Include="MyDotNetClass.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TestCom.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="EWSUtil\Setting\Internals\ExceptionHResult.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>ExceptionHResult.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="EWSUtil\Setting\Internals\UserSettings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>UserSettings.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="MyKeyPair.snk" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="EWSUtil\Resource\TemplateEwsRequests.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>TemplateEwsRequests.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent />
+    <PostBuildEvent />
+  </PropertyGroup>
+</Project>

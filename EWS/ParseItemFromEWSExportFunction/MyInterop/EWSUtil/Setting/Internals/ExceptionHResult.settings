@@ -1,0 +1,27 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="MonadMgrDll.EWSUtil.Setting.Internals" GeneratedClassName="ExceptionHResult">
+  <Profiles />
+  <Settings>
+    <Setting Name="AutodiscoverLocalException" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">-2147483647</Value>
+    </Setting>
+    <Setting Name="IOException" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">-2147483646</Value>
+    </Setting>
+    <Setting Name="AutodiscoverRemoteException" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">-2147483645</Value>
+    </Setting>
+    <Setting Name="ServiceValidationException" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">-2147483644</Value>
+    </Setting>
+    <Setting Name="OtherException" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">-2147483648</Value>
+    </Setting>
+    <Setting Name="ImportFTStreamFailed" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">-2147483643</Value>
+    </Setting>
+    <Setting Name="CanntCreateFindFolder" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">-2147483642</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

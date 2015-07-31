@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30501.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Store", "Store\Store.vcxproj", "{F1C234FA-9123-43F8-AEDB-3467D3CE6D6B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		ExMapi|Win32 = ExMapi|Win32
+		ExMapi|x64 = ExMapi|x64
+		OutlookMapi|Win32 = OutlookMapi|Win32
+		OutlookMapi|x64 = OutlookMapi|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F1C234FA-9123-43F8-AEDB-3467D3CE6D6B}.ExMapi|Win32.ActiveCfg = ExMapi|Win32
+		{F1C234FA-9123-43F8-AEDB-3467D3CE6D6B}.ExMapi|Win32.Build.0 = ExMapi|Win32
+		{F1C234FA-9123-43F8-AEDB-3467D3CE6D6B}.ExMapi|x64.ActiveCfg = ExMapi|x64
+		{F1C234FA-9123-43F8-AEDB-3467D3CE6D6B}.ExMapi|x64.Build.0 = ExMapi|x64
+		{F1C234FA-9123-43F8-AEDB-3467D3CE6D6B}.OutlookMapi|Win32.ActiveCfg = OutlookMapi|Win32
+		{F1C234FA-9123-43F8-AEDB-3467D3CE6D6B}.OutlookMapi|Win32.Build.0 = OutlookMapi|Win32
+		{F1C234FA-9123-43F8-AEDB-3467D3CE6D6B}.OutlookMapi|x64.ActiveCfg = OutlookMapi|x64
+		{F1C234FA-9123-43F8-AEDB-3467D3CE6D6B}.OutlookMapi|x64.Build.0 = OutlookMapi|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

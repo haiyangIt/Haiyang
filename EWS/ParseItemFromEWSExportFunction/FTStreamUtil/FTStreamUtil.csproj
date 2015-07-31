@@ -1,0 +1,131 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{EFFE874C-2E8D-4E18-97E3-F5557D2EE4B8}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>FTStreamUtil</RootNamespace>
+    <AssemblyName>FTStreamUtil</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Build\E15PropertyItem.cs" />
+    <Compile Include="Build\IAttachmentBuild.cs" />
+    <Compile Include="Build\IAttachmentCollectionBuild.cs" />
+    <Compile Include="Build\IEmbeddedMessageBuild.cs" />
+    <Compile Include="Build\IItemBuild.cs" />
+    <Compile Include="Build\Implement\AttachmentBuild.cs" />
+    <Compile Include="Build\Implement\AttachmentCollectionBuild.cs" />
+    <Compile Include="Build\Implement\ConvertE15PropertyToUnit.cs" />
+    <Compile Include="Build\Implement\EmbeddedMessageBuild.cs" />
+    <Compile Include="Build\Implement\ItemBuild.cs" />
+    <Compile Include="Build\Implement\PropertyBuildBase.cs" />
+    <Compile Include="Build\Implement\PropListBuild.cs" />
+    <Compile Include="Build\Implement\RecipientBuild.cs" />
+    <Compile Include="Build\Implement\RecipientCollectionBuild.cs" />
+    <Compile Include="Build\IPropListBuild.cs" />
+    <Compile Include="Build\IRecipientBuild.cs" />
+    <Compile Include="Build\IRecipientCollectionBuild.cs" />
+    <Compile Include="FTStream\ByteArrayTransferUnit.cs" />
+    <Compile Include="FTStream\FxOpcodes.cs" />
+    <Compile Include="Build\IBuild.cs" />
+    <Compile Include="Item\Attachment.cs" />
+    <Compile Include="Item\AttachmentCollection.cs" />
+    <Compile Include="Item\AttachmentContent.cs" />
+    <Compile Include="FTStream\FTFileStream.cs" />
+    <Compile Include="FTStream\FTStreamConst.cs" />
+    <Compile Include="FTStream\FTStreamReaderForPage.cs" />
+    <Compile Include="FTStream\FTStreamWriter.cs" />
+    <Compile Include="FTStream\FTStreamWriterForPage.cs" />
+    <Compile Include="FTStream\IFTPage.cs" />
+    <Compile Include="FTStream\IFTTransferUnit.cs" />
+    <Compile Include="IFTParseEvent.cs" />
+    <Compile Include="FTStream\IFTSerialize .cs" />
+    <Compile Include="FTStream\IFTStreamWriter.cs" />
+    <Compile Include="IFTTreeLeaf.cs" />
+    <Compile Include="Item\PropValue\FixedPropType.cs" />
+    <Compile Include="Item\PropValue\FixPropValue.cs" />
+    <Compile Include="FTNodeLeaf.cs" />
+    <Compile Include="Item\PropValue\IFixedSizeValue.cs" />
+    <Compile Include="Item\PropValue\IPropInfo.cs" />
+    <Compile Include="Item\Marker\MarkerBase.cs" />
+    <Compile Include="Item\PropertyType.cs" />
+    <Compile Include="Item\PropValue\ISizeValue.cs" />
+    <Compile Include="Item\PropValue\MetaPropertyBase.cs" />
+    <Compile Include="Item\PropValue\MvPropType.cs" />
+    <Compile Include="Item\PropValue\MvPropValue.cs" />
+    <Compile Include="Item\PropValue\PropValueLength.cs" />
+    <Compile Include="Item\PropValue\AttachmentNumberTag.cs" />
+    <Compile Include="Item\EmbeddedMessage.cs" />
+    <Compile Include="Item\Marker\EndAttachMarker.cs" />
+    <Compile Include="Item\Marker\EndEmbedMarker.cs" />
+    <Compile Include="Item\Marker\EndRecipientMarker.cs" />
+    <Compile Include="FTFactory.cs" />
+    <Compile Include="FTNodeBase.cs" />
+    <Compile Include="FTNodeCollection.cs" />
+    <Compile Include="FTOneNode.cs" />
+    <Compile Include="FTStreamParseContext.cs" />
+    <Compile Include="IFTTreeNode.cs" />
+    <Compile Include="FTStream\IFTStreamReader.cs" />
+    <Compile Include="IPropertyProcess.cs" />
+    <Compile Include="Item\PropValue\IPropValue.cs" />
+    <Compile Include="Item\MessageChildren.cs" />
+    <Compile Include="Item\MessageContent.cs" />
+    <Compile Include="Item\PropValue\MetaPropertyFxDelTag.cs" />
+    <Compile Include="Item\Marker\NewAttachmentMarker.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Item\PropertyTag.cs" />
+    <Compile Include="FTStream\FTStreamReader.cs" />
+    <Compile Include="FTMessageTreeRoot.cs" />
+    <Compile Include="Item\PropValue\PropList.cs" />
+    <Compile Include="Item\Recipient.cs" />
+    <Compile Include="Item\RecipientCollection.cs" />
+    <Compile Include="Item\Marker\StartEmbedMarker.cs" />
+    <Compile Include="Item\Marker\StartRecipientMarker.cs" />
+    <Compile Include="Item\PropValue\VarPropType.cs" />
+    <Compile Include="Item\PropValue\VarPropValue.cs" />
+    <Compile Include="Item\PropValue\IVarSizeValue.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
