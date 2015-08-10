@@ -48,8 +48,9 @@ HRESULT CMapiError111::Reproduce(){
 		m_bKeepProfile = false;
 	}
 
-	cout << "Need change mailbox service or mailbox name? Y/N:" << endl;
-	cin >> temp;
+	//cout << "Need change mailbox service or mailbox name? Y/N:" << endl;
+	//cin >> temp;
+	temp = "Y";
 	if (temp == "Y" || temp == "y"){
 		cout << "Please input exchange server(For PR_PROFILE_UNRESOLVED_SERVER):" << endl;
 		cin >> temp;
@@ -59,7 +60,7 @@ HRESULT CMapiError111::Reproduce(){
 		cin >> temp;
 		m_mailBoxName = temp;
 
-		cout << "Please input proxy server name(For PR_PROFILE_RPC_PROXY_SERVER_)" << endl;
+		cout << "Please input CAS server name(For PR_PROFILE_RPC_PROXY_SERVER_)" << endl;
 		cin >> temp;
 		m_mailProxyServer = temp;
 	}
@@ -74,14 +75,14 @@ HRESULT CMapiError111::Reproduce(){
 		 m_mailProxyServer = "linha05-m-cas10.linha05-ex20131.com";
 	}
 
-	cout << "Is SSL On" << endl;
+	cout << "Is SSL On? Y/N:" << endl;
 	cin >> temp;
-	if (temp == "Y")
+	if (temp == "Y" || temp == "y")
 		m_hasSSL = true;
 	else
 		m_hasSSL = false;
 
-	cout << "Basic:0, NTLM:1, Negotiate:2" << endl;
+	cout << "AuthenticationMethod(Basic:0, NTLM:1, Negotiate:2):" << endl;
 	cin >> temp;
 	if (temp == "0")
 		m_auth = 1;
@@ -94,7 +95,6 @@ HRESULT CMapiError111::Reproduce(){
 
 	HRESULT hr = ConnectServer();
 
-	getchar();
 	return hr;
 }
 
@@ -121,9 +121,6 @@ HRESULT CMapiError111::ConnectServer(){
 		hr = OpenStore(lpSession);
 		if (FAILED(hr)){
 			m_helper.OutputLog("OpenStore failed with %0x", hr);
-			if (hr == 0x80040111){
-				m_helper.OutputLog("Reproduce ok");
-			}
 		}
 		else
 		{
