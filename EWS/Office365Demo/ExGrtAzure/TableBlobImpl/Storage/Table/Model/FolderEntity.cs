@@ -88,5 +88,9 @@ namespace TableBlobImpl.Storage.Table.Model
             return string.Format("{0}{1}", organizationName.ToLower(), mailAddress);
         }
 
+        public IFolderData Clone()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -40,12 +40,28 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CatalogException.cs" />
+    <Compile Include="Event\CatalogProgressType.cs" />
+    <Compile Include="Event\EventExceptionArgs.cs" />
+    <Compile Include="Event\CatalogFolderArgs.cs" />
+    <Compile Include="Event\CatalogItemArgs.cs" />
+    <Compile Include="Event\CatalogMailboxArgs.cs" />
+    <Compile Include="Event\CatalogProgressArgs.cs" />
+    <Compile Include="Event\CatalogFolderProgressType.cs" />
+    <Compile Include="Event\ICatalogServiceEvent.cs" />
+    <Compile Include="Event\CatalogItemProgressType.cs" />
+    <Compile Include="Event\CatalogMailboxProgressType.cs" />
+    <Compile Include="Event\RestoreFolderArgs.cs" />
+    <Compile Include="Event\RestoreItemArgs.cs" />
+    <Compile Include="Event\RestoreMailboxArgs.cs" />
+    <Compile Include="Event\RestoreProgressArgs.cs" />
     <Compile Include="ICatalogService.cs" />
     <Compile Include="ICatalogDataAccess.cs" />
     <Compile Include="IDataAccess.cs" />
     <Compile Include="IQueryCatalogAdvanced.cs" />
     <Compile Include="IQueryCatalogDataAccess.cs" />
     <Compile Include="IRestoreDestination.cs" />
+    <Compile Include="Event\IRestoreEvent.cs" />
     <Compile Include="IRestoreService.cs" />
     <Compile Include="IServiceContext.cs" />
     <Compile Include="OrganizationAdminInfo.cs" />

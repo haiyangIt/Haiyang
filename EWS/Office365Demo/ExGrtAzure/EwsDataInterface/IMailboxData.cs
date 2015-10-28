@@ -12,5 +12,7 @@ namespace EwsDataInterface
         string DisplayName { get; }
         string MailAddress { get; }
         string RootFolderId { get; }
+
+        IMailboxData Clone();
     }
 }

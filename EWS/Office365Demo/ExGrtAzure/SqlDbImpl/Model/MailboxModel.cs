@@ -25,5 +25,17 @@ namespace SqlDbImpl.Model
         [Key]
         [Column(Order = 2)]
         public DateTime StartTime { get; set; }
+
+        public IMailboxData Clone()
+        {
+            return new MailboxModel()
+            {
+                DisplayName = DisplayName,
+                Location = Location,
+                MailAddress = MailAddress,
+                RootFolderId = RootFolderId,
+                StartTime = StartTime
+            };
+        }
     }
 }

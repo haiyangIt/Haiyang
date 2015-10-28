@@ -250,6 +250,11 @@ namespace ExGrtAzure.Tests
             {
                 get; set;
             }
+
+            public IFolderData Clone()
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

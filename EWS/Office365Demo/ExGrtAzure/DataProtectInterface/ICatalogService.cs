@@ -1,4 +1,5 @@
-﻿using EwsDataInterface;
+﻿using DataProtectInterface.Event;
+using EwsDataInterface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DataProtectInterface
 {
-    public interface ICatalogService
+    public interface ICatalogService : ICatalogServiceEvent
     {
         DateTime StartTime { get; }
 
@@ -26,4 +27,6 @@ namespace DataProtectInterface
         void GenerateCatalog(string mailbox);
         void GenerateCatalog(string mailbox, string folder);
     }
+
+    
 }

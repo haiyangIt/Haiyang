@@ -108,6 +108,11 @@ namespace TableBlobImpl.Storage.Table.Model
         {
             return string.Format("{0}{1}{2}", organizationName.ToLower(), folderId, "item");
         }
+
+        public IItemData Clone()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     

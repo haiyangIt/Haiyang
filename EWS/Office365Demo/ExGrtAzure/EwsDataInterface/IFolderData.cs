@@ -16,5 +16,7 @@ namespace EwsDataInterface
         string FolderType { get; }
         int ChildItemCount { get; }
         int ChildFolderCount { get; }
+
+        IFolderData Clone();
     }
 }

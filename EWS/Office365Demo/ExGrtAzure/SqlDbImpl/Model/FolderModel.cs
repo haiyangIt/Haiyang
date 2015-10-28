@@ -69,5 +69,21 @@ namespace SqlDbImpl.Model
         {
             get; set;
         }
+
+        public IFolderData Clone()
+        {
+            return new FolderModel()
+            {
+                StartTime = StartTime,
+                ChildItemCount = ChildItemCount,
+                DisplayName = DisplayName,
+                FolderId = FolderId,
+                FolderType = FolderType,
+                Location = Location,
+                MailboxAddress = MailboxAddress,
+                ParentFolderId = ParentFolderId,
+                ChildFolderCount = ChildFolderCount
+            };
+        }
     }
 }

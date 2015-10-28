@@ -79,5 +79,10 @@ namespace TableBlobImpl.Storage.Table.Model
         {
             return string.Format("{0}{1}", organization.ToLower(), "mail");
         }
+
+        public IMailboxData Clone()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -127,7 +127,18 @@ namespace SqlDbImpl.Model
 
             return folderCountInfo.ContainerInfo.ContainerName;
         }
-        
+
+        public IItemData Clone()
+        {
+            return new ItemLocationModel()
+            {
+                ParentFolderId = ParentFolderId,
+                ItemId = ItemId,
+                Location = Location,
+                Size = Size,
+                ActualSize = ActualSize
+            };
+        }
     }
 
     [Serializable]

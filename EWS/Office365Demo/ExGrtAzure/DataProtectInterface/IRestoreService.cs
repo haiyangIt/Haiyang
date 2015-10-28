@@ -1,4 +1,5 @@
-﻿using EwsDataInterface;
+﻿using DataProtectInterface.Event;
+using EwsDataInterface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DataProtectInterface
 {
-    public interface IRestoreService
+    public interface IRestoreService : IRestoreEvent
     {
         DateTime StartTime { get; }
 

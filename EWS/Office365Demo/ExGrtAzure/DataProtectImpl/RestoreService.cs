@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using EwsDataInterface;
 using EwsFrame;
+using DataProtectInterface.Event;
 
 namespace DataProtectImpl
 {
@@ -226,7 +227,6 @@ namespace DataProtectImpl
 
         public virtual DateTime StartTime { get; protected set; }
 
-
         protected IQueryCatalogDataAccess DataAccess
         {
             get
@@ -335,8 +335,43 @@ namespace DataProtectImpl
             RestoreMailboxes(mailboxAddresses);
         }
 
+        protected virtual void RestoreStart()
+        {
+
+        }
+
+        protected virtual void RestoreEnd()
+        {
+
+        }
+
+        protected virtual void OnProgressChanged()
+        {
+
+        }
+
+        protected virtual void OnMailboxProgressChanged()
+        {
+
+        }
+
+        protected virtual void OnFolderProgressChanged()
+        {
+
+        }
+
+        protected virtual void OnItemProcessChanged()
+        {
+
+        }
 
         private MailboxFolderCache _FolderCache = new MailboxFolderCache();
+
+        public event EventHandler<RestoreProgressArgs> ProgressChanged;
+        public event EventHandler<RestoreMailboxArgs> MailboxeProgressChanged;
+        public event EventHandler<RestoreFolderArgs> FolderProgressChanged;
+        public event EventHandler<RestoreItemArgs> ItemProgressChanged;
+
         private void InitMailBoxFolderPathes(string mailbox)
         {
             if (!_FolderCache.IsMailboxInit(mailbox))

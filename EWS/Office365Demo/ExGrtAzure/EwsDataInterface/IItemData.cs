@@ -18,6 +18,8 @@ namespace EwsDataInterface
 
         int ActualSize { get; }
         string Location { get; }
+
+        IItemData Clone();
     }
     
 }

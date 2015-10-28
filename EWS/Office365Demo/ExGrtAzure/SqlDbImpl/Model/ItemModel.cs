@@ -44,5 +44,21 @@ namespace SqlDbImpl.Model
 
         [NotMapped]
         public int ActualSize { get; set; }
+
+        public IItemData Clone()
+        {
+            return new ItemModel()
+            {
+                CreateTime = CreateTime,
+                DisplayName = DisplayName,
+                ItemClass = ItemClass,
+                ItemId = ItemId,
+                Location = Location,
+                ParentFolderId = ParentFolderId,
+                StartTime = StartTime,
+                Size = Size,
+                ActualSize = ActualSize
+            };
+        }
     }
 }
