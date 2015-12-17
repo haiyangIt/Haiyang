@@ -49,6 +49,7 @@
     <Compile Include="IDataConvert.cs" />
     <Compile Include="IDataConvertFromDb.cs" />
     <Compile Include="IFolderData.cs" />
+    <Compile Include="IItemBase.cs" />
     <Compile Include="IItemData.cs" />
     <Compile Include="IMailboxData.cs" />
     <Compile Include="IOrganizationData.cs" />

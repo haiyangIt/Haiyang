@@ -10,6 +10,7 @@ using System.Web;
 
 namespace SqlDbImpl.Cache
 {
+    [Obsolete("For blob size limitation.")]
     public class FolderContainerMapCache : ICache
     {
         public static string CacheName = "FolderContainer";

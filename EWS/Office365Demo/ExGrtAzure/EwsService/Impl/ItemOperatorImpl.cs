@@ -9,6 +9,7 @@ using System.Runtime.Serialization;
 using EwsService.Common;
 using EwsServiceInterface;
 using EwsFrame;
+using DataProtectInterface;
 
 namespace EwsService.Impl
 {
@@ -23,6 +24,15 @@ namespace EwsService.Impl
         public ExchangeService CurrentExchangeService
         {
             get; set;
+        }
+
+        public void ExportEmlItem(Item itemInEws, MemoryStream emlStream, EwsServiceArgument argument)
+        {
+            PropertySet props = new PropertySet(EmailMessageSchema.MimeContent);
+
+            // This results in a GetItem call to EWS.
+            var email = EmailMessage.Bind(CurrentExchangeService, itemInEws.Id, props);
+            emlStream.Write(email.MimeContent.Content, 0, email.MimeContent.Content.Length);
         }
 
         public void ExportItem(Item item, Stream stream, EwsServiceArgument argument)
@@ -68,7 +78,10 @@ namespace EwsService.Impl
 
         public bool IsItemNew(Item item, DateTime lastTime, DateTime thisTime)
         {
-            return item.DateTimeCreated > lastTime && item.DateTimeCreated <= thisTime;
+            var dataAccess = (ICatalogDataAccess)ServiceContext.ContextInstance.DataAccessObj;
+            return !dataAccess.IsItemContentExist(item.Id.UniqueId);
+
+            //return (item.DateTimeCreated > lastTime && item.DateTimeCreated <= thisTime) || (item.LastModifiedTime > lastTime && item.LastModifiedTime <= thisTime);
         }
     }
 

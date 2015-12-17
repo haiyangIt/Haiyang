@@ -12,7 +12,7 @@ namespace DataProtectInterface
     {
         DateTime StartTime { get; }
 
-        DateTime LastCatalogTime { get; }
+        //DateTime LastCatalogTime { get; }
 
         string CatalogJobName { get; }
 
@@ -22,10 +22,11 @@ namespace DataProtectInterface
 
         List<IMailboxData> GetAllUserMailbox();
 
+        List<IFolderData> GetFolder(string mailbox, string parentId, bool containRootFolder);
+
         void GenerateCatalog();
 
-        void GenerateCatalog(string mailbox);
-        void GenerateCatalog(string mailbox, string folder);
+        void GenerateCatalog(IFilterItem filter);
     }
 
     

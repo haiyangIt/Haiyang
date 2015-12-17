@@ -58,14 +58,18 @@
     <Compile Include="ICatalogService.cs" />
     <Compile Include="ICatalogDataAccess.cs" />
     <Compile Include="IDataAccess.cs" />
+    <Compile Include="IFilterItem.cs" />
+    <Compile Include="INotify.cs" />
     <Compile Include="IQueryCatalogAdvanced.cs" />
     <Compile Include="IQueryCatalogDataAccess.cs" />
     <Compile Include="IRestoreDestination.cs" />
     <Compile Include="Event\IRestoreEvent.cs" />
     <Compile Include="IRestoreService.cs" />
     <Compile Include="IServiceContext.cs" />
+    <Compile Include="ItemKindEx.cs" />
     <Compile Include="OrganizationAdminInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SelectedItem.cs" />
     <Compile Include="TaskType.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -122,5 +122,28 @@ namespace EwsService.Impl
             Folder folder = Folder.Bind(CurrentExchangeService, findFolderId);
             folder.Delete(deleteMode);
         }
+
+        public List<Folder> GetChildFolder(string parentFolderId)
+        {
+            const int pageSize = 100;
+            int offset = 0;
+            bool moreItems = true;
+            List<Folder> result = new List<Folder>();
+            var parentFolder = new FolderId(parentFolderId);
+            //var parentFolderObj = Folder.Bind(CurrentExchangeService, parentFolder);
+           // return GetChildFolder(parentFolderObj);
+            while (moreItems)
+            {
+                FolderView oView = new FolderView(pageSize, offset, OffsetBasePoint.Beginning);
+                FindFoldersResults findResult = CurrentExchangeService.FindFolders(parentFolder, oView);
+                result.AddRange(findResult.Folders);
+                if (!findResult.MoreAvailable)
+                    moreItems = false;
+
+                if (moreItems)
+                    offset += pageSize;
+            }
+            return result;
+        }
     }
 }

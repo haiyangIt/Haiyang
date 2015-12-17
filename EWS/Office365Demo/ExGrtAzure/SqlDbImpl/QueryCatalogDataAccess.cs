@@ -14,20 +14,30 @@ using Microsoft.WindowsAzure.Storage;
 using System.Configuration;
 using System.IO;
 using EwsFrame;
+using System.Data.Entity;
 
 namespace SqlDbImpl
 {
     public class QueryCatalogDataAccess : DataAccessBase, IQueryCatalogDataAccess
     {
         private delegate IQueryable<T> QueryFunc<T>(CatalogDbContext context);
-        
+        private delegate int QueryCountFunc<T>(CatalogDbContext context);
         public ICatalogJob CatalogJob { get; set; }
 
-        private IServiceContext ServiceContext
+        private string _organization;
+        public string Organization
         {
             get
             {
-                return RestoreFactory.Instance.GetServiceContext();
+                if(CatalogJob != null)
+                {
+                    return CatalogJob.Organization;
+                }
+                return _organization;
+            }
+            set
+            {
+                _organization = value;
             }
         }
 
@@ -41,7 +51,7 @@ namespace SqlDbImpl
 
         private List<T> QueryDatas<T>(QueryFunc<T> funcObj)
         {
-            using (var context = new CatalogDbContext(ServiceContext.AdminInfo.OrganizationName))
+            using (var context = new CatalogDbContext(Organization))
             {
                 IQueryable<T> query = funcObj(context);
                 return query.ToList();
@@ -50,10 +60,28 @@ namespace SqlDbImpl
 
         private T QueryData<T>(QueryFunc<T> funcObj)
         {
-            using (var context = new CatalogDbContext(ServiceContext.AdminInfo.OrganizationName))
+            using (var context = new CatalogDbContext(Organization))
             {
                 IQueryable<T> query = funcObj(context);
                 return query.FirstOrDefault();
+            }
+        }
+
+        private int QueryData<T>(QueryCountFunc<T> funcObj)
+        {
+            using (var context = new CatalogDbContext(Organization))
+            {
+                return funcObj(context);
+            }
+        }
+
+        private List<T> QueryData<T>(QueryFunc<T> funcObj, int pageIndex, int pageCount)
+        {
+            using (var context = new CatalogDbContext(Organization))
+            {
+                var skip = pageIndex == 0 ? (pageCount * pageIndex) : (pageCount * (pageIndex - 1));
+                IQueryable<T> query = funcObj(context).Skip(skip).Take(pageCount);
+                return query.ToList();
             }
         }
 
@@ -87,7 +115,7 @@ namespace SqlDbImpl
                );
         }
 
-        
+
 
         public IItemData GetItem(string itemId)
         {
@@ -107,7 +135,7 @@ namespace SqlDbImpl
                (context) =>
                {
                    return from f in context.Mailboxes
-                          where f.StartTime == CatalogJob.StartTime 
+                          where f.StartTime == CatalogJob.StartTime
                           select f;
                }
                );
@@ -133,12 +161,146 @@ namespace SqlDbImpl
         internal static CloudBlobClient BlobClient = StorageAccount.CreateCloudBlobClient();
 
         public readonly BlobDataAccess BlobDataAccessObj = new BlobDataAccess(BlobClient);
+
+        [Obsolete("Please use GetItemContent(IItemData, ExportType)")]
         public IItemData GetItemContent(IItemData itemData)
         {
-            return GetItemContent(itemData.ItemId);
+            return GetItemContent(itemData.ItemId, itemData.DisplayName);
         }
 
-        public IItemData GetItemContent(string itemId)
+        [Obsolete("Please use GetItemContent(string, ExportType)")]
+        public IItemData GetItemContent(string itemId, string displayName)
+        {
+            return GetItemContent(itemId, displayName, ExportType.TransferBin);
+        }
+
+        public override void BeginTransaction()
+        {
+
+        }
+
+        public override void EndTransaction(bool isCommit)
+        {
+
+        }
+
+        public List<IFolderData> GetAllFoldersInMailboxes(string mailboxAddress)
+        {
+            return QueryDatas<IFolderData>(
+               (context) =>
+               {
+                   return from f in context.Folders
+                          where f.StartTime == CatalogJob.StartTime && f.MailboxAddress == mailboxAddress
+                          select f;
+               }
+               );
+        }
+
+        public List<IItemData> GetChildItems(string folderId, int pageIndex, int pageCount)
+        {
+            return QueryData<IItemData>((context) =>
+               {
+                   return from i in context.Items
+                          where i.StartTime == CatalogJob.StartTime && i.ParentFolderId == folderId
+                          orderby i.CreateTime
+                          select i;
+
+               }, pageIndex, pageCount);
+        }
+
+        public int GetChildItemsCount(string folderId)
+        {
+            return QueryData<IItemData>((context) =>
+            {
+                return (from i in context.Items
+                        where i.StartTime == CatalogJob.StartTime && i.ParentFolderId == folderId
+                        select i).Count();
+            });
+        }
+
+        public List<ICatalogJob> GetCatalogsInOneDay(DateTime day)
+        {
+            var startTime = new DateTime(day.Year, day.Month, day.Day, 0, 0, 0);
+            day = day.AddDays(1);
+            var endTime = new DateTime(day.Year, day.Month, day.Day, 0, 0, 0);
+            return QueryDatas<ICatalogJob>((context) =>
+            {
+                return from c in context.Catalogs
+                       where c.StartTime >= startTime && c.StartTime < endTime
+                       select c;
+            });
+        }
+
+        public ICatalogJob GetLatestCatalogJob()
+        {
+            return QueryData<ICatalogJob>((context) =>
+            {
+                return (from c in context.Catalogs
+                        orderby c.StartTime descending
+                        select c).Take(1);
+            });
+        }
+
+        public List<DateTime> GetCatalogDaysInMonth(DateTime startTime)
+        {
+            var startDay = new DateTime(startTime.Year, startTime.Month, 1, 0, 0, 0);
+            var endDay = startDay.AddMonths(1);
+            return QueryDatas<DateTime>((context) =>
+            {
+               
+                return (from c in context.Catalogs
+                        where c.StartTime >= startDay && c.StartTime < endDay
+                        orderby c.StartTime
+                        select DbFunctions.TruncateTime(c.StartTime).Value).Distinct();
+            });
+        }
+
+        public List<IMailboxData> GetAllMailbox(List<string> excludeIds)
+        {
+            return QueryDatas<IMailboxData>((context) =>
+            {
+                return from m in context.Mailboxes
+                       where !excludeIds.Contains(m.RootFolderId) && m.StartTime == CatalogJob.StartTime
+                       select m;
+            });
+        }
+
+        public List<IFolderData> GetAllChildFolder(string parentFolderId, List<string> excludefolderIds)
+        {
+            return QueryDatas<IFolderData>((context) =>
+            {
+                return from f in context.Folders
+                       where f.StartTime == CatalogJob.StartTime && f.ParentFolderId == parentFolderId && !excludefolderIds.Contains(f.FolderId)
+                       select f;
+            });
+        }
+
+        public List<IItemData> GetAllChildItems(string parentFolderId, List<string> excludeItemIds)
+        {
+            return QueryDatas<IItemData>((context) =>
+            {
+                return from f in context.Items
+                       where f.StartTime == CatalogJob.StartTime && f.ParentFolderId == parentFolderId && !excludeItemIds.Contains(f.ItemId)
+                       select f;
+            });
+        }
+
+        public List<IFolderData> GetAllChildFolder(string rootFolderId)
+        {
+            return QueryDatas<IFolderData>((context) =>
+            {
+                return from f in context.Folders
+                       where f.StartTime == CatalogJob.StartTime && f.ParentFolderId == rootFolderId
+                       select f;
+            });
+        }
+
+        public IItemData GetItemContent(IItemData itemData, ExportType type)
+        {
+            return GetItemContent(itemData.ItemId, itemData.DisplayName, type);
+        }
+
+        public IItemData GetItemContent(string itemId, string displayName, ExportType type)
         {
             var result = QueryData<ItemLocationModel>(
                (context) =>
@@ -155,8 +317,9 @@ namespace SqlDbImpl
             byte[] data = null;
             using (MemoryStream stream = new MemoryStream())
             {
-                string blobName = MD5Utility.ConvertToMd5(itemId);
-                BlobDataAccessObj.GetBlob(location, blobName, stream, result.ActualSize);
+                string blobNamePrefix = MailLocation.GetBlobNamePrefix(itemId);
+                string blobName = MailLocation.GetBlobName(type, blobNamePrefix);
+                BlobDataAccessObj.GetBlob(location, blobName, stream);
                 stream.Capacity = (int)stream.Length;
                 stream.Seek(0, SeekOrigin.Begin);
                 data = stream.ToArray();
@@ -165,28 +328,5 @@ namespace SqlDbImpl
             IItemData model = DataConvert.Convert(result, data);
             return model;
         }
-
-        public override void BeginTransaction()
-        {
-            
-        }
-
-        public override void EndTransaction(bool isCommit)
-        {
-            
-        }
-
-        public List<IFolderData> GetAllFoldersInMailboxes(string mailboxAddress)
-        {
-            return QueryDatas<IFolderData>(
-               (context) =>
-               {
-                   return from f in context.Folders
-                          where f.StartTime == CatalogJob.StartTime && f.MailboxAddress == mailboxAddress
-                          select f;
-               }
-               );
-        }
-
     }
 }

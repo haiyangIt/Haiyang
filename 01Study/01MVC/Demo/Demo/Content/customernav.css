@@ -1,0 +1,53 @@
+﻿body {
+}
+
+.restorenav{
+    height:450px;
+}
+
+.restorenav .restore-nav-list{
+    min-height:425px;
+}
+
+.restorenav .restore-nav-list .restore-nav-content{
+    min-height:355px;
+}
+
+.restorenav .checkall-div
+{
+    padding-left:15px;
+    padding-bottom:5px;
+}
+
+.restorenav .nav-checkbox-span
+{
+    padding-left:5px;
+}
+
+.restorenav .nav-children
+{
+    padding-left:10px;
+}
+
+.restore-nav-placehold
+{
+    margin-right:14px;
+}
+
+.usermailboxdetail{
+    min-height:450px;
+}
+
+.maildetail{
+    min-height: 450px;
+}
+
+.maildetail .restore-table
+{
+    min-height:355px;
+}
+
+.usermailboxdetail .jumbotron
+{
+    height:450px;
+}

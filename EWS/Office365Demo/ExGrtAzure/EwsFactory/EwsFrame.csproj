@@ -36,6 +36,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -46,13 +47,22 @@
   <ItemGroup>
     <Compile Include="Cache\ICache.cs" />
     <Compile Include="Cache\MailboxCacheManager.cs" />
+    <Compile Include="Cache\OrganizationCacheManager.cs" />
     <Compile Include="CatalogFactory.cs" />
+    <Compile Include="Config.cs" />
     <Compile Include="FactoryBase.cs" />
     <Compile Include="LogFactory.cs" />
+    <Compile Include="MailConfig.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MailConfig.resx</DependentUpon>
+    </Compile>
     <Compile Include="MD5Utility.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RestoreFactory.cs" />
     <Compile Include="ServiceContext.cs" />
+    <Compile Include="Util\SendMailHelper.cs" />
+    <Compile Include="Util\TreeNode.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DataProtectInterface\DataProtectInterface.csproj">
@@ -71,6 +81,12 @@
       <Project>{ed66d5c0-8d87-4dd6-9e6c-7d21b5bb8585}</Project>
       <Name>LogInterface</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="MailConfig.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>MailConfig.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

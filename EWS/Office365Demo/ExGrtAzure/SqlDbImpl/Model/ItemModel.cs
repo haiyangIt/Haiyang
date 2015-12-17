@@ -45,6 +45,26 @@ namespace SqlDbImpl.Model
         [NotMapped]
         public int ActualSize { get; set; }
 
+        [NotMapped]
+        public string Id
+        {
+            get
+            {
+                return ItemId;
+            }
+            set { }
+        }
+
+        [NotMapped]
+        public ItemKind ItemKind
+        {
+            get
+            {
+                return ItemKind.Item;
+            }
+            set { }
+        }
+
         public IItemData Clone()
         {
             return new ItemModel()

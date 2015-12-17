@@ -64,7 +64,7 @@ namespace SqlDbImpl.Model
         public string ItemId { get; set; }
 
         [Required]
-        [MaxLength(255)]
+        [MaxLength(256)]
         public string Location { get; set; }
 
         [NotMapped]
@@ -73,11 +73,35 @@ namespace SqlDbImpl.Model
         [Required]
         public int ActualSize { get; set; }
 
+        [NotMapped]
+        public string Id
+        {
+            get
+            {
+                return ItemId;
+            }
+            set { }
+        }
+
+        [NotMapped]
+        public ItemKind ItemKind
+        {
+            get
+            {
+                return ItemKind.Item;
+            }
+            set { }
+        }
 
         internal static string GetItemContainerName(string folderIdMd5Str, int index)
         {
             var context = CatalogFactory.Instance.GetServiceContext();
             return string.Format("{0}{3}{1}{3}{2}",context.GetOrganizationPrefix(), folderIdMd5Str, index, BlobDataAccess.DashChar);
+        }
+
+        internal static string GetItemContainerName(IItemData itemData)
+        {
+            return GetItemContainerName(MD5Utility.ConvertToMd5(itemData.ParentFolderId), 0);
         }
 
         internal static string GetItemNextContainerName(string containerName)
@@ -93,6 +117,20 @@ namespace SqlDbImpl.Model
         }
 
 
+        public static string GetLocation(IItemData item)
+        {
+            return GetItemContainerName(item);
+        }
+
+        /// <summary>
+        /// This method is based on a hypothesis that all mails write into a block blob who contains many blobs, the blob max size is 4MB and count can't more than 50000.
+        /// So if a mail is a block blob. we don't need the limitation.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="actualSize"></param>
+        /// <param name="thisCatalogTime"></param>
+        /// <returns></returns>
+        [Obsolete("This method is for size limitation.")]
         public static string GetLocation(IItemData item, int actualSize, DateTime thisCatalogTime)
         {
             BlobDataAccess dataAccess = new BlobDataAccess(CatalogDataAccess.BlobClient);
@@ -141,6 +179,7 @@ namespace SqlDbImpl.Model
         }
     }
 
+    [Obsolete("For blob size limitation.")]
     [Serializable]
     public class FolderContainerMapping
     {
@@ -200,6 +239,7 @@ namespace SqlDbImpl.Model
         }
     }
 
+    [Obsolete("For blob size limitation.")]
     public class ContainerCount
     {
         public string ContainerName { get; private set; }

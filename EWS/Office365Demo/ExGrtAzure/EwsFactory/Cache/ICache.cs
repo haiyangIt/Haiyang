@@ -5,6 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+/// <summary>
+/// 
+/// </summary>
+/// <remarks>
+/// todo need think about multi node.
+/// if there are many application server,  the cache need synchronize. 
+/// </remarks>
 namespace EwsFrame.Cache
 {
     public interface ICache
@@ -14,6 +21,13 @@ namespace EwsFrame.Cache
         void SetKeyValue(ICacheKey cacheKey, object cacheValue);
         void DeSerialize();
         void Serialize();
+    }
+
+    public interface ICacheManager
+    {
+        ICache NewCache(string key, string cacheName, Type cacheType);
+        ICache GetCache(string key, string cacheName);
+        void ReleaseCache(bool isSerialize = false);
     }
 
     public interface ICacheKey

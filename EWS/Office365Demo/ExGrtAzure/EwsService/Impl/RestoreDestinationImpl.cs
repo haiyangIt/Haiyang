@@ -29,7 +29,15 @@ namespace EwsService.Impl
                 return _desFolderPathArray;
             }
         }
-        
+
+        public ExportType ExportType
+        {
+            get
+            {
+                return ExportType.TransferBin;
+            }
+        }
+
         private string CurrentMailbox;
         private ExchangeService CurrentExService;
         private void ConnectMailbox(string mailboxAddress)
@@ -54,20 +62,21 @@ namespace EwsService.Impl
         private FolderId FindAndCreateFolder(string folderDisplayName, FolderId parentFolderId)
         {
             FolderId folderId = null;
-            if (CreatedFolders.TryGetValue(folderDisplayName, out folderId))
+            var key = string.Format("{0}-{1}", folderDisplayName, parentFolderId.UniqueId);
+            if (CreatedFolders.TryGetValue(key, out folderId))
                 return folderId;
 
             IFolder folderOper = RestoreFactory.Instance.NewFolderOperatorImpl(CurrentExService);
             folderId = folderOper.FindFolder(folderDisplayName, parentFolderId, 3);
             if(folderId == null)
                 folderId = folderOper.CreateChildFolder(folderDisplayName, parentFolderId);
-            CreatedFolders.Add(folderDisplayName, folderId);
+            CreatedFolders.Add(key, folderId);
             return folderId;
         }
 
-        private FolderId CreateFoldersIfNotExist(ICollection<string> folderDisplayNames, string mailboxAddress)
+        private FolderId CreateFoldersIfNotExist(ICollection<string> folderDisplayNames)
         {
-            ConnectMailbox(mailboxAddress);
+            ConnectMailbox(DesMailboxAddress);
             IFolder folderOper = RestoreFactory.Instance.NewFolderOperatorImpl(CurrentExService);
             FolderId parentFolderId = folderOper.GetRootFolder().Id;
             foreach(string folderName in folderDisplayNames)
@@ -104,7 +113,7 @@ namespace EwsService.Impl
         public void WriteItem(IRestoreItemInformation item, byte[] itemData)
         {
             List<string> path = GetFolderPathArray(item.FolderPathes);
-            var folder = CreateFoldersIfNotExist(path, item.MailAddress);
+            var folder = CreateFoldersIfNotExist(path);
             IItem itemOperatorImpl = RestoreFactory.Instance.NewItemOperatorImpl(CurrentExService);
             var argument = RestoreFactory.Instance.GetServiceContext().Argument;
             itemOperatorImpl.ImportItem(folder, itemData, argument);
@@ -114,6 +123,14 @@ namespace EwsService.Impl
         {
             DesMailboxAddress = information[0] as string;
             DesFolderDisplayNamePath = information[1] as string;
+        }
+
+        public void RestoreComplete(bool success, Exception ex)
+        {
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

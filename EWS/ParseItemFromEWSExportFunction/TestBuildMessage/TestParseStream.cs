@@ -33,12 +33,11 @@ namespace TestParseFTStream
         {
             allBuffer.Add(buffer);
         }
-
         
         public void TestParseFtStream()
         {
-            FileStream templateStream = new FileStream(templateFile, FileMode.CreateNew);
-            BinaryWriter templateWriter = new BinaryWriter(templateStream);
+            //FileStream templateStream = new FileStream(templateFile, FileMode.CreateNew);
+            //BinaryWriter templateWriter = new BinaryWriter(templateStream);
             using (FileStream fileStream = new FileStream(exportFileName, FileMode.Open))
             {
                 byte[] buffer = new byte[fileStream.Length];
@@ -49,15 +48,8 @@ namespace TestParseFTStream
                 int iGuessIsTag = 0;
                 int subBufferCount = 0;
                 FxOpcodes opcodes = 0;
-                string str;
-                string str2;
-                XmlNode node2;
-                XmlNode node = null; //no itemid, so can't overwrite;
-                //proxy = item.MapiMessage.GetFxProxyCollector();
-                string iGuessTagStr = "";
                 try
                 {
-                    //buffer = Base64StringConverter.Parse(node3.InnerText);
                     readedCount = 0;
                     byteCount = buffer.Length;
                     int outputIndex = 0;
@@ -67,10 +59,10 @@ namespace TestParseFTStream
                         if ((readedCount + 8) <= byteCount)
                         {
                             iGuessIsTag = BitConverter.ToInt32(buffer, readedCount);
-                            templateWriter.Write(iGuessIsTag);
+                            //templateWriter.Write(iGuessIsTag);
                             readedCount += 4;
                             subBufferCount = BitConverter.ToInt32(buffer, readedCount);
-                            templateWriter.Write(subBufferCount);
+                            //templateWriter.Write(subBufferCount);
                             readedCount += 4;
                             if ((readedCount + subBufferCount) <= byteCount)
                             {
@@ -92,7 +84,7 @@ namespace TestParseFTStream
 
                                     else
                                     {
-                                        templateWriter.Write(subBuffer);
+                                        //templateWriter.Write(subBuffer);
 
                                         StringBuilder sb = new StringBuilder();
 
@@ -136,8 +128,8 @@ namespace TestParseFTStream
                 catch (Exception e) { }
             }
 
-            templateWriter.Close();
-            templateStream.Close();
+            //templateWriter.Close();
+            //templateStream.Close();
 
             ProcessTransferBuffer();
             LogWriter.Instance.Dispose();

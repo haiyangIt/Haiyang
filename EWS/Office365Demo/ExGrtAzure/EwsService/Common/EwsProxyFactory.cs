@@ -4,6 +4,8 @@ using Microsoft.Exchange.WebServices.Data;
 using EwsFrame;
 using LogInterface;
 using EwsServiceInterface;
+using EwsFrame.Cache;
+using EwsService.Impl;
 
 namespace EwsService.Common
 {
@@ -55,6 +57,11 @@ namespace EwsService.Common
 
         public static ExchangeService CreateExchangeService(EwsServiceArgument ewsServiceArgument, string mailboxAddress)
         {
+            if (String.IsNullOrEmpty(ewsServiceArgument.ServiceCredential.Password))
+            {
+                throw new ArgumentException("Please input password first.");
+            }
+
             ewsServiceArgument.EwsUrl = null;
             ExchangeService service = null;
             TimeZoneInfo oTimeZone = null;
@@ -193,7 +200,35 @@ namespace EwsService.Common
                 }
             }
 
-            DoAutodiscover(service, mailboxAddress);
+            var domainName = AutodiscoveryUrlCache.GetDomainName(mailboxAddress);
+            var urlCache = OrganizationCacheManager.CacheManager.GetCache(domainName, AutodiscoveryUrlCache.CacheName);
+            if(urlCache == null)
+            {
+                urlCache = OrganizationCacheManager.CacheManager.NewCache(domainName, AutodiscoveryUrlCache.CacheName, typeof(AutodiscoveryUrlCache));
+            }
+
+            StringCacheKey mailboxKey = new StringCacheKey(domainName);
+            object urlObj = null;
+            if(!urlCache.TryGetValue(mailboxKey, out urlObj))
+            {
+                DoAutodiscover(service, mailboxAddress);
+                urlObj = service.Url;
+                urlCache.AddKeyValue(mailboxKey, urlObj);
+            }
+            else
+            {
+                try
+                {
+                    service.Url = new Uri(urlObj.ToString());
+                    TestExchangeService(service);
+                }
+                catch(Exception ex)
+                {
+                    DoAutodiscover(service, mailboxAddress);
+                    urlCache.SetKeyValue(mailboxKey, service.Url);
+                }
+            }
+
             ewsServiceArgument.EwsUrl = service.Url;
             return service;
         }
@@ -204,6 +239,11 @@ namespace EwsService.Common
         /// <param name="oRequest"></param>
         public static void CreateHttpWebRequest(ref HttpWebRequest oRequest, EwsServiceArgument argument)
         {
+            if (String.IsNullOrEmpty(argument.ServiceCredential.Password))
+            {
+                throw new ArgumentException("Please input password first.");
+            }
+
             HttpWebRequest oHttpWebRequest = (HttpWebRequest)WebRequest.Create(argument.EwsUrl);
 
             if (argument.UserAgent.Length != 0)
@@ -393,5 +433,14 @@ namespace EwsService.Common
         //    }
 
         //}
+
+        public static void TestExchangeService(ExchangeService service)
+        {
+            // mstehle - 11/15/2011 - The validation override is now handled by GlobalSettings, no need
+            // to do all this stuff anymore.  Just try ConvertIds and let the exceptions bubble up.
+            service.ConvertIds(
+                new AlternateId[] { new AlternateId(IdFormat.HexEntryId, "00", "blah@blah.com") },
+                IdFormat.HexEntryId);
+        }
     }
 }

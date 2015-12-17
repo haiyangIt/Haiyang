@@ -140,7 +140,13 @@ namespace ExGrtAzure.Tests
         [TestMethod]
         public void TestGenerateCatalog()
         {
-            _service.GenerateCatalog("haiyang.ling@arcserve.com","Test");
+            //_service.GenerateCatalog("haiyang.ling@arcserve.com","Test");
+        }
+
+        [TestMethod]
+        public void TestClearBlobData()
+        {
+            
         }
     }
 }

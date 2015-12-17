@@ -125,26 +125,61 @@ namespace SqlDbImpl
                 return;
 
             string containerName = string.Empty;
-            string blobNamePrefix = string.Empty;
 
             var itemOper = CatalogFactory.Instance.NewItemOperatorImpl(itemInEws.Service);
             IServiceContext context = CatalogFactory.Instance.GetServiceContext();
             var itemLocationModel = new ItemLocationModel();
-            using (MemoryStream stream = new MemoryStream())
+            List<MailLocation> locationInfos = new List<MailLocation>(3);
+
+            MemoryStream binStream = null;
+            MemoryStream emlStream = null;
+            MailLocation mailLocation = new MailLocation();
+            int binStreamLength = 0;
+            try
             {
-                itemOper.ExportItem(itemInEws, stream, ServiceContext.Argument);
-                stream.Capacity = (int)stream.Length;
-                stream.Seek(0, SeekOrigin.Begin);
-                
-                var location = ItemLocationModel.GetLocation(item, (int)stream.Length, startTime);
-                
-                itemLocationModel.ItemId = item.ItemId;
-                itemLocationModel.ParentFolderId = item.ParentFolderId;
-                itemLocationModel.Location = location;
-                itemLocationModel.ActualSize = (int)stream.Length;
-                string blobName = MD5Utility.ConvertToMd5(item.ItemId);
-                BlobDataAccessObj.SaveBlob(location, blobName, stream, true);
+                binStream = new MemoryStream();
+                itemOper.ExportItem(itemInEws, binStream, ServiceContext.Argument);
+                binStream.Capacity = (int)binStream.Length;
+                binStream.Seek(0, SeekOrigin.Begin);
+                var binLocation = new ExportItemSizeInfo() { Type = ExportType.TransferBin, Size = (int)binStream.Length };
+                mailLocation.AddLocation(binLocation);
+                binStreamLength = (int)binStream.Length;
+
+                emlStream = new MemoryStream();
+                itemOper.ExportEmlItem(itemInEws, emlStream, ServiceContext.Argument);
+                emlStream.Capacity = (int)emlStream.Length;
+                emlStream.Seek(0, SeekOrigin.Begin);
+                var emlLocation = new ExportItemSizeInfo() { Type = ExportType.Eml, Size = (int)emlStream.Length };
+                mailLocation.AddLocation(emlLocation);
+
+                var location = ItemLocationModel.GetLocation(item);
+                mailLocation.Path = location;
+
+                string blobNamePrefix = MailLocation.GetBlobNamePrefix(item.ItemId);
+                string binBlobName = MailLocation.GetBlobName(ExportType.TransferBin, blobNamePrefix);
+                string emlBlobName = MailLocation.GetBlobName(ExportType.Eml, blobNamePrefix);
+
+                BlobDataAccessObj.SaveBlob(location, binBlobName, binStream, true);
+                BlobDataAccessObj.SaveBlob(location, emlBlobName, emlStream, true);
             }
+            finally
+            {
+                if(binStream != null)
+                {
+                    binStream.Close();
+                    binStream.Dispose();
+                }
+                if (emlStream != null)
+                {
+                    emlStream.Close();
+                    emlStream.Dispose();
+                }
+            }
+
+            itemLocationModel.ItemId = item.ItemId;
+            itemLocationModel.ParentFolderId = item.ParentFolderId;
+            itemLocationModel.Location = mailLocation.Path;
+            itemLocationModel.ActualSize = binStreamLength;
 
             SaveModel<IItemData, ItemLocationModel>(itemLocationModel, CacheKeyNameDic[typeof(ItemLocationModel)], CachPageCountDic[typeof(ItemLocationModel)], (dbContext, lists) => dbContext.ItemLocations.AddRange(lists), false);
         }
@@ -175,7 +210,7 @@ namespace SqlDbImpl
             if (data == null)
             {
                 throw new ArgumentException("argument type is not right or argument is null", "folder");
-            }
+            } 
 
             TImpl model = (TImpl)data;
             SaveModelCache(model, false, keyName, pageCount, delegateFunc, isInTransaction);

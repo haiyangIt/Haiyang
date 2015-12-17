@@ -11,8 +11,34 @@ namespace SqlDbImpl.Model
     [Table("MailboxInformation")]
     public class MailboxModel : IMailboxData, ICatalogInfo
     {
+        public int ChildFolderCount
+        {
+            get; set;
+        }
+
         [MaxLength(255)]
         public string DisplayName { get; set; }
+
+        [NotMapped]
+        public string Id
+        {
+            get
+            {
+                return RootFolderId;
+            }
+            set { }
+        }
+
+        [NotMapped]
+        public ItemKind ItemKind
+        {
+            get
+            {
+                return ItemKind.Mailbox;
+            }
+            set { }
+        }
+
         [NotMapped]
         public string Location { get; set; }
         [MaxLength(255)]

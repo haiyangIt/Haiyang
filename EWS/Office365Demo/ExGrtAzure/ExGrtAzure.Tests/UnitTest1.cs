@@ -9,6 +9,12 @@ using System.Threading;
 using System.Reflection;
 using DataProtectImpl;
 using EwsDataInterface;
+using EwsFrame.Util;
+using System.Diagnostics;
+using DataProtectInterface;
+using SqlDbImpl;
+using System.IO.Compression;
+using System.Net.Mail;
 
 namespace ExGrtAzure.Tests
 {
@@ -64,6 +70,27 @@ namespace ExGrtAzure.Tests
         //    Assert.AreEqual(size, 10);
         //}
 
+            [TestMethod]
+        public void TestStack()
+        {
+            Stack<string> test = new Stack<string>();
+            test.Push("0");
+            test.Push("00");
+            test.Push("000");
+
+            List<string> testList = new List<string>(4);
+            testList.Add("0000");
+            testList.AddRange(test);
+
+            Stack<string> other = new Stack<string>(testList);
+
+            while (other.Count > 0)
+            {
+                Debug.WriteLine(other.Pop());
+            }
+
+        }
+
         [TestMethod]
         public void TestMD5()
         {
@@ -92,17 +119,101 @@ namespace ExGrtAzure.Tests
 
         }
 
-        //[TestMethod]
+        [TestMethod]
         public void ResetBlobData()
         {
             var directory = AppDomain.CurrentDomain.BaseDirectory;
             directory = Path.Combine(directory, "..\\..\\..\\lib");
             CatalogFactory.LibPath = directory;
-            ServiceContext context = new ServiceContext("haiyang.ling@arcserve.com", "", "", "Arcserve", DataProtectInterface.TaskType.Catalog);
+            IServiceContext context = ServiceContext.NewServiceContext("haiyang.ling@arcserve.com", "", "", "Arcserve", DataProtectInterface.TaskType.Catalog);
             context.CurrentContext.CurrentMailbox = "haiyang.ling@arcserve.com";
             var dataAccess = CatalogFactory.Instance.NewCatalogDataAccess();
             dataAccess.ResetAllStorage();
             dataAccess.ResetAllStorage("Arcserve");
+        }
+
+        [TestMethod]
+        public void TestSendMail()
+        {
+            SendMailHelper helper = new SendMailHelper();
+            helper.AddDownloadUrl("http://127.0.0.1:10000/devstoreaccount1/b4c939eb-a481-4e0d-bde1-49abd6eafade?sv=2015-02-21&sr=c&sig=9nwy8J0CbhbPEvvhpDVMSijq%2BBteQqdX8hQYQy9cnQ4%3D&st=2015-12-14T08%3A37%3A54Z&se=2015-12-18T09%3A07%3A54Z&sp=rl&restype=container&comp=list");
+            helper.AddDownloadUrl("http://127.0.0.1:10000/devstoreaccount1/b4c939eb-a481-4e0d-bde1-49abd6eafade/1.zip?sv=2015-02-21&sr=c&sig=9nwy8J0CbhbPEvvhpDVMSijq%2BBteQqdX8hQYQy9cnQ4%3D&st=2015-12-14T08%3A37%3A54Z&se=2015-12-18T09%3A07%3A54Z&sp=rl&restype=container&comp=list");
+            string htmlbody = helper.GetHtmlBody();
+
+            var client = Config.MailConfigInstance.Client();
+            System.Net.Mail.MailMessage msg = new System.Net.Mail.MailMessage();
+            msg.To.Add("haiyang.ling@arcserve.com");
+            msg.From = new MailAddress(Config.MailConfigInstance.Sender);
+            msg.Subject = "Restore Finish";
+            msg.Body = htmlbody;
+            msg.IsBodyHtml = true;
+
+            try
+            {
+                client.Send(msg);
+            }
+            catch (Exception e)
+            {
+
+            }
+        }
+
+
+        [TestMethod]
+        public void TestCompress()
+        {
+            StreamReader readerFile1 = new StreamReader(@"D:\21GitHub\Haiyang\EWS\Office365Demo\ExGrtAzure\ExGrtAzure.Tests\bin\Debug\00MsgFile\11.msg");
+            StreamReader readerFile2 = new StreamReader(@"D:\21GitHub\Haiyang\EWS\Office365Demo\ExGrtAzure\ExGrtAzure.Tests\bin\Debug\00MsgFile\test.msg");
+
+            using (MemoryStream mStream = new MemoryStream())
+            {
+                using (ZipArchive archive = new ZipArchive(mStream, ZipArchiveMode.Create, true))
+                {
+                    var entry = archive.CreateEntry(@"Dir1\Dir3\11.msg");
+                    using (var stream = entry.Open())
+                    {
+                        readerFile1.BaseStream.CopyTo(stream);
+                    }
+
+                    var entry2 = archive.CreateEntry(@"Dir2\Dir4\test.msg");
+                    using (var stream2 = entry2.Open())
+                    {
+                        readerFile2.BaseStream.CopyTo(stream2);
+                    }
+
+                }
+                mStream.Seek(0, SeekOrigin.Begin);
+
+                using (StreamWriter writer = new StreamWriter(@"D:\21GitHub\Haiyang\EWS\Office365Demo\ExGrtAzure\ExGrtAzure.Tests\bin\Debug\00MsgFile\zip.zip"))
+                {
+                    mStream.CopyTo(writer.BaseStream);
+                }
+
+            }
+
+
+            //MailLocation binLocation = new MailLocation(ExportType.TransferBin, @"http://www.baidu.com/baidu?wd=support+oauth+2.0+file+share&tn=monline_4_dg",100);
+            //MailLocation emlLocation = new MailLocation(ExportType.Eml, @"http://dict.youdao.com/search?le=eng&q=lj%3A%20%E5%90%8C%E6%AD%A5&keyfrom=dict.top",200);
+            //List<MailLocation> lists = new List<MailLocation>(2);
+            //lists.Add(binLocation);
+            //lists.Add(emlLocation);
+
+            //string saveString = LocationUtil.LocationsToString(lists, 0);
+            //var val = LocationUtil.StringToLocations(saveString, 0);
+
+            //string otherString = LocationUtil.LocationsToString(lists, 1);
+            //var otherVal = LocationUtil.StringToLocations(otherString, 1);
+
+            //Assert.AreEqual(binLocation.Path, otherVal[0].Path);
+            //Assert.AreEqual(binLocation.Type, otherVal[0].Type);
+            //Assert.AreEqual(emlLocation.Path, otherVal[1].Path);
+            //Assert.AreEqual(emlLocation.Type, otherVal[1].Type);
+
+            //var locationLenght = (binLocation.Path.Length + emlLocation.Path.Length);
+            //var jsonLength = saveString.Length;
+            //var compressLength = otherString.Length;
+
+
         }
 
         [TestMethod]
@@ -156,10 +267,10 @@ namespace ExGrtAzure.Tests
                  folderLevel1212
             };
 
-            var rootNode = RestoreServiceBase.TreeNode.CreateTree(allFolder);
-            List<string> allFolderIds = RestoreServiceBase.TreeNode.GetAllFoldersAndChildFolders(rootNode, "12");
+            var rootNode = TreeNode.CreateTree(allFolder);
+            List<string> allFolderIds = TreeNode.GetAllFoldersAndChildFolders(rootNode, "12");
 
-            var dic = RestoreServiceBase.TreeNode.GetEachFolderPath(rootNode);
+            var dic = TreeNode.GetEachFolderPath(rootNode);
 
             var path1212 = dic["1212"];
             var path11 = dic["11"];
@@ -228,6 +339,31 @@ namespace ExGrtAzure.Tests
                 }
             }
 
+            public string Id
+            {
+                get
+                {
+                    return FolderId;
+                }
+
+                set
+                {
+                    FolderId = value;
+                }
+            }
+
+            public ItemKind ItemKind
+            {
+                get
+                {
+                    return ItemKind.Folder;
+                }
+
+                set
+                {
+                }
+            }
+
             public string Location
             {
                 get
@@ -251,10 +387,69 @@ namespace ExGrtAzure.Tests
                 get; set;
             }
 
+            int IFolderData.ChildFolderCount
+            {
+                get
+                {
+                    throw new NotImplementedException();
+                }
+
+                set
+                {
+                    throw new NotImplementedException();
+                }
+            }
+
+            int IFolderData.ChildItemCount
+            {
+                get
+                {
+                    throw new NotImplementedException();
+                }
+
+                set
+                {
+                    throw new NotImplementedException();
+                }
+            }
+
             public IFolderData Clone()
             {
                 throw new NotImplementedException();
             }
+        }
+    }
+
+    public static class ZipArchiveExtension
+    {
+        public static ZipArchiveDirectory CreateDirectory(this ZipArchive @this, string directoryPath)
+        {
+
+            return new ZipArchiveDirectory(@this, directoryPath);
+        }
+    }
+
+    public class ZipArchiveDirectory
+    {
+        private readonly string _directory;
+        private ZipArchive _archive;
+
+        internal ZipArchiveDirectory(ZipArchive archive, string directory)
+        {
+            _archive = archive;
+            _directory = directory;
+        }
+
+        public ZipArchive Archive { get { return _archive; } }
+
+        public ZipArchiveEntry CreateEntry(string entry)
+        {
+            return _archive.CreateEntry(_directory + "/" + entry);
+        }
+
+        public ZipArchiveEntry CreateEntry(string entry, CompressionLevel compressionLevel)
+        {
+            return _archive.CreateEntry(_directory + "/" + entry, compressionLevel);
         }
     }
 }

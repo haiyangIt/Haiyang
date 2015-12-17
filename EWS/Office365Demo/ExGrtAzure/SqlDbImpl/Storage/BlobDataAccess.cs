@@ -5,30 +5,13 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Web;
 
 namespace SqlDbImpl.Storage
 {
     public class BlobDataAccess
     {
-        private static int _blobMaxSize;
-        private static int BlobMaxSize
-        {
-            get
-            {
-                if (_blobMaxSize == 0)
-                {
-                    if (ConfigurationManager.AppSettings["UseEmulator"] == "1")
-                    {
-                        _blobMaxSize = 2 * 1024 * 1024;
-                    }
-                    else
-                        _blobMaxSize = 4 * 1024 * 1024;
-                }
-                return _blobMaxSize;
-            }
-        }
-        private const int BlobMaxNumber = 50000;
         public const string DashString = "-";
         public const char DashChar = '-';
         public static readonly char[] DashCharArray = DashString.ToCharArray();
@@ -56,6 +39,7 @@ namespace SqlDbImpl.Storage
             }
         }
 
+        
 
         public void ResetAllBlob(string organization, bool isResetAll = false)
         {
@@ -65,7 +49,7 @@ namespace SqlDbImpl.Storage
                 containers = _blobClient.ListContainers();
             else
                 containers = _blobClient.ListContainers(prefix);
-            foreach(var container in containers)
+            foreach (var container in containers)
             {
                 container.Delete();
             }
@@ -77,40 +61,30 @@ namespace SqlDbImpl.Storage
         }
         private CloudBlobClient _blobClient;
 
+
         public void SaveBlob(string containerName, string blobNamePrefix, Stream data, bool isAdd = true)
         {
             containerName = ValidateContainerName(containerName, false);
             CloudBlobContainer container = _blobClient.GetContainerReference(containerName);
             container.CreateIfNotExists();
 
-            long dataLength = data.Length;
-            int index = 0;
-            byte[] buffer = new byte[BlobMaxSize];
-            int actualReadCount = 0;
-            while (dataLength > 0)
+            string blobName = GetBlobName(blobNamePrefix, 0);
+            blobName = ValidateBlobName(blobName, false);
+            CloudBlockBlob blockBlob = container.GetBlockBlobReference(blobName);
+            if (!blockBlob.Exists())
             {
-                string blobName = GetBlobName(blobNamePrefix, index);
-                blobName = ValidateBlobName(blobName, false);
-                CloudBlockBlob blockBlob = container.GetBlockBlobReference(blobName);
-                if (!blockBlob.Exists())
-                {
-                    actualReadCount = data.Read(buffer, 0, BlobMaxSize);
-                    blockBlob.UploadFromByteArray(buffer, 0, actualReadCount);
-                }
-                else
-                {
-                    if (!isAdd)
-                    {
-                        blockBlob.Delete();
-                        actualReadCount = data.Read(buffer, 0, BlobMaxSize);
-                        blockBlob.UploadFromByteArray(buffer, 0, actualReadCount);
-                    }
-                    LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.WARN, "blob exist", "blob {0} in container {1} exists", blobName, containerName);
-                }
-
-                dataLength -= BlobMaxSize;
-                index++;
+                blockBlob.UploadFromStream(data);
             }
+            else
+            {
+                if (!isAdd)
+                {
+                    blockBlob.Delete();
+                    blockBlob.UploadFromStream(data);
+                }
+                LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.WARN, "blob exist", "blob {0} in container {1} exists", blobName, containerName);
+            }
+
         }
 
         public bool IsBlobExist(string containerName, string blobNamePrefix)
@@ -130,23 +104,7 @@ namespace SqlDbImpl.Storage
             return true;
         }
 
-        public void GetBlob(string containerName, string blobNamePrefix, Stream writeData, int size)
-        {
-            long dataLength = size;
-
-            GetBlob(containerName, blobNamePrefix, writeData,
-                () =>
-                {
-                    if (dataLength <= 0)
-                        return true;
-                    dataLength -= BlobMaxSize;
-                    return false;
-                }
-                );
-        }
-
-        private delegate bool IsOutofRange();
-        private void GetBlob(string containerName, string blobNamePrefix, Stream writeData, IsOutofRange outOfRangeFunc)
+        public void GetBlob(string containerName, string blobNamePrefix, Stream writeData)
         {
             containerName = ValidateContainerName(containerName, false);
             CloudBlobContainer container = _blobClient.GetContainerReference(containerName);
@@ -155,31 +113,23 @@ namespace SqlDbImpl.Storage
                 throw new FileNotFoundException(string.Format("container {0} can not found .", container));
             }
 
-            int index = 0;
-            byte[] buffer = new byte[BlobMaxSize];
-            int actualSize = BlobMaxSize;
-            while (actualSize == BlobMaxSize)
-            {
-                if (outOfRangeFunc())
-                    break;
-
-                string blobName = GetBlobName(blobNamePrefix, index);
-                blobName = ValidateBlobName(blobName, false);
-                CloudBlockBlob blockBlob = container.GetBlockBlobReference(blobName);
-                if (!blockBlob.Exists())
-                    break;
-
-                Stream reader = blockBlob.OpenRead();
-                actualSize = reader.Read(buffer, 0, BlobMaxSize);
-                writeData.Write(buffer, 0, actualSize);
-
-                index++;
-            }
+            string blobName = GetBlobName(blobNamePrefix, 0);
+            blobName = ValidateBlobName(blobName, false);
+            CloudBlockBlob blockBlob = container.GetBlockBlobReference(blobName);
+            if (!blockBlob.Exists())
+                throw new FileNotFoundException(string.Format("blob {0} can not found .", blobName));
+            blockBlob.DownloadToStream(writeData);
         }
 
-        public void GetBlob(string containerName, string blobNamePrefix, Stream writeData)
+        public CloudBlockBlob GetBlockBlobObj(string containerName, string blobName)
         {
-            GetBlob(containerName, blobNamePrefix, writeData, () => { return false; });
+            containerName = ValidateContainerName(containerName, false);
+            CloudBlobContainer container = _blobClient.GetContainerReference(containerName);
+            container.CreateIfNotExists();
+
+            blobName = ValidateBlobName(blobName, false);
+            CloudBlockBlob blockBlob = container.GetBlockBlobReference(blobName);
+            return blockBlob;
         }
 
         /// <summary>
@@ -244,17 +194,75 @@ namespace SqlDbImpl.Storage
 
         public static bool IsNotOutOfBlobCountRange(int currentContainerCount, int itemSize)
         {
-            return currentContainerCount + GetBlobCount(itemSize) < BlobMaxNumber;
+            return false;
         }
 
         public static int GetBlobCount(int itemSize)
         {
-            return (int)Math.Ceiling((double)itemSize / (double)BlobMaxSize);
+            return 1;
         }
 
         internal static string GetBlobName(string blobNamePrefix, int index)
         {
             return string.Format("{0}{2}{1}", blobNamePrefix, index, BlobDataAccess.DashChar);
+        }
+
+        public string GetSharedUri(string containerName)
+        {
+            CloudBlobContainer container = _blobClient.GetContainerReference(containerName);
+            string sasContainerToken = container.GetSharedAccessSignature(GetSASPolicy());
+            return container.Uri + sasContainerToken;
+        }
+
+        private SharedAccessBlobPolicy GetSASPolicy()
+        {
+            //Create a new shared access policy and define its constraints.
+            SharedAccessBlobPolicy sharedPolicy = new SharedAccessBlobPolicy()
+            {
+                SharedAccessExpiryTime = DateTime.UtcNow.AddHours(Config.RestoreCfgInstance.SASExpireHours),
+                Permissions = SharedAccessBlobPermissions.List | SharedAccessBlobPermissions.Read,
+
+                SharedAccessStartTime = DateTime.UtcNow.AddMinutes(Config.RestoreCfgInstance.SASStartTimeMinute)
+            };
+            return sharedPolicy;
+        }
+
+        public List<string> GetBlobShareUris(string containerName, List<string> blobNames)
+        {
+            CloudBlobContainer container = _blobClient.GetContainerReference(containerName);
+            string sasContainerToken = container.GetSharedAccessSignature(GetSASPolicy());
+
+            List<string> blobResult = new List<string>(blobNames.Count);
+
+            StringBuilder sb = new StringBuilder(container.Uri.AbsoluteUri.Length + sasContainerToken.Length + 30);
+            foreach(var name in blobNames)
+            {
+                sb.Append(container.Uri.AbsoluteUri);
+                sb.Append("/");
+                sb.Append(name);
+                sb.Append(sasContainerToken);
+                blobResult.Add(sb.ToString());
+                sb.Length = 0;
+            }
+
+            return blobResult;
+        }
+
+        public string GetBlobSharedUri(string containerName, string blobName)
+        {
+            containerName = ValidateContainerName(containerName, false);
+            CloudBlobContainer container = _blobClient.GetContainerReference(containerName);
+            container.CreateIfNotExists();
+
+            blobName = ValidateBlobName(blobName, false);
+            var blob = container.GetBlobReferenceFromServer(blobName);
+
+            string sasContainerToken = blob.GetSharedAccessSignature(GetSASPolicy());
+
+            return blob.Uri.AbsoluteUri + sasContainerToken;
+
+
+
         }
     }
 }

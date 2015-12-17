@@ -13,7 +13,11 @@ namespace EwsServiceInterface
     public interface IFolder
     {
         List<Folder> GetChildFolder(Folder parentFolder);
+
+        List<Folder> GetChildFolder(string folderId);
+
         Folder GetRootFolder();
+
         string GetFolderDisplayName(Folder folder);
         ExchangeService CurrentExchangeService { get; }
 

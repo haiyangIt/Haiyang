@@ -29,13 +29,26 @@ namespace DataProtectInterface
         void RestoreFolder(string mailbox, string folderId, bool isRecursion = false);
         void RestoreItems(string mailbox, List<IRestoreItemInformation> items);
         void RestoreItem(string mailbox, IRestoreItemInformation item);
-        void RestoreItem(string mailbox, string itemId);
+        void RestoreItem(string mailbox, string itemId, string displayName);
     }
 
     public interface IRestoreItemInformation
     {
         List<string> FolderPathes { get; } 
         string ItemId { get; }
-        string MailAddress { get; }
+        string DisplayName { get; }
     }
+
+    public interface IRestoreServiceEx
+    {
+        void Restore(LoadedTreeItem items);
+        
+        IRestoreDestinationEx Destination { get; set; }
+        ICatalogJob CurrentRestoreCatalogJob { get; set; }
+        OrganizationAdminInfo AdminInfo { get; set; }
+        string RestoreJobName { get; set; }
+        DateTime StartTime { get; }
+        IServiceContext ServiceContext { get; }
+    }
+    
 }

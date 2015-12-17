@@ -2,6 +2,7 @@
 {
     public enum CatalogMailboxProgressType : byte
     {
+        SkipMailbox,
         Start,
         ConnectMailboxStart,
         ConnectMailboxEnd,

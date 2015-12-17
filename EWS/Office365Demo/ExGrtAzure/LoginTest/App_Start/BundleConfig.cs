@@ -29,6 +29,44 @@ namespace LoginTest
 
             bundles.Add(new ScriptBundle("~/bundles/bootstrapwizard").Include(
                       "~/Scripts/jquery.bootstrap.wizard.*"));
+
+            bundles.Add(new ScriptBundle("~/bundles/jqueryui").
+                Include("~/Scripts/jquery-ui*").
+                Include("~/Scripts/mustache.js"));
+
+            bundles.Add(new StyleBundle("~/bundles/jqueryuicss").
+                IncludeDirectory("~/Content/themes/base", "*.css", true).
+                IncludeDirectory("~/Content/themes/base", "*.png", true));
+
+            //bundles.Add(new StyleBundle("~/bundles/jqueryuicss").
+            //                IncludeDirectory("~/Content/themes/ui_bootstrap", "*.css", true).
+            //                IncludeDirectory("~/Content/themes/ui_bootstrap", "*.png", true));
+
+            bundles.Add(new ScriptBundle("~/bundles/jqueryajax").Include(
+                    "~/Scripts/jquery.unobtrusive*"));
+
+            bundles.Add(new ScriptBundle("~/bundles/arcserveutil").Include("~/Scripts/Restore/jquery_data_protect_util.js"));
+
+            bundles.Add(new ScriptBundle("~/bundles/three-status-select").
+                Include("~/Scripts/jquery.tristate.js").
+                Include("~/Scripts/Restore/restore-selection.js"));
+
+            bundles.Add(new ScriptBundle("~/bundles/three-status-select-nav").
+                Include("~/Scripts/Restore/jquery-ui-customer-restore-nav.js"));
+
+            bundles.Add(new ScriptBundle("~/bundles/customerMailbox").
+                Include("~/Scripts/Restore/jquery-mailbox-detail.js").
+                Include("~/Scripts/Restore/jquery-ui-customer-maildetail.js").
+                Include("~/Scripts/Restore/jquery-ui-customer-catalogselection.js"));
+
+            bundles.Add(new StyleBundle("~/bundles/customerMailboxcss").Include("~/Content/Restore/customernav.css"));
+
+            bundles.Add(new ScriptBundle("~/bundles/customerPaginator").
+                Include("~/Scripts/Restore/bootstrap-paginator.js"));
+
+            bundles.Add(new StyleBundle("~/bundles/bootstrapselectcss").Include("~/Content/bootstrap-select.css"));
+
+            bundles.Add(new ScriptBundle("~/bundles/bottstrapselect").Include("~/Scripts/bootstrap-select.js"));
         }
     }
 }

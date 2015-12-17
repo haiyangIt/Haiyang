@@ -53,9 +53,11 @@
     <Compile Include="Common\ExportUploadHelper.cs" />
     <Compile Include="Common\FileHelper.cs" />
     <Compile Include="Common\ValidationCallbackHelper.cs" />
+    <Compile Include="Impl\AutodiscoveryUrlCache.cs" />
     <Compile Include="Impl\FolderOperatorImpl.cs" />
     <Compile Include="Impl\ItemOperatorImpl.cs" />
     <Compile Include="Impl\MailboxOperatorImpl.cs" />
+    <Compile Include="Impl\RestoreDestinationExImpl.cs" />
     <Compile Include="Impl\RestoreDestinationImpl.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resource\TemplateEwsRequests.Designer.cs">

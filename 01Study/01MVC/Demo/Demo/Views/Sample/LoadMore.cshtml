@@ -1,0 +1,10 @@
+﻿@model IEnumerable<Demo.Models.AddMoreModel>
+
+
+    @foreach (var item in Model)
+    {
+        <li class="@item.Type" id="@item.Id">@item.Name</li>
+    }
+    
+@Html.CheckBox("test")
+

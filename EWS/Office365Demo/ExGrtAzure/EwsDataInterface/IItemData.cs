@@ -6,20 +6,25 @@ using System.Threading.Tasks;
 
 namespace EwsDataInterface
 {
-    public interface IItemData
+    public interface IItemData : IItemBase
     {
         string ParentFolderId { get; }
-        string DisplayName { get; }
         DateTime? CreateTime { get; }
         string ItemId { get; }
         object Data { get; }
         string ItemClass { get; }
         int Size { get; }
-
         int ActualSize { get; }
         string Location { get; }
 
         IItemData Clone();
     }
-    
+
+    public enum ExportType : byte
+    {
+        TransferBin = 1,
+        Eml = 2,
+        Msg = 3
+    }
+
 }

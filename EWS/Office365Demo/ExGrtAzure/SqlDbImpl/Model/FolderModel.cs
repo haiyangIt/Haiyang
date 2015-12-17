@@ -70,6 +70,26 @@ namespace SqlDbImpl.Model
             get; set;
         }
 
+        [NotMapped]
+        public string Id
+        {
+            get
+            {
+                return FolderId;
+            }
+            set { }
+        }
+
+        [NotMapped]
+        public ItemKind ItemKind
+        {
+            get
+            {
+                return ItemKind.Folder;
+            }
+            set { }
+        }
+
         public IFolderData Clone()
         {
             return new FolderModel()

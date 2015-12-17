@@ -22,5 +22,7 @@ namespace EwsServiceInterface
         bool IsItemNew(Item item, DateTime lastTime, DateTime thisTime);
         
         ExchangeService CurrentExchangeService { get; }
+
+        void ExportEmlItem(Item itemInEws, MemoryStream emlStream, EwsServiceArgument argument);
     }
 }

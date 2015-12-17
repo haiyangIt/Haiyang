@@ -47,6 +47,7 @@ namespace SqlDbImpl
             model.MailAddress = mailbox.MailAddress;
             model.RootFolderId = mailbox.RootFolderId;
             model.StartTime = StartTime;
+            model.ChildFolderCount = 0;
             return model;
         }
 
@@ -75,9 +76,10 @@ namespace SqlDbImpl
                 ParentFolderId = folder.ParentFolderId.UniqueId,
                 DisplayName = folder.DisplayName,
                 FolderType = folder.FolderClass,
-                ChildItemCount = folder.TotalCount,
-                ChildFolderCount = folder.ChildFolderCount,
+                ChildItemCount = 0,
+                ChildFolderCount = 0,
                 MailboxAddress = Context.CurrentMailbox
+                
             };
             return model;
         }

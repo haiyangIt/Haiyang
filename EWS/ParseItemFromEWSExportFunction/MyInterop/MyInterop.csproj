@@ -108,6 +108,7 @@
     <Compile Include="AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="CompoundFileUtil.cs" />
     <Compile Include="EWSUtil\ActiveDirectoryHelper.cs" />
     <Compile Include="EWSUtil\CertificateValidationHelper.cs" />
     <Compile Include="EWSUtil\EWSException.cs" />
@@ -259,6 +260,7 @@
     <Compile Include="FTStreamUtil\Log\TraceLog.cs" />
     <Compile Include="FTStreamUtil\Log\TraceLogLevel.cs" />
     <Compile Include="FTStreamUtil\Log\TraceSourceLog.cs" />
+    <Compile Include="MailItemUtil.cs" />
     <Compile Include="MyDotNetClass.cs">
       <SubType>Code</SubType>
     </Compile>

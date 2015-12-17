@@ -5,6 +5,7 @@ using System.Web;
 using Microsoft.Exchange.WebServices.Data;
 using EwsService.Common;
 using EwsServiceInterface;
+using EwsFrame;
 
 namespace EwsService.Impl
 {
@@ -27,6 +28,7 @@ namespace EwsService.Impl
 
         public void ConnectMailbox(EwsServiceArgument argument, string connectMailAddress)
         {
+            ServiceContext.ContextInstance.CurrentMailbox = connectMailAddress;
             MailboxPrincipalAddress = connectMailAddress;
             CurrentExchangeService = EwsProxyFactory.CreateExchangeService(argument, MailboxPrincipalAddress);
         }

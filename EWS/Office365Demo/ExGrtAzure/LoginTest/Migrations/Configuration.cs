@@ -10,7 +10,6 @@ namespace LoginTest.Migrations
         public Configuration()
         {
             AutomaticMigrationsEnabled = true;
-            ContextKey = "LoginTest.Models.ApplicationDbContext";
         }
 
         protected override void Seed(LoginTest.Models.ApplicationDbContext context)
@@ -27,7 +26,8 @@ namespace LoginTest.Migrations
             //      new Person { FullName = "Rowan Miller" }
             //    );
             //
-            
+
+
             context.Users.AddOrUpdate(p => p.UserName,
                 new Models.ApplicationUser()
                 {

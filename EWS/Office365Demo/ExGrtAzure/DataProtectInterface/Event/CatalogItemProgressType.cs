@@ -2,6 +2,7 @@
 {
     public enum CatalogItemProgressType : byte
     {
+        SkipItem,
         Start,
         SaveItemStart,
         SaveItemEnd,

@@ -27,6 +27,45 @@ namespace TableBlobImpl.Storage.Table.Model
         [IgnoreProperty]
         public string Organization { get; set; }
 
+        public string Id
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public string DisplayName
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public ItemKind ItemKind
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         public static void SetPartitionRowKeys(CatalogEntity entity)
         {
             entity.PartitionKey = TableDataAccess.ValidateRowPartitionKey(entity.Organization, true);

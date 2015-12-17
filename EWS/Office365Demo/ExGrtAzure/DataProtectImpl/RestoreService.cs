@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using EwsDataInterface;
 using EwsFrame;
 using DataProtectInterface.Event;
+using EwsFrame.Util;
 
 namespace DataProtectImpl
 {
@@ -17,6 +18,8 @@ namespace DataProtectImpl
         {
 
         }
+
+        public RestoreService(string adminUserName, string organizationName): base(adminUserName, organizationName) { }
 
         private RestoreServiceBase _restoreServiceObj;
         private RestoreServiceBase RestoreServiceObj
@@ -31,15 +34,15 @@ namespace DataProtectImpl
             }
         }
 
-        public void RestoreStart()
+        protected override void RestoreStart()
         {
             StartTime = DateTime.Now;
-            RestoreFactory.Instance.NewDataAccess().BeginTransaction();
+            ServiceContext.DataAccessObj.BeginTransaction();
         }
 
-        public void RestoreEnd(bool isFinished)
+        protected override void RestoreEnd(bool isFinished)
         {
-            RestoreFactory.Instance.NewDataAccess().EndTransaction(isFinished);
+            ServiceContext.DataAccessObj.EndTransaction(isFinished);
         }
 
         public override void RestoreItem(string mailbox, IRestoreItemInformation item)
@@ -147,13 +150,13 @@ namespace DataProtectImpl
             }
         }
 
-        public override void RestoreItem(string mailbox, string itemId)
+        public override void RestoreItem(string mailbox, string itemId, string displayName)
         {
             bool isFinish = false;
             RestoreStart();
             try
             {
-                RestoreServiceObj.RestoreItem(mailbox, itemId);
+                RestoreServiceObj.RestoreItem(mailbox, itemId, displayName);
                 isFinish = true;
             }
             finally
@@ -179,7 +182,12 @@ namespace DataProtectImpl
             AdminInfo.UserDomain = domainName;
             AdminInfo.OrganizationName = organizationName;
 
-            ServiceContext = new ServiceContext(AdminInfo.UserName, AdminInfo.UserPassword, AdminInfo.UserDomain, AdminInfo.OrganizationName, TaskType.Restore);
+            ServiceContext = EwsFrame.ServiceContext.NewServiceContext(AdminInfo.UserName, AdminInfo.UserPassword, AdminInfo.UserDomain, AdminInfo.OrganizationName, TaskType.Restore);
+        }
+
+        protected RestoreServiceBase(string adminUserName, string organizationName) : this(adminUserName, string.Empty, string.Empty, organizationName)
+        {
+
         }
 
         internal RestoreServiceBase(RestoreServiceBase restoreService)
@@ -231,7 +239,7 @@ namespace DataProtectImpl
         {
             get
             {
-                var result = RestoreFactory.Instance.NewDataAccess();
+                var result = (IQueryCatalogDataAccess)ServiceContext.DataAccessObj;
                 result.CatalogJob = CurrentRestoreCatalogJob;
                 return result;
             }
@@ -270,7 +278,7 @@ namespace DataProtectImpl
             List<IRestoreItemInformation> itemInformations = new List<IRestoreItemInformation>(childItems.Count);
             foreach (var item in childItems)
             {
-                var itemInformation = GetRestoreItemInformation(mailbox, folderId, item.ItemId);
+                var itemInformation = GetRestoreItemInformation(mailbox, folderId, item.ItemId, item.DisplayName);
                 RestoreItem(mailbox, itemInformation);
             }
         }
@@ -293,17 +301,17 @@ namespace DataProtectImpl
             }
         }
 
-        public virtual void RestoreItem(string mailbox, string itemId)
+        public virtual void RestoreItem(string mailbox, string itemId, string displayName)
         {
-            IItemData itemDetails = DataAccess.GetItemContent(itemId);
+            IItemData itemDetails = DataAccess.GetItemContent(itemId, displayName, Destination.ExportType);
             IItemData item = DataAccess.GetItem(itemId);
-            var itemInformation = GetRestoreItemInformation(mailbox, item.ParentFolderId, item.ItemId);
+            var itemInformation = GetRestoreItemInformation(mailbox, item.ParentFolderId, item.ItemId, item.DisplayName);
             Destination.WriteItem(itemInformation, itemDetails.Data as byte[]);
         }
 
         public virtual void RestoreItem(string mailbox, IRestoreItemInformation item)
         {
-            IItemData itemDetails = DataAccess.GetItemContent(item.ItemId);
+            IItemData itemDetails = DataAccess.GetItemContent(item.ItemId, item.DisplayName, Destination.ExportType);
             Destination.WriteItem(item, itemDetails.Data as byte[]);
         }
 
@@ -340,7 +348,7 @@ namespace DataProtectImpl
 
         }
 
-        protected virtual void RestoreEnd()
+        protected virtual void RestoreEnd(bool isFinished)
         {
 
         }
@@ -381,7 +389,7 @@ namespace DataProtectImpl
             }
         }
 
-        private IRestoreItemInformation GetRestoreItemInformation(string mailAddress, string folderId, string itemId)
+        private IRestoreItemInformation GetRestoreItemInformation(string mailAddress, string folderId, string itemId, string displayName)
         {
             InitMailBoxFolderPathes(mailAddress);
             List<string> result = null;
@@ -393,7 +401,7 @@ namespace DataProtectImpl
             {
                 FolderPathes = result,
                 ItemId = itemId,
-                MailAddress = mailAddress
+                DisplayName = displayName
             };
         }
 
@@ -407,150 +415,6 @@ namespace DataProtectImpl
         {
             InitMailBoxFolderPathes(mailbox);
             return _FolderCache.GetFolderIds(mailbox, folderIds);
-        }
-
-        public class TreeNode
-        {
-            public List<TreeNode> Childrens;
-            public IFolderData Folder;
-            public string FolderId;
-
-            public TreeNode()
-            {
-                Childrens = new List<TreeNode>();
-            }
-
-            public static Dictionary<string, List<string>> GetEachFolderPath(TreeNode root)
-            {
-                Dictionary<string, List<string>> result = new Dictionary<string, List<string>>();
-                List<string> paths = new List<string>();
-
-                var children = root.Childrens;
-                foreach (var node in children)
-                {
-                    paths = new List<string>();
-                    paths.Add(node.Folder.DisplayName);
-                    TraverseTree(node, result, paths);
-                }
-                return result;
-            }
-
-            private static void TraverseTree(TreeNode child, Dictionary<string, List<string>> result, List<string> paths)
-            {
-                result.Add(child.Folder.FolderId, paths);
-                var children = child.Childrens;
-                if (children.Count > 0)
-                {
-                    foreach (var node in children)
-                    {
-                        var childpaths = new List<string>();
-                        childpaths.AddRange(paths);
-                        childpaths.Add(node.Folder.DisplayName);
-                        TraverseTree(node, result, childpaths);
-                    }
-                }
-            }
-
-            public static List<string> GetAllFoldersAndChildFolders(TreeNode root, List<string> folderIds)
-            {
-                HashSet<string> result = new HashSet<string>(folderIds);
-                foreach(var id in folderIds)
-                {
-                    var eachResult = GetAllFoldersAndChildFolders(root, id);
-                    foreach(var eachid in eachResult)
-                    {
-                        if(!result.Contains(eachid))
-                        {
-                            result.Add(eachid);
-                        }
-                    }
-                }
-                return result.ToList();
-            }
-
-            public static List<string> GetAllFoldersAndChildFolders(TreeNode root, string folderId)
-            {
-                var findNode = FindFolderId(root, folderId);
-                if (findNode == null)
-                    throw new NullReferenceException(string.Format("can't find folder [{0}]", folderId));
-                var result = new List<string>();
-                GetAllChildFolders(findNode, result);
-                return result;
-            }
-
-            public static TreeNode FindFolderId(TreeNode node, string folderId)
-            {
-                if (node.FolderId == folderId)
-                    return node;
-                foreach(var child in node.Childrens)
-                {
-                    var result = FindFolderId(child, folderId);
-                    if (result != null)
-                        return result;
-                }
-                return null;
-            }
-
-            public static void GetAllChildFolders(TreeNode node, List<string> result)
-            {
-                if (node.Folder != null)
-                {
-                    result.Add(node.Folder.FolderId);
-                    foreach (var child in node.Childrens)
-                    {
-                        GetAllChildFolders(child, result);
-                    }
-                }
-            }
-
-            public static TreeNode CreateTree(List<IFolderData> folders)
-            {
-                Dictionary<string, TreeNode> folderId2Node = new Dictionary<string, TreeNode>(folders.Count);
-                TreeNode root = null;
-                foreach (var folder in folders)
-                {
-                    var parentId = folder.ParentFolderId;
-                    TreeNode node = CreateOrGetParentNode(parentId, folderId2Node);
-                    TreeNode childNode = CreateNode(folder, folderId2Node);
-                    node.Childrens.Add(childNode);
-                }
-
-                foreach (var keyvalue in folderId2Node)
-                {
-                    if (keyvalue.Value.Folder == null)
-                    {
-                        root = keyvalue.Value;
-                        break;
-                    }
-                }
-                return root;
-            }
-
-
-            private static TreeNode CreateNode(IFolderData folder, Dictionary<string, TreeNode> folderId2Node)
-            {
-                TreeNode result = null;
-                if (!folderId2Node.TryGetValue(folder.FolderId, out result))
-                {
-                    result = new TreeNode();
-                    folderId2Node.Add(folder.FolderId, result);
-                }
-                result.Folder = folder;
-                result.FolderId = folder.FolderId;
-                return result;
-            }
-
-            private static TreeNode CreateOrGetParentNode(string parentId, Dictionary<string, TreeNode> folderId2Node)
-            {
-                TreeNode result = null;
-                if (!folderId2Node.TryGetValue(parentId, out result))
-                {
-                    result = new TreeNode();
-                    folderId2Node.Add(parentId, result);
-                }
-                result.FolderId = parentId;
-                return result;
-            }
         }
 
         class MailboxFolderCache
@@ -632,13 +496,14 @@ namespace DataProtectImpl
             {
                 get; set;
             }
+            
 
-            public string MailAddress
+            public List<string> FolderPathes { get; set; }
+
+            public string DisplayName
             {
                 get; set;
             }
-
-            public List<string> FolderPathes { get; set; }
         }
     }
 }

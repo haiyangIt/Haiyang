@@ -18,6 +18,8 @@ namespace DataProtectInterface
 
         TaskType TaskType { get; }
 
+        Exception LastException { get; set; }
+
         string GetOrganizationPrefix();
     }
 }

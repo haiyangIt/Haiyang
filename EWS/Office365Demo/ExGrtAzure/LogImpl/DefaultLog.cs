@@ -64,6 +64,7 @@ namespace LogImpl
                     val = new FileStream(LogPath, FileMode.Append);
                     LogThreadManager.Instance.AddStream(val, _streamKey);
                 }
+                val.Flush();
                 return val;
             }
         }

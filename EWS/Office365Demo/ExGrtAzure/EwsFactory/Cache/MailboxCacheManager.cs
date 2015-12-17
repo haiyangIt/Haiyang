@@ -5,25 +5,35 @@ using System.Web;
 
 namespace EwsFrame.Cache
 {
-    public class MailboxCacheManager
+    public class MailboxCacheManager : ICacheManager
     {
         [ThreadStatic]
-        public static MailboxCacheManager CacheManager = new MailboxCacheManager();
+        private static MailboxCacheManager _CacheManager;
+
+        public static MailboxCacheManager CacheManager
+        {
+            get
+            {
+                if (_CacheManager == null)
+                    _CacheManager = new MailboxCacheManager();
+                return _CacheManager;
+            }
+        }
 
         public ICache NewCache(string mailboxAddress, string cacheName, Type cacheType)
         {
-            lock(CacheDic)
+            lock (CacheDic)
             {
                 if (string.IsNullOrEmpty(_mailboxAddress))
                     _mailboxAddress = mailboxAddress;
 
-                if(!mailboxAddress.Equals(_mailboxAddress))
+                if (!mailboxAddress.Equals(_mailboxAddress))
                 {
                     CacheDic.Clear();
                 }
 
                 ICache outObj;
-                if(!CacheDic.TryGetValue(cacheName,out outObj))
+                if (!CacheDic.TryGetValue(cacheName, out outObj))
                 {
                     outObj = cacheType.GetConstructor(new Type[0]).Invoke(new object[0]) as ICache;
                     if (outObj == null)
@@ -34,7 +44,7 @@ namespace EwsFrame.Cache
                 return outObj;
             }
         }
-        
+
         public ICache GetCache(string mailboxAddress, string cacheName)
         {
             lock (CacheDic)
@@ -57,14 +67,14 @@ namespace EwsFrame.Cache
         {
             lock (CacheDic)
             {
-                foreach(var keyValue in CacheDic)
+                foreach (var keyValue in CacheDic)
                 {
                     keyValue.Value.Serialize();
                 }
                 CacheDic.Clear();
             }
         }
-        
+
 
         private string _mailboxAddress;
         private Dictionary<string, ICache> CacheDic = new Dictionary<string, ICache>();

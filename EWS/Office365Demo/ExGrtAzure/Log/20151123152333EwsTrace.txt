@@ -1,0 +1,294 @@
+20151123152359    D    AutodiscoverRequest    <Trace Tag="AutodiscoverRequest" Tid="35" Time="2015-11-23 07:23:59Z" Version="15.00.0913.015">
+  <?xml version="1.0" encoding="utf-8"?>
+  <soap:Envelope xmlns:a="http://schemas.microsoft.com/exchange/2010/Autodiscover" xmlns:wsa="http://www.w3.org/2005/08/addressing" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+    <soap:Header>
+      <a:RequestedServerVersion>Exchange2013_SP1</a:RequestedServerVersion>
+      <wsa:Action>http://schemas.microsoft.com/exchange/2010/Autodiscover/Autodiscover/GetUserSettings</wsa:Action>
+      <wsa:To>https://autodiscover-s.outlook.com/autodiscover/autodiscover.svc</wsa:To>
+    </soap:Header>
+    <soap:Body>
+      <a:GetUserSettingsRequestMessage xmlns:a="http://schemas.microsoft.com/exchange/2010/Autodiscover">
+        <a:Request>
+          <a:Users>
+            <a:User>
+              <a:Mailbox>haiyang.ling@arcserve.com</a:Mailbox>
+            </a:User>20151123152405    D    AutodiscoverResponseHttpHeaders    <Trace Tag="AutodiscoverResponseHttpHeaders" Tid="35" Time="2015-11-23 07:24:05Z">
+HTTP/1.1 200 OK
+Transfer-Encoding: chunked
+request-id: ace6492d-a5d1-4018-8590-25579eb0b7d3
+X-CalculatedBETarget: blupr10mb0515.namprd10.prod.outlook.com
+X-DiagInfo: BLUPR10MB0515
+X-BEServer: BLUPR10MB0515
+Cache-Control: private
+Content-Type: text/xml; charset=utf-8
+Set-Cookie: EXOBasicAuth=compactTicket=&amp;key=devo365admin%40arcservemail.onmicrosoft.com+microsoft.exchange.autodiscover+118.102.221.12+&amp;signature=DtabtEum4HGdS266EhfH/8DU9JibR1o9/FCZOqFUvF2ENveOoXuo0JArvlNGlptMpni8p1dSEQFlamad6oRAfJgeLvye2ZOxesON+iKge2NyW0gH3dJFPXmcpzMgWgrxqffHaLBRtXt61KMeCNtFwc4PMW5775EyMLBvpgMqoKw+h4OA+oVawgG4//IfM9P1tnJvneqhGteJq/EbTDPjNGTyUYKGSlz7C/yvl2vwDf9FPKhbgnCFsJuHy6HSuMq4t/qlvX52Xp5FzbtKif3MpvifBD+zO1rbccVk/n5eYzRQPf8NfrNr1iEQaF7Sddgag5Vpq0IDm3Rj5TW1TFncZA==&amp;puid=10037FFE940E5D08&amp;expireTime=635838837250000000&amp;membername=devO365admin%40arcservemail.onmicrosoft.c20151123152405    D    AutodiscoverResponse    <Trace Tag="AutodiscoverResponse" Tid="35" Time="2015-11-23 07:24:05Z" Version="15.00.0913.015">
+  <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" xmlns:a="http://www.w3.org/2005/08/addressing">
+    <s:Header>
+      <a:Action s:mustUnderstand="1">http://schemas.microsoft.com/exchange/2010/Autodiscover/Autodiscover/GetUserSettingsResponse</a:Action>
+      <h:ServerVersionInfo xmlns:h="http://schemas.microsoft.com/exchange/2010/Autodiscover" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+        <h:MajorVersion>15</h:MajorVersion>
+        <h:MinorVersion>1</h:MinorVersion>
+        <h:MajorBuildNumber>331</h:MajorBuildNumber>
+        <h:MinorBuildNumber>18</h:MinorBuildNumber>
+        <h:Version>Exchange2015</h:Version>
+      </h:ServerVersionInfo>
+    </s:Header>
+    <s:Body>
+      <GetUserSettingsResponseMessage xmlns="http://schemas.microsoft.com/exchange/2010/Autodiscover">
+        <Response xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+          <ErrorCode>NoError</ErrorCode>
+          <ErrorMessage />
+          <UserResponses>
+            <UserResponse>
+              <ErrorCode>NoError</ErrorCode>
+              <ErrorMessage>No error.</ErrorMessage>
+              <RedirectTarget i:nil="true" />
+              <UserSettingErrors>
+                <UserSettingError>
+                  <ErrorCode>SettingIsNotAvailable</ErrorCode>
+                  <ErrorMessage>User setting 'InternalEwsUrl' is not available. </ErrorMessage>
+                  <SettingName>InternalEwsUrl</SettingName>
+                </UserSettingError>
+              </UserSettingErrors>
+              <UserSettings>
+                <UserSetting i:type="StringSetting">
+                  <Name>ExternalEwsUrl</Name>
+                  <Value>https://outlook.office365.com/EWS/Exchange.asmx</Value>
+                </UserSetting>
+              </UserSettings>
+            </UserResponse>
+          </UserResponses>
+        </Response>
+      </GetUs20151123152455    D    EwsResponseHttpHeaders    <Trace Tag="EwsResponseHttpHeaders" Tid="35" Time="2015-11-23 07:24:55Z">
+HTTP/1.1 200 OK
+Transfer-Encoding: chunked
+Content-Encoding: gzip
+Vary: Accept-Encoding
+request-id: f33ff71a-5ba2-4cba-ad20-83f642357ab0
+X-CalculatedBETarget: BLUPR10MB0515.namprd10.prod.outlook.com
+X-BackEndHttpStatus: 200
+Cache-Control: private
+Content-Type: text/xml; charset=utf-8
+Set-Cookie: exchangecookie=954ec413d8c743a48b2ce23d3f6ba2ba; expires=Wed, 23-Nov-2016 07:24:54 GMT; path=/; HttpOnly,exchangecookie=954ec413d8c743a48b2ce23d3f6ba2ba; expires=Wed, 23-Nov-2016 07:24:54 GMT; path=/; HttpOnly,EXOBasicAuth=compactTicket=&amp;key=devo365admin%40arcservemail.onmicrosoft.com+microsoft.exchange.webservices+118.102.221.12+&amp;signature=IdHVRdfzQjPG5VvzRrG9+GIJE5SZutLhEVO3TAONUF9FK9kspK4qniYar/PxsVhR75I1bT1GQBFNNKc/cSW+YuT2hJaYAtPFb9KUHH47IfMwz7l8ApewPmDpHiEAcCfkeWe2AUTSxFpAFcDwgIv8xkKyoQqMxEPdJur8N4aRK+jrTe3yQIEzUx0tG4Say75X2lvJ2N5VymjwkUvkNqWV5VxOWfjAFAgKClo/sHvYMFhKH3qWZM9pOIIuqtkS20151123152455    D    EwsResponse    <Trace Tag="EwsResponse" Tid="35" Time="2015-11-23 07:24:55Z" Version="15.00.0913.015">
+  <?xml version="1.0" encoding="utf-8"?>
+  <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+    <s:Header>
+      <h:ServerVersionInfo MajorVersion="15" MinorVersion="1" MajorBuildNumber="331" MinorBuildNumber="20" Version="V2015_10_21" xmlns:h="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" />
+    </s:Header>
+    <s:Body>
+      <m:ConvertIdResponse xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types">
+        <m:ResponseMessages>
+          <m:ConvertIdResponseMessage ResponseClass="Error">
+            <m:MessageText>Data is corrupt., Microsoft.Exchange.Data.Storage.Corr20151123152505    D    EwsResponse    <Trace Tag="EwsResponse" Tid="35" Time="2015-11-23 07:25:05Z" Version="15.00.0913.015">
+  <?xml version="1.0" encoding="utf-8"?>
+  <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+    <s:Header>
+      <h:ServerVersionInfo MajorVersion="15" MinorVersion="1" MajorBuildNumber="331" MinorBuildNumber="20" Version="V2015_10_21" xmlns:h="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" />
+    </s:Header>
+    <s:Body>
+      <m:GetFolderResponse xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types">
+        <m:ResponseMessages>
+          <m:GetFolderResponseMessage ResponseClass="Success">
+            <m:ResponseCode>NoError</m:ResponseCode>
+            <m:Folders>
+              <t:Folder>
+                <t:FolderId Id="AQMkAGY2NTdkYjBiLTEwMmItNDc2OC1hZTg4AC05NDU2N2I4YzljMTcALgAAAz8L7pzVQyNEpu/scrJ8ZsABANflmCjVmd5CkgLeNsTCtDIAAAIBCAAAAA==" ChangeKey="AQAAABYAAADX5Zgo1ZneQpIC3jbEwrQyAAAAAAAy" />
+                <t:ParentFolderId Id="AAMkAGY2NTdkYjBiLTEwMmItNDc2OC1hZTg4LTk0NTY3YjhjOWMxNwAuAAAAAAA/C+6c1UMjRKbv7HKyfGbAAQDX5Zgo1ZneQpIC3jbEwrQyAAAAAAEBAAA=" ChangeKey="AQAAAA==" />
+                <t:DisplayName>Top of Information Store</t:DisplayName>
+                <t:TotalCount>0</t:TotalCount>
+                <t:ChildFolderCount>12</t:ChildFolderCount>
+                <t:EffectiveRights>
+                  <t:CreateAssociated>true</t:CreateAssociated>
+                  <t:CreateContents>true</t:CreateContents>
+                  <t:CreateHierarchy>true</t:CreateHierarchy>
+                  <t:Delete>true</t:Delete>
+                  <t:Modify>true</t:Modify>
+                  <t:Read>true</t:Read>
+                  <t:ViewPrivateItems>true</t:ViewPrivateItems>20151123152513    D    EwsRequest    <Trace Tag="EwsRequest" Tid="35" Time="2015-11-23 07:25:13Z" Version="15.00.0913.015">
+  <?xml version="1.0" encoding="utf-8"?>
+  <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+    <soap:Header>
+      <t:RequestServerVersion Version="Exchange2013_SP1" />
+    </soap:Header>
+    <soap:Body>
+      <m:FindFolder Traversal="Shallow">
+        <m:FolderShape>
+          <t:BaseShape>AllProperties</t:BaseShape>
+        </m:FolderShape>
+        <m:IndexedPageFolderView MaxEntriesReturned="100" Offset="0" BasePoint="Beginning" />
+        <m:ParentFolderIds>
+          <t:FolderId Id="AQMkAGY2NTdkYjBiLTEwMmItNDc2OC1hZTg4AC05NDU2N2I4YzljMTcALgAAAz8L7pzVQyNEpu/scrJ8ZsABANflmCjVmd5CkgLeNsTCtDIAAAIBCAAAAA==" ChangeKey="AQAAABYAAADX5Zgo1ZneQpIC3jbEwrQyAAAAAAAy" />20151123152514    D    EwsResponse    <Trace Tag="EwsResponse" Tid="35" Time="2015-11-23 07:25:14Z" Version="15.00.0913.015">
+  <?xml version="1.0" encoding="utf-8"?>
+  <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+    <s:Header>
+      <h:ServerVersionInfo MajorVersion="15" MinorVersion="1" MajorBuildNumber="331" MinorBuildNumber="20" Version="V2015_10_21" xmlns:h="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" />
+    </s:Header>
+    <s:Body>
+      <m:FindFolderResponse xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types">
+        <m:ResponseMessages>
+          <m:FindFolderResponseMessage ResponseClass="Success">
+            <m:ResponseCode>NoError</m:ResponseCode>
+            <m:RootFolder IndexedPagingOffset="12" TotalItemsInView="12" IncludesLastItemInRange="true">
+              <t:Folders>
+                <t:CalendarFolder>
+                  <t:FolderId Id="AQMkAGY2NTdkYjBiLTEwMmItNDc2OC1hZTg4AC05NDU2N2I4YzljMTcALgAAAz8L7pzVQyNEpu/scrJ8ZsABANflmCjVmd5CkgLeNsTCtDIAAAIBDQAAAA==" ChangeKey="AgAAABYAAADX5Zgo1ZneQpIC3jbEwrQyAAAAAAA3" />
+                  <t:ParentFolderId Id="AQMkAGY2NTdkYjBiLTEwMmItNDc2OC1hZTg4AC05NDU2N2I4YzljMTcALgAAAz8L7pzVQyNEpu/scrJ8ZsABANflmCjVmd5CkgLeNsTCtDIAAAIBCAAAAA==" ChangeKey="AQAAAA==" />
+                  <t:FolderClass>IPF.Appointment</t:FolderClass>
+                  <t:DisplayName>Calendar</t:DisplayName>
+                  <t:TotalCount>0</t:TotalCount>
+                  <t:ChildFolderCount>0</t:ChildFolderCount>
+                  <t:EffectiveRights>
+                    <t:CreateAssociated>true</t:CreateAssociated>
+                    <t:CreateContents>true</t:CreateContents>
+                    <t:CreateHierarchy>true</t:CreateHierarchy>
+                    <t:Delete>true</t:Delete>
+                    <t:Modify>true</t:Modify>
+                    <t:Read>true</t:Read>
+                    <t:ViewPrivateItems>true</t:ViewPrivateItems>
+                  </t:EffectiveRights>
+                </t:CalendarFolder>
+                <t:ContactsFolder>
+                  <t:FolderId Id="AQMkAGY2NTdkYjBiLTEwMmItNDc2OC1hZTg4AC05NDU2N2I4YzljMTcALgAAAz8L7pzVQyNEpu/scrJ8ZsABANflmCjVmd5CkgLeNsTCtDIAAAIBDgAAAA==" ChangeKey="AwAAABYAAADX5Zgo1ZneQpIC3jbEwrQyAAAAAAA4" />
+                  <t:ParentFolderId Id="AQMkAGY2NTdkYjBiLTEwMmItNDc2OC1hZTg4AC05NDU2N2I4YzljMTcALgAAAz8L7pzVQyNEpu/scrJ8ZsABANflmCjVmd5CkgLeNsTCtDIAAAIBCAAAAA==" ChangeKey="AQAAAA==" />
+                  <t:FolderClass>IPF.Contact</t:FolderClass>
+                  <t:DisplayName>Contacts</t:DisplayName>
+                  <t:TotalCount>0</t:TotalCount>
+                  <t:ChildFolderCount>4</t:ChildFolderCount>
+                  <t:EffectiveRights>
+                    <t:CreateAssociated>true</t:CreateAssociated>
+                    <t:CreateContents>true</t:CreateContents>
+                    <t:CreateHierarchy>true</t:CreateHierarchy>
+                    <t:Delete>true</t:Delete>
+                    <t:Modify>true</t:Modify>
+                    <t:Read>true</t:Read>
+                    <t:ViewPrivateItems>true</t:ViewPrivateItems>
+                  </t:EffectiveRights>
+                </t:ContactsFolder>
+                <t:Folder>
+                  <t:FolderId Id="AAMkAGY2NTdkYjBiLTEwMmItNDc2OC1hZTg4LTk0NTY3YjhjOWMxNwAuAAAAAAA/C+6c1UMjRKbv7HKyfGbAAQDX5Zgo1ZneQpIC3jbEwrQyAAAHgTFWAAA=" ChangeKey="AQAAABYAAADX5Zgo1ZneQpIC3jbEwrQyAAAHgTKr" />
+                  <t:ParentFolderId Id="AQMkAGY2NTdkYjBiLTEwMmItNDc2OC1hZTg4AC05NDU2N2I4YzljMTcALgAAAz8L7pzVQyNEpu/scrJ8ZsABANflmCjVmd5CkgLeNsTCtDIAAAIBCAAAAA==" ChangeKey="AQAAAA==" />
+                  <t:FolderClass>IPF.Configuration</t:FolderClass>
+                  <t:DisplayName>Conversation Action Settings</t:DisplayName>
+                  <t:TotalCount>0</t:TotalCount>
+                  <t:ChildFolderCount>0</t:ChildFolderCount>
+                  <t:EffectiveRights>
+                    <t:CreateAssociated>true</t:CreateAssociated>
+                    <t:CreateContents>true</t:CreateContents>
+                    <t:CreateHierarchy>true</t:CreateHierarchy>
+                    <t:Delete>true</t:Delete>
+                    <t:Modify>true</t:Modify>
+                    <t:Read>true</t:Read>
+                    <t:ViewPrivateItems>true</t:ViewPrivateItems>
+                  </t:EffectiveRights>
+                  <t:UnreadCount>0</t:UnreadCount>
+                </t:Folder>
+                <t:Folder>
+                  <t:FolderId Id="AQMkAGY2NTdkYjBiLTEwMmItNDc2OC1hZTg4AC05NDU2N2I4YzljMTcALgAAAz8L7pzVQyNEpu/scrJ8ZsABANflmCjVmd5CkgLeNsTCtDIAAAIBCgAAAA==" ChangeKey="AQAAABYAAADX5Zgo1ZneQpIC3jbEwrQyAAAAAAA0" />
+                  <t:ParentFolderId Id="AQMkAGY2NTdkYjBiLTEwMmItNDc2OC1hZTg4AC05NDU2N2I4YzljMTcALgAAAz8L7pzVQyNEpu/scrJ8ZsABANflmCjVmd5CkgLeNsTCtDIAAAIBCAAAAA==" ChangeKey="AQAAAA==" />
+                  <t:FolderClass>IPF.Note</t:FolderClass>
+                  <t:DisplayName>Deleted Items</t:DisplayName>
+                  <t:TotalCount>0</t:TotalCount>
+                  <t:ChildFolderCount>0</t:ChildFolderCount>
+                  <t:EffectiveRights>
+                    <t:CreateAssociated>true</t:CreateAssociated>
+                    <t:CreateContents>true</t:CreateContents>
+                    <t:CreateHierarchy>true</t:CreateHierarchy>
+                    <t:Delete>true</t:Delete>
+                    <t:Modify>true</t:Modify>
+                    <t:Read>true</t:Read>
+                    <t:ViewPrivateItems>true</t:ViewPrivateItems>
+                  </t:EffectiveRights>
+                  <t:UnreadCount>0</t:UnreadCount>
+                </t:Folder>
+                <t:Folder>
+                  <t:FolderId Id="AQMkAGY2NTdkYjBiLTEwMmItNDc2OC1hZTg4AC05NDU2N2I4YzljMTcALgAAAz8L7pzVQyNEpu/scrJ8ZsABANflmCjVmd5CkgLeNsTCtDIAAAIBDwAAAA==" ChangeKey="AQAAABYAAADX5Zgo1ZneQpIC3jbEwrQyAAAAAAA5" />
+                  <t:ParentFolderId Id="AQMkAGY2NTdkYjBiLTEwMmItNDc2OC1hZTg4AC05NDU2N2I4YzljMTcALgAAAz8L7pzVQyNEpu/scrJ8ZsABANflmCjVmd5CkgLeNsTCtDIAAAIBCAAAAA==" ChangeKey="AQAAAA==" />
+                  <t:FolderClass>IPF.Note</t:FolderClass>
+                  <t:DisplayName>Drafts</t:DisplayName>
+                  <t:TotalCount>0</t:TotalCount>
+                  <t:ChildFolderCount>0</t:ChildFolderCount>
+                  <t:EffectiveRights>
+                    <t:CreateAssociated>true</t:CreateAssociated>
+                    <t:CreateContents>true</t:CreateContents>
+                    <t:CreateHierarchy>true</t:CreateHierarchy>
+                    <t:Delete>true</t:Delete>
+                    <t:Modify>true</t:Modify>
+                    <t:Read>true</t:Read>
+                    <t:ViewPrivateItems>true</t:ViewPrivateItems>
+                  </t:EffectiveRights>
+                  <t:UnreadCount>0</t:UnreadCount>
+                </t:Folder>
+                <t:Folder>
+                  <t:FolderId Id="AQMkAGY2NTdkYjBiLTEwMmItNDc2OC1hZTg4AC05NDU2N2I4YzljMTcALgAAAz8L7pzVQyNEpu/scrJ8ZsABANflmCjVmd5CkgLeNsTCtDIAAAIBDAAAAA==" ChangeKey="AQAAABYAAADX5Zgo1ZneQpIC3jbEwrQyAAAazxo2" />
+                  <t:ParentFolderId Id="AQMkAGY2NTdkYjBiLTEwMmItNDc2OC1hZTg4AC05NDU2N2I4YzljMTcALgAAAz8L7pzVQyNEpu/scrJ8ZsABANflmCjVmd5CkgLeNsTCtDIAAAIBCAAAAA==" ChangeKey="AQAAAA==" />
+                  <t:FolderClass>IPF.Note</t:FolderClass>
+                  <t:DisplayName>Inbox</t:DisplayName>
+                  <t:TotalCount>0</t:TotalCount>
+                  <t:ChildFolderCount>0</t:ChildFolderCount>
+                  <t:EffectiveRights>
+                    <t:CreateAssociated>true</t:CreateAssociated>
+                    <t:CreateContents>true</t:CreateContents>
+                    <t:CreateHierarchy>true</t:CreateHierarchy>
+                    <t:Delete>true</t:Delete>
+                    <t:Modify>true</t:Modify>
+                    <t:Read>true</t:Read>
+                    <t:ViewPrivateItems>true</t:ViewPrivateItems>
+                  </t:EffectiveRights>
+                  <t:UnreadCount>0</t:UnreadCount>
+                </t:Folder>
+                <t:Folder>
+                  <t:FolderId Id="AQMkAGY2NTdkYjBiLTEwMmItNDc2OC1hZTg4AC05NDU2N2I4YzljMTcALgAAAz8L7pzVQyNEpu/scrJ8ZsABANflmCjVmd5CkgLeNsTCtDIAAAIBEAAAAA==" ChangeKey="BgAAABYAAADX5Zgo1ZneQpIC3jbEwrQyAAAAAAA6" />
+                  <t:ParentFolderId Id="AQMkAGY2NTdkYjBiLTEwMmItNDc2OC1hZTg4AC05NDU2N2I4YzljMTcALgAAAz8L7pzVQyNEpu/scrJ8ZsABANflmCjVmd5CkgLeNsTCtDIAAAIBCAAAAA==" ChangeKey="AQAAAA==" />
+                  <t:FolderClass>IPF.Journal</t:FolderClass>
+                  <t:DisplayName>Journal</t:DisplayName>
+                  <t:TotalCount>0</t:TotalCount>
+                  <t:ChildFolderCount>0</t:ChildFolderCount>
+                  <t:EffectiveRights>
+                    <t:CreateAssociated>true</t:CreateAssociated>
+                    <t:CreateContents>true</t:CreateContents>
+                    <t:CreateHierarchy>true</t:CreateHierarchy>
+                    <t:Delete>true</t:Delete>
+                    <t:Modify>true</t:Modify>
+                    <t:Read>true</t:Read>
+                    <t:ViewPrivateItems>true</t:ViewPrivateItems>
+                  </t:EffectiveRights>
+                  <t:UnreadCount>0</t:UnreadCount>
+                </t:Folder>
+                <t:Folder>
+                  <t:FolderId Id="AAMkAGY2NTdkYjBiLTEwMmItNDc2OC1hZTg4LTk0NTY3YjhjOWMxNwAuAAAAAAA/C+6c1UMjRKbv7HKyfGbAAQDX5Zgo1ZneQpIC3jbEwrQyAAAHgTFVAAA=" ChangeKey="AQAAABYAAADX5Zgo1ZneQpIC3jbEwrQyAAAHgTKa" />
+                  <t:ParentFolderId Id="AQMkAGY2NTdkYjBiLTEwMmItNDc2OC1hZTg4AC05NDU2N2I4YzljMTcALgAAAz8L7pzVQyNEpu/scrJ8ZsABANflmCjVmd5CkgLeNsTCtDIAAAIBCAAAAA==" ChangeKey="AQAAAA==" />
+                  <t:FolderClass>IPF.Note</t:FolderClass>
+                  <t:DisplayName>Junk Email</t:DisplayName>
+                  <t:TotalCount>0</t:TotalCount>
+                  <t:ChildFolderCount>0</t:ChildFolderCount>
+                  <t:EffectiveRights>
+                    <t:CreateAssociated>true</t:CreateAssociated>
+                    <t:CreateContents>true</t:CreateContents>
+                    <t:CreateHierarchy>true</t:CreateHierarchy>
+                    <t:Delete>true</t:Delete>
+                    <t:Modify>true</t:Modify>
+                    <t:Read>true</t:Read>
+                    <t:ViewPrivateItems>true</t:ViewPrivateItems>
+                  </t:EffectiveRights>
+                  <t:UnreadCount>0</t:UnreadCount>
+                </t:Folder>
+                <t:Folder>
+                  <t:FolderId Id="AQMkAGY2NTdkYjBiLTEwMmItNDc2OC1hZTg4AC05NDU2N2I4YzljMTcALgAAAz8L7pzVQyNEpu/scrJ8ZsABANflmCjVmd5CkgLeNsTCtDIAAAIBEQAAAA==" ChangeKey="BQAAABYAAADX5Zgo1ZneQpIC3jbEwrQyAAAAAAA7" />
+                  <t:ParentFolderId Id="AQMkAGY2NTdkYjBiLTEwMmItNDc2OC1hZTg4AC05NDU2N2I4YzljMTcALgAAAz8L7pzVQyNEpu/scrJ8ZsABANflmCjVmd5CkgLeNsTCtDIAAAIBCAAAAA==" ChangeKey="AQAAAA==" />
+                  <t:FolderClass>IPF.StickyNote</t:FolderClass>
+                  <t:DisplayName>Notes</t:DisplayName>
+                  <t:TotalCount>0</t:TotalCount>
+                  <t:ChildFolderCount>0</t:ChildFolderCount>
+                  <t:EffectiveRights>
+                    <t:CreateAssociated>true</t:CreateAssociated>
+                    <t:CreateContents>true</t:CreateContents>
+                    <t:CreateHierarchy>true</t:CreateHierarchy>
+                    <t:Delete>true</t:Delete>
+                    <t:Modify>true</t:Modify>
+                    <t:Read>true</t:Read>
+                    <t:ViewPrivateItems>true</t:ViewPrivateItems>
+                  </t:EffectiveRights>
+                  <t:UnreadCount>0</t:UnreadCount>
+                </t:Folder>
+                <t:Folder>
+                  <t:FolderId Id="AQMkAGY2NTdkYjBiLTEwMmItNDc2OC1hZTg4AC05NDU2N2I4YzljMTcALgAAAz8L7pzVQyNEpu/scrJ8ZsABANflmCjVmd5CkgLeNsTCtDIAAAIBCwAAAA==" ChangeKey="AQAAABYAAADX5Zgo1ZneQpIC3jbEwrQy

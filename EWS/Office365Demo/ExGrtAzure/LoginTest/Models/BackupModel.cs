@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DataProtectInterface;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -24,5 +25,7 @@ namespace LoginTest.Models
 
         [Required]
         public int Index { get; set; }
+
+        public string BackupSelectItems { get; set; }
     }
 }

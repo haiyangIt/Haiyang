@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EwsDataInterface
 {
-    public interface ICatalogJob : ICatalogInfo
+    public interface ICatalogJob : ICatalogInfo, IItemBase
     {
         string CatalogJobName { get; }
         string Organization { get; }

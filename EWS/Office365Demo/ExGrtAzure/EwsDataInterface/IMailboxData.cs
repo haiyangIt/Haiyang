@@ -6,12 +6,13 @@ using System.Threading.Tasks;
 
 namespace EwsDataInterface
 {
-    public interface IMailboxData
+    public interface IMailboxData : IItemBase
     {
         string Location { get; set; }
-        string DisplayName { get; }
         string MailAddress { get; }
-        string RootFolderId { get; }
+        string RootFolderId { get; set; }
+
+        int ChildFolderCount { get; set; }
 
         IMailboxData Clone();
     }

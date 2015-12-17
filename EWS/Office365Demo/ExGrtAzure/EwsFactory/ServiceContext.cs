@@ -15,11 +15,62 @@ namespace EwsFrame
         public Dictionary<string, object> OtherInformation { get; private set; }
 
         [ThreadStatic]
-        public static IServiceContext ContextInstance;
+        private static IServiceContext _ContextInstance;
 
-        public IServiceContext CurrentContext { get { return ContextInstance; } }
+        public static IServiceContext ContextInstance
+        {
+            get
+            {
+                if(_ContextInstance == null)
+                {
+                    throw new NullReferenceException();
+                }
+                return _ContextInstance;
+            }
+        }
 
-        public IDataAccess DataAccessObj { get; private set; }
+        public IServiceContext CurrentContext
+        {
+            get {
+                return ContextInstance;
+            }
+        }
+
+        [ThreadStatic]
+        private static IDataAccess _dataAccessObj;
+
+        public static IDataAccess GetDataAccessInstance(TaskType taskType)
+        {
+            if (_dataAccessObj == null)
+                CreateDataAccess(taskType);
+            return _dataAccessObj;
+        }
+
+        public IDataAccess DataAccessObj {
+            get
+            {
+                if(_dataAccessObj == null)
+                {
+                    CreateDataAccess(TaskType);
+                }
+                return _dataAccessObj;
+            }
+        }
+
+        private static void CreateDataAccess(TaskType taskType)
+        {
+            if(_dataAccessObj == null)
+            {
+                if (taskType == TaskType.Catalog)
+                {
+                    _dataAccessObj = CatalogFactory.Instance.NewCatalogDataAccessInternal();
+                }
+                else
+                {
+                    _dataAccessObj = RestoreFactory.Instance.NewCatalogDataAccessInternal();
+                }
+            }
+        }
 
         public TaskType TaskType { get; private set; }
 
@@ -38,16 +89,35 @@ namespace EwsFrame
             }
         }
 
-        public string Organization { get; private set; }
+        public string Organization { get {
+                if (AdminInfo != null)
+                    return AdminInfo.OrganizationName;
+                return string.Empty;
+            }
+        }
 
-        public string CurrentMailbox { get; set; }
+        private string _currentMailbox;
+        public string CurrentMailbox {
+            get { return _currentMailbox; }
+            set {
+                _currentMailbox = value;
+                if (!String.IsNullOrEmpty(CurrentMailbox))
+                {
+                    _argument.ServiceEmailAddress = CurrentMailbox;
+                    _argument.UserToImpersonate = new ImpersonatedUserId(ConnectingIdType.SmtpAddress, CurrentMailbox);
+                    _argument.SetXAnchorMailbox = true;
+                    _argument.XAnchorMailbox = CurrentMailbox;
+                }
+            }
+        }
 
-        public ServiceContext(string userName, string password, string domainName, string organization, TaskType taskType)
+        public Exception LastException
         {
-            if (ContextInstance != null)
-                return;
+            get; set;
+        }
 
-            ContextInstance = this;
+        private ServiceContext(string userName, string password, string domainName, string organization, TaskType taskType)
+        {
             AdminInfo = new OrganizationAdminInfo();
 
             AdminInfo.UserName = userName;
@@ -55,21 +125,22 @@ namespace EwsFrame
             AdminInfo.UserDomain = domainName;
             AdminInfo.OrganizationName = organization;
 
-            OtherInformation = new Dictionary<string, object>();
+
 
             _argument = new EwsServiceArgument();
             _argument.ServiceCredential = new System.Net.NetworkCredential(userName, password);
             _argument.UseDefaultCredentials = false;
 
+            OtherInformation = new Dictionary<string, object>();
             TaskType = taskType;
-            if(taskType == TaskType.Catalog)
-            {
-                DataAccessObj = CatalogFactory.Instance.NewCatalogDataAccess();
-            }
-            else
-            {
-                DataAccessObj = RestoreFactory.Instance.NewDataAccess();
-            }
+            CreateDataAccess(TaskType);
+        }
+
+        public static IServiceContext NewServiceContext(string userName, string password, string domainName, string organization, TaskType taskType)
+        {
+            if(_ContextInstance == null)
+                _ContextInstance = new ServiceContext(userName, password, domainName, organization, taskType);
+            return ContextInstance;
         }
 
         public ServiceContext()

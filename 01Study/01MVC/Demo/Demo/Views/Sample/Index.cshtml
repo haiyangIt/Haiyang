@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head><title>Sample View</title></head>
+<body>
+<h1>@ViewBag.Message</h1>
+<p>
+    This is a sample view. It’s not much to look at, 
+    but it gets the job done.
+</p>
+<p>
+    This is in a file named <strong>Index.cshtml</strong> within the <strong>~/Views/Sample</strong> directory.
+</p>
+
+    
+    <div id="">
+        <ul id="list">
+
+        </ul>
+    </div>
+
+    <div id="testAjax">
+        @*@Html.ActionLink("Load more...",""))*@
+        @Ajax.ActionLink("Load more...", "LoadMore", new AjaxOptions()
+   {
+       UpdateTargetId = "list",
+       InsertionMode = InsertionMode.InsertAfter,
+       HttpMethod = "POST",
+
+   })
+    </div>
+
+    <div id="list">
+
+    </div>
+
+</body>
+</html>
+
+@section Scripts{
+    @Scripts.Render("~/bundles/customerPaginator")
+    @Scripts.Render("~/bundles/customerMailbox")
+    <script>
+        $(document).ready(function () {
+            
+            $("#list").usermailboxes({ 
+                getdataurl : "@Url.Action("UpdateMailboxes")",
+                getdataargs : "10/22/2015",
+                onSelectItemChanged : function(item){
+                    alert(item.RootFolderId);
+                }
+            });
+
+        })
+    </script>
+    }

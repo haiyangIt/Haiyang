@@ -56,6 +56,35 @@ namespace TableBlobImpl.Storage.Table.Model
             get; set;
         }
 
+        public int ChildFolderCount
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public string Id
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public ItemKind ItemKind
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         public static MailboxEntity CreateMailboxEntityFromEws(string organizationName, string displayName, string mailboxAddress, DateTime catalogStartTime)
         {
             MailboxEntity entity = new MailboxEntity();

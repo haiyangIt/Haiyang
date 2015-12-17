@@ -51,6 +51,7 @@ namespace EwsFrame
                     _interfaceImplTypeNameDic.Add(typeof(IItem), "EwsService.Impl.ItemOperatorImpl");
 
                     _interfaceImplTypeNameDic.Add(typeof(ICatalogService), "DataProtectImpl.CatalogService");
+                    _interfaceImplTypeNameDic.Add(typeof(IFilterItem), "DataProtectImpl.FilterBySelectedTree");
                 }
                 return _interfaceImplTypeNameDic;
             }
@@ -73,12 +74,17 @@ namespace EwsFrame
         {
             return (IItem)CreateType<IItem>(EwsServiceImplAssembly, service);
         }
-        public ICatalogDataAccess NewCatalogDataAccess()
+
+        internal ICatalogDataAccess NewCatalogDataAccessInternal()
         {
-            if (ServiceContext.ContextInstance.DataAccessObj == null)
+            if (ServiceContext.GetDataAccessInstance(TaskType.Catalog) == null)
+            {
                 return (ICatalogDataAccess)CreateType<ICatalogDataAccess>(EwsDataImplAssembly);
-            return (ICatalogDataAccess)ServiceContext.ContextInstance.DataAccessObj;
+            }
+            else
+                return (ICatalogDataAccess)ServiceContext.GetDataAccessInstance(TaskType.Catalog);
         }
+
         public IDataConvert NewDataConvert()
         {
             return (IDataConvert)CreateType<IDataConvert>(EwsDataImplAssembly);
@@ -87,6 +93,11 @@ namespace EwsFrame
         public IServiceContext GetServiceContext()
         {
             return ServiceContext.ContextInstance;
+        }
+
+        public IFilterItem NewFilterItemBySelectTree(LoadedTreeItem orgSelectItem)
+        {
+            return (IFilterItem)CreateType<IFilterItem>(DataProtectImplAssembly, orgSelectItem);
         }
     }
 }

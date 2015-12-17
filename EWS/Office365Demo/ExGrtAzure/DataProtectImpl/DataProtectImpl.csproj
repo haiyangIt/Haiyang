@@ -49,8 +49,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CatalogService.cs" />
+    <Compile Include="FilterBySelectedTree.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RestoreService.cs" />
+    <Compile Include="RestoreServiceEx.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DataProtectInterface\DataProtectInterface.csproj">

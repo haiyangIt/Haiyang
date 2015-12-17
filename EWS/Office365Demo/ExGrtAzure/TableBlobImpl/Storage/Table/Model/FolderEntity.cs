@@ -63,6 +63,22 @@ namespace TableBlobImpl.Storage.Table.Model
             get; set;
         }
 
+        public string Id
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public ItemKind ItemKind
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         #endregion
 
         public static FolderEntity CreateFolderEntityFromEws(Folder folder, DateTime catalogStartTime)

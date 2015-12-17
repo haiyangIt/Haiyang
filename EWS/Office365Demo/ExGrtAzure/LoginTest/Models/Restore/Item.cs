@@ -1,0 +1,33 @@
+﻿using EwsDataInterface;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using EwsFrame.Util;
+using DataProtectInterface;
+
+namespace Demo.Models.Restore
+{
+    public class Item : IItemBase
+    {
+        public string Id { get; set; }
+        public string DisplayName { get; set; }
+        public object OtherInformation { get; set; }
+        public List<Item> Container { get; set; }
+        public List<Item> Leaf { get; set; }
+
+        /// <summary>
+        /// Container.Count + leaf.Count
+        /// </summary>
+        public int ChildCount { get; set; }
+        public string ItemType { get; set; }
+
+        public ItemKind ItemKind
+        {
+            get
+            {
+                return ItemType.GetItemKind();
+            }
+        }
+    }
+}
