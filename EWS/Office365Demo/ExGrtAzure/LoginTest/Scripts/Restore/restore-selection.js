@@ -74,7 +74,7 @@ Restore.Item = function (itemId, itemData, childItemCount, itemType, displayName
     this.Id = itemId;
     this.DisplayName = displayName;
     this.Status = Restore.Item.UnSelectedStatus;
-    this.SelectedLoadedChildren = [];
+    //this.SelectedLoadedChildren = [];
     this.ChildItemCount = childItemCount;
     this.Event = [];
     this.ParentId = null;
@@ -178,7 +178,7 @@ Restore.Item._ConvertItemForSelected = function (item) {
     result.UnloadedChildrenStatus = item.UnloadChildStatus;
     result.TotalChildCount = item.ChildItemCount;
     result.ItemType = item.ItemType;
-    result.SelectedChildCount = Object.size(item.SelectedLoadedChildren);
+    result.SelectedChildCount = item._GetSelectedChildCount(); //Object.size(item.SelectedLoadedChildren);
     result.LoadedChildrenCount = Object.size(item.ChildrenLoaded);
     result.LoadedChildren = Restore.Item._GetChildItem(item.ChildrenLoaded);
     result.DisplayName = item.DisplayName;
@@ -279,19 +279,19 @@ Restore.Item.prototype.AddChild = function (item) {
             throw "not support status";
     }
 
-    switch (itemStatus) {
-        case Restore.Item.SelectedStatus:
-            this.SelectedLoadedChildren[item.Id] = 1;
-            break;
-        case Restore.Item.UnSelectedStatus:
-            if (typeof (this.SelectedLoadedChildren[item.Id] !== "undefined"))
-                delete this.SelectedLoadedChildren[item.Id];
-            break;
-        case Restore.Item.IndeterminateStatus:
-            break;
-        default:
-            throw "not support item status";
-    }
+    //switch (itemStatus) {
+    //    case Restore.Item.SelectedStatus:
+    //        this.SelectedLoadedChildren[item.Id] = 1;
+    //        break;
+    //    case Restore.Item.UnSelectedStatus:
+    //        if (typeof (this.SelectedLoadedChildren[item.Id] !== "undefined"))
+    //            delete this.SelectedLoadedChildren[item.Id];
+    //        break;
+    //    case Restore.Item.IndeterminateStatus:
+    //        break;
+    //    default:
+    //        throw "not support item status";
+    //}
 
     item._checkDomStatus(itemStatus);
     item._ChangeSelectStatus(itemStatus);
@@ -301,11 +301,11 @@ Restore.Item.prototype.AddChild = function (item) {
 
 // when client click the dom object to change status, we need call this function.
 Restore.Item.prototype.Select = function (oldStatus, newStatus) {
-    // 1. Change parent select status; should be event.
-    this._TriggerEvent(Restore.Item.ItemStatusChanged, { CurrentStatus: newStatus, OldStatus: oldStatus });
-    // 2. Change self status; should be event;
+    // 1. Change self status; should be event;
     this._ChangeSelectStatus(newStatus);
     this._ChangeUnloadChildStatus(newStatus);
+    // 2. Change parent select status; should be event.
+    this._TriggerEvent(Restore.Item.ItemStatusChanged, { CurrentStatus: newStatus, OldStatus: oldStatus });
     // 3. Change selectedChild status; 
     this._ChangeChildrenSelectStatus(newStatus);
 };
@@ -322,42 +322,99 @@ Restore.Item.prototype._TriggerEvent = function (type, data) {
     if (typeof (this.Event[type]) !== "undefined" && typeof (this.Event[type][this.ParentId]) !== "undefined") {
         this.Event[type][this.ParentId](this, data);
     }
-}
+};
 
-Restore.Item.prototype._OnItemStatusChanged = function (childItem, childItemStatusData) {
-    if (childItemStatusData.CurrentStatus == Restore.Item.SelectedStatus) {
-        this.SelectedLoadedChildren[childItem.Id] = 1;
-    }
-    else {//if (childItemStatusData.CurrentStatus == Restore.Item.UnSelectedStatus) {
-        if (typeof (this.SelectedLoadedChildren[childItem.Id]) !== "undefined") {
-            delete this.SelectedLoadedChildren[childItem.Id];
+Restore.Item.prototype._GetSelectedChildCount = function () {
+    var key;
+    var count = 0;
+    for (key in this.ChildrenLoaded) {
+        if (this.ChildrenLoaded.hasOwnProperty(key)) {
+            var item = this.ChildrenLoaded[key];
+            if (item.Status == Restore.Item.SelectedStatus) {
+                count++;
+            }
         }
     }
+    return count;
+};
+
+Restore.Item.prototype._GetLoadedChildrenStatus = function () {
+    var key;
+    var isAllSelected = true;
+    var isAllUnSelected = true;
+    var isIndeterminate = false;
+    var isContainSelectedItem = false;
+    var hasChild = false;
+    for (key in this.ChildrenLoaded) {
+        if (this.ChildrenLoaded.hasOwnProperty(key)) {
+            hasChild = true;
+            var item = this.ChildrenLoaded[key];
+            if (item.Status != Restore.Item.SelectedStatus) {
+                isAllSelected = false;
+            }
+            else {
+                isContainSelectedItem = true;
+            }
+
+            if (item.Status != Restore.Item.UnSelectedStatus) {
+                isAllUnSelected = false;
+            }
+            if(item.Status == Restore.Item.IndeterminateStatus) {
+                isIndeterminate = true;
+            }
+        }
+    }
+
+    if (!hasChild)
+        return Restore.Item.UnSelectedStatus;
+
+    if (isAllUnSelected)
+        return Restore.Item.UnSelectedStatus;
+
+    if (isAllSelected)
+        return Restore.Item.SelectedStatus;
+    
+    if (isIndeterminate || isContainSelectedItem)
+        return Restore.Item.IndeterminateStatus;
+    throw "Not support";
+};
+
+Restore.Item.prototype._OnItemStatusChanged = function (childItem, childItemStatusData) {
+    //if (childItemStatusData.CurrentStatus == Restore.Item.SelectedStatus) {
+    //    this.SelectedLoadedChildren[childItem.Id] = 1;
+    //}
+    //else {//if (childItemStatusData.CurrentStatus == Restore.Item.UnSelectedStatus) {
+    //    if (typeof (this.SelectedLoadedChildren[childItem.Id]) !== "undefined") {
+    //        delete this.SelectedLoadedChildren[childItem.Id];
+    //    }
+    //}
     //else {
     //    throw "not support the status."
     //}
 
     var newStatus = Restore.Item.UnSelectedStatus;
     var childCount = Object.size(this.ChildrenLoaded);
-    var childSelectCount = Object.size(this.SelectedLoadedChildren);
+    //var childSelectCount = Object.size(this.SelectedLoadedChildren);
+    var childLoadedStatus = this._GetLoadedChildrenStatus();
 
     if (childCount == this.ChildItemCount) { // if all children loaded
-        if (childSelectCount == childCount)
-            newStatus = Restore.Item.SelectedStatus;
-        else {
-            if (childSelectCount > 0)
-                newStatus = Restore.Item.IndeterminateStatus;
-            else if (childItemStatusData.CurrentStatus == Restore.Item.IndeterminateStatus)
-                newStatus = Restore.Item.IndeterminateStatus;
-            else
-                newStatus = Restore.Item.UnSelectedStatus;
-        }
+        newStatus = childLoadedStatus;
+        //if (childSelectCount == childCount)
+        //    newStatus = Restore.Item.SelectedStatus;
+        //else {
+        //    if (childSelectCount > 0)
+        //        newStatus = Restore.Item.IndeterminateStatus;
+        //    else if (childItemStatusData.CurrentStatus == Restore.Item.IndeterminateStatus)
+        //        newStatus = Restore.Item.IndeterminateStatus;
+        //    else
+        //        newStatus = Restore.Item.UnSelectedStatus;
+        //}
     }
     else { // if not all children loaded
-        if (childSelectCount == childCount && this.UnloadChildStatus == Restore.Item.SelectedStatus) {
+        if (childLoadedStatus == this.UnloadChildStatus && this.UnloadChildStatus == Restore.Item.SelectedStatus) {
             newStatus = Restore.Item.SelectedStatus;
         }
-        else if (childSelectCount == 0 && this.UnloadChildStatus == Restore.Item.UnSelectedStatus)
+        else if (childLoadedStatus == this.UnloadChildStatus && this.UnloadChildStatus == Restore.Item.UnSelectedStatus)
             newStatus = Restore.Item.UnSelectedStatus;
         else
             newStatus = Restore.Item.IndeterminateStatus;
@@ -365,6 +422,7 @@ Restore.Item.prototype._OnItemStatusChanged = function (childItem, childItemStat
 
     if (this.Status != newStatus) {
         this._ChangeSelectStatus(newStatus);
+        this._ChangeUnloadChildStatus(newStatus);
         this._TriggerEvent(Restore.Item.ItemStatusChanged, { CurrentStatus: newStatus, OldStatus: this.Status });
     }
 };
@@ -380,13 +438,13 @@ Restore.Item.prototype._ChangeChildrenSelectStatus = function (status) {
             item._ChangeSelectStatus(status);
             item._ChangeUnloadChildStatus(status);
             item._ChangeChildrenSelectStatus(status);
-            if (status == Restore.Item.SelectedStatus) {
-                this.SelectedLoadedChildren[item.Id] = 1;
-            }
-            else if (status == Restore.Item.UnSelectedStatus) {
-                if (typeof (this.SelectedLoadedChildren[item.Id]) !== "undefined")
-                    delete this.SelectedLoadedChildren[item.Id];
-            }
+            //if (status == Restore.Item.SelectedStatus) {
+            //    this.SelectedLoadedChildren[item.Id] = 1;
+            //}
+            //else if (status == Restore.Item.UnSelectedStatus) {
+            //    if (typeof (this.SelectedLoadedChildren[item.Id]) !== "undefined")
+            //        delete this.SelectedLoadedChildren[item.Id];
+            //}
         }
     }
 };

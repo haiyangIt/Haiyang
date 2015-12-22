@@ -40,7 +40,7 @@ namespace EwsFrame
         {
             get
             {
-                if(_interfaceImplTypeNameDic == null)
+                if (_interfaceImplTypeNameDic == null)
                 {
                     _interfaceImplTypeNameDic = new Dictionary<Type, string>(8);
                     _interfaceImplTypeNameDic.Add(typeof(IQueryCatalogDataAccess), "SqlDbImpl.QueryCatalogDataAccess");
@@ -52,7 +52,7 @@ namespace EwsFrame
                     _interfaceImplTypeNameDic.Add(typeof(IItem), "EwsService.Impl.ItemOperatorImpl");
                     _interfaceImplTypeNameDic.Add(typeof(IRestoreDestination), "EwsService.Impl.RestoreDestinationImpl");
                     _interfaceImplTypeNameDic.Add(typeof(IRestoreDestinationEx), "EwsService.Impl.RestoreDestinationExImpl");
-                   
+
 
                     _interfaceImplTypeNameDic.Add(typeof(IRestoreService), "DataProtectImpl.RestoreService");
                     _interfaceImplTypeNameDic.Add(typeof(IRestoreServiceEx), "DataProtectImpl.RestoreServiceEx");
@@ -94,12 +94,7 @@ namespace EwsFrame
 
         internal IQueryCatalogDataAccess NewCatalogDataAccessInternal()
         {
-            if (ServiceContext.DataAccessInstance == null)
-            {
-                return (IQueryCatalogDataAccess)CreateType<IQueryCatalogDataAccess>(EwsDataImplAssembly);
-            }
-            else
-                return (IQueryCatalogDataAccess)ServiceContext.ContextInstance.DataAccessObj;
+            return (IQueryCatalogDataAccess)CreateType<IQueryCatalogDataAccess>(EwsDataImplAssembly);
         }
 
         public IServiceContext GetServiceContext()
@@ -116,7 +111,7 @@ namespace EwsFrame
         {
             return (IMailbox)CreateType<IMailbox>(EwsServiceImplAssembly);
         }
-        
+
         public IFolder NewFolderOperatorImpl(ExchangeService currentExService)
         {
             return (IFolder)CreateType<IFolder>(EwsServiceImplAssembly, currentExService);

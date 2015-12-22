@@ -51,7 +51,7 @@ namespace ExGrtAzure.Tests
                 service.Destination = destination;
                 destination.InitOtherInformation("haiyang.ling@arcserve.com", "Restore1");
 
-                IQueryCatalogDataAccess dataAccess = _factory.NewDataAccessForRestore();
+                IQueryCatalogDataAccess dataAccess = (IQueryCatalogDataAccess)ServiceContext.GetDataAccessInstance(TaskType.Restore);
                 var allJob = dataAccess.GetAllCatalogJob();
                 dataAccess.CatalogJob = allJob[0];
                 service.CurrentRestoreCatalogJob = allJob[0];

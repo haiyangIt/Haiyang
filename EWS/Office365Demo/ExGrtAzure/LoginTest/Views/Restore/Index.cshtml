@@ -328,7 +328,7 @@
                         //var folderName = (+date).toString();
                         var destination = { MailboxAddress: "haiyang.ling@arcserve.com", FolderPath: folderName };
                         var data = { catalog: catalogInfo, restoreAdminUserInfo: adminUser, destination: destination, selectedItem: selectedItems };
-
+                        Arcserve.DataProtect.Util.Ajax.SetLoadingDialog({ title: "Processing" });
                         Arcserve.DataProtect.Util.Post(data, "@Url.Action("RestoreItems")", function (data) {
                             alert("restore finished.");
                         });
@@ -336,7 +336,7 @@
                     }
                     else if (restoreType == "2") {
                         var data = { catalog: catalogInfo, restoreAdminUserInfo: adminUser, selectedItem: selectedItems, notificationAddress: $("#NotificationAddress").val() };
-
+                        Arcserve.DataProtect.Util.Ajax.SetLoadingDialog({ title: "Processing" });
                         Arcserve.DataProtect.Util.Post(data, "@Url.Action("DumpItems")", function (data) {
                             alert("restore finished");
                             dialog.dialog("close");

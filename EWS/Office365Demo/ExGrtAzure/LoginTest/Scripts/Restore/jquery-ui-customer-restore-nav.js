@@ -268,10 +268,10 @@ $.widget("custom.restorenav",
                    var self = this;
                    self.navList.html("");
 
-                   self._updateNavChildren(self.navDatas, self.navList, true);
+                   self._updateNavChildren(self.navDatas, self.navList, true, 0);
                },
 
-               _updateNavChildren: function (childItems, navList, isRoot) {
+               _updateNavChildren: function (childItems, navList, isRoot, levelIndex) {
                    var self = this;
                    var startIndex = 0;
                    var count = self.options.pagecount;
@@ -308,7 +308,7 @@ $.widget("custom.restorenav",
 
                        if (hasChildren) {
                            var childList = $('<ul class="nav nav-pills nav-stacked hidden nav-children" ></ul>').appendTo(eachItemElement);
-                           self._updateNavChildren(item.Container, childList, false);
+                           self._updateNavChildren(item.Container, childList, false, levelIndex+1);
                        }
                    }
 
@@ -411,7 +411,7 @@ $.widget("custom.foldernav", $.custom.restorenav, {
 
 // load the child step by step.
 $.widget("custom.foldernavForSteped", $.custom.foldernav, {
-    _updateNavChildren: function (childItems, navList, isRoot) {
+    _updateNavChildren: function (childItems, navList, isRoot, levelIndex) {
         var self = this;
         var startIndex = 0;
         var count = self.options.pagecount;
@@ -460,7 +460,7 @@ $.widget("custom.foldernavForSteped", $.custom.foldernav, {
 
             if (hasChildren) {
                 var childList = $('<ul class="nav nav-pills nav-stacked hidden nav-children" ></ul>').appendTo(eachItemElement);
-                self._updateNavChildren(item.Container, childList, false);
+                self._updateNavChildren(item.Container, childList, false, levelIndex + 1);
             }
         }
 
@@ -501,7 +501,7 @@ $.widget("custom.foldernavForSteped", $.custom.foldernav, {
             var $target = $(".glyphicon", parentLi);
 
             var childList = $('<ul class="nav nav-pills nav-stacked hidden nav-children" ></ul>').appendTo(parentLi);
-            this._updateNavChildren(childContainerData, childList, false);
+            this._updateNavChildren(childContainerData, childList, false, 0); // todo
             this._addToTree(parentId, childContainerData.length, childContainerData);
 
             var parentItem = this.navDatasId2Item[parentId];

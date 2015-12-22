@@ -127,7 +127,7 @@ namespace ExGrtAzure.Tests
             CatalogFactory.LibPath = directory;
             IServiceContext context = ServiceContext.NewServiceContext("haiyang.ling@arcserve.com", "", "", "Arcserve", DataProtectInterface.TaskType.Catalog);
             context.CurrentContext.CurrentMailbox = "haiyang.ling@arcserve.com";
-            var dataAccess = CatalogFactory.Instance.NewCatalogDataAccess();
+            var dataAccess = ServiceContext.GetDataAccessInstance(TaskType.Catalog);
             dataAccess.ResetAllStorage();
             dataAccess.ResetAllStorage("Arcserve");
         }
@@ -158,6 +158,14 @@ namespace ExGrtAzure.Tests
             }
         }
 
+
+        [TestMethod]
+        public void TestMonth()
+        {
+            DateTime time = new DateTime(2015, 2, 28);
+            DateTime time13 = time.AddDays(13 * 7);
+            DateTime time27 = time.AddDays(28 * 7 - 1);
+        }
 
         [TestMethod]
         public void TestCompress()

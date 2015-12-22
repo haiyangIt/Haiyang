@@ -77,12 +77,7 @@ namespace EwsFrame
 
         internal ICatalogDataAccess NewCatalogDataAccessInternal()
         {
-            if (ServiceContext.GetDataAccessInstance(TaskType.Catalog) == null)
-            {
-                return (ICatalogDataAccess)CreateType<ICatalogDataAccess>(EwsDataImplAssembly);
-            }
-            else
-                return (ICatalogDataAccess)ServiceContext.GetDataAccessInstance(TaskType.Catalog);
+            return (ICatalogDataAccess)CreateType<ICatalogDataAccess>(EwsDataImplAssembly);
         }
 
         public IDataConvert NewDataConvert()

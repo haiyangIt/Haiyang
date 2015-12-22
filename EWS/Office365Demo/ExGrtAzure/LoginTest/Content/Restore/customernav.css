@@ -57,11 +57,15 @@
         padding-left: 5px;
 
         display:-moz-inline-box; display:inline-block;
-        width: 70%;
+        width: 60%;
+    }
+
+    .restorenav .open-children{
+        min-width: 14px;
     }
 
     .restorenav .nav-children {
-        padding-left: 10px;
+        margin-left: 10px;
     }
 
 .restore-nav-placehold {

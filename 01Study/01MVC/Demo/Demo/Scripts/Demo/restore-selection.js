@@ -335,6 +335,7 @@ Restore.Item.prototype._OnItemStatusChanged = function (childItem, childItemStat
 
     if (this.Status != newStatus) {
         this._ChangeSelectStatus(newStatus);
+        this._ChangeUnloadChildStatus(newStatus);
         this._TriggerEvent(Restore.Item.ItemStatusChanged, { CurrentStatus: newStatus, OldStatus: this.Status });
     }
 };
@@ -348,6 +349,7 @@ Restore.Item.prototype._ChangeChildrenSelectStatus = function (status) {
         if (this.ChildrenLoaded.hasOwnProperty(key)) {
             var item = this.ChildrenLoaded[key];
             item._ChangeSelectStatus(status);
+            item._ChangeUnloadChildStatus(status);
             item._ChangeChildrenSelectStatus(status);
             if(status == Restore.Item.SelectedStatus)
             {
