@@ -14,6 +14,22 @@ namespace MyInterop
         [DllImport("ole32.dll")]
         public static extern int StgIsStorageFile([MarshalAs(UnmanagedType.LPWStr)] string pwcsName);
 
+        [DllImport("kernel32.dll")]
+        public static extern IntPtr GlobalAlloc(int uFlags, int dwBytes);
+
+        [DllImport("kernel32.dll")]
+        public static extern UIntPtr GlobalSize(IntPtr hMem);
+
+        [DllImport("kernel32.dll")]
+        public static extern IntPtr GlobalLock(IntPtr hMem);
+
+        [DllImport("kernel32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool GlobalUnlock(IntPtr hMem);
+
+        [DllImport("kernel32.dll")]
+        public static extern IntPtr GlobalFree(IntPtr hMem);
+
         [DllImport("ole32.dll")]
         public static extern int StgOpenStorage(
             [MarshalAs(UnmanagedType.LPWStr)] string pwcsName,
@@ -22,6 +38,66 @@ namespace MyInterop
             IntPtr snbExclude,
             uint reserved,
             out IStorage ppstgOpen);
+
+        /// <summary>
+        /// The StgCreateDocfileOnILockBytes function creates and opens a new compound file 
+        /// storage object on top of a byte-array object provided by the caller. The storage 
+        /// object supports the COM-provided, compound-file implementation for the IStorage interface.
+        /// </summary>
+        /// <param name="plkbyt">A pointer to the ILockBytes interface on the underlying byte-array object on which to create a compound file.</param>
+        /// <param name="grfMode">Specifies the access mode to use when opening the new compound file. For more information, see STGM Constants.</param>
+        /// <param name="reserved">Reserved for future use; must be zero.</param>
+        /// <param name="ppstgOpen">A pointer to the location of the IStorage pointer on the new storage object.</param>
+        /// <returns>
+        /// S_OK
+        ///    Indicates that the compound file was successfully created.
+        ///STG_E_ACCESSDENIED
+        ///    Access denied because the caller does not have enough permissions, or another caller has the file open and locked.
+        ///STG_E_FILEALREADYEXISTS
+        ///    Indicates that the compound file already exists and the grfMode parameter is set to STGM_FAILIFTHERE.
+        ///STG_E_INSUFFICIENTMEMORY
+        ///    Indicates that the storage object was not created due to inadequate memory.
+        ///STG_E_INVALIDPOINTER
+        ///    Indicates that a non-valid pointer was in the pLkbyt parameter or the ppStgOpen parameter.
+        ///STG_E_INVALIDFLAG
+        ///    Indicates that a non-valid flag combination was in the grfMode parameter.
+        ///STG_E_TOOMANYOPENFILES
+        ///    Indicates that the storage object was not created due to a lack of file handles.
+        ///STG_E_LOCKVIOLATION
+        ///    Access denied because another caller has the file open and locked.
+        ///STG_E_SHAREVIOLATION
+        ///    Access denied because another caller has the file open and locked.
+        ///STG_S_CONVERTED
+        ///    Indicates that the compound file was successfully converted. The original byte-array object was successfully converted to IStorage format.
+        /// </returns>
+        [DllImport("ole32.dll")]
+        public extern static int StgCreateDocfileOnILockBytes(ILockBytes plkbyt, STGM grfMode, int reserved, out IStorage ppstgOpen);
+
+        /// <summary>
+        /// The CreateILockBytesOnHGlobal function creates a byte array object, 
+        /// using global memory as the physical device, which is intended to be the 
+        /// compound file foundation. This object supports a COM implementation of the 
+        /// ILockBytes interface.
+        /// </summary>
+        /// 
+        /// <param name="hGlobal">The memory handle allocated by the GlobalAlloc function. 
+        /// The handle must be allocated as moveable and nondiscardable. If the handle is 
+        /// shared between processes, it must also be allocated as shared. New handles should 
+        /// be allocated with a size of zero. If hGlobal is NULL, CreateILockBytesOnHGlobal 
+        /// internally allocates a new shared memory block of size zero.</param>
+        /// 
+        /// <param name="fDeleteOnRelease">A flag that specifies whether the underlying handle 
+        /// for this byte array object should be automatically freed when the object is released. 
+        /// If set to FALSE, the caller must free the hGlobal after the final release. If set 
+        /// to TRUE, the final release will automatically free the hGlobal parameter.</param>
+        /// 
+        /// <param name="ppLkbyt">The address of ILockBytes pointer variable that receives the 
+        /// interface pointer to the new byte array object.</param>
+        /// 
+        /// <returns>This function supports the standard return values E_INVALIDARG and E_OUTOFMEMORY, as well as the following:
+        /// S_OK: The byte array object was created successfully.</returns>
+        [DllImport("ole32.dll")]
+        public extern static int CreateILockBytesOnHGlobal(IntPtr hGlobal, [MarshalAs(UnmanagedType.Bool)] bool fDeleteOnRelease, out ILockBytes ppLkbyt);
 
         [DllImport("ole32.dll", ExactSpelling = true, PreserveSig = false)]
         static extern void WriteClassStg(
@@ -91,6 +167,31 @@ namespace MyInterop
         }
 
 
+    }
+
+    [ComVisible(false)]
+    [ComImport, InterfaceType(ComInterfaceType.InterfaceIsIUnknown), Guid("0000000A-0000-0000-C000-000000000046")]
+    public interface ILockBytes
+    {
+        //Note: These two by(reference 32-bit integers (ULONG) could be used as return values instead,
+        //      but they are not tagged [retval] in the IDL, so for consitency's sake...
+        void ReadAt(long ulOffset, System.IntPtr pv, int cb, out System.UInt32 pcbRead);
+        void WriteAt(long ulOffset, System.IntPtr pv, int cb, out System.UInt32 pcbWritten);
+        void Flush();
+        void SetSize(long cb);
+        void LockRegion(long libOffset, long cb, int dwLockType);
+        void UnlockRegion(long libOffset, long cb, int dwLockType);
+        void Stat(out System.Runtime.InteropServices.STATSTG pstatstg, int grfStatFlag);
+    }
+
+    [Flags]
+    public enum GMEMFlag
+    {
+        GMEM_FIXED = 0x0000,
+        GHND = 0x0042,
+        GMEM_MOVEABLE = 0x0002,
+        GMEM_ZEROINIT = 0x0040,
+        GPTR = 0x0040
     }
 
     [Flags]

@@ -13,6 +13,7 @@ version: 1.0
     1.5 Restore.Item.GetStatus
     1.6 Restore.Item.GetNewStatus
     1.7 Restore.Item.Clear
+    1.8 Restore.Item.IsSelectAnyItem
 
     object method
     1.8 Restore.Item.prototype.AddChild
@@ -142,6 +143,15 @@ Restore.Item.GetItem = function (itemId, cacheKey) {
     }
     return null;
 };
+
+Restore.Item.IsSelectAnyItem = function (cacheKey) {
+    var rootItem = Restore.Item.GetRootItem(cacheKey);
+    if (typeof (rootItem) === "undefined")
+        throw "please create item first.";
+    if (rootItem.Status == Restore.Item.UnSelectedStatus)
+        return false;
+    return true;
+}
 
 // @return {Id:0, ItemData:{}, Status:0, UnloadedChildrenStatus:0, TotalChildCount:100, LoadedChildren:[], ItemType}. 
 Restore.Item.GetTotalSelectItems = function (cacheKey) {

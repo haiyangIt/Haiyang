@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.30501.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Call_CSharp_COM", "Call_CSharp_COM.vcxproj", "{CF53DC98-F1EE-4583-9224-AB581FE1A2CD}"
 EndProject
@@ -9,6 +9,14 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DotNet_COM_Call", "DotNet_COM_Call\DotNet_COM_Call.vcxproj", "{AB2C10D8-BB34-4539-92E2-95EEBBEF145C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestBuildMessage", "..\TestBuildMessage\TestBuildMessage.csproj", "{3A67B6C3-35D0-49D6-9AC4-7D63858BD5F5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FastTransferUtil", "..\FastTransferUtil\FastTransferUtil.csproj", "{724571A8-BF45-4EFE-AB1E-BB065201513B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MsgFileBuildTest", "MsgFileBuildTest\MsgFileBuildTest.csproj", "{07384685-2222-4085-92A5-81E1B6787C9C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CompoundFile", "CompoundFile", "{E60397B1-F950-4881-805E-29C3AD47EB18}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FastTransferCom", "FastTransferCom", "{BF4EBC08-FA6A-4E70-82BA-86866DDEA198}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -60,8 +68,40 @@ Global
 		{3A67B6C3-35D0-49D6-9AC4-7D63858BD5F5}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{3A67B6C3-35D0-49D6-9AC4-7D63858BD5F5}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{3A67B6C3-35D0-49D6-9AC4-7D63858BD5F5}.Release|Win32.ActiveCfg = Release|Any CPU
+		{724571A8-BF45-4EFE-AB1E-BB065201513B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{724571A8-BF45-4EFE-AB1E-BB065201513B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{724571A8-BF45-4EFE-AB1E-BB065201513B}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{724571A8-BF45-4EFE-AB1E-BB065201513B}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{724571A8-BF45-4EFE-AB1E-BB065201513B}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{724571A8-BF45-4EFE-AB1E-BB065201513B}.Debug|Win32.Build.0 = Debug|Any CPU
+		{724571A8-BF45-4EFE-AB1E-BB065201513B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{724571A8-BF45-4EFE-AB1E-BB065201513B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{724571A8-BF45-4EFE-AB1E-BB065201513B}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{724571A8-BF45-4EFE-AB1E-BB065201513B}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{724571A8-BF45-4EFE-AB1E-BB065201513B}.Release|Win32.ActiveCfg = Release|Any CPU
+		{724571A8-BF45-4EFE-AB1E-BB065201513B}.Release|Win32.Build.0 = Release|Any CPU
+		{07384685-2222-4085-92A5-81E1B6787C9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07384685-2222-4085-92A5-81E1B6787C9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07384685-2222-4085-92A5-81E1B6787C9C}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{07384685-2222-4085-92A5-81E1B6787C9C}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{07384685-2222-4085-92A5-81E1B6787C9C}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{07384685-2222-4085-92A5-81E1B6787C9C}.Debug|Win32.Build.0 = Debug|Any CPU
+		{07384685-2222-4085-92A5-81E1B6787C9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07384685-2222-4085-92A5-81E1B6787C9C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07384685-2222-4085-92A5-81E1B6787C9C}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{07384685-2222-4085-92A5-81E1B6787C9C}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{07384685-2222-4085-92A5-81E1B6787C9C}.Release|Win32.ActiveCfg = Release|Any CPU
+		{07384685-2222-4085-92A5-81E1B6787C9C}.Release|Win32.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{CF53DC98-F1EE-4583-9224-AB581FE1A2CD} = {BF4EBC08-FA6A-4E70-82BA-86866DDEA198}
+		{EE468AC7-9B91-481E-9393-48F02000BADD} = {BF4EBC08-FA6A-4E70-82BA-86866DDEA198}
+		{AB2C10D8-BB34-4539-92E2-95EEBBEF145C} = {BF4EBC08-FA6A-4E70-82BA-86866DDEA198}
+		{3A67B6C3-35D0-49D6-9AC4-7D63858BD5F5} = {BF4EBC08-FA6A-4E70-82BA-86866DDEA198}
+		{724571A8-BF45-4EFE-AB1E-BB065201513B} = {E60397B1-F950-4881-805E-29C3AD47EB18}
+		{07384685-2222-4085-92A5-81E1B6787C9C} = {E60397B1-F950-4881-805E-29C3AD47EB18}
 	EndGlobalSection
 EndGlobal

@@ -12,7 +12,8 @@ defaultOptions:{
     contentType:"application/json; charset=utf-8",
     error: function(jqXhr, textStatus, errorThrown){ alert(e.);},
     success:function(data, textStatus, jqXhr){alert("operator success.");},
-    complete: function(jqXhr, textStatus){}
+    complete: function(jqXhr, textStatus){},
+    loading: false
 }
 */
 Arcserve.DataProtect.Util.Ajax = function (options) {
@@ -25,7 +26,13 @@ Arcserve.DataProtect.Util.Ajax = function (options) {
     if (typeof (setting.url) === "undefined")
         alert("please check code, missing ajax url.");
 
-    Arcserve.DataProtect.Util.Ajax.loading();
+
+    var isLoading = false;
+    var timeOut = setTimeout(function () {
+        Arcserve.DataProtect.Util.Ajax.loading();
+        isLoading = true;
+    }, 1000);
+
     $.ajax({
         url: setting.url,
         type: setting.type,
@@ -39,11 +46,16 @@ Arcserve.DataProtect.Util.Ajax = function (options) {
             setting.success(data, textStatus, jqXhr);
         },
         complete: function (jqXhr, textStatus) {
-            Arcserve.DataProtect.Util.Ajax.close();
+            clearTimeout(timeOut);
+            if (isLoading) {
+                Arcserve.DataProtect.Util.Ajax.close();
+                isLoading = false;
+            }
             setting.complete(jqXhr, textStatus);
-
         }
     });
+
+    
 };
 
 Arcserve.DataProtect.Util.Post = function (data, url, success, complete, error) {
@@ -64,31 +76,35 @@ Arcserve.DataProtect.Util.Ajax.loading = function () {
     var title = "loading";
     if (self.dialogOptions.title)
         title = self.dialogOptions.title;
+
     if (!self.loadingDialog) {
-        $("<div id='for_ajax_loading'></div>").appendTo($("body"));
-        self.loadingDialog = $("#for_ajax_loading").dialog({
-            hide: 'slide',
-            show: 'slide',
-            autoOpen: false,
-            title: title
+        self.loadingDialog = new BootstrapDialog.show({
+            type: BootstrapDialog.TYPE_INFO,
+            title: "loading",
+            message: "<p>Please wait...</p>",
+            animate: false,
+            closable: false
         });
 
         self.loadingCounter = 0;
     }
 
     if (self.loadingCounter == 0) {
-        self.loadingDialog.dialog("option", "title", title);
-        self.loadingDialog.dialog("open").html("<p>Please wait...</p>");
-        self.ResetDialogOptions();
+        self.loadingDialog.setTitle(title);
+        self.loadingDialog.open();
     }
     self.loadingCounter++;
+
+    Arcserve.DataProtect.Util.Ajax.ResetDialogOptions();
 };
 
 Arcserve.DataProtect.Util.Ajax.close = function () {
     var self = Arcserve.DataProtect.Util.Ajax;
-    self.loadingCounter--;
+    if (self.loadingCounter > 0) {
+        self.loadingCounter--;
+    }
     if (self.loadingCounter == 0) {
-        self.loadingDialog.dialog("close");
+        self.loadingDialog.close();
     }
 };
 
@@ -110,29 +126,27 @@ Arcserve.DataProtect.Util.Ajax.SetLoadingDialog = function (options) {
 };
 
 
-
 Arcserve.DataProtect.Util.Alert = function (options) {
-    var self = Arcserve.DataProtect.Util.Alert;
-    var options = $.extend({}, self.DefaultOptions, options);
-
-};
+    var options = $.extend({}, Arcserve.DataProtect.Util.Alert.DefaultOptions, options);
+    BootstrapDialog.show({
+        type: options.type,
+        title: options.title,
+        message: options.message,
+        buttons: [{
+            label: options.btnYesText,
+            action: function (dialogWarning) {
+                options.callbackForYes(dialogWarning);
+            }
+        }]
+    });
+}
 
 Arcserve.DataProtect.Util.Alert.DefaultOptions = {
+    type: BootstrapDialog.TYPE_WARNING,
     title: "Warning",
-    btnYes: "Ok",
-    functionYes: function () {
-
+    message: "warning",
+    btnYesText: "Ok",
+    callbackForYes: function (dialogWarning) {
+        dialogWarning.close();
     }
-};
-
-Arcserve.DataProtect.Util.Confirm = function (options) {
-
-};
-
-Arcserve.DataProtect.Util.Confirm.DefaultOptions = {
-    title: "Prompt",
-    btnYes: "Yes",
-    btnNo: "No",
-    functionYes: function () { },
-    functionNo: function () { }
-};
+}

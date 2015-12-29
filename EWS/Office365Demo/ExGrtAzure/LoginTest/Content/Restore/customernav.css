@@ -22,6 +22,10 @@
     
 }
 
+.restore-dialog .modal-dialog {
+        width: 800px;
+    }
+
 .restore .restore-details .panel-details{
     margin-left : -20px;
 }

@@ -1,5 +1,6 @@
 ﻿/// <autosync enabled="true" />
 /// <reference path="bootstrap.js" />
+/// <reference path="bootstrap-dialog.js" />
 /// <reference path="bootstrap-select.min.js" />
 /// <reference path="jquery.bootstrap.wizard.js" />
 /// <reference path="jquery.tristate.js" />

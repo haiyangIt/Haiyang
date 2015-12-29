@@ -34,8 +34,6 @@ namespace FTStreamUtil
             {
                 var logFile = FTStreamUtil.Build.Implement.BuildConst.LogFileName;
                 Debug.WriteLine(logFile);
-                //if (File.Exists(logFile))
-                //    File.Delete(logFile);
 
                 _logwriter = new StreamWriter(FTStreamUtil.Build.Implement.BuildConst.LogFileName, true);
                 Debug.WriteLine("Create logwriter success.");

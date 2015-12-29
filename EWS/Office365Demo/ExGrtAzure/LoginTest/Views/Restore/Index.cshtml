@@ -7,7 +7,7 @@
     ViewBag.Title = "Index";
     //Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
+@Styles.Render("~/bundles/bootstrapdialogcss")
 @Styles.Render("~/bundles/customerMailboxcss")
 @Styles.Render("~/bundles/bootstrapselectcss")
 
@@ -59,7 +59,7 @@
         </div>
     </div>
 
-    <div class="restore-destination-container">
+    <div class="restore-destination-container hidden">
         <form id="restore_destination_form" role="form" class="form-horizontal">
             <div class="restore_destination" id="restore_destination">
                 <fieldset>
@@ -111,6 +111,7 @@
 
 @section Scripts{
     @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/bootstrapdialog")
     @Scripts.Render("~/bundles/bottstrapselect")
     @Scripts.Render("~/bundles/arcserveutil")
     @Scripts.Render("~/bundles/three-status-select")
@@ -146,7 +147,8 @@
         $(document).ready(function () {
             // todo $("#).plugin();
             // todo $("#).catalognav()
-
+            //Arcserve.DataProtect.Util.Alert({ message: "No item selected." });
+            //return;
             (function ($) {
                 var catalogYearMonthInfoHash = [];
                 var organization = "@Model.Organization";
@@ -161,7 +163,8 @@
                             catalogSelection.catalogselection("update", updateData);
                         }
                         else {
-                            alert("this day no catalog jobs.");
+                            Arcserve.DataProtect.Util.Alert({ message: "this day no catalog jobs." });
+                            //alert("this day no catalog jobs.");
                             return false;
                         }
                     },
@@ -171,10 +174,10 @@
                             catalogYearMonthInfoHash[key] = true;
                             var date = new Date(year, month, 1);
                             var data = { date: date, organization: organization };
-                            Arcserve.DataProtect.Util.Post(data, "@Url.Action("GetCatalogDaysInMonth")", function(result){
+                            Arcserve.DataProtect.Util.Post(data, "@Url.Action("GetCatalogDaysInMonth")", function (result) {
                                 var days = result.Days;
-                                $.each(days, function(i, day){
-                                    var dayTime =  Restore.GetDateTime(day);
+                                $.each(days, function (i, day) {
+                                    var dayTime = Restore.GetDateTime(day);
                                     haveCatalogDaysInMonths[dayTime] = true;
                                 });
                                 $("#catalog-calendar").datepicker("refresh");
@@ -288,36 +291,87 @@
                             }
                         }
                     });
+                var modelDialogHtml = $(".restore-destination-container").html();
+                modelDialogHtml = modelDialogHtml.replace(/(\r\n|\n|\r)/gm, "");
+                $(".restore-destination-container").html("");
+                var formValidator = null;
+                
 
                 $("#RestoreBtn").on("click", function () {
-                    dialog.dialog("open");
+                    var isSelected = Restore.Item.IsSelectAnyItem(restoreCacheKey);
+                    if (!isSelected) {
+                        Arcserve.DataProtect.Util.Alert({ message: "No item selected." });
+                        return;
+                    }
+
+                    BootstrapDialog.show({
+                        title: "Restore Option",
+                        message: modelDialogHtml,
+                        closeByBackdrop: false,
+                        closeByKeyboard: false,
+                        cssClass: "restore-dialog",
+                        buttons: [
+                            {
+                                label: "Restore",
+                                action: function (selfDialog) {
+                                    $("#restore_destination_form").submit();
+                                    //RestoreToDestination(selfDialog);
+                                }
+                            },
+                            {
+                                label: "Cancel",
+                                action: function (selfDialog) {
+                                    selfDialog.close();
+                                }
+                            }
+                        ],
+                        onshown: function (selfDialog) {
+                            formValidator = $("#restore_destination_form").validate({
+                                excluded: ':disabled',
+                                rules: {
+                                    RestoreFolder: {
+                                        required: "#RestoreToOrg:checked"
+                                    },
+                                    NotificationAddress: {
+                                        required: "#RestoreToAzure:checked"
+                                    },
+                                    RestoreAdminUser: {
+                                        required: true
+                                    }
+                                },
+                                submitHandler: function (form) {
+                                    RestoreToDestination(selfDialog);
+                                }
+                            });
+
+                            $("[name='RestoreType']").bind("click.restore", function () {
+                                $("#restore_dump").toggleClass("hidden");
+                                $("#restore_original").toggleClass("hidden");
+                            });
+                        }
+                    })
+                    //dialog.dialog("open");
                 });
 
                 //var originalRestoreHtml = $("#restore_destination").html();
 
-
-                var formValidator = $("#restore_destination_form").validate({
-                    rules: {
-                        RestoreFolder: {
-                            required: "#RestoreType[val='1']"
-                        },
-                        NotificationAddress: {
-                            required: "#RestoreType[val='2']"
-                        }
-                    }
-                });
-
-                function RestoreToDestination() {
+                function RestoreToDestination(selfDialog) {
                     if (!formValidator.valid()) {
+                        return;
+                    }
+
+                    var isSelected = Restore.Item.IsSelectAnyItem(restoreCacheKey);
+                    if (!isSelected) {
+                        Arcserve.DataProtect.Util.Alert({ message: "No item selected." });
                         return;
                     }
 
                     var selectedItems = Restore.Item.GetTotalSelectItems(restoreCacheKey);
                     if (selectedItems.length == 0) {
-                        alert("No item selected.");
+                        Arcserve.DataProtect.Util.Alert({ message: "No item selected." });
                         return;
                     }
-
+                    
                     var restoreType = $("[name='RestoreType']:checked").val();
                     var adminUserName = $("#RestoreAdminUser").val();
                     var adminPassword = $("#RestoreAdminPassword").val();
@@ -328,42 +382,64 @@
                         //var folderName = (+date).toString();
                         var destination = { MailboxAddress: "haiyang.ling@arcserve.com", FolderPath: folderName };
                         var data = { catalog: catalogInfo, restoreAdminUserInfo: adminUser, destination: destination, selectedItem: selectedItems };
-                        Arcserve.DataProtect.Util.Ajax.SetLoadingDialog({ title: "Processing" });
+                        Arcserve.DataProtect.Util.Ajax.SetLoadingDialog({ title: "Processing" ,isLoading: true});
                         Arcserve.DataProtect.Util.Post(data, "@Url.Action("RestoreItems")", function (data) {
-                            alert("restore finished.");
+
+                            Arcserve.DataProtect.Util.Alert({
+                                type: BootstrapDialog.TYPE_INFO,
+                                title: "Info",
+                                message: "restore finished.",
+                                callbackForYes: function (infoDialog) {
+                                    //dialog.dialog("close");
+                                    infoDialog.close();
+                                    selfDialog.close();
+                                }
+                            })
+
+                            //alert("restore finished.");
                         });
 
                     }
                     else if (restoreType == "2") {
                         var data = { catalog: catalogInfo, restoreAdminUserInfo: adminUser, selectedItem: selectedItems, notificationAddress: $("#NotificationAddress").val() };
-                        Arcserve.DataProtect.Util.Ajax.SetLoadingDialog({ title: "Processing" });
+                        Arcserve.DataProtect.Util.Ajax.SetLoadingDialog({ title: "Processing", isLoading: true });
                         Arcserve.DataProtect.Util.Post(data, "@Url.Action("DumpItems")", function (data) {
-                            alert("restore finished");
-                            dialog.dialog("close");
+
+                            Arcserve.DataProtect.Util.Alert({
+                                type: BootstrapDialog.TYPE_INFO,
+                                title: "Info",
+                                message: "restore finished.",
+                                callbackForYes: function (infoDialog) {
+                                    //dialog.dialog("close");
+
+                                    infoDialog.close();
+                                    selfDialog.close();
+                                }
+                            })
+                            //alert("restore finished");
+                            //dialog.dialog("close");
                         });
                     }
                 }
 
-                dialog = $(".restore-destination-container").dialog({
-                    autoOpen: false,
-                    modal: true,
-                    minWidth: 800,
-                    buttons: {
-                        "Restore": RestoreToDestination,
-                        Cancel: function () {
-                            dialog.dialog("close");
-                        }
-                    },
-                    close: function () {
-                        formValidator.resetForm();
-                    },
-                    title: "Restore Options"
-                });
 
-                $("[name='RestoreType']").bind("click.restore", function () {
-                        $("#restore_dump").toggleClass("hidden");
-                        $("#restore_original").toggleClass("hidden");
-                })
+                //dialog = $(".restore-destination-container").dialog({
+                //    autoOpen: false,
+                //    modal: true,
+                //    minWidth: 800,
+                //    buttons: {
+                //        "Restore": RestoreToDestination,
+                //        Cancel: function () {
+                //            dialog.dialog("close");
+                //        }
+                //    },
+                //    close: function () {
+                //        formValidator.resetForm();
+                //    },
+                //    title: "Restore Options"
+                //});
+
+
             })(jQuery);
 
 

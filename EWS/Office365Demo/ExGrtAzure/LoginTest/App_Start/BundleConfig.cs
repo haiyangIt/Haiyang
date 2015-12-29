@@ -67,6 +67,9 @@ namespace LoginTest
             bundles.Add(new StyleBundle("~/bundles/bootstrapselectcss").Include("~/Content/bootstrap-select.css"));
 
             bundles.Add(new ScriptBundle("~/bundles/bottstrapselect").Include("~/Scripts/bootstrap-select.js"));
+
+            bundles.Add(new StyleBundle("~/bundles/bootstrapdialogcss").Include("~/Content/bootstrap-dialog.css"));
+            bundles.Add(new ScriptBundle("~/bundles/bootstrapdialog").Include("~/Scripts/bootstrap-dialog.js"));
         }
     }
 }

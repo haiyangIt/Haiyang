@@ -133,69 +133,29 @@
       <DependentUpon>UserSettings.settings</DependentUpon>
     </Compile>
     <Compile Include="EWSUtil\ValidationCallbackHelper.cs" />
-    <Compile Include="FTStreamUtil\Build\E15PropertyItem.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FTStreamUtil\Build\IAttachmentBuild.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FTStreamUtil\Build\IAttachmentCollectionBuild.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FTStreamUtil\Build\IBuild.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FTStreamUtil\Build\IEmbeddedMessageBuild.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FTStreamUtil\Build\IItemBuild.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FTStreamUtil\Build\Implement\AttachmentBuild.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FTStreamUtil\Build\Implement\AttachmentCollectionBuild.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FTStreamUtil\Build\Implement\BuildConst.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FTStreamUtil\Build\Implement\ConvertE15PropertyToUnit.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FTStreamUtil\Build\Implement\EmbeddedMessageBuild.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FTStreamUtil\Build\Implement\ItemBuild.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FTStreamUtil\Build\Implement\PropertyBuildBase.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FTStreamUtil\Build\Implement\PropListBuild.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FTStreamUtil\Build\Implement\RecipientBuild.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FTStreamUtil\Build\Implement\RecipientCollectionBuild.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FTStreamUtil\Build\Implement\RestoreMsg.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FTStreamUtil\Build\IPropListBuild.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FTStreamUtil\Build\IRecipientBuild.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FTStreamUtil\Build\IRecipientCollectionBuild.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FTStreamUtil\Build\IRestoreMsg.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="FTStreamUtil\Build\E15PropertyItem.cs" />
+    <Compile Include="FTStreamUtil\Build\IAttachmentBuild.cs" />
+    <Compile Include="FTStreamUtil\Build\IAttachmentCollectionBuild.cs" />
+    <Compile Include="FTStreamUtil\Build\IBuild.cs" />
+    <Compile Include="FTStreamUtil\Build\IEmbeddedMessageBuild.cs" />
+    <Compile Include="FTStreamUtil\Build\IItemBuild.cs" />
+    <Compile Include="FTStreamUtil\Build\Implement\AttachmentBuild.cs" />
+    <Compile Include="FTStreamUtil\Build\Implement\AttachmentCollectionBuild.cs" />
+    <Compile Include="FTStreamUtil\Build\Implement\BuildConst.cs" />
+    <Compile Include="FTStreamUtil\Build\Implement\ConvertE15PropertyToUnit.cs" />
+    <Compile Include="FTStreamUtil\Build\Implement\EmbeddedMessageBuild.cs" />
+    <Compile Include="FTStreamUtil\Build\Implement\FTFileStream.cs" />
+    <Compile Include="FTStreamUtil\Build\Implement\ItemBuild.cs" />
+    <Compile Include="FTStreamUtil\Build\Implement\PropertyBuildBase.cs" />
+    <Compile Include="FTStreamUtil\Build\Implement\PropListBuild.cs" />
+    <Compile Include="FTStreamUtil\Build\Implement\RecipientBuild.cs" />
+    <Compile Include="FTStreamUtil\Build\Implement\RecipientCollectionBuild.cs" />
+    <Compile Include="FTStreamUtil\Build\Implement\RestoreMsg.cs" />
+    <Compile Include="FTStreamUtil\Build\IPropListBuild.cs" />
+    <Compile Include="FTStreamUtil\Build\IRecipientBuild.cs" />
+    <Compile Include="FTStreamUtil\Build\IRecipientCollectionBuild.cs" />
+    <Compile Include="FTStreamUtil\Build\IRestoreMsg.cs" />
+    <Compile Include="FTStreamUtil\Class1.cs" />
     <Compile Include="FTStreamUtil\FTFactory.cs" />
     <Compile Include="FTStreamUtil\FTMessageTreeRoot.cs" />
     <Compile Include="FTStreamUtil\FTNodeBase.cs" />
@@ -203,9 +163,8 @@
     <Compile Include="FTStreamUtil\FTNodeLeaf.cs" />
     <Compile Include="FTStreamUtil\FTOneNode.cs" />
     <Compile Include="FTStreamUtil\FTParserUtil.cs" />
-    <Compile Include="FTStreamUtil\FTStream\FTBufferRead.cs" />
     <Compile Include="FTStreamUtil\FTStream\ByteArrayTransferUnit.cs" />
-    <Compile Include="FTStreamUtil\Build\Implement\FTFileStream.cs" />
+    <Compile Include="FTStreamUtil\FTStream\FTBufferRead.cs" />
     <Compile Include="FTStreamUtil\FTStream\FTStreamConst.cs" />
     <Compile Include="FTStreamUtil\FTStream\FTStreamReader.cs" />
     <Compile Include="FTStreamUtil\FTStream\FTStreamReaderForPage.cs" />
@@ -295,7 +254,6 @@
       <LastGenOutput>TemplateEwsRequests.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent />
