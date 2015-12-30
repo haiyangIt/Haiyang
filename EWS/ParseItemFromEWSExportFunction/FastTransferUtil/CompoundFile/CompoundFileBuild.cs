@@ -1,4 +1,5 @@
 ﻿using FTStreamUtil;
+using FTStreamUtil.Item;
 using FTStreamUtil.Item.PropValue;
 using System;
 using System.Collections.Generic;
@@ -127,6 +128,24 @@ namespace FastTransferUtil.CompoundFile
         {
             throw new NotImplementedException();
         }
+
+        protected override void BuildHeader(IStream propertyStream)
+        {
+
+            // 1.1.1 Set 8 bytes reserve.
+            propertyStream.Write((Int32)0);
+            // 1.1.2 Set Next Recipient Id
+            Int32 recipientCount = RecipientProperties.Count;
+            propertyStream.Write(recipientCount);
+            // 1.1.3 Set Next Attachment Id
+            propertyStream.Write(AttachmentProperties.Count);
+            // 1.1.4 Set Recipient Count
+            propertyStream.Write(recipientCount);
+            // 1.1.5 Set Attachment Count
+            propertyStream.Write(AttachmentProperties.Count);
+            // 1.1.6 Set 8 bytes Reserve;
+            propertyStream.Write((Int32)0);
+        }
     }
 
     public class MessageContentStruct : PropertyCollection
@@ -154,7 +173,7 @@ namespace FastTransferUtil.CompoundFile
 
         public override void Build()
         {
-            
+
         }
     }
 
@@ -178,9 +197,9 @@ namespace FastTransferUtil.CompoundFile
         public virtual void AddProperties(IPropValue property)
         {
             Properties.AddProperty(property);
-            if(property.PropInfo is NamePropInfo)
+            if (property.PropInfo is NamePropInfo)
             {
-                NamedProperties[property.PropertyId] = property;
+                NamedProperties[property.PropTag.PropertyId] = property;
             }
         }
 
@@ -200,25 +219,143 @@ namespace FastTransferUtil.CompoundFile
         {
             IStream propertyStream = CreatePropertyStream();
             BuildHeader(propertyStream);
-            foreach(IPropValue property in Properties.Properties)
+            foreach (IPropValue property in Properties.Properties)
             {
                 BuildEachProperty(Storage, propertyStream, property);
             }
         }
 
-        private void BuildEachProperty(IStorage storage, IStream propertyStream, IPropValue property)
+        protected virtual void BuildEachProperty(IStorage storage, IStream propertyStream, IPropValue property)
+        {
+            WritePropertyInfoToPropertyStream(propertyStream, property);
+            WritePropertyValueToStorage(storage, property);
+        }
+
+        private void WritePropertyValueToStorage(IStorage storage, IPropValue property)
+        {
+            if (property is VarPropValue)
+            {
+                var streamName = string.Format("__substg1.0_{0}", property.PropTag.PropertyTag.ToString("X8"));
+                IStream varPropStream = null;
+                try
+                {
+                    varPropStream = CompoundFileUtil.Instance.GetChildStream(streamName, true, storage);
+                    varPropStream.Write(property.PropValue.Bytes);
+                    varPropStream.Commit(0);
+                }
+                finally
+                {
+                    CompoundFileUtil.Instance.ReleaseComObj(ref varPropStream);
+                }
+            }
+            else if (property is MvPropValue)
+            {
+                if (PropertyTag.IsMultiVarType((ushort)property.PropTag.PropertyTag))
+                {
+                    var streamName = string.Format("__substg1.0_{0}", property.PropTag.PropertyTag.ToString("X8"));
+                    IStream propStream = null;
+                    try
+                    {
+                        propStream = CompoundFileUtil.Instance.GetChildStream(streamName, true, storage);
+                        propStream.Write(((MvVarSizeValue)property.PropValue).GetItemLengthByte());
+                        if (property.PropTag.PropertyTag == (int)PropertyType.PT_MV_BINARY)
+                        {
+                            propStream.WriteZero(4);
+                        }
+                        propStream.Commit(0);
+                    }
+                    finally
+                    {
+                        CompoundFileUtil.Instance.ReleaseComObj(ref propStream);
+                    }
+
+
+                }
+                else
+                {
+                    var streamName = string.Format("__substg1.0_{0}", property.PropTag.PropertyTag.ToString("X8"));
+                    IStream propStream = null;
+                    try
+                    {
+                        propStream = CompoundFileUtil.Instance.GetChildStream(streamName, true, storage);
+                        propStream.Write(((MvFixedSizeValue)property.PropValue).GetItemValueByte());
+                        propStream.Commit(0);
+                    }
+                    finally
+                    {
+                        CompoundFileUtil.Instance.ReleaseComObj(ref propStream);
+                    }
+                }
+            }
+        }
+
+        protected virtual void WritePropertyInfoToPropertyStream(IStream propertyStream, IPropValue property)
+        {
+            if (property is FixPropValue)
+            {
+                // 1.2.1 Set fixed data
+                // 1.2.1.1 Set Tag
+                propertyStream.Write(property.PropTag.Bytes);
+                // 1.2.1.2 Set Flag
+                propertyStream.Write((Int32)0x06);
+                // 1.2.1.3 Set Value
+                var value = property.PropValue.Bytes;
+                propertyStream.Write(value);
+                propertyStream.WriteZero(8 - value.Length);
+            }
+            else if (property is VarPropValue)
+            {
+                // 1.2.2 Set variable data
+                // 1.2.2.1 Set Tag
+                propertyStream.Write(property.PropTag.Bytes);
+                // 1.2.2.2 Set Flag
+                propertyStream.Write((Int32)0x06);
+                // 1.2.2.3 Set Size
+                var valueSize = property.PropValue.BytesCount;
+                if (property.PropValue is VarStringValue)
+                {
+
+                    if (valueSize == 0)
+                        propertyStream.Write((Int32)2);
+                    else
+                        propertyStream.Write(valueSize);
+                }
+                else
+                {
+                    propertyStream.Write(valueSize);
+                }
+                // 1.2.2.4 Set Reserve , todo if contain embed message, it must set 0x01, if OLE, set 0x04;
+                propertyStream.WriteZero(0);
+            }
+            else if (property is MvPropValue)
+            {
+                // 1.2.3 Set variable data
+                // 1.2.3.1 Set Tag
+                propertyStream.Write(property.PropTag.Bytes);
+                // 1.2.3.2 Set Flag
+                propertyStream.Write((Int32)0x06);
+                // 1.2.3.3 Set Size, todo must check the length is all value's bytes total length;
+                if (PropertyTag.IsMultiVarType((ushort)property.PropTag.PropertyType))
+                {
+                    propertyStream.Write((Int32)(((ISizeValue)property.PropValue).ItemCount) * 4);
+                }
+                else
+                {
+                    propertyStream.Write((Int32)(((ISizeValue)property.PropValue).ItemCount) * PropertyTag.GetFixPropertyTypeLength((ushort)property.PropTag.PropertyType));
+                }
+                // 1.2.3.4 Set Reserve , todo if contain embed message, it must set 0x01, if OLE, set 0x04;
+                propertyStream.WriteZero(0);
+            }
+        }
+
+        protected virtual void BuildHeader(IStream propertyStream)
         {
             throw new NotImplementedException();
         }
 
-        private void BuildHeader(IStream propertyStream)
+        protected virtual IStream CreatePropertyStream()
         {
-            throw new NotImplementedException();
-        }
-
-        private IStream CreatePropertyStream()
-        {
-            throw new NotImplementedException();
+            return CompoundFileUtil.Instance.GetChildStream("__properties_version1.0", true, Storage);
         }
     }
 
@@ -299,6 +436,40 @@ namespace FastTransferUtil.CompoundFile
             MessageContent = new MessageContentStruct(this);
             MessageContent.Storage = Storage;
             return MessageContent;
+        }
+    }
+
+    public static class StreamWriter
+    {
+        public static void Write(this IStream stream, Int32 value)
+        {
+            stream.Write(BitConverter.GetBytes(value), sizeof(Int32), IntPtr.Zero);
+        }
+
+        public static void Write(this IStream stream, byte[] value)
+        {
+            stream.Write(value, value.Length, IntPtr.Zero);
+        }
+
+        static byte[] zero;
+        static byte[] Zero
+        {
+            get
+            {
+                if (zero == null)
+                {
+                    zero = new byte[16];
+                    for (int i = 0; i < 16; i++)
+                    {
+                        zero[i] = 0;
+                    }
+                }
+                return zero;
+            }
+        }
+        public static void WriteZero(this IStream stream, int length)
+        {
+            stream.Write(Zero, length, IntPtr.Zero);
         }
     }
 }

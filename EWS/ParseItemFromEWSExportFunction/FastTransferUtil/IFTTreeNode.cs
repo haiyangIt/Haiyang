@@ -13,6 +13,8 @@ namespace FTStreamUtil
         IList<IFTTreeNode> Children { get; }
         int BytesCount { get; }
 
+        byte[] Bytes { get; }
+
         void WriteToCompoundFile(CompoundFileBuild build);
     }
 }

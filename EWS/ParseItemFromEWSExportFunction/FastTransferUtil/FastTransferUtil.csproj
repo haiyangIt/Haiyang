@@ -41,7 +41,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="CompoundFile\CompoundFileBuild.cs" />
+    <Compile Include="CompoundFile\CompoundFileUtil.cs" />
+    <Compile Include="CompoundFile\NativeDll.cs" />
     <Compile Include="FTFactory.cs" />
     <Compile Include="FTMessageTreeRoot.cs" />
     <Compile Include="FTNodeBase.cs" />

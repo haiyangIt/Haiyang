@@ -11,6 +11,7 @@ namespace FTStreamUtil
     {
         protected override void ParseNode(IFTStreamReader reader)
         {
+            ItemCount = 0;
             while (true)
             {
                 var propertyTag = reader.ReadPropertyTag();
@@ -19,8 +20,11 @@ namespace FTStreamUtil
                 IFTTreeNode item = CreateItem(propertyTag);
                 AddItem(item);
                 item.Parse(reader);
+                ItemCount++;
             }
         }
+
+        public int ItemCount { get; set; }
 
         internal void AddItem(IFTTreeNode item)
         {

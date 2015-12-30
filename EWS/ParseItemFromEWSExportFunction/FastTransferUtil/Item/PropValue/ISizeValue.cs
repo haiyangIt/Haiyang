@@ -7,6 +7,7 @@ namespace FTStreamUtil.Item.PropValue
 {
     public interface ISizeValue : IFTTreeNode
     {
+        int ItemCount { get; }
     }
 
     public class MvFixedSizeValue : FTNodeCollection<IFixedSizeValue>, ISizeValue
@@ -34,6 +35,11 @@ namespace FTStreamUtil.Item.PropValue
                 return true;
             return false;
         }
+
+        internal byte[] GetItemValueByte()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class MvVarSizeValue : FTNodeCollection<MvVarSizeItem>, ISizeValue
@@ -46,7 +52,6 @@ namespace FTStreamUtil.Item.PropValue
         {
             _tag = propertyTag;
             _length = length;
-        
         }
 
         protected override MvVarSizeItem CreateItem(PropertyTag propertyTag)
@@ -59,6 +64,11 @@ namespace FTStreamUtil.Item.PropValue
             if (_parsed++ < _length.Data)
                 return true;
             return false;
+        }
+
+        internal byte[] GetItemLengthByte()
+        {
+            throw new NotImplementedException();
         }
     }
 

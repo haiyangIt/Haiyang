@@ -67,6 +67,8 @@ namespace FTStreamUtil.Item
         private static HashSet<ushort> _fixedTypeHash = new HashSet<ushort>();
         private static HashSet<ushort> _varTypeHash = new HashSet<ushort>();
         private static HashSet<ushort> _mvTypeHash = new HashSet<ushort>();
+        private static HashSet<ushort> _mvVarTypeHash = new HashSet<ushort>();
+        private static Dictionary<ushort, short> _mvFixedTypeLengthDic = new Dictionary<ushort, short>();
         private static void Init()
         {
             #region initMarkerHash
@@ -139,6 +141,21 @@ namespace FTStreamUtil.Item
             _mvTypeHash.Add((UInt16)PropertyType.PT_MV_UNICODE);
             _mvTypeHash.Add((UInt16)PropertyType.PT_MV_CLSID);
             _mvTypeHash.Add((UInt16)PropertyType.PT_MV_I8);
+
+            _mvVarTypeHash.Add((UInt16)PropertyType.PT_MV_UNICODE);
+            _mvVarTypeHash.Add((UInt16)PropertyType.PT_MV_STRING8);
+            _mvVarTypeHash.Add((UInt16)PropertyType.PT_MV_BINARY);
+
+            _mvFixedTypeLengthDic.Add((UInt16)PropertyType.PT_I2, 2);
+            _mvFixedTypeLengthDic.Add((UInt16)PropertyType.PT_I8, 8);
+            _mvFixedTypeLengthDic.Add((UInt16)PropertyType.PT_LONG, 4);
+            _mvFixedTypeLengthDic.Add((UInt16)PropertyType.PT_R4, 4);
+            _mvFixedTypeLengthDic.Add((UInt16)PropertyType.PT_DOUBLE,8);
+            _mvFixedTypeLengthDic.Add((UInt16)PropertyType.PT_CURRENCY, 8);
+            _mvFixedTypeLengthDic.Add((UInt16)PropertyType.PT_APPTIME, 8);
+            //_fixedTypeLengthDic.Add((UInt16)PropertyType.PT_BOOLEAN, );
+            _mvFixedTypeLengthDic.Add((UInt16)PropertyType.PT_SYSTIME, 8);
+            _mvFixedTypeLengthDic.Add((UInt16)PropertyType.PT_CLSID, 16);
             #endregion
         }
 
@@ -197,11 +214,55 @@ namespace FTStreamUtil.Item
             bool result = _mvTypeHash.Contains(propertyTag.PropType);
             if(!result)
             {
+                if ((propertyTag.PropType & 0x9000) == 0x9000) // 0x8000 & 0x1000. 0x8000 means it's mv. 0x1000 means it's string.
+                    return true;
+            }
+            return result;
+        }
+
+        public static bool IsMultiVarType(PropertyTag propertyTag)
+        {
+            if (_markerHash.Count == 0)
+                Init();
+
+
+            bool result = _mvVarTypeHash.Contains(propertyTag.PropType);
+            if (!result)
+            {
                 if ((propertyTag.PropType & 0x9000) == 0x9000)
                     return true;
             }
             return result;
         }
+
+        internal static bool IsMultiVarType(ushort propertyType)
+        {
+            if (_markerHash.Count == 0)
+                Init();
+
+
+            bool result = _mvVarTypeHash.Contains(propertyType);
+            if (!result)
+            {
+                if ((propertyType & 0x9000) == 0x9000)
+                    return true;
+            }
+            return result;
+        }
+
+        internal static int GetFixPropertyTypeLength(ushort propertyType)
+        {
+            if (_markerHash.Count == 0)
+                Init();
+            ushort temp = 0x0FFF;
+            propertyType = (ushort)(propertyType & temp);
+            short result;
+            var isContain = _mvFixedTypeLengthDic.TryGetValue(propertyType, out result);
+            if (isContain)
+                throw new ArgumentException();
+            return result;
+        }
+        
         #endregion
     }
 }
