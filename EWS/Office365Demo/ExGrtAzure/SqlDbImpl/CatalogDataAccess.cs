@@ -35,7 +35,7 @@ namespace SqlDbImpl
 
         public ICatalogJob GetLastCatalogJob(DateTime thisJobStartTime)
         {
-            using (var context = new CatalogDbContext(ServiceContext.AdminInfo.OrganizationName))
+            using (var context = new CatalogDbContext(new OrganizationModel() { Name = ServiceContext.AdminInfo.OrganizationName }))
             {
                 var lastCatalogInfoQuery = context.Catalogs.Where(c => c.StartTime < thisJobStartTime).OrderByDescending(c => c.StartTime).Take(1);
                 var lastCatalogInfo = lastCatalogInfoQuery.FirstOrDefault();
@@ -50,7 +50,7 @@ namespace SqlDbImpl
             CatalogInfoModel information = catalogJob as CatalogInfoModel;
             if (information == null)
                 throw new ArgumentException("argument type is not right or argument is null", "catalogJob");
-            using (var context = new CatalogDbContext(ServiceContext.AdminInfo.OrganizationName, SqlConn, false))
+            using (var context = new CatalogDbContext(new OrganizationModel() { Name = ServiceContext.AdminInfo.OrganizationName }, SqlConn, false))
             {
                 context.Catalogs.Add(information);
                 context.SaveChanges();
@@ -186,7 +186,7 @@ namespace SqlDbImpl
 
         public bool IsItemContentExist(string itemId)
         {
-            using (var context = new CatalogDbContext(ServiceContext.AdminInfo.OrganizationName))
+            using (var context = new CatalogDbContext(new OrganizationModel() { Name = ServiceContext.AdminInfo.OrganizationName }))
             {
                 var result = from m in context.ItemLocations
                              where m.ItemId == itemId
@@ -234,15 +234,32 @@ namespace SqlDbImpl
                 ServiceContext.OtherInformation.Add(keyName, modelListObject);
             }
             List<T> modelList = modelListObject as List<T>;
+            
 
             if (modelData != null)
                 modelList.Add(modelData);
 
             if (modelList.Count >= pageCount || isEnd)
             {
+                HashSet<string> ids = new HashSet<string>();
+                bool isMultiItem = false;
+                foreach (var item in modelList)
+                {
+                    IItemData temp = item as IItemData;
+                    if(temp != null){
+                        if (ids.Contains(temp.Id))
+                        {
+                            isMultiItem = true;
+                        }
+                        else
+                            ids.Add(temp.Id);
+                    }
+                }
+
+
                 if (isInTransaction)
                 {
-                    using (var context = new CatalogDbContext(ServiceContext.AdminInfo.OrganizationName, SqlConn, false))
+                    using (var context = new CatalogDbContext(new OrganizationModel() { Name = ServiceContext.AdminInfo.OrganizationName }, SqlConn, false))
                     {
                         delegateFunc(context, modelList);
                         context.SaveChanges();
@@ -250,7 +267,7 @@ namespace SqlDbImpl
                 }
                 else
                 {
-                    using (var context = new CatalogDbContext(ServiceContext.AdminInfo.OrganizationName))
+                    using (var context = new CatalogDbContext(new OrganizationModel() { Name = ServiceContext.AdminInfo.OrganizationName }))
                     {
                         delegateFunc(context, modelList);
                         context.SaveChanges();

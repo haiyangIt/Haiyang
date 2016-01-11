@@ -13,6 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Web;
 using System.Security.Cryptography;
+using EwsFrame.EF;
 
 namespace SqlDbImpl.Model
 {
@@ -54,6 +55,7 @@ namespace SqlDbImpl.Model
         
         [Required]
         [MaxLength(512)]
+        [CaseSensitive]
         public string ParentFolderId
         {
             get; set;
@@ -61,6 +63,7 @@ namespace SqlDbImpl.Model
 
         [Key]
         [MaxLength(512)]
+        [CaseSensitive("ItemId")]
         public string ItemId { get; set; }
 
         [Required]

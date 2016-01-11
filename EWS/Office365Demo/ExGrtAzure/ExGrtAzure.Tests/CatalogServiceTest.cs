@@ -92,7 +92,7 @@ namespace ExGrtAzure.Tests
         private void OutputFolderData(IFolderData folderData, int level)
         {
             Debug.WriteLine(string.Format("{0} Folder: [{1}],type: [{2}],ChildFolderCount:[{3}],ChildItemCount:[{4}],Id:[{5}],ParentId:[{6}]",
-                "".PadLeft(level * 2), folderData.DisplayName,
+                "".PadLeft(level * 2), ((IItemBase)folderData).DisplayName,
                 folderData.FolderType,
                 folderData.ChildFolderCount,
                 folderData.ChildItemCount,
@@ -124,13 +124,13 @@ namespace ExGrtAzure.Tests
             }
 
             IFolder folderOper = _factory.NewFolderOperatorImpl(_ewsContext);
-            var findFolderId = folderOper.FindFolder("Test", inboxFolder.Id);
+            var findFolderId = folderOper.FindFolder(new FolderDataBaseDefault() { DisplayName = "Test" }, inboxFolder.Id);
             if(findFolderId != null)
             {
                 folderOper.DeleteFolder(findFolderId);
             }
 
-            FolderId testFolderId = folderOper.CreateChildFolder("Test", inboxFolder.Id);
+            FolderId testFolderId = folderOper.CreateChildFolder(new FolderDataBaseDefault() { DisplayName = "Test" }, inboxFolder.Id);
             using (StreamReader reader = new StreamReader(path))
             {
                 itemOper.ImportItem(testFolderId, reader.BaseStream, ServiceContext.ContextInstance.Argument);

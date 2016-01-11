@@ -1,4 +1,5 @@
 ﻿using DataProtectInterface.Event;
+using DataProtectInterface.Util;
 using EwsDataInterface;
 using System;
 using System.Collections.Generic;
@@ -34,9 +35,11 @@ namespace DataProtectInterface
 
     public interface IRestoreItemInformation
     {
-        List<string> FolderPathes { get; } 
+        List<IFolderDataBase> FolderPathes { get; } 
         string ItemId { get; }
         string DisplayName { get; }
+
+        ItemClass ItemClass { get; }
     }
 
     public interface IRestoreServiceEx

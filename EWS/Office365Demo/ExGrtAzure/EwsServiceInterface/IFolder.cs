@@ -1,4 +1,5 @@
-﻿using Microsoft.Exchange.WebServices.Data;
+﻿using EwsDataInterface;
+using Microsoft.Exchange.WebServices.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,8 +23,9 @@ namespace EwsServiceInterface
         ExchangeService CurrentExchangeService { get; }
 
         bool IsFolderNeedGenerateCatalog(Folder folder);
-        FolderId CreateChildFolder(string folderDisplayName, FolderId parentFolderId);
-        FolderId FindFolder(string folderDisplayName, FolderId parentFolderId, int findCount = 0);
+        FolderId CreateChildFolder(IFolderDataBase folder, FolderId parentFolderId);
+        FolderId FindFolder(IFolderDataBase folder, FolderId parentFolderId, int findCount = 0);
         void DeleteFolder(FolderId findFolderId, DeleteMode deleteMode = DeleteMode.MoveToDeletedItems);
     }
+
 }

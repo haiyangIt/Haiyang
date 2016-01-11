@@ -1,0 +1,330 @@
+20160106151736    D    AutodiscoverRequest    <Trace Tag="AutodiscoverRequest" Tid="12" Time="2016-01-06 07:17:36Z" Version="15.00.0913.015">
+  <?xml version="1.0" encoding="utf-8"?>
+  <soap:Envelope xmlns:a="http://schemas.microsoft.com/exchange/2010/Autodiscover" xmlns:wsa="http://www.w3.org/2005/08/addressing" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+    <soap:Header>
+      <a:RequestedServerVersion>Exchange2013_SP1</a:RequestedServerVersion>
+      <wsa:Action>http://schemas.microsoft.com/exchange/2010/Autodiscover/Autodiscover/GetUserSettings</wsa:Action>
+      <wsa:To>https://autodiscover-s.outlook.com/autodiscover/autodiscover.svc</wsa:To>
+    </soap:Header>
+    <soap:Body>
+      <a:GetUserSettingsRequestMessage xmlns:a="http://schemas.microsoft.com/exchange/2010/Autodiscover">
+        <a:Request>
+          <a:Users>
+            <a:User>
+              <a:Mailbox>haiyang.ling@arcserve.com</a:Mailbox>
+            </a:User>20160106151739    D    AutodiscoverResponseHttpHeaders    <Trace Tag="AutodiscoverResponseHttpHeaders" Tid="12" Time="2016-01-06 07:17:39Z">
+HTTP/1.1 200 OK
+Transfer-Encoding: chunked
+request-id: 602cc778-72e8-4247-b2dd-4ea81d94c714
+X-CalculatedBETarget: blupr10mb0820.namprd10.prod.outlook.com
+X-MS-Credentials-Expire: 5
+X-MS-Credential-Service-Federated: false
+X-MS-Credential-Service-Url: https://portal.microsoftonline.com/ChangePassword.aspx
+X-DiagInfo: BLUPR10MB0820
+X-BEServer: BLUPR10MB0820
+Cache-Control: private
+Content-Type: text/xml; charset=utf-8
+Set-Cookie: X-BackEndCookie2=haiyang.ling@arcserve.com=u56Lnp2ejJqBx8zJmZqcx8zSyprGzNLLmcad0p7IzcvSysbOnZ2dx83Oy56agZ6NnIyajYma0ZyQkoHNz87J0s/N0s/Kq8/Ixc7IxczGgZGeko+Nm87P0Y+NkJvRkIqLk5CQlNGckJKBzw==; expires=Fri, 05-Feb-2016 07:17:39 GMT; path=/autodiscover; secure; HttpOnly,X-BackEndCookie=haiyang.ling@arcserve.com=u56Lnp2ejJqBx8zJmZqcx8zSyprGzNLLmcad0p7IzcvSysbOnZ2dx83Oy56agZ6NnIyajYma0ZyQkoHNz87J0s/N0s/Kq8/Ixc7IxczGgZGeko+Nm87P0Y+NkJvRkIqLk5CQlNGckJKBzw==20160106151739    D    AutodiscoverResponse    <Trace Tag="AutodiscoverResponse" Tid="12" Time="2016-01-06 07:17:39Z" Version="15.00.0913.015">
+  <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" xmlns:a="http://www.w3.org/2005/08/addressing">
+    <s:Header>
+      <a:Action s:mustUnderstand="1">http://schemas.microsoft.com/exchange/2010/Autodiscover/Autodiscover/GetUserSettingsResponse</a:Action>
+      <h:ServerVersionInfo xmlns:h="http://schemas.microsoft.com/exchange/2010/Autodiscover" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+        <h:MajorVersion>15</h:MajorVersion>
+        <h:MinorVersion>1</h:MinorVersion>
+        <h:MajorBuildNumber>361</h:MajorBuildNumber>
+        <h:MinorBuildNumber>6</h:MinorBuildNumber>
+        <h:Version>Exchange2015</h:Version>
+      </h:ServerVersionInfo>
+    </s:Header>
+    <s:Body>
+      <GetUserSettingsResponseMessage xmlns="http://schemas.microsoft.com/exchange/2010/Autodiscover">
+        <Response xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+          <ErrorCode>NoError</ErrorCode>
+          <ErrorMessage />
+          <UserResponses>
+            <UserResponse>
+              <ErrorCode>NoError</ErrorCode>
+              <ErrorMessage>No error.</ErrorMessage>
+              <RedirectTarget i:nil="true" />
+              <UserSettingErrors>
+                <UserSettingError>
+                  <ErrorCode>SettingIsNotAvailable</ErrorCode>
+                  <ErrorMessage>User setting 'InternalEwsUrl' is not available. </ErrorMessage>
+                  <SettingName>InternalEwsUrl</SettingName>
+                </UserSettingError>
+              </UserSettingErrors>
+              <UserSettings>
+                <UserSetting i:type="StringSetting">
+                  <Name>ExternalEwsUrl</Name>
+                  <Value>https://outlook.office365.com/EWS/Exchange.asmx</Value>
+                </UserSetting>
+              </UserSettings>
+            </UserResponse>
+          </UserResponses>
+        </Response>
+      </GetUse20160106151742    D    EwsRequest    <Trace Tag="EwsRequest" Tid="12" Time="2016-01-06 07:17:42Z" Version="15.00.0913.015">
+  <?xml version="1.0" encoding="utf-8"?>
+  <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+    <soap:Header>
+      <t:RequestServerVersion Version="Exchange2013_SP1" />
+      <t:ExchangeImpersonation>
+        <t:ConnectingSID>
+          <t:SmtpAddress>haiyang.ling@arcserve.com</t:SmtpAddress>
+        </t:ConnectingSID>
+      </t:ExchangeImpersonation>
+    </soap:Header>
+    <soap:Body>
+      <m:GetFolder>
+        <m:FolderShape>
+          <t:BaseShape>AllProperties</t:BaseShape>
+        </m:FolderShape>
+        <m:FolderIds>
+          <t:DistinguishedFolderId Id="calendar" />
+        </m:FolderIds>
+      </m:GetFolder>
+    </soap:Body>
+  </soap:Envelope>20160106151745    D    EwsResponse    <Trace Tag="EwsResponse" Tid="12" Time="2016-01-06 07:17:45Z" Version="15.00.0913.015">
+  <?xml version="1.0" encoding="utf-8"?>
+  <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+    <s:Header>
+      <h:ServerVersionInfo MajorVersion="15" MinorVersion="1" MajorBuildNumber="361" MinorBuildNumber="16" Version="V2015_10_05" xmlns:h="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" />
+    </s:Header>
+    <s:Body>
+      <m:GetFolderResponse xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types">
+        <m:ResponseMessages>
+          <m:GetFolderResponseMessage ResponseClass="Success">
+            <m:ResponseCode>NoError</m:ResponseCode>
+            <m:Folders>
+              <t:CalendarFolder>
+                <t:FolderId Id="AAMkAGYxYzc0MTAyLTI3MjAtNDA5Zi04ZDY2LTlmODU5NmJkZDlhZgAuAAAAAADKmQFKsxwfSKwEXH3khGtpAQA1BzsargwHRq9aRKbs1Mp0AAAAAAENAAA=" ChangeKey="AgAAABYAAAA1BzsargwHRq9aRKbs1Mp0AAC5UP7c" />
+                <t:ParentFolderId Id="AAMkAGYxYzc0MTAyLTI3MjAtNDA5Zi04ZDY2LTlmODU5NmJkZDlhZgAuAAAAAADKmQFKsxwfSKwEXH3khGtpAQA1BzsargwHRq9aRKbs1Mp0AAAAAAEIAAA=" ChangeKey="AQAAAA==" />
+                <t:FolderClass>IPF.Appointment</t:FolderClass>
+                <t:DisplayName>Calendar</t:DisplayName>
+                <t:TotalCount>58</t:TotalCount>
+                <t:ChildFolderCount>0</t:ChildFolderCount>
+                <t:EffectiveRights>
+                  <t:CreateAssociated>true</t:CreateAssociated>
+                  <t:CreateContents>true</t:CreateContents>
+                  <t:CreateHierarchy>true</t:CreateHierarchy>
+                  <t:Delete>true</t:Delete>
+                  <t:Modify>true</t:Modify>
+                  <t:Read>true</t:Read>
+                  <t:ViewPrivateItems>true</t:ViewPrivateItems>
+                </t:EffectiveRights>
+                <t:PermissionSet>
+                  <t:CalendarPermissions>
+                    <t:CalendarPermission>
+                      <t:UserId>
+                        <t:DistinguishedUser>Default</t:DistinguishedUser>
+                      </t:UserId>
+                      <t:CanCreateItems>false</t:CanCreateItems>
+                      <t:CanCreateSubFolders>false</t:CanCreateSubFolders>
+                      <t:IsFolderOwner>false</t:IsFolderOwner>
+                      <t:IsFolderVisible>false</t:IsFolderVisible>
+                      <t:IsFolderContact>false</t:IsFolderContact>
+                      <t:EditItems>None</t:EditItems>
+                      <t:DeleteItems>None</t:DeleteItems>
+                      <t:ReadItems>TimeOnly</t:ReadItems>
+                      <t:CalendarPermissionLevel>FreeBusyTimeOnly</t:CalendarPermissionLevel>
+                    </t:CalendarPermission>
+                    <t:CalendarPermission>
+                      <t:UserId>
+                        <t:DistinguishedUser>Anonymous</t:DistinguishedUser>
+                      </t:UserId>
+                      <t:CanCreateItems>false</t:CanCreateItems>
+                      <t:CanCreateSubFolders>false</t:CanCreateSubFolders>
+                      <t:IsFolderOwner>false</t:IsFolderOwner>
+                      <t:IsFolderVisible>false</t:IsFolderVisible>
+                      <t:IsFolderContact>false</t:IsFolderContact>
+                      <t:EditItems>None</t:EditItems>
+                      <t:DeleteItems>None</t:DeleteItems>
+                      <t:ReadItems>None</t:ReadItems>
+                      <t:CalendarPermissionLevel>None</t:CalendarPermissionLevel>
+                    </t:CalendarPermission>
+                  </t:CalendarPermissions>
+                </t:PermissionSet>
+              </t:CalendarFolder>
+            </m:Folders>
+          </m:GetFolderResponseMessage>
+        </m:Respon20160106151846    D    EwsRequest    <Trace Tag="EwsRequest" Tid="12" Time="2016-01-06 07:18:46Z" Version="15.00.0913.015">
+  <?xml version="1.0" encoding="utf-8"?>
+  <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+    <soap:Header>
+      <t:RequestServerVersion Version="Exchange2013_SP1" />
+      <t:ExchangeImpersonation>
+        <t:ConnectingSID>
+          <t:SmtpAddress>haiyang.ling@arcserve.com</t:SmtpAddress>
+        </t:ConnectingSID>
+      </t:ExchangeImpersonation>
+    </soap:Header>
+    <soap:Body>
+      <m:GetFolder>
+        <m:FolderShape>
+          <t:BaseShape>AllProperties</t:BaseShape>
+        </m:FolderShape>
+        <m:FolderIds>
+          <t:DistinguishedFolderId Id="contacts" />
+        </m:FolderIds>
+      </m:GetFolder>
+    </soap:Body>
+  </soap:Envelope>20160106151847    D    EwsResponse    <Trace Tag="EwsResponse" Tid="12" Time="2016-01-06 07:18:47Z" Version="15.00.0913.015">
+  <?xml version="1.0" encoding="utf-8"?>
+  <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+    <s:Header>
+      <h:ServerVersionInfo MajorVersion="15" MinorVersion="1" MajorBuildNumber="361" MinorBuildNumber="16" Version="V2015_10_05" xmlns:h="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" />
+    </s:Header>
+    <s:Body>
+      <m:GetFolderResponse xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types">
+        <m:ResponseMessages>
+          <m:GetFolderResponseMessage ResponseClass="Success">
+            <m:ResponseCode>NoError</m:ResponseCode>
+            <m:Folders>
+              <t:ContactsFolder>
+                <t:FolderId Id="AAMkAGYxYzc0MTAyLTI3MjAtNDA5Zi04ZDY2LTlmODU5NmJkZDlhZgAuAAAAAADKmQFKsxwfSKwEXH3khGtpAQA1BzsargwHRq9aRKbs1Mp0AAAAAAEOAAA=" ChangeKey="AwAAABQAAABh5LhXPJD0Ta0yT8hKshfRAADIOQ==" />
+                <t:ParentFolderId Id="AAMkAGYxYzc0MTAyLTI3MjAtNDA5Zi04ZDY2LTlmODU5NmJkZDlhZgAuAAAAAADKmQFKsxwfSKwEXH3khGtpAQA1BzsargwHRq9aRKbs1Mp0AAAAAAEIAAA=" ChangeKey="AQAAAA==" />
+                <t:FolderClass>IPF.Contact</t:FolderClass>
+                <t:DisplayName>Contacts</t:DisplayName>
+                <t:TotalCount>2</t:TotalCount>
+                <t:ChildFolderCount>7</t:ChildFolderCount>
+                <t:EffectiveRights>
+                  <t:CreateAssociated>true</t:CreateAssociated>
+                  <t:CreateContents>true</t:CreateContents>
+                  <t:CreateHierarchy>true</t:CreateHierarchy>
+                  <t:Delete>true</t:Delete>
+                  <t:Modify>true</t:Modify>
+                  <t:Read>true</t:Read>
+                  <t:ViewPrivateItems>true</t:ViewPrivateItems>
+                </t:EffectiveRights>
+                <t:PermissionSet>
+                  <t:Permissions>
+                    <t:Permission>
+                      <t:UserId>
+                        <t:DistinguishedUser>Default</t:DistinguishedUser>
+                      </t:UserId>
+                      <t:CanCreateItems>false</t:CanCreateItems>
+                      <t:CanCreateSubFolders>false</t:CanCreateSubFolders>
+                      <t:IsFolderOwner>false</t:IsFolderOwner>
+                      <t:IsFolderVisible>false</t:IsFolderVisible>
+                      <t:IsFolderContact>false</t:IsFolderContact>
+                      <t:EditItems>None</t:EditItems>
+                      <t:DeleteItems>None</t:DeleteItems>
+                      <t:ReadItems>None</t:ReadItems>
+                      <t:PermissionLevel>None</t:PermissionLevel>
+                    </t:Permission>
+                    <t:Permission>
+                      <t:UserId20160106152305    D    EwsResponse    <Trace Tag="EwsResponse" Tid="45" Time="2016-01-06 07:23:05Z" Version="15.00.0913.015">
+  <?xml version="1.0" encoding="utf-8"?>
+  <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+    <s:Header>
+      <h:ServerVersionInfo MajorVersion="15" MinorVersion="1" MajorBuildNumber="361" MinorBuildNumber="16" Version="V2015_10_05" xmlns:h="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" />
+    </s:Header>
+    <s:Body>
+      <m:ConvertIdResponse xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types">
+        <m:ResponseMessages>
+          <m:ConvertIdResponseMessage ResponseClass="Error">
+            <m:MessageText>Data is corrupt., Microsoft.Exchange.Data.Storage.Corr20160106152305    D    EwsRequest    <Trace Tag="EwsRequest" Tid="45" Time="2016-01-06 07:23:05Z" Version="15.00.0913.015">
+  <?xml version="1.0" encoding="utf-8"?>
+  <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+    <soap:Header>
+      <t:RequestServerVersion Version="Exchange2013_SP1" />
+      <t:ExchangeImpersonation>
+        <t:ConnectingSID>
+          <t:SmtpAddress>haiyang.ling@arcserve.com</t:SmtpAddress>
+        </t:ConnectingSID>
+      </t:ExchangeImpersonation>
+    </soap:Header>
+    <soap:Body>
+      <m:GetFolder>
+        <m:FolderShape>
+          <t:BaseShape>AllProperties</t:BaseShape>
+        </m:FolderShape>
+        <m:FolderIds>
+          <t:DistinguishedFolderId Id="calendar" />
+        </m:FolderIds>
+      </m:GetFolder>
+    </soap:Body>
+  </soap:Envelope>20160106152306    D    EwsResponse    <Trace Tag="EwsResponse" Tid="45" Time="2016-01-06 07:23:06Z" Version="15.00.0913.015">
+  <?xml version="1.0" encoding="utf-8"?>
+  <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+    <s:Header>
+      <h:ServerVersionInfo MajorVersion="15" MinorVersion="1" MajorBuildNumber="361" MinorBuildNumber="16" Version="V2015_10_05" xmlns:h="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" />
+    </s:Header>
+    <s:Body>
+      <m:GetFolderResponse xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types">
+        <m:ResponseMessages>
+          <m:GetFolderResponseMessage ResponseClass="Success">
+            <m:ResponseCode>NoError</m:ResponseCode>
+            <m:Folders>
+              <t:CalendarFolder>
+                <t:FolderId Id="AAMkAGYxYzc0MTAyLTI3MjAtNDA5Zi04ZDY2LTlmODU5NmJkZDlhZgAuAAAAAADKmQFKsxwfSKwEXH3khGtpAQA1BzsargwHRq9aRKbs1Mp0AAAAAAENAAA=" ChangeKey="AgAAABYAAAA1BzsargwHRq9aRKbs1Mp0AAC5UP7c" />
+                <t:ParentFolderId Id="AAMkAGYxYzc0MTAyLTI3MjAtNDA5Zi04ZDY2LTlmODU5NmJkZDlhZgAuAAAAAADKmQFKsxwfSKwEXH3khGtpAQA1BzsargwHRq9aRKbs1Mp0AAAAAAEIAAA=" ChangeKey="AQAAAA==" />
+                <t:FolderClass>IPF.Appointment</t:FolderClass>
+                <t:DisplayName>Calendar</t:DisplayName>
+                <t:TotalCount>59</t:TotalCount>
+                <t:ChildFolderCount>0</t:ChildFolderCount>
+                <t:EffectiveRights>
+                  <t:CreateAssociated>true</t:CreateAssociated>
+                  <t:CreateContents>true</t:CreateContents>
+                  <t:CreateHierarchy>true</t:CreateHierarchy>
+                  <t:Delete>true</t:Delete>
+                  <t:Modify>true</t:Modify>
+                  <t:Read>true</t:Read>
+                  <t:ViewPrivateItems>true</t:ViewPrivateItems>
+                </t:EffectiveRights>
+                <t:PermissionSet>
+                  <t:CalendarPermissions>
+                    <t:CalendarPermission>
+                      <t:UserId>
+                        <t:DistinguishedUser>Default</t:DistinguishedUser>
+                      </t:UserId>
+                      <t:CanCreateItems>false</t:CanCreateItems>
+                      <t:CanCreateSubFolders>false</t:CanCreateSubFolders>
+                      <t:IsFolderOwner>false</t:IsFolderOwner>
+                      <t:IsFolderVisible>false</t:IsFolderVisible>
+                      <t:IsFolderContact>false</t:IsFolderContact>
+                      <t:EditItems>None</t:EditItems>
+                      <t:DeleteItems>None</t:DeleteItems>
+                      <t:ReadItems>TimeOnly</t:ReadItems>
+                      <t:CalendarPermissionLevel>FreeBusyTimeOnly</t:CalendarPermissionLevel>
+                    </t:CalendarPermission>
+                    <t:CalendarPermission>
+                      <t:UserId>
+                        <t:DistinguishedUser>Anonymous</t:DistinguishedUser>
+                      </t:UserId>
+                      <t:CanCreateItems>false</t:CanCreateItems>
+                      <t:CanCreateSubFolders>false</t:CanCreateSubFolders>
+                      <t:IsFolderOwner>false</t:IsFolderOwner>
+                      <t:IsFolderVisible>false</t:IsFolderVisible>
+                      <t:IsFolderContact>false</t:IsFolderContact>
+                      <t:EditItems>None</t:EditItems>
+                      <t:DeleteItems>None</t:DeleteItems>
+                      <t:ReadItems>None</t:ReadItems>
+                      <t:CalendarPermissionLevel>None</t:CalendarPermissionLevel>
+                    </t:CalendarPermission>
+                  </t:CalendarPermissions>
+                </t:PermissionSet>
+              </t:CalendarFolder>
+            </m:Folders>
+          </m:GetFolderResponseMessage>
+        </m:Respon20160106152309    D    EwsRequest    <Trace Tag="EwsRequest" Tid="45" Time="2016-01-06 07:23:09Z" Version="15.00.0913.015">
+  <?xml version="1.0" encoding="utf-8"?>
+  <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages" xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+    <soap:Header>
+      <t:RequestServerVersion Version="Exchange2013_SP1" />
+      <t:ExchangeImpersonation>
+        <t:ConnectingSID>
+          <t:SmtpAddress>haiyang.ling@arcserve.com</t:SmtpAddress>
+        </t:ConnectingSID>
+      </t:ExchangeImpersonation>
+    </soap:Header>
+    <soap:Body>
+      <m:GetFolder>
+        <m:FolderShape>
+          <t:BaseShape>AllProperties</t:BaseShape>
+        </m:FolderShape>
+        <m:FolderIds>
+          <t:DistinguishedFolderId Id="contacts" />
+        </m:FolderIds>
+      </m:GetFolder>
+    </soap:Body>
+  </soap:Envelope>

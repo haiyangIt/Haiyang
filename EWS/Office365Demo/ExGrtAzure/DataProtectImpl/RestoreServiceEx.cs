@@ -137,10 +137,12 @@ namespace DataProtectImpl
                     else
                     {
                         if (itemUnloadStatus == SelectedItemStatus.UnSelected)
+                            isLoadUnloadChildren = false;
+                        else if (itemUnloadStatus == SelectedItemStatus.Selected)
+                            isLoadUnloadChildren = true;
+                        else
                             throw new ArgumentException("when item status is indeterminate and part child is loaded, the unload status must be selected.");
-
-                        // all load select items + unload items.
-                        isLoadUnloadChildren = true;
+                        
                     }
                     break;
                 case SelectedItemStatus.UnSelected:
@@ -302,7 +304,7 @@ namespace DataProtectImpl
             foreach (var folder in folders)
             {
                 dealItemStack.Push(folder);
-                RestoreFolderToDestination(folder.DisplayName, restoreDestination, dealItemStack);
+                RestoreFolderToDestination(((IItemBase)folder).DisplayName, restoreDestination, dealItemStack);
 
                 var childFolders = DataAccess.GetAllChildFolder(folder);
                 RestoreUnLoadedFolders(childFolders, restoreDestination, dealItemStack);

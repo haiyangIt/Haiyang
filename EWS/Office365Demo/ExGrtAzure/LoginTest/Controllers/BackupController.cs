@@ -86,7 +86,7 @@ namespace LoginTest.Controllers
                 var item = new Item()
                 {
                     Id = folder.FolderId,
-                    DisplayName = folder.DisplayName,
+                    DisplayName = ((IItemBase)folder).DisplayName,
                     ChildCount = int.MaxValue,
                     ItemType = ItemTypeStr.Folder
                 };

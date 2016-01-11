@@ -19,22 +19,22 @@ namespace EwsFrame.Util
             Childrens = new List<TreeNode>();
         }
 
-        public static Dictionary<string, List<string>> GetEachFolderPath(TreeNode root)
+        public static Dictionary<string, List<IFolderDataBase>> GetEachFolderPath(TreeNode root)
         {
-            Dictionary<string, List<string>> result = new Dictionary<string, List<string>>();
-            List<string> paths = new List<string>();
+            Dictionary<string, List<IFolderDataBase>> result = new Dictionary<string, List<IFolderDataBase>>();
+            List<IFolderDataBase> paths = new List<IFolderDataBase>();
 
             var children = root.Childrens;
             foreach (var node in children)
             {
-                paths = new List<string>();
-                paths.Add(node.Folder.DisplayName);
+                paths = new List<IFolderDataBase>();
+                paths.Add(node.Folder);
                 TraverseTree(node, result, paths);
             }
             return result;
         }
 
-        private static void TraverseTree(TreeNode child, Dictionary<string, List<string>> result, List<string> paths)
+        private static void TraverseTree(TreeNode child, Dictionary<string, List<IFolderDataBase>> result, List<IFolderDataBase> paths)
         {
             result.Add(child.Folder.FolderId, paths);
             var children = child.Childrens;
@@ -42,9 +42,9 @@ namespace EwsFrame.Util
             {
                 foreach (var node in children)
                 {
-                    var childpaths = new List<string>();
+                    var childpaths = new List<IFolderDataBase>();
                     childpaths.AddRange(paths);
-                    childpaths.Add(node.Folder.DisplayName);
+                    childpaths.Add(node.Folder);
                     TraverseTree(node, result, childpaths);
                 }
             }

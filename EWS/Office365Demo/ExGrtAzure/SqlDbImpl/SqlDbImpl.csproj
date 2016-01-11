@@ -98,6 +98,11 @@
     <Compile Include="DataConvert.cs" />
     <Compile Include="DataConvertFromDb.cs" />
     <Compile Include="LocationUtil.cs" />
+    <Compile Include="Migrations\201601060503412_InitDatabase.cs" />
+    <Compile Include="Migrations\201601060503412_InitDatabase.Designer.cs">
+      <DependentUpon>201601060503412_InitDatabase.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Model\CatalogInfoModel.cs" />
     <Compile Include="Model\FolderModel.cs" />
     <Compile Include="Model\ItemLocationModel.cs" />
@@ -157,6 +162,11 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\201601060503412_InitDatabase.resx">
+      <DependentUpon>201601060503412_InitDatabase.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

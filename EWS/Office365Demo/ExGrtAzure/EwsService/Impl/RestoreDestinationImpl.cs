@@ -8,27 +8,40 @@ using EwsDataInterface;
 using EwsServiceInterface;
 using Microsoft.Exchange.WebServices.Data;
 using EwsFrame;
+using DataProtectInterface.Util;
 
 namespace EwsService.Impl
 {
     public class RestoreDestinationImpl : IRestoreDestination
     {
         public string DesMailboxAddress { get; set; }
-        public string DesFolderDisplayNamePath { get; set; }
-
-        private static char[] _pathSplit = "\\".ToCharArray();
-        private string[] _desFolderPathArray;
-        private string[] DesFolderPathArray
+        public string DesFolderDisplayNamePath
         {
-            get
+            set
             {
-                if(_desFolderPathArray == null)
+                var eachPath = value.Split(_pathSplit, StringSplitOptions.RemoveEmptyEntries);
+                DesFolderPath = new List<IFolderDataBase>(eachPath.Length);
+                foreach (var pathItem in eachPath)
                 {
-                    _desFolderPathArray = DesFolderDisplayNamePath.Split(_pathSplit, StringSplitOptions.RemoveEmptyEntries);
+                    DesFolderPath.Add(new FolderDataBase() { DisplayName = pathItem, FolderType = FolderClassUtil.DefaultFolderType });
                 }
-                return _desFolderPathArray;
             }
         }
+        public List<IFolderDataBase> DesFolderPath { get; set; }
+
+        private static char[] _pathSplit = "\\".ToCharArray();
+        //private string[] _desFolderPathArray;
+        //private string[] DesFolderPathArray
+        //{
+        //    get
+        //    {
+        //        if(_desFolderPathArray == null)
+        //        {
+        //            _desFolderPathArray = DesFolderDisplayNamePath.Split(_pathSplit, StringSplitOptions.RemoveEmptyEntries);
+        //        }
+        //        return _desFolderPathArray;
+        //    }
+        //}
 
         public ExportType ExportType
         {
@@ -42,7 +55,7 @@ namespace EwsService.Impl
         private ExchangeService CurrentExService;
         private void ConnectMailbox(string mailboxAddress)
         {
-            if(CurrentMailbox != mailboxAddress)
+            if (CurrentMailbox != mailboxAddress)
             {
                 if (CurrentMailbox == null)
                 {
@@ -59,64 +72,109 @@ namespace EwsService.Impl
         }
 
         private Dictionary<string, FolderId> CreatedFolders;
-        private FolderId FindAndCreateFolder(string folderDisplayName, FolderId parentFolderId)
+        private FolderId FindAndCreateFolder(IFolderDataBase folder, FolderId parentFolderId)
         {
             FolderId folderId = null;
-            var key = string.Format("{0}-{1}", folderDisplayName, parentFolderId.UniqueId);
+            var key = string.Format("{0}-{1}", folder.DisplayName, parentFolderId.UniqueId);
             if (CreatedFolders.TryGetValue(key, out folderId))
                 return folderId;
 
             IFolder folderOper = RestoreFactory.Instance.NewFolderOperatorImpl(CurrentExService);
-            folderId = folderOper.FindFolder(folderDisplayName, parentFolderId, 3);
-            if(folderId == null)
-                folderId = folderOper.CreateChildFolder(folderDisplayName, parentFolderId);
+            folderId = folderOper.FindFolder(folder, parentFolderId, 3);
+            if (folderId == null)
+                folderId = folderOper.CreateChildFolder(folder, parentFolderId);
             CreatedFolders.Add(key, folderId);
             return folderId;
         }
 
-        private FolderId CreateFoldersIfNotExist(ICollection<string> folderDisplayNames)
+        private FolderId CreateFoldersIfNotExist(ICollection<IFolderDataBase> folders)
         {
             ConnectMailbox(DesMailboxAddress);
             IFolder folderOper = RestoreFactory.Instance.NewFolderOperatorImpl(CurrentExService);
             FolderId parentFolderId = folderOper.GetRootFolder().Id;
-            foreach(string folderName in folderDisplayNames)
+            foreach (var folder in folders)
             {
-                parentFolderId = FindAndCreateFolder(folderName, parentFolderId);
+                parentFolderId = FindAndCreateFolder(folder, parentFolderId);
             }
             return parentFolderId;
         }
 
-        private List<string> GetFolderPathArray(Stack<IFolderData> folders)
+        private List<IFolderDataBase> GetFolderPathArray(Stack<IFolderData> folders)
         {
-            List<string> path = new List<string>(5);
-            if (DesFolderPathArray != null)
-                path.AddRange(DesFolderPathArray);
-            if(folders != null)
+            List<IFolderDataBase> path = new List<IFolderDataBase>(5);
+            if (DesFolderPath != null)
+                path.AddRange(DesFolderPath);
+            if (folders != null)
             {
-                foreach(IFolderData data in folders)
-                {
-                    path.Add(data.DisplayName);
-                }
+                path.AddRange(folders);
             }
             return path;
         }
 
-        private List<string> GetFolderPathArray(List<string> folderPaths)
+        private List<IFolderDataBase> GetFolderPathArray(List<IFolderDataBase> folderPaths)
         {
-            List<string> path = new List<string>(5);
-            if (DesFolderPathArray != null)
-                path.AddRange(DesFolderPathArray);
+            List<IFolderDataBase> path = new List<IFolderDataBase>(5);
+            if (DesFolderPath != null)
+                path.AddRange(DesFolderPath);
             path.AddRange(folderPaths);
             return path;
         }
 
         public void WriteItem(IRestoreItemInformation item, byte[] itemData)
         {
-            List<string> path = GetFolderPathArray(item.FolderPathes);
-            var folder = CreateFoldersIfNotExist(path);
+            //WriteItemForEachType(item, itemData);
+            WriteItemToDesFolder(item, itemData);
+        }
+
+        private void WriteItemForEachType(IRestoreItemInformation item, byte[] itemData)
+        {
+            FolderId folderId;
+            ConnectMailbox(DesMailboxAddress);
+            switch (item.ItemClass)
+            {
+                case DataProtectInterface.Util.ItemClass.Message:
+                    {
+                        List<IFolderDataBase> path = GetFolderPathArray(item.FolderPathes);
+                        var folder = CreateFoldersIfNotExist(path);
+                        folderId = folder;
+                        break;
+                    }
+                case DataProtectInterface.Util.ItemClass.Contact:
+                    {
+                        var folder = Folder.Bind(CurrentExService, WellKnownFolderName.Contacts);
+                        folderId = folder.Id;
+                        break;
+                    }
+                case DataProtectInterface.Util.ItemClass.Appointment:
+                    {
+                        var folder = Folder.Bind(CurrentExService, WellKnownFolderName.Calendar);
+                        folderId = folder.Id;
+                        break;
+                    }
+                case DataProtectInterface.Util.ItemClass.Task:
+                    {
+                        var folder = Folder.Bind(CurrentExService, WellKnownFolderName.Tasks);
+                        folderId = folder.Id;
+                        break;
+                    }
+                default:
+                    throw new NotSupportedException("Can not import not support itemclass.");
+            }
             IItem itemOperatorImpl = RestoreFactory.Instance.NewItemOperatorImpl(CurrentExService);
             var argument = RestoreFactory.Instance.GetServiceContext().Argument;
-            itemOperatorImpl.ImportItem(folder, itemData, argument);
+            itemOperatorImpl.ImportItem(folderId, itemData, argument);
+        }
+
+        private void WriteItemToDesFolder(IRestoreItemInformation item, byte[] itemData)
+        {
+            FolderId folderId;
+            ConnectMailbox(DesMailboxAddress);
+            List<IFolderDataBase> path = GetFolderPathArray(item.FolderPathes);
+            var folder = CreateFoldersIfNotExist(path);
+            folderId = folder;
+            IItem itemOperatorImpl = RestoreFactory.Instance.NewItemOperatorImpl(CurrentExService);
+            var argument = RestoreFactory.Instance.GetServiceContext().Argument;
+            itemOperatorImpl.ImportItem(folderId, itemData, argument);
         }
 
         public void InitOtherInformation(params object[] information)
@@ -132,5 +190,21 @@ namespace EwsService.Impl
         public void Dispose()
         {
         }
+
+
+        class FolderDataBase : IFolderDataBase
+        {
+            public string DisplayName
+            {
+                get; set;
+            }
+
+            public string FolderType
+            {
+                get; set;
+            }
+        }
     }
+
+
 }

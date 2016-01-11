@@ -8,6 +8,7 @@ using EwsDataInterface;
 using EwsFrame;
 using DataProtectInterface.Event;
 using EwsFrame.Util;
+using DataProtectInterface.Util;
 
 namespace DataProtectImpl
 {
@@ -278,7 +279,7 @@ namespace DataProtectImpl
             List<IRestoreItemInformation> itemInformations = new List<IRestoreItemInformation>(childItems.Count);
             foreach (var item in childItems)
             {
-                var itemInformation = GetRestoreItemInformation(mailbox, folderId, item.ItemId, item.DisplayName);
+                var itemInformation = GetRestoreItemInformation(mailbox, folderId, item.ItemId, item.DisplayName, item.ItemClass);
                 RestoreItem(mailbox, itemInformation);
             }
         }
@@ -305,7 +306,7 @@ namespace DataProtectImpl
         {
             IItemData itemDetails = DataAccess.GetItemContent(itemId, displayName, Destination.ExportType);
             IItemData item = DataAccess.GetItem(itemId);
-            var itemInformation = GetRestoreItemInformation(mailbox, item.ParentFolderId, item.ItemId, item.DisplayName);
+            var itemInformation = GetRestoreItemInformation(mailbox, item.ParentFolderId, item.ItemId, item.DisplayName, item.ItemClass);
             Destination.WriteItem(itemInformation, itemDetails.Data as byte[]);
         }
 
@@ -389,10 +390,10 @@ namespace DataProtectImpl
             }
         }
 
-        private IRestoreItemInformation GetRestoreItemInformation(string mailAddress, string folderId, string itemId, string displayName)
+        private IRestoreItemInformation GetRestoreItemInformation(string mailAddress, string folderId, string itemId, string displayName, string itemClass)
         {
             InitMailBoxFolderPathes(mailAddress);
-            List<string> result = null;
+            List<IFolderDataBase> result = null;
             if (!_FolderCache.TryGetFolderPath(mailAddress, folderId, out result))
             {
                 throw new ArgumentException(string.Format("can find [{0}]'s folder [{1}] pathes", mailAddress, folderId));
@@ -401,7 +402,8 @@ namespace DataProtectImpl
             {
                 FolderPathes = result,
                 ItemId = itemId,
-                DisplayName = displayName
+                DisplayName = displayName,
+                ItemClass = ItemClassUtil.GetItemClass(itemClass)
             };
         }
 
@@ -426,7 +428,7 @@ namespace DataProtectImpl
                 return Mailbox2FolderPath.ContainsKey(mailbox);
             }
 
-            public bool TryGetFolderPath(string mailbox, string folderId, out List<string> paths)
+            public bool TryGetFolderPath(string mailbox, string folderId, out List<IFolderDataBase> paths)
             {
                 MailboxFolderTreePath result = null;
                 if (Mailbox2FolderPath.TryGetValue(mailbox, out result))
@@ -447,7 +449,7 @@ namespace DataProtectImpl
                 if (!Mailbox2FolderPath.TryGetValue(mailbox, out result))
                 {
                     TreeNode treeroot = TreeNode.CreateTree(folders);
-                    Dictionary<string, List<string>> eachFolderPath = TreeNode.GetEachFolderPath(treeroot);
+                    Dictionary<string, List<IFolderDataBase>> eachFolderPath = TreeNode.GetEachFolderPath(treeroot);
                     result = new MailboxFolderTreePath(mailbox, eachFolderPath, treeroot);
                     Mailbox2FolderPath.Add(mailbox, result);
                 }
@@ -478,9 +480,9 @@ namespace DataProtectImpl
             private class MailboxFolderTreePath
             {
                 internal readonly string MailboxAddress;
-                internal readonly Dictionary<string, List<string>> FolderPaths;
+                internal readonly Dictionary<string, List<IFolderDataBase>> FolderPaths;
                 internal readonly TreeNode Root;
-                internal MailboxFolderTreePath(string mailboxAddress, Dictionary<string, List<string>> folderPaths, TreeNode root)
+                internal MailboxFolderTreePath(string mailboxAddress, Dictionary<string, List<IFolderDataBase>> folderPaths, TreeNode root)
                 {
                     MailboxAddress = mailboxAddress;
                     FolderPaths = folderPaths;
@@ -498,9 +500,14 @@ namespace DataProtectImpl
             }
             
 
-            public List<string> FolderPathes { get; set; }
+            public List<IFolderDataBase> FolderPathes { get; set; }
 
             public string DisplayName
+            {
+                get; set;
+            }
+
+            public ItemClass ItemClass
             {
                 get; set;
             }

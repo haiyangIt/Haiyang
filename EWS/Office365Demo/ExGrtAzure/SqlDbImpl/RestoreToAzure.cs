@@ -12,6 +12,9 @@ using EwsFrame;
 using SqlDbImpl.Storage;
 using System.Net.Mail;
 using EwsFrame.Util;
+using SqlDbImpl.Model;
+using System.Web.Script.Serialization;
+using DataProtectInterface.Util;
 
 namespace SqlDbImpl
 {
@@ -25,7 +28,7 @@ namespace SqlDbImpl
         {
             get
             {
-                if(_invalidFolderChars == null)
+                if (_invalidFolderChars == null)
                 {
                     HashSet<char> charHash = new HashSet<char>(Path.GetInvalidPathChars());
                     if (!charHash.Contains('\\'))
@@ -67,7 +70,7 @@ namespace SqlDbImpl
 
         public void DealFolder(string displayName, Stack<IItemBase> dealItemStack)
         {
-            
+
         }
 
         private string GetPath(string displayName, Stack<IItemBase> dealItemStack)
@@ -82,13 +85,17 @@ namespace SqlDbImpl
                     continue;
                 //if (index != length)
                 //{
-                    sb.Insert(0, "\\");
+                sb.Insert(0, "\\");
 
-                    sb.Insert(0, string.Join("_", item.DisplayName.Split(InvalidFolderChars)));
+                sb.Insert(0, string.Join("_", item.DisplayName.Split(InvalidFolderChars)));
                 //}
             }
             sb.Append(string.Join("_", displayName.Split(InvalidFileChars)));
-            sb.Append(".eml");
+
+            var dealItem = dealItemStack.Pop();
+            dealItemStack.Push(dealItem);
+
+            sb.Append(ItemClassUtil.GetItemSuffix(dealItem));
             return sb.ToString();
         }
 
@@ -100,21 +107,21 @@ namespace SqlDbImpl
 
         public void DealMailbox(string displayName, Stack<IItemBase> dealItemStack)
         {
-            
+
         }
 
         public void DealOrganization(string organization, Stack<IItemBase> dealItemStack)
         {
-            
+
         }
 
         public void SetOtherInformation(params object[] args)
         {
-            if(args.Length >= 1)
+            if (args.Length >= 1)
             {
                 _notifyMailAddress = args[0] as string;
             }
-            if(args.Length >=2)
+            if (args.Length >= 2)
                 _instance.ContainerName = args[1] as string;
             if (string.IsNullOrEmpty(_instance.ContainerName))
             {
@@ -145,7 +152,7 @@ namespace SqlDbImpl
 
                 foreach (var address in addresses)
                     msg.To.Add(address);
-                
+
                 msg.From = new MailAddress(Config.MailConfigInstance.Sender);
                 msg.Subject = subject;
                 msg.Body = body;
@@ -155,7 +162,7 @@ namespace SqlDbImpl
                 {
                     client.Send(msg);
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
 
                 }

@@ -65,11 +65,6 @@ namespace FTStreamUtil.Item.PropValue
                 return true;
             return false;
         }
-
-        internal byte[] GetItemLengthByte()
-        {
-            throw new NotImplementedException();
-        }
     }
 
     public class MvVarSizeItem : FTNodeBase
@@ -88,6 +83,16 @@ namespace FTStreamUtil.Item.PropValue
 
             Children.Add(_length);
             Children.Add(_varSizeValue);
+        }
+
+        internal int GetValueLength()
+        {
+            return (int)_length.Data;
+        }
+
+        internal byte[] GetValueBytes()
+        {
+            return _varSizeValue.Bytes;
         }
     }
 }

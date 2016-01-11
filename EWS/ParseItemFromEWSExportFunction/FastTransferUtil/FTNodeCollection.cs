@@ -4,10 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Collections;
 
 namespace FTStreamUtil
 {
-    public abstract class FTNodeCollection<T> : FTNodeBase, IContentProcess where T : IFTTreeNode
+    public abstract class FTNodeCollection<T> : FTNodeBase, IContentProcess, IEnumerable<IFTTreeNode> where T : IFTTreeNode
     {
         protected override void ParseNode(IFTStreamReader reader)
         {
@@ -41,5 +42,15 @@ namespace FTStreamUtil
         protected abstract T CreateItem(PropertyTag propertyTag);
 
         public abstract bool IsTagRight(PropertyTag propertyTag);
+
+        public IEnumerator<IFTTreeNode> GetEnumerator()
+        {
+            return Children.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return Children.GetEnumerator();
+        }
     }
 }

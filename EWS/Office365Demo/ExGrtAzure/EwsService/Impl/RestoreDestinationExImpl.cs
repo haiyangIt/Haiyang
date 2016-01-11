@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using EwsDataInterface;
 using Microsoft.Exchange.WebServices.Data;
+using DataProtectInterface.Util;
 
 namespace EwsService.Impl
 {
@@ -14,7 +15,10 @@ namespace EwsService.Impl
         //private ExchangeService CurrentExService;
 
         public string DestinationMailbox { get; set; }
-        public string DestinationFolder { get; set; }
+        public string DestinationFolder {
+            get; set;
+        }
+        private List<IFolderDataBase> DestinationFolderDataBase { get; set; }
 
         public ExportType ExportType
         {
@@ -40,12 +44,17 @@ namespace EwsService.Impl
                 _restoreHelper.DesFolderDisplayNamePath = DestinationFolder;
             }
 
-            var restoreItemInfo = new RestoreItemInformationImpl() { ItemId = id , DisplayName = displayName };
-            var paths = new List<string>(dealItemStack.Count);
+            var item = dealItemStack.Pop();
+            dealItemStack.Push(item);
+            var itemClass = ItemClassUtil.GetItemClass(item);
+
+            var restoreItemInfo = new RestoreItemInformationImpl() { ItemId = id , DisplayName = displayName, ItemClass = itemClass };
+            var paths = new List<IFolderDataBase>(dealItemStack.Count);
 
             foreach(var itemBase in dealItemStack)
             {
-                paths.Insert(0, itemBase.DisplayName);
+                IFolderDataBase folderDataBase = FolderClassUtil.NewFolderDataBase(itemBase);
+                paths.Insert(0, folderDataBase);
             }
 
             if (dealItemStack.Count > 0)
@@ -87,9 +96,14 @@ namespace EwsService.Impl
             }
 
 
-            public List<string> FolderPathes { get; set; }
+            public List<IFolderDataBase> FolderPathes { get; set; }
 
             public string DisplayName
+            {
+                get; set;
+            }
+
+            public ItemClass ItemClass
             {
                 get; set;
             }

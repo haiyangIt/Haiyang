@@ -50,6 +50,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RestoreUIDemo", "..\..\..\0
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CompoundFileImpl", "CompoundFileImpl\CompoundFileImpl.csproj", "{DDE4659B-120E-4E37-A402-5ABFD214FB96}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntityFrameworkTest", "EntityFrameworkTest\EntityFrameworkTest.csproj", "{10278F9E-4134-4A77-A906-A69D077DF153}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -116,6 +118,10 @@ Global
 		{DDE4659B-120E-4E37-A402-5ABFD214FB96}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DDE4659B-120E-4E37-A402-5ABFD214FB96}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DDE4659B-120E-4E37-A402-5ABFD214FB96}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10278F9E-4134-4A77-A906-A69D077DF153}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10278F9E-4134-4A77-A906-A69D077DF153}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10278F9E-4134-4A77-A906-A69D077DF153}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10278F9E-4134-4A77-A906-A69D077DF153}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -51,6 +51,12 @@
     <Compile Include="IMailbox.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EwsDataInterface\EwsDataInterface.csproj">
+      <Project>{943fa512-7de9-47d2-9f9a-5e1dc1628f8e}</Project>
+      <Name>EwsDataInterface</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

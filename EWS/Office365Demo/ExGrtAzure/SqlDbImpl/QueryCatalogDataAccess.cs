@@ -51,7 +51,7 @@ namespace SqlDbImpl
 
         private List<T> QueryDatas<T>(QueryFunc<T> funcObj)
         {
-            using (var context = new CatalogDbContext(Organization))
+            using (var context = new CatalogDbContext(new OrganizationModel() { Name = Organization }))
             {
                 IQueryable<T> query = funcObj(context);
                 return query.ToList();
@@ -60,7 +60,7 @@ namespace SqlDbImpl
 
         private T QueryData<T>(QueryFunc<T> funcObj)
         {
-            using (var context = new CatalogDbContext(Organization))
+            using (var context = new CatalogDbContext(new OrganizationModel() { Name = Organization }))
             {
                 IQueryable<T> query = funcObj(context);
                 return query.FirstOrDefault();
@@ -69,7 +69,7 @@ namespace SqlDbImpl
 
         private int QueryData<T>(QueryCountFunc<T> funcObj)
         {
-            using (var context = new CatalogDbContext(Organization))
+            using (var context = new CatalogDbContext(new OrganizationModel() { Name = Organization }))
             {
                 return funcObj(context);
             }
@@ -77,9 +77,9 @@ namespace SqlDbImpl
 
         private List<T> QueryData<T>(QueryFunc<T> funcObj, int pageIndex, int pageCount)
         {
-            using (var context = new CatalogDbContext(Organization))
+            using (var context = new CatalogDbContext(new OrganizationModel() { Name = Organization }))
             {
-                var skip = pageIndex == 0 ? (pageCount * pageIndex) : (pageCount * (pageIndex - 1));
+                var skip = pageCount * pageIndex;
                 IQueryable<T> query = funcObj(context).Skip(skip).Take(pageCount);
                 return query.ToList();
             }

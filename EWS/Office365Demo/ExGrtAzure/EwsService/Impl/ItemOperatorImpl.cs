@@ -31,8 +31,9 @@ namespace EwsService.Impl
             PropertySet props = new PropertySet(EmailMessageSchema.MimeContent);
 
             // This results in a GetItem call to EWS.
-            var email = EmailMessage.Bind(CurrentExchangeService, itemInEws.Id, props);
-            emlStream.Write(email.MimeContent.Content, 0, email.MimeContent.Content.Length);
+            itemInEws.Load(props);
+            //var email = EmailMessage.Bind(CurrentExchangeService, itemInEws.Id, props);
+            emlStream.Write(itemInEws.MimeContent.Content, 0, itemInEws.MimeContent.Content.Length);
         }
 
         public void ExportItem(Item item, Stream stream, EwsServiceArgument argument)

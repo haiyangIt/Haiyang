@@ -1,5 +1,6 @@
 ﻿using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
+using SqlDbImpl.Model;
 using SqlDbImpl.Storage;
 using System;
 using System.Collections.Generic;
@@ -24,7 +25,7 @@ namespace SqlDbImpl
 
         public void DeleteDatabase(string organization)
         {
-            using (CatalogDbContext context = new CatalogDbContext(organization))
+            using (CatalogDbContext context = new CatalogDbContext(new OrganizationModel() { Name = organization }))
             {
                 if(context.Database.Exists())
                 {

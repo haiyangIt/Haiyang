@@ -83,7 +83,7 @@
 
     .maildetail .restore-table {
         height: 380px;
-
+        overflow-y: auto;
     }
 
     .maildetail .restore-maildetail-pagination{

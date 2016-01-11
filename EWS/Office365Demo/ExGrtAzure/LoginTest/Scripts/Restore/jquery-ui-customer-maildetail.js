@@ -233,7 +233,7 @@
                        postData.catalogJob.StartTime = Restore.GetDateTime(postData.catalogJob.StartTime);
 
                        Arcserve.DataProtect.Util.Post(postData,
-                           self.options.getdataurl,
+                           self._ajaxUrl,
                            function (data) {
                                self._renderTable(data.Mails);
                            });

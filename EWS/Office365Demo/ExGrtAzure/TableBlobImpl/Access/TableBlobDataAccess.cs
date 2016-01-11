@@ -72,7 +72,7 @@ namespace TableBlobImpl.Access
 
             TableResult tableResult = tableDataAccess.InsertEntity(table, entity);
             LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.DEBUG, "Insert folder to table", "Insert folder {0} to table {1} result, Etag:{2}, HttpStatusCode:{3},",
-                folder.DisplayName, tableName, tableResult.Etag, tableResult.HttpStatusCode);
+                ((IItemBase)folder).DisplayName, tableName, tableResult.Etag, tableResult.HttpStatusCode);
         }
 
         public void SaveItem(IItemData item, IMailboxData mailboxData, IFolderData parentFolderData)

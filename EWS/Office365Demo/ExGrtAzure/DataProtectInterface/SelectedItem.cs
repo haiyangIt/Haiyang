@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Web.Script.Serialization;
 
 namespace DataProtectInterface
 {
@@ -17,6 +18,7 @@ namespace DataProtectInterface
         public string DisplayName { get; set; }
         public int SelectedChildCount { get; set; }
         public List<LoadedTreeItem> LoadedChildren { get; set; }
+        public string ItemData { get; set; }
 
         public ItemKind ItemKind
         {
@@ -35,4 +37,5 @@ namespace DataProtectInterface
         Selected = 1,
         Indeterminate = 2
     }
+    
 }

@@ -124,16 +124,10 @@ namespace FastTransferUtil.CompoundFile
             Storage = rootStorage;
         }
 
-        public override void Build()
-        {
-            throw new NotImplementedException();
-        }
-
         protected override void BuildHeader(IStream propertyStream)
         {
-
             // 1.1.1 Set 8 bytes reserve.
-            propertyStream.Write((Int32)0);
+            propertyStream.WriteZero(8);
             // 1.1.2 Set Next Recipient Id
             Int32 recipientCount = RecipientProperties.Count;
             propertyStream.Write(recipientCount);
@@ -144,7 +138,248 @@ namespace FastTransferUtil.CompoundFile
             // 1.1.5 Set Attachment Count
             propertyStream.Write(AttachmentProperties.Count);
             // 1.1.6 Set 8 bytes Reserve;
-            propertyStream.Write((Int32)0);
+            propertyStream.WriteZero(8);
+        }
+
+        public override void Build()
+        {
+            BuildNamedProperty();
+            base.Build();
+        }
+
+        private void BuildNamedProperty()
+        {
+            //1. Create NameidStorage
+            IStorage m_pStorage = null;
+            IStream m_pGuidStream = null;
+            IStream m_pEntryStream = null;
+            IStream m_pStringStream = null;
+            m_pStorage = CompoundFileUtil.Instance.GetChildStorage("__nameid_version1.0", true, Storage);
+            
+            //2. Create GUID Stream
+            m_pGuidStream = CompoundFileUtil.Instance.GetChildStream("__substg1.0_00020102", true, m_pStorage);
+
+            //3. Create Entry Stream
+            m_pEntryStream = CompoundFileUtil.Instance.GetChildStream("__substg1.0_00030102", true, m_pStorage);
+
+            //4. Create String Stream
+            m_pStringStream = CompoundFileUtil.Instance.GetChildStream("__substg1.0_00040102", true, m_pStorage);
+
+
+
+            int index = 0;
+            int size = NamedProperties.Count;
+
+            foreach(var keyValue in NamedProperties)
+            {
+                var propValue = keyValue.Value;
+
+                //1. if guid is not exist, add value to guid stream and guid map
+                var namedPropInfo = propValue.PropInfo as NamePropInfo;
+                Guid itemGuid = namedPropInfo.GetNamedGuid();
+                //GUID itemGuid = *(propertyItem.namedID.lpguid);
+                UINT16 guidIndex = 0;
+
+                if (itemGuid == PS_MAPI_CA)
+                {
+                    guidIndex = 1;
+                }
+                else if (itemGuid == PS_PUBLIC_STRINGS_CA)
+                {
+                    guidIndex = 2;
+                }
+                else
+                {
+                    auto findResult = m_guidIndex.find(itemGuid);
+                    if (findResult == m_guidIndex.end())
+                    {
+                        guidIndex = 3 + m_guidIndex.size();
+                        m_guidIndex.insert(make_pair(*(propertyItem.namedID.lpguid), m_guidIndex.size()));
+                        hr = m_pGuidStream->Write(propertyItem.namedID.lpguid, sizeof(GUID), NULL);
+                        if (hr)
+                        {
+                            TRACE_LOG2(CA_LOG_ERR, L"When build named property mapping, write property [%08x] guid stream failed with :%08x.", propertyItem.nTag, hr);
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        guidIndex = 3 + findResult->second;
+                    }
+
+                }
+
+                //2. write entry stream
+                ULONG idOrOffsetPart = 0;
+                ULONG indexKindPart = 0;
+                if (propertyItem.namedID.ulKind == MNID_ID)
+                {
+                    idOrOffsetPart = propertyItem.namedID.Kind.lID;
+                }
+                else
+                {
+                    idOrOffsetPart = m_stringStreamWritedCount;
+                }
+                hr = m_pEntryStream->Write(&idOrOffsetPart, 4, NULL);
+                if (hr)
+                {
+                    TRACE_LOG2(CA_LOG_ERR, L"When build named property mapping, write property [%08x] id or string offset failed with :%08x.", propertyItem.nTag, hr);
+                    break;
+                }
+
+                indexKindPart = ((UINT32)index << 16) | ((UINT32)(guidIndex << 1)) | propertyItem.namedID.ulKind;
+                hr = m_pEntryStream->Write(&indexKindPart, 4, NULL);
+                if (hr)
+                {
+                    TRACE_LOG2(CA_LOG_ERR, L"When build named property mapping, write property [%08x] index and kind failed with :%08x.", propertyItem.nTag, hr);
+                    break;
+                }
+
+                //3. write string stream
+                if (propertyItem.namedID.ulKind == MNID_STRING)
+                {
+                    name = propertyItem.namedID.Kind.lpwstrName;
+                    ULONG nameSizeWithoutTerminate = name.size() * sizeof(wchar_t);
+                    hr = m_pStringStream->Write(&nameSizeWithoutTerminate, 4, NULL);
+                    if (hr)
+                    {
+                        TRACE_LOG2(CA_LOG_ERR, L"When build named property mapping, write property [%08x] string length failed with :%08x.", propertyItem.nTag, hr);
+                        break;
+                    }
+                    m_stringStreamWritedCount += 4;
+
+                    hr = m_pStringStream->Write(name.c_str(), nameSizeWithoutTerminate, NULL);
+                    if (hr)
+                    {
+                        TRACE_LOG2(CA_LOG_ERR, L"When build named property mapping, write property [%08x] string data failed with :%08x.", propertyItem.nTag, hr);
+                        break;
+                    }
+                    m_stringStreamWritedCount += nameSizeWithoutTerminate;
+
+                    int leftNeedWriteTerminate = m_stringStreamWritedCount % 4;
+                    if (leftNeedWriteTerminate != 0 && index != size - 1)
+                    {
+                        leftNeedWriteTerminate = 4 - leftNeedWriteTerminate;
+                        hr = m_pStringStream->Write(&zero, leftNeedWriteTerminate, NULL);
+                        if (hr)
+                        {
+                            TRACE_LOG2(CA_LOG_ERR, L"When build named property mapping, write property [%08x] zero data failed with :%08x.", propertyItem.nTag, hr);
+                            break;
+                        }
+                        m_stringStreamWritedCount += leftNeedWriteTerminate;
+                    }
+                }
+
+                //4. Name to Id Stream
+                ULONG32 id = 0;
+                if (propertyItem.namedID.ulKind == MNID_ID)
+                {
+                    id = propertyItem.namedID.Kind.lID;
+                }
+                else
+                {
+                    hr = CCrc32Helper::GetCrc32(name, id);
+                    if (hr)
+                    {
+                        TRACE_LOG2(CA_LOG_ERR, L"When build named property mapping, get property [%08x] string crc32 data failed with :%08x.", propertyItem.nTag, hr);
+                        break;
+                    }
+                }
+                ULONG32 streamId = 0x1000 + (id ^ ((guidIndex << 1) | propertyItem.namedID.ulKind)) % 0x1F;
+                ULONG32 nStreamName = (streamId << 16) | 0x0102;
+
+                auto findStream = m_mapStream.find(nStreamName);
+                IStream* pStream = NULL;
+                if (findStream == m_mapStream.end())
+                {
+                    wchar_t streamName[SizeNameToIdMappingStream];
+                    swprintf_s(streamName, NameNameToIdMappingStream, nStreamName);
+                    HRESULT hr = m_pStorage->CreateStream(streamName, STGM_CREATE | STGM_SHARE_EXCLUSIVE | STGM_READWRITE, 0, 0, &pStream);
+                    if (hr)
+                    {
+                        TRACE_LOG2(CA_LOG_ERR, L"When build named property mapping, create property [%08x] stream failed with :%08x.", propertyItem.nTag, hr);
+                        break;
+                    }
+
+                    m_mapStream.insert(make_pair(nStreamName, pStream));
+                }
+                else
+                {
+                    pStream = findStream->second;
+                }
+
+                hr = pStream->Write(&id, 4, NULL);
+                if (hr)
+                {
+                    TRACE_LOG2(CA_LOG_ERR, L"When build named property mapping, write property [%08x] id into property stream failed with :%08x.", propertyItem.nTag, hr);
+                    break;
+                }
+
+                hr = pStream->Write(&indexKindPart, 4, NULL);
+                if (hr)
+                {
+                    TRACE_LOG2(CA_LOG_ERR, L"When build named property mapping, write property [%08x] index&kind into property stream failed with :%08x.", propertyItem.nTag, hr);
+                    break;
+                }
+
+            }
+
+            for (auto begin = m_allNamedProperties.begin();
+                begin != m_allNamedProperties.end();
+                begin++, index++)
+            {
+                hr = BuildEachProperty(*begin, index, size);
+                if (hr)
+                {
+                    TRACE_LOG2(CA_LOG_ERR, L"When build named property mapping, build property [%08x] failed with :%08x.", begin->nTag, hr);
+                    break;
+                }
+            }
+
+            if (hr)
+            {
+                break;
+            }
+            else
+            {
+                hr = m_pGuidStream->Commit(STGC_DEFAULT);
+                if (hr)
+                {
+                    TRACE_LOG2(CA_LOG_ERR, L"When build named property mapping, Commit property guid stream failed with :%08x.", hr);
+                    break;
+                }
+
+                hr = m_pEntryStream->Commit(STGC_DEFAULT);
+                if (hr)
+                {
+                    TRACE_LOG2(CA_LOG_ERR, L"When build named property mapping, Commit property guid stream failed with :%08x.", hr);
+                    break;
+                }
+
+                hr = m_pStringStream->Commit(STGC_DEFAULT);
+                if (hr)
+                {
+                    TRACE_LOG2(CA_LOG_ERR, L"When build named property mapping, Commit property guid stream failed with :%08x.", hr);
+                    break;
+                }
+
+                for (auto streamBegin = m_mapStream.begin(); streamBegin != m_mapStream.end(); streamBegin++)
+                {
+                    hr = streamBegin->second->Commit(STGC_DEFAULT);
+                    if (hr)
+                    {
+                        TRACE_LOG2(CA_LOG_ERR, L"When build named property mapping, Commit property [%08x] stream failed with :%08x.", streamBegin->first, hr);
+                        break;
+                    }
+                }
+
+                hr = m_pStorage->Commit(STGC_DEFAULT);
+                if (hr)
+                {
+                    TRACE_LOG2(CA_LOG_ERR, L"When build named property mapping, Commit named mapping property storage failed with :%08x.", hr);
+                    break;
+                }
+            }
         }
     }
 
@@ -171,9 +406,19 @@ namespace FastTransferUtil.CompoundFile
             return recipientStruct;
         }
 
-        public override void Build()
+        protected override void BuildHeader(IStream propertyStream)
         {
-
+            // 1.1.1 Set 8 bytes reserve.
+            propertyStream.WriteZero(8);
+            // 1.1.2 Set Next Recipient Id
+            Int32 recipientCount = RecipientProperties.Count;
+            propertyStream.Write(recipientCount);
+            // 1.1.3 Set Next Attachment Id
+            propertyStream.Write(AttachmentProperties.Count);
+            // 1.1.4 Set Recipient Count
+            propertyStream.Write(recipientCount);
+            // 1.1.5 Set Attachment Count
+            propertyStream.Write(AttachmentProperties.Count);
         }
     }
 
@@ -203,7 +448,12 @@ namespace FastTransferUtil.CompoundFile
             }
         }
 
-        public abstract void Build();
+        public virtual void Build()
+        {
+            BuildProperties();
+            var storage = Storage;
+            CompoundFileUtil.Instance.ReleaseComObj(ref storage);
+        }
 
         protected PropertyCollection ParentStruct
         {
@@ -250,18 +500,36 @@ namespace FastTransferUtil.CompoundFile
             }
             else if (property is MvPropValue)
             {
-                if (PropertyTag.IsMultiVarType((ushort)property.PropTag.PropertyTag))
+                if (PropertyTag.IsMultiVarType((ushort)property.PropTag.PropertyTag)) // MVVarValue
                 {
+                    // write length stream
                     var streamName = string.Format("__substg1.0_{0}", property.PropTag.PropertyTag.ToString("X8"));
                     IStream propStream = null;
                     try
                     {
                         propStream = CompoundFileUtil.Instance.GetChildStream(streamName, true, storage);
-                        propStream.Write(((MvVarSizeValue)property.PropValue).GetItemLengthByte());
+
                         if (property.PropTag.PropertyTag == (int)PropertyType.PT_MV_BINARY)
                         {
-                            propStream.WriteZero(4);
+                            foreach (var item in (MvVarSizeValue)property.PropValue)
+                            {
+                                MvVarSizeItem mvItem = item as MvVarSizeItem;
+
+                                propStream.Write(mvItem.GetValueLength());
+                                propStream.WriteZero(4);
+                            }
                         }
+                        else if (property.PropTag.PropertyTag == (int)PropertyType.PT_MV_STRING8 || ((property.PropTag.PropertyTag & 0x9000) == 0x9000))
+                        {
+                            foreach (var item in (MvVarSizeValue)property.PropValue)
+                            {
+                                MvVarSizeItem mvItem = item as MvVarSizeItem;
+                                propStream.Write(mvItem.GetValueLength());
+                            }
+                        }
+                        else
+                            throw new ArgumentException("Mv propertyTag is wrong.");
+
                         propStream.Commit(0);
                     }
                     finally
@@ -269,7 +537,24 @@ namespace FastTransferUtil.CompoundFile
                         CompoundFileUtil.Instance.ReleaseComObj(ref propStream);
                     }
 
-
+                    // write value stream
+                    int itemIndex = 0;
+                    foreach (var item in (MvVarSizeValue)property.PropValue)
+                    {
+                        MvVarSizeItem mvItem = item as MvVarSizeItem;
+                        string valueStreamName = string.Format("__substg1.0_{0}-{1}", property.PropTag.PropertyTag, itemIndex.ToString("X8"));
+                        IStream valueStream = null;
+                        try
+                        {
+                            valueStream = CompoundFileUtil.Instance.GetChildStream(valueStreamName, true, Storage);
+                            valueStream.Write(mvItem.GetValueBytes());
+                            valueStream.Commit(0);
+                        }
+                        finally
+                        {
+                            CompoundFileUtil.Instance.ReleaseComObj(ref valueStream);
+                        }
+                    }
                 }
                 else
                 {
@@ -325,7 +610,7 @@ namespace FastTransferUtil.CompoundFile
                     propertyStream.Write(valueSize);
                 }
                 // 1.2.2.4 Set Reserve , todo if contain embed message, it must set 0x01, if OLE, set 0x04;
-                propertyStream.WriteZero(0);
+                propertyStream.WriteZero(4);
             }
             else if (property is MvPropValue)
             {
@@ -344,7 +629,7 @@ namespace FastTransferUtil.CompoundFile
                     propertyStream.Write((Int32)(((ISizeValue)property.PropValue).ItemCount) * PropertyTag.GetFixPropertyTypeLength((ushort)property.PropTag.PropertyType));
                 }
                 // 1.2.3.4 Set Reserve , todo if contain embed message, it must set 0x01, if OLE, set 0x04;
-                propertyStream.WriteZero(0);
+                propertyStream.WriteZero(4);
             }
         }
 
@@ -382,15 +667,17 @@ namespace FastTransferUtil.CompoundFile
             return string.Format("__attach_version1.0_#{0}", index.ToString("X8"));
         }
 
-        public override void Build()
-        {
-            throw new NotImplementedException();
-        }
-
         public EmbedStruct CreateEmbedStruct()
         {
             Embed = new EmbedStruct(this);
             return Embed;
+        }
+
+        protected override void BuildHeader(IStream propertyStream)
+        {
+            // 1.1.1 Set 8 bytes reserve.
+            propertyStream.WriteZero(8);
+            
         }
     }
 
@@ -401,14 +688,15 @@ namespace FastTransferUtil.CompoundFile
             Storage = CompoundFileUtil.Instance.GetChildStorage(GetStorageName(index), true, parentStruct.Storage);
         }
 
-        public override void Build()
-        {
-            throw new NotImplementedException();
-        }
-
         private string GetStorageName(int index)
         {
             return string.Format("__recip_version1.0_#{0}", index.ToString("X8"));
+        }
+
+        protected override void BuildHeader(IStream propertyStream)
+        {
+            // 1.1.1 Set 8 bytes reserve.
+            propertyStream.WriteZero(8);
         }
     }
 
@@ -428,7 +716,7 @@ namespace FastTransferUtil.CompoundFile
 
         public override void Build()
         {
-            throw new NotImplementedException();
+            
         }
 
         public MessageContentStruct CreateMessageContent()

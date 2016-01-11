@@ -248,8 +248,12 @@ namespace ExGrtAzure.Tests
             var folderLevel1211 = new FolderData() { ParentFolderId = folderLevel121.FolderId, FolderId = "1211", DisplayName = "Display-1211" };
             var folderLevel1212 = new FolderData() { ParentFolderId = folderLevel121.FolderId, FolderId = "1212", DisplayName = "Display-1212" };
 
-            var folderLevel1212_Path = new List<string>() { folderLevel12.DisplayName, folderLevel121.DisplayName, folderLevel1212.DisplayName };
-            var folderLevel11_Path = new List<string>() { folderLevel11.DisplayName };
+            var folderLevel1212_Path = new List<IFolderDataBase>() {
+                new FolderDataBaseDefault() { DisplayName = folderLevel12.DisplayName },
+                new FolderDataBaseDefault() { DisplayName = folderLevel121.DisplayName },
+                new FolderDataBaseDefault() { DisplayName = folderLevel1212.DisplayName }
+            };
+            var folderLevel11_Path = new List<IFolderDataBase>() { new FolderDataBaseDefault() { DisplayName = folderLevel11.DisplayName } };
 
             var folderLevel12_AllChildFolderId = new List<string>() {
                 folderLevel12.FolderId,
@@ -288,10 +292,10 @@ namespace ExGrtAzure.Tests
             AssertList(path11, folderLevel11_Path, true);
         }
 
-        private void AssertList(List<string> left1, List<string> right1, bool isEqualByOrder)
+        private void AssertList(List<IFolderDataBase> left1, List<IFolderDataBase> right1, bool isEqualByOrder)
         {
-            var left = new List<string>(left1);
-            var right = new List<string>(right1);
+            var left = new List<IFolderDataBase>(left1);
+            var right = new List<IFolderDataBase>(right1);
             Assert.AreEqual(left.Count, right.Count);
             if(isEqualByOrder)
             {
@@ -303,6 +307,29 @@ namespace ExGrtAzure.Tests
             else
             {
                 for(int i = 0; i < left.Count; i++)
+                {
+                    int j = right.IndexOf(left[i]);
+                    Assert.IsTrue(j >= 0);
+                    right.RemoveAt(j);
+                }
+            }
+        }
+
+        private void AssertList<T>(List<T> left1, List<T> right1, bool isEqualByOrder)
+        {
+            var left = new List<T>(left1);
+            var right = new List<T>(right1);
+            Assert.AreEqual(left.Count, right.Count);
+            if (isEqualByOrder)
+            {
+                for (int i = 0; i < right.Count; i++)
+                {
+                    Assert.AreEqual(left[i], right[i]);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < left.Count; i++)
                 {
                     int j = right.IndexOf(left[i]);
                     Assert.IsTrue(j >= 0);

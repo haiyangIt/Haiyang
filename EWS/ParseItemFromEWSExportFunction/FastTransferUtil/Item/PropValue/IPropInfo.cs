@@ -35,6 +35,11 @@ namespace FTStreamUtil.Item.PropValue
         private PropertySet _propertySet;
         private X00Or01 _x00Or01;
         private IDispIdOrName _dispIdOrName;
+
+        internal Guid GetNamedGuid()
+        {
+            return _propertySet.Data;
+        }
     }
 
     public class NamedPropId : PropertyId

@@ -5,27 +5,13 @@ using System.Web;
 using Microsoft.Exchange.WebServices.Data;
 using EwsServiceInterface;
 using System.Threading;
+using DataProtectInterface.Util;
+using EwsDataInterface;
 
 namespace EwsService.Impl
 {
     public class FolderOperatorImpl : IFolder
     {
-        private static HashSet<string> _validFolderType;
-        private static HashSet<string> ValidFolderType
-        {
-            get
-            {
-                if(_validFolderType == null)
-                {
-                    _validFolderType = new HashSet<string>();
-                    _validFolderType.Add("IPF.Note");
-                    _validFolderType.Add("IPF.Appointment");
-                    _validFolderType.Add("IPF.Contact");
-                }
-                return _validFolderType;
-            }
-        }
-        
         public FolderOperatorImpl(ExchangeService service)
         {
             CurrentExchangeService = service;
@@ -69,7 +55,7 @@ namespace EwsService.Impl
         
         public bool IsFolderNeedGenerateCatalog(Folder folder)
         {
-            return ValidFolderType.Contains(folder.FolderClass);
+            return FolderClassUtil.IsFolderValid(folder.FolderClass);
         }
 
         public IItem NewItemOperatorInstance()
@@ -77,21 +63,21 @@ namespace EwsService.Impl
             return new ItemOperatorImpl(CurrentExchangeService);
         }
 
-        public FolderId CreateChildFolder(string folderDisplayName, FolderId parentFolderId)
+        public FolderId CreateChildFolder(IFolderDataBase folderData, FolderId parentFolderId)
         {
             Folder folder = new Folder(CurrentExchangeService);
-            folder.DisplayName = folderDisplayName;
-            folder.FolderClass = "IPF.Note";
+            folder.DisplayName = folderData.DisplayName;
+            folder.FolderClass = folderData.FolderType;
             folder.Save(parentFolderId);
-            return FindFolder(folderDisplayName, parentFolderId);
+            return FindFolder(folderData, parentFolderId);
         }
 
-        public FolderId FindFolder(string folderDisplayName, FolderId parentFolderId, int findCount = 0)
+        public FolderId FindFolder(IFolderDataBase folderData, FolderId parentFolderId, int findCount = 0)
         {
             FolderView view = new FolderView(1);
             view.PropertySet = new PropertySet(BasePropertySet.IdOnly);
             view.Traversal = FolderTraversal.Shallow;
-            SearchFilter filter = new SearchFilter.IsEqualTo(FolderSchema.DisplayName, folderDisplayName);
+            SearchFilter filter = new SearchFilter.IsEqualTo(FolderSchema.DisplayName, folderData.DisplayName);
             FindFoldersResults results = CurrentExchangeService.FindFolders(parentFolderId, filter, view);
 
             if (results.TotalCount > 1)
@@ -105,7 +91,7 @@ namespace EwsService.Impl
                     return null;
                 }
                 Thread.Sleep(500);
-                return FindFolder(folderDisplayName, parentFolderId, ++findCount);
+                return FindFolder(folderData, parentFolderId, ++findCount);
             }
             else
             {

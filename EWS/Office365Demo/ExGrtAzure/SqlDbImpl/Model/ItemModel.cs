@@ -1,4 +1,5 @@
 ﻿using EwsDataInterface;
+using EwsFrame.EF;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -26,6 +27,7 @@ namespace SqlDbImpl.Model
         [Key]
         [Column(Order = 1)]
         [MaxLength(512)]
+        [CaseSensitive("ItemId, StartTime")]
         public string ItemId { get; set; }
         [NotMapped]
         [MaxLength(512)]
@@ -33,6 +35,7 @@ namespace SqlDbImpl.Model
 
         [Required]
         [MaxLength(512)]
+        [CaseSensitive]
         public string ParentFolderId { get; set; }
         [Key]
         [Column(Order = 2)]

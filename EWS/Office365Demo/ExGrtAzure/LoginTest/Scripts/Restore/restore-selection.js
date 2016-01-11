@@ -192,6 +192,8 @@ Restore.Item._ConvertItemForSelected = function (item) {
     result.LoadedChildrenCount = Object.size(item.ChildrenLoaded);
     result.LoadedChildren = Restore.Item._GetChildItem(item.ChildrenLoaded);
     result.DisplayName = item.DisplayName;
+    if (item.ItemData.OtherInformation)
+        result.ItemData = JSON.stringify(item.ItemData.OtherInformation);
     return result;
 };
 

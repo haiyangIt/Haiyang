@@ -60,7 +60,7 @@ namespace DataProtectImpl
                     folderItemUtil = folderItemUtil.GetChild(folder.Id);
                     if (folderItemUtil == null)
                     {
-                        folderItemUtil = folderItemUtil.GetChildByDisplayName(folder.DisplayName);
+                        folderItemUtil = folderItemUtil.GetChildByDisplayName(((IItemBase)folder).DisplayName);
                     }
 
                     if (folderItemUtil == null)

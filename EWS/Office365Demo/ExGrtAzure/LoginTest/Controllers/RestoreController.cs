@@ -108,7 +108,7 @@ namespace LoginTest.Controllers
                     item = new Item()
                     {
                         Id = currentNode.Folder.FolderId,
-                        DisplayName = currentNode.Folder.DisplayName,
+                        DisplayName = ((IItemBase)currentNode.Folder).DisplayName,
                         ChildCount = currentNode.Folder.ChildFolderCount + currentNode.Folder.ChildItemCount,
                         ItemType = ItemTypeStr.Folder,
                         OtherInformation = currentNode.Folder
@@ -152,9 +152,10 @@ namespace LoginTest.Controllers
             int startIndex = pageIndex * pageCount;
             int endIndex = startIndex + pageCount;
             List<Item> result = new List<Item>(pageCount);
-            while (startIndex < endIndex && startIndex < items.Count)
+            int index = 0;
+            while (startIndex < endIndex && index < items.Count)
             {
-                var mailItem = items[startIndex];
+                var mailItem = items[index++];
                 var item = new Item() { Id = mailItem.ItemId, ChildCount = 0, ItemType = ItemTypeStr.Item, DisplayName = mailItem.DisplayName, OtherInformation = mailItem };
 
                 result.Add(item);
