@@ -92,6 +92,13 @@ namespace ExGrtAzure.Tests
         }
 
         [TestMethod]
+        public void FormatString()
+        {
+            int i = 10;
+            string test = string.Format("{0:X8},{0:X4},{0:X2}", i);
+        }
+
+        [TestMethod]
         public void TestMD5()
         {
             string testStr = "2345asabasdfewtqgasdfwertqgasdgqwetbasdweqgasdfaweqegsdgasdgwegasgqgtasdfgasdgaweqfasdgfasdfwqgerhtykukotjeu69i87okke56";

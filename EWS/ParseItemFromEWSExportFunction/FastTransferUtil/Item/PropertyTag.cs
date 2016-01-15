@@ -1,11 +1,12 @@
-﻿using System;
+﻿using FTStreamUtil.Item.PropValue;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
 namespace FTStreamUtil.Item
 {
-    public class PropertyTag
+    public class PropertyTag : IPropTag
     {
         public static PropertyTag Empty = new PropertyTag(0x00000000);
 
@@ -20,6 +21,45 @@ namespace FTStreamUtil.Item
 
         public ushort PropId { get; private set; }
         public ushort PropType { get; private set; }
+
+        int IPropTag.PropertyTag
+        {
+            get
+            {
+                return (int)Data;
+            }
+        }
+
+        public short PropertyId
+        {
+            get
+            {
+                return (short)PropId;
+            }
+        }
+
+        public short PropertyType
+        {
+            get
+            {
+                return (short)PropType;
+            }
+
+            set
+            {
+                throw new InvalidOperationException();
+            }
+        }
+
+        public byte[] Bytes
+        {
+            get
+            {
+                return BitConverter.GetBytes(Data);
+            }
+        }
+
+
 
         #region Judge propertytag type
 
@@ -112,50 +152,50 @@ namespace FTStreamUtil.Item
 
             #region InitFixVarMvType
 
-            _fixedTypeHash.Add((UInt16)PropertyType.PT_I2);
-            _fixedTypeHash.Add((UInt16)PropertyType.PT_I8);
-            _fixedTypeHash.Add((UInt16)PropertyType.PT_LONG);
-            _fixedTypeHash.Add((UInt16)PropertyType.PT_R4);
-            _fixedTypeHash.Add((UInt16)PropertyType.PT_DOUBLE);
-            _fixedTypeHash.Add((UInt16)PropertyType.PT_CURRENCY);
-            _fixedTypeHash.Add((UInt16)PropertyType.PT_APPTIME);
-            _fixedTypeHash.Add((UInt16)PropertyType.PT_BOOLEAN);
-            _fixedTypeHash.Add((UInt16)PropertyType.PT_SYSTIME);
-            _fixedTypeHash.Add((UInt16)PropertyType.PT_CLSID);
+            _fixedTypeHash.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_I2);
+            _fixedTypeHash.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_I8);
+            _fixedTypeHash.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_LONG);
+            _fixedTypeHash.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_R4);
+            _fixedTypeHash.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_DOUBLE);
+            _fixedTypeHash.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_CURRENCY);
+            _fixedTypeHash.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_APPTIME);
+            _fixedTypeHash.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_BOOLEAN);
+            _fixedTypeHash.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_SYSTIME);
+            _fixedTypeHash.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_CLSID);
 
-            _varTypeHash.Add((UInt16)PropertyType.PT_STRING8);
-            _varTypeHash.Add((UInt16)PropertyType.PT_UNICODE);
-            _varTypeHash.Add((UInt16)PropertyType.PT_SERVERID);
-            _varTypeHash.Add((UInt16)PropertyType.PT_OBJECT);
-            _varTypeHash.Add((UInt16)PropertyType.PT_BINARY);
+            _varTypeHash.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_STRING8);
+            _varTypeHash.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_UNICODE);
+            _varTypeHash.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_SERVERID);
+            _varTypeHash.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_OBJECT);
+            _varTypeHash.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_BINARY);
 
-            _mvTypeHash.Add((UInt16)PropertyType.PT_MV_I2);
-            _mvTypeHash.Add((UInt16)PropertyType.PT_MV_LONG);
-            _mvTypeHash.Add((UInt16)PropertyType.PT_MV_R4);
-            _mvTypeHash.Add((UInt16)PropertyType.PT_MV_DOUBLE);
-            _mvTypeHash.Add((UInt16)PropertyType.PT_MV_CURRENCY);
-            _mvTypeHash.Add((UInt16)PropertyType.PT_MV_APPTIME);
-            _mvTypeHash.Add((UInt16)PropertyType.PT_MV_SYSTIME);
-            _mvTypeHash.Add((UInt16)PropertyType.PT_MV_STRING8);
-            _mvTypeHash.Add((UInt16)PropertyType.PT_MV_BINARY);
-            _mvTypeHash.Add((UInt16)PropertyType.PT_MV_UNICODE);
-            _mvTypeHash.Add((UInt16)PropertyType.PT_MV_CLSID);
-            _mvTypeHash.Add((UInt16)PropertyType.PT_MV_I8);
+            _mvTypeHash.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_MV_I2);
+            _mvTypeHash.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_MV_LONG);
+            _mvTypeHash.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_MV_R4);
+            _mvTypeHash.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_MV_DOUBLE);
+            _mvTypeHash.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_MV_CURRENCY);
+            _mvTypeHash.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_MV_APPTIME);
+            _mvTypeHash.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_MV_SYSTIME);
+            _mvTypeHash.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_MV_STRING8);
+            _mvTypeHash.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_MV_BINARY);
+            _mvTypeHash.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_MV_UNICODE);
+            _mvTypeHash.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_MV_CLSID);
+            _mvTypeHash.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_MV_I8);
 
-            _mvVarTypeHash.Add((UInt16)PropertyType.PT_MV_UNICODE);
-            _mvVarTypeHash.Add((UInt16)PropertyType.PT_MV_STRING8);
-            _mvVarTypeHash.Add((UInt16)PropertyType.PT_MV_BINARY);
+            _mvVarTypeHash.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_MV_UNICODE);
+            _mvVarTypeHash.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_MV_STRING8);
+            _mvVarTypeHash.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_MV_BINARY);
 
-            _mvFixedTypeLengthDic.Add((UInt16)PropertyType.PT_I2, 2);
-            _mvFixedTypeLengthDic.Add((UInt16)PropertyType.PT_I8, 8);
-            _mvFixedTypeLengthDic.Add((UInt16)PropertyType.PT_LONG, 4);
-            _mvFixedTypeLengthDic.Add((UInt16)PropertyType.PT_R4, 4);
-            _mvFixedTypeLengthDic.Add((UInt16)PropertyType.PT_DOUBLE,8);
-            _mvFixedTypeLengthDic.Add((UInt16)PropertyType.PT_CURRENCY, 8);
-            _mvFixedTypeLengthDic.Add((UInt16)PropertyType.PT_APPTIME, 8);
-            //_fixedTypeLengthDic.Add((UInt16)PropertyType.PT_BOOLEAN, );
-            _mvFixedTypeLengthDic.Add((UInt16)PropertyType.PT_SYSTIME, 8);
-            _mvFixedTypeLengthDic.Add((UInt16)PropertyType.PT_CLSID, 16);
+            _mvFixedTypeLengthDic.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_I2, 2);
+            _mvFixedTypeLengthDic.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_I8, 8);
+            _mvFixedTypeLengthDic.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_LONG, 4);
+            _mvFixedTypeLengthDic.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_R4, 4);
+            _mvFixedTypeLengthDic.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_DOUBLE,8);
+            _mvFixedTypeLengthDic.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_CURRENCY, 8);
+            _mvFixedTypeLengthDic.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_APPTIME, 8);
+            //_fixedTypeLengthDic.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_BOOLEAN, );
+            _mvFixedTypeLengthDic.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_SYSTIME, 8);
+            _mvFixedTypeLengthDic.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_CLSID, 16);
             #endregion
         }
 
@@ -187,6 +227,11 @@ namespace FTStreamUtil.Item
                 Init();
 
             return _fixedTypeHash.Contains(propertyTag.PropType);
+        }
+
+        public static bool IsGuidType(IPropTag propertyTag)
+        {
+            return propertyTag.PropertyType == (UInt16)FTStreamUtil.Item.PropertyType.PT_CLSID;
         }
 
         public static bool IsVarType(PropertyTag propertyTag)
@@ -258,7 +303,7 @@ namespace FTStreamUtil.Item
             propertyType = (ushort)(propertyType & temp);
             short result;
             var isContain = _mvFixedTypeLengthDic.TryGetValue(propertyType, out result);
-            if (isContain)
+            if (!isContain)
                 throw new ArgumentException();
             return result;
         }

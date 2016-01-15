@@ -123,12 +123,33 @@ namespace TestBuildMessage
             }
             finally
             {
-                CompoundFileUtil.Instance.ReleaseComObj(ref srcRootStorage);
-                CompoundFileUtil.Instance.ReleaseComObj(ref desMemStorage);
-                CompoundFileUtil.Instance.ReleaseComObj(ref lockBytes);
+                CompoundFileUtil.Instance.ReleaseComObj(srcRootStorage);
+                CompoundFileUtil.Instance.ReleaseComObj(desMemStorage);
+                CompoundFileUtil.Instance.ReleaseComObj(lockBytes);
             }
         }
         
-
+        [TestMethod]
+        public void TestCreateMsgFromBin()
+        {
+            string binFilePath = @"D:\21GitHub\Haiyang\EWS\99TestFile\Old\Test.bin";
+            string msgFilePath = string.Format( @"D:\21GitHub\Haiyang\EWS\99TestFile\New\{0}.msg", DateTime.Now.ToString("yyyyMMddHHmmss"));
+            ILockBytes memory = null;
+            try {
+                using (StreamReader reader = new StreamReader(binFilePath))
+                {
+                    CompoundFileUtil.Instance.BuildMsgInMemoryWithBin(reader.BaseStream, out memory);
+                    var bytes = CompoundFileUtil.Instance.ReadAllByteInlockBytes(memory);
+                    using (FileStream writer = new System.IO.FileStream(msgFilePath, FileMode.Create))
+                    {
+                        writer.Write(bytes, 0, bytes.Length);
+                    }
+                }
+            }
+            finally
+            {
+                CompoundFileUtil.Instance.ReleaseComObj(memory);
+            }
+        }
     }
 }

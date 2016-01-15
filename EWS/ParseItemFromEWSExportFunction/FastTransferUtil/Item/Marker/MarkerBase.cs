@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using FastTransferUtil.CompoundFile;
 
 namespace FTStreamUtil.Item.Marker
 {
@@ -48,6 +49,11 @@ namespace FTStreamUtil.Item.Marker
         {
             Init(SpecificData);
             return this;
+        }
+
+        public override void WriteToCompoundFile(CompoundFileBuild build)
+        {
+            
         }
     }
 }

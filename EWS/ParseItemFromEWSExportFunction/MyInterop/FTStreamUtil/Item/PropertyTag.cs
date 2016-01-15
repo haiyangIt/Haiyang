@@ -183,7 +183,7 @@ namespace FTStreamUtil.Item
             else
             {
                 if((propertyTag.PropType & 0x8000) == 0x8000 && (propertyTag.PropType & 0x1000) != 0x1000)
-                    return true; ;
+                    return true; 
             }
             return false;
         }

@@ -40,7 +40,7 @@ namespace FastTransferUtil.CompoundFile
         #endregion
 
         #region CompoundFileStorageUtil
-        public void ReleaseComObj<T>(ref T comObj)
+        public void ReleaseComObj<T>(T comObj)
         {
             if (comObj != null)
             {
@@ -154,25 +154,25 @@ namespace FastTransferUtil.CompoundFile
         }
         #endregion
 
-        public void BuildMsgInMemoryWithBin(Stream binFileInfoStream)
+        public void BuildMsgInMemoryWithBin(Stream binFileInfoStream, out ILockBytes lockBytes)
         {
             List<byte[]> allBuffer = GetContentFromBin(binFileInfoStream);
             FTParserUtil util = new FTParserUtil(allBuffer);
             var root = util.Parser();
 
-            ILockBytes lockBytes = null;
             IStorage storage = null;
             CompoundFileBuild build = new CompoundFileBuild();
             try
             {
                 storage = CreateStorageInMemory(out lockBytes);
                 build.SetRootStorage(storage);
-                root.WriteToStorage(build);
+                root.WriteToCompoundFile(build);
+                storage.Commit(0);
+                lockBytes.Flush();
             }
             finally
             {
-                ReleaseComObj(ref storage);
-                ReleaseComObj(ref lockBytes);
+                ReleaseComObj(storage);
             }
         }
 
@@ -183,32 +183,34 @@ namespace FastTransferUtil.CompoundFile
             List<byte[]> allBuffer = new List<byte[]>();
 
             stream.Seek(0, SeekOrigin.Begin);
-            using (BinaryReader reader = new BinaryReader(stream))
+            BinaryReader reader = new BinaryReader(stream);
             {
-                int iGuessIsTag = reader.ReadInt32();
-                int subBufferCount = reader.ReadInt32();
-                byte[] subBuffer = null;
-                if (reader.BaseStream.Position + subBufferCount <= reader.BaseStream.Length)
-                {
-                    if (subBufferCount > 0)
-                        subBuffer = reader.ReadBytes(subBufferCount);
-                    FxOpcodes opcodes = (FxOpcodes)iGuessIsTag;
-                    if (opcodes != FxOpcodes.TransferBuffer || (subBuffer != null && subBuffer.Length > 0))
+                while (stream.Position < stream.Length) {
+                    int iGuessIsTag = reader.ReadInt32();
+                    int subBufferCount = reader.ReadInt32();
+                    byte[] subBuffer = null;
+                    if (reader.BaseStream.Position + subBufferCount <= reader.BaseStream.Length)
                     {
-                        if (opcodes == FxOpcodes.TransferBuffer)
+                        if (subBufferCount > 0)
+                            subBuffer = reader.ReadBytes(subBufferCount);
+                        FxOpcodes opcodes = (FxOpcodes)iGuessIsTag;
+                        if (opcodes != FxOpcodes.TransferBuffer || (subBuffer != null && subBuffer.Length > 0))
                         {
-                            allBuffer.Add(subBuffer);
-                        }
-                        else
-                        {
-                            StringBuilder sb = new StringBuilder();
-
-                            foreach (byte temp in subBuffer)
+                            if (opcodes == FxOpcodes.TransferBuffer)
                             {
-                                sb.Append(temp.ToString("X2"));
+                                allBuffer.Add(subBuffer);
                             }
+                            else
+                            {
+                                StringBuilder sb = new StringBuilder();
 
-                            Debug.Write(string.Format("FxOpCodes:{0:-30}\t\tCount:{1}\t\tvalue:{2}\t\t", opcodes.ToString(), subBuffer.Length, sb.ToString()));
+                                foreach (byte temp in subBuffer)
+                                {
+                                    sb.Append(temp.ToString("X2"));
+                                }
+
+                                Debug.Write(string.Format("FxOpCodes:{0:-30}\t\tCount:{1}\t\tvalue:{2}\t\t", opcodes.ToString(), subBuffer.Length, sb.ToString()));
+                            }
                         }
                     }
                 }

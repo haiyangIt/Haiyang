@@ -181,7 +181,7 @@ namespace MyInterop
         void SetSize(long cb);
         void LockRegion(long libOffset, long cb, int dwLockType);
         void UnlockRegion(long libOffset, long cb, int dwLockType);
-        void Stat(out System.Runtime.InteropServices.STATSTG pstatstg, int grfStatFlag);
+        void Stat(out System.Runtime.InteropServices.ComTypes.STATSTG pstatstg, int grfStatFlag);
     }
 
     [Flags]

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace FTStreamUtil.Item.PropValue
 {
-    public class FixedPropType : FTNodeLeaf<UInt16>, IPropType
+    public class FixedPropType : FTNodeLeaf<UInt16>
     {
         protected override ushort ReadLeafData(IFTStreamReader reader)
         {
@@ -31,6 +31,14 @@ namespace FTStreamUtil.Item.PropValue
             get
             {
                 return FTStreamConst.UInt16Size;
+            }
+        }
+
+        public short PropertyType
+        {
+            get
+            {
+                return (short)Data;
             }
         }
     }

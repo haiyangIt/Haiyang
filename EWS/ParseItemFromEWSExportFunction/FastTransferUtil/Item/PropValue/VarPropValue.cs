@@ -12,6 +12,7 @@ namespace FTStreamUtil.Item.PropValue
         public VarPropValue(PropertyTag propertyTag)
             : base()
         {
+            PropTag = propertyTag;
             _varPropType = FTFactory.Instance.CreateVarPropType();
             _propInfo = FTFactory.Instance.CreatePropInfo(propertyTag);
             _length = FTFactory.Instance.CreatePropValueLength();
@@ -28,10 +29,30 @@ namespace FTStreamUtil.Item.PropValue
         private PropValueLength _length;
         private IVarSizeValue _varSizeValue;
 
+        public IPropTag PropTag
+        {
+            get; set;
+        }
+
+        public IValue PropValue
+        {
+            get
+            {
+                return _varSizeValue;
+            }
+        }
+
+        public IPropInfo PropInfo
+        {
+            get
+            {
+                return _propInfo;
+            }
+        }
 
         public override void WriteToCompoundFile(CompoundFileBuild build)
         {
-            build.AddVarPropValue(this);
+            build.AddProperty(this);
         }
 
     }

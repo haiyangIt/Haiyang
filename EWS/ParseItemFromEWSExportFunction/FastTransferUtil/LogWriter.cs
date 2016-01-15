@@ -12,7 +12,7 @@ namespace FTStreamUtil
     {
         [ThreadStatic]
         private static LogWriter _instance = null;
-        
+
         public static LogWriter Instance
         {
             get
@@ -26,7 +26,7 @@ namespace FTStreamUtil
                 return _instance;
             }
         }
-        
+
         private Timer _timer;
         private LogWriter()
         {
@@ -53,7 +53,8 @@ namespace FTStreamUtil
         {
             try
             {
-                _logwriter.Flush();
+                if (_logwriter != null)
+                    _logwriter.Flush();
             }
             catch (Exception ex)
             {
@@ -99,9 +100,15 @@ namespace FTStreamUtil
         {
             try
             {
-                _logwriter.Write(msg);
-                //Debug.Write(msg);
-                //Console.Write(msg);
+                if (_logwriter != null)
+                {
+                    _logwriter.Write(msg);
+                }
+                else
+                {
+                    Debug.Write(msg);
+                    //Console.Write(msg);
+                }
             }
             catch (Exception e)
             {
@@ -114,9 +121,15 @@ namespace FTStreamUtil
         {
             try
             {
-                _logwriter.WriteLine(msg);
-                //Debug.WriteLine(msg);
-                //Console.WriteLine(msg);
+                if (_logwriter != null)
+                {
+                    _logwriter.WriteLine(msg);
+                }
+                else
+                {
+                    Debug.WriteLine(msg);
+                    //Console.WriteLine(msg);
+                }
             }
             catch (Exception e)
             {
@@ -129,15 +142,20 @@ namespace FTStreamUtil
         {
             try
             {
-                _logwriter.WriteLine("-----------------Exception:-----------------------");
-                _logwriter.Write("type:");
-                _logwriter.WriteLine(obj.GetType().FullName);
-                _logwriter.WriteLine(ex.Message);
-                _logwriter.WriteLine(ex.StackTrace);
-
-                Debug.WriteLine(obj.GetType().FullName);
-                Debug.WriteLine(ex.Message);
-                Debug.WriteLine(ex.StackTrace);
+                if (_logwriter != null)
+                {
+                    _logwriter.WriteLine("-----------------Exception:-----------------------");
+                    _logwriter.Write("type:");
+                    _logwriter.WriteLine(obj.GetType().FullName);
+                    _logwriter.WriteLine(ex.Message);
+                    _logwriter.WriteLine(ex.StackTrace);
+                }
+                else
+                {
+                    Debug.WriteLine(obj.GetType().FullName);
+                    Debug.WriteLine(ex.Message);
+                    Debug.WriteLine(ex.StackTrace);
+                }
             }
             catch (Exception e)
             {
@@ -150,7 +168,8 @@ namespace FTStreamUtil
         {
             try
             {
-                _logwriter.Flush();
+                if (_logwriter != null)
+                    _logwriter.Flush();
             }
             catch (Exception e)
             {

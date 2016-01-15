@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using FastTransferUtil.CompoundFile;
 
 namespace FTStreamUtil.Item.PropValue
 {
@@ -17,6 +18,11 @@ namespace FTStreamUtil.Item.PropValue
         {
             _item = propValue;
             Children.Add(_item);
+        }
+
+        public override void WriteToCompoundFile(CompoundFileBuild build)
+        {
+            
         }
     }
 }

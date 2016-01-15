@@ -5,7 +5,7 @@ using System.Text;
 
 namespace FTStreamUtil.Item.PropValue
 {
-    public interface ISizeValue : IFTTreeNode
+    public interface ISizeValue : IValue, IFTTreeNode
     {
         int ItemCount { get; }
     }
@@ -15,6 +15,23 @@ namespace FTStreamUtil.Item.PropValue
         private PropertyTag _tag;
         private PropValueLength _length;
         private int _parsed = 0;
+
+        public byte[] BytesForMsg
+        {
+            get
+            {
+                return Bytes;
+            }
+        }
+
+        public int BytesCountForMsg
+        {
+            get
+            {
+                return BytesCount;
+            }
+        }
+
         public MvFixedSizeValue(PropertyTag propertyTag, PropValueLength length)
         {
             _tag = propertyTag;
@@ -38,7 +55,12 @@ namespace FTStreamUtil.Item.PropValue
 
         internal byte[] GetItemValueByte()
         {
-            throw new NotImplementedException();
+            List<byte> temp = new List<byte>((int)_length.Data * PropertyTag.GetFixPropertyTypeLength((ushort)_tag.PropertyType));
+            foreach(var item in this)
+            {
+                temp.AddRange(item.Bytes);
+            }
+            return temp.ToArray();
         }
     }
 
@@ -47,6 +69,23 @@ namespace FTStreamUtil.Item.PropValue
         private PropertyTag _tag;
         private PropValueLength _length;
         private int _parsed = 0;
+
+        public byte[] BytesForMsg
+        {
+            get
+            {
+                return Bytes;
+            }
+        }
+
+        public int BytesCountForMsg
+        {
+            get
+            {
+                return BytesCount;
+            }
+        }
+
         public MvVarSizeValue(PropertyTag propertyTag, PropValueLength length)
             : base()
         {

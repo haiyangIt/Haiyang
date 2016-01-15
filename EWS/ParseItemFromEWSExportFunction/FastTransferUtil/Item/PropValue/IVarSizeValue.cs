@@ -6,7 +6,7 @@ using System.Text;
 
 namespace FTStreamUtil.Item.PropValue
 {
-    public interface IVarSizeValue : IFTTreeNode
+    public interface IVarSizeValue : IValue, IFTTreeNode
     {
     }
 
@@ -20,6 +20,21 @@ namespace FTStreamUtil.Item.PropValue
             _propType = propType;
         }
 
+        public virtual byte[] BytesForMsg
+        {
+            get
+            {
+                return Bytes;
+            }
+        }
+
+        public virtual int BytesCountForMsg
+        {
+            get
+            {
+                return BytesCount;
+            }
+        }
     }
 
     public class VarStringValue : VarBaseValue<string>, IVarSizeValue
@@ -59,6 +74,26 @@ namespace FTStreamUtil.Item.PropValue
             get
             {
                 return (int)_length.Data;
+            }
+        }
+
+        public override byte[] BytesForMsg
+        {
+            get
+            {
+                if (BytesCountForMsg == 0)
+                    return new byte[0];
+                var result = new byte[BytesCountForMsg - 2];
+                Array.Copy(Bytes, result, BytesCountForMsg - 2);
+                return result;
+            }
+        }
+
+        public override int BytesCountForMsg
+        {
+            get
+            {
+                return BytesCount;
             }
         }
     }

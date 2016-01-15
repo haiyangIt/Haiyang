@@ -11,6 +11,7 @@ namespace FTStreamUtil.Item.PropValue
         public FixPropValue(PropertyTag propertyTag)
             : base()
         {
+            PropTag = propertyTag;
             _fixedPropType = FTFactory.Instance.CreateFixedPropType();
             _propInfo = FTFactory.Instance.CreatePropInfo(propertyTag);
             _fixedSizeValue = FTFactory.Instance.CreateFixedSizeValue(_fixedPropType, propertyTag.PropType);
@@ -23,10 +24,31 @@ namespace FTStreamUtil.Item.PropValue
         private FixedPropType _fixedPropType;
         private IPropInfo _propInfo;
         private IFixedSizeValue _fixedSizeValue;
+        
+        public IPropTag PropTag
+        {
+            get; set;
+        }
+
+        public IValue PropValue
+        {
+            get
+            {
+                return _fixedSizeValue;
+            }
+        }
+
+        public IPropInfo PropInfo
+        {
+            get
+            {
+                return _propInfo;
+            }
+        }
 
         public override void WriteToCompoundFile(CompoundFileBuild build)
         {
-            build.AddFixPropValue(this);
+            build.AddProperty(this);
         }
     }
 }

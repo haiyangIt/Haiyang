@@ -11,6 +11,7 @@ namespace FTStreamUtil.Item.PropValue
         public MvPropValue(PropertyTag propertyTag)
             : base()
         {
+            PropTag = propertyTag;
             _mvPropType = FTFactory.Instance.CreateMvPropType();
             _propInfo = FTFactory.Instance.CreatePropInfo(propertyTag);
             _length = FTFactory.Instance.CreatePropValueLength();
@@ -27,9 +28,30 @@ namespace FTStreamUtil.Item.PropValue
         private PropValueLength _length;
         private ISizeValue _SizeValue;
 
+        public IPropTag PropTag
+        {
+            get; set;
+        }
+
+        public IValue PropValue
+        {
+            get
+            {
+                return _SizeValue;
+            }
+        }
+
+        public IPropInfo PropInfo
+        {
+            get
+            {
+                return _propInfo;
+            }
+        }
+
         public override void WriteToCompoundFile(CompoundFileBuild build)
         {
-            build.AddMvPropValue(this);
+            build.AddProperty(this);
         }
     }
 }

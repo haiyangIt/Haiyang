@@ -41,8 +41,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CompoundFile\BaseStruct.cs" />
     <Compile Include="CompoundFile\CompoundFileBuild.cs" />
     <Compile Include="CompoundFile\CompoundFileUtil.cs" />
+    <Compile Include="CompoundFile\MsgStruct\Helper\Crc32.cs" />
+    <Compile Include="CompoundFile\MsgStruct\AttachmentStruct.cs" />
+    <Compile Include="CompoundFile\MsgStruct\EmbedStruct.cs" />
+    <Compile Include="CompoundFile\MsgStruct\Helper\IStreamHelper.cs" />
+    <Compile Include="CompoundFile\MsgStruct\Helper\SpecialFixProperty.cs" />
+    <Compile Include="CompoundFile\MsgStruct\MessageContentStruct.cs" />
+    <Compile Include="CompoundFile\MsgStruct\RecipientStruct.cs" />
+    <Compile Include="CompoundFile\MsgStruct\TopLevelStruct.cs" />
     <Compile Include="CompoundFile\NativeDll.cs" />
     <Compile Include="FTFactory.cs" />
     <Compile Include="FTMessageTreeRoot.cs" />
@@ -109,6 +118,7 @@
     <Compile Include="Log\TraceSourceLog.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

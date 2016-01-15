@@ -1,4 +1,5 @@
-﻿using FTStreamUtil.FTStream;
+﻿using DamienG.Security.Cryptography;
+using FTStreamUtil.FTStream;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,12 +11,12 @@ namespace FTStreamUtil.Item.PropValue
     {
     }
 
-    public class TagPropId : PropertyId , IPropInfo
+    public class TagPropId : PropertyId, IPropInfo
     {
-        
+
     }
 
-    public class NamePropInfo : FTNodeBase,IPropInfo
+    public class NamePropInfo : FTNodeBase, IPropInfo
     {
         public NamePropInfo()
             : base()
@@ -39,6 +40,26 @@ namespace FTStreamUtil.Item.PropValue
         internal Guid GetNamedGuid()
         {
             return _propertySet.Data;
+        }
+
+        internal bool IsMNID()
+        {
+            return _x00Or01.Data == X00Or01.X00ForDispId;
+        }
+
+        internal uint GetMNID()
+        {
+            return (uint)BitConverter.ToInt32(((DispIdOrNameBase)_dispIdOrName).Bytes, 0);
+        }
+
+        internal byte[] GetPropName()
+        {
+            return ((DispIdOrNameBase)_dispIdOrName).Bytes;
+        }
+
+        internal uint GetCrc32FromName()
+        {
+            return Crc32.Compute(GetPropName());
         }
     }
 
@@ -75,12 +96,12 @@ namespace FTStreamUtil.Item.PropValue
             }
         }
     }
-    
+
 
     public interface IDispIdOrName : IFTTreeNode
     { }
 
-    public class DispIdOrNameBase: FTOneNode<IDispIdOrName>, IDispIdOrName
+    public class DispIdOrNameBase : FTOneNode<IDispIdOrName>, IDispIdOrName
     {
         private X00Or01 _x00or01;
         public DispIdOrNameBase(X00Or01 x00or01)
@@ -218,7 +239,7 @@ namespace FTStreamUtil.Item.PropValue
         {
             get
             {
-                return (Data.Length + 1)*2;
+                return (Data.Length + 1) * 2;
             }
         }
     }

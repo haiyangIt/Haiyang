@@ -6,7 +6,7 @@ using System.Text;
 
 namespace FTStreamUtil.Item.PropValue
 {
-    public interface IFixedSizeValue : IFTTreeNode
+    public interface IFixedSizeValue : IValue, IFTTreeNode
     {
     }
 
@@ -18,6 +18,21 @@ namespace FTStreamUtil.Item.PropValue
             _propType = propType;
         }
 
+        public int BytesCountForMsg
+        {
+            get
+            {
+                return BytesCount;
+            }
+        }
+
+        public byte[] BytesForMsg
+        {
+            get
+            {
+                return Bytes;
+            }
+        }
     }
 
     public class FixedInt16Value : FixedBaseSizeValue<UInt16>

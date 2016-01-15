@@ -7,30 +7,26 @@ using System.Text;
 namespace FTStreamUtil.Item.PropValue
 {
     public interface IPropValue : IFTTreeNode, IFTTransferUnit
-    {        
-        IPropType PropType { get; }
+    {
         IPropTag PropTag { get; }
 
         IValue PropValue { get; }
 
         IPropInfo PropInfo { get; }
     }
-
-
-    public interface IPropType : IFTTreeNode
-    {
-        Int16 PropertyType { get; }
-    }
-
-    public interface IPropTag : IFTTreeNode
+    
+    public interface IPropTag
     {
         Int32 PropertyTag { get; }
         Int16 PropertyId { get; }
-        Int16 PropertyType { get; set; }
+        Int16 PropertyType { get; }
+        byte[] Bytes { get; }
     }
 
-    public interface IValue: IFTTreeNode
+    public interface IValue : IFTTreeNode
     {
+        byte[] BytesForMsg { get; }
 
+        int BytesCountForMsg { get; }
     }
 }
