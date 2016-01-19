@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.InteropServices.ComTypes;
 
 namespace FastTransferUtil.CompoundFile.MsgStruct
 {
@@ -27,26 +28,16 @@ namespace FastTransferUtil.CompoundFile.MsgStruct
             return "__substg1.0_3701000D";
         }
 
-        internal override IStorage Storage
+        protected override void CreateSelfStorageForBuild()
         {
-            get
-            {
-                if (base.Storage == null)
-                {
-                    base.Storage = CompoundFileUtil.Instance.GetChildStorage(GetStorageName(), true, ParentStruct.Storage);
-                }
-                return base.Storage;
-            }
-
-            set
-            {
-                throw new InvalidProgramException();
-            }
+            if (MessageContent.Properties.Properties.Count > 0 || MessageContent.RecipientProperties.Count > 0 || MessageContent.AttachmentProperties.Count > 0)
+                Storage = CompoundFileUtil.Instance.GetChildStorage(GetStorageName(), true, ParentStruct.Storage);
         }
 
         protected override void BuildEx()
         {
-            MessageContent.BuildInternal();
+            if (MessageContent.Properties.Properties.Count > 0 || MessageContent.RecipientProperties.Count > 0 || MessageContent.AttachmentProperties.Count > 0)
+                MessageContent.BuildInternal();
         }
 
         public MessageContentStruct CreateMessageContent()
@@ -57,12 +48,51 @@ namespace FastTransferUtil.CompoundFile.MsgStruct
 
         protected override void Release(bool hasError)
         {
-            if (base.Storage != null)
+            if (Storage != null)
             {
-                if (!hasError)
-                    base.Storage.Commit(0);
-                CompoundFileUtil.Instance.ReleaseComObj(base.Storage);
+                if (!hasError && !isParser)
+                    Storage.Commit(0);
+                CompoundFileUtil.Instance.ReleaseComObj(Storage);
             }
+        }
+
+        protected override void ParserEx()
+        {
+            GetStorageForParser();
+            MessageContent = new MessageContentStruct(this);
+            MessageContent.ParserInternal();
+        }
+
+        protected override void GetStorageForParser()
+        {
+            if (Storage == null)
+            {
+                Storage = CompoundFileUtil.Instance.GetChildStorage(GetStorageName(), false, ParentStruct.Storage);
+            }
+        }
+
+        public override bool Compare(object other, StringBuilder result, int indent)
+        {
+            var desStruct = other as EmbedStruct;
+            if (desStruct == null)
+            {
+                BaseStruct.SetMessage(result, indent, "{0} Type is not EmbedStruct.", Name);
+                return false;
+            }
+
+            bool returnResult = true;
+
+            var isSame = base.Compare(other, result, indent);
+            if (!isSame) returnResult = false;
+
+            if(MessageContent != null)
+            {
+                if (!MessageContent.Compare(desStruct.MessageContent, result, indent + 2))
+                {
+                    returnResult = false;
+                }
+            }
+            return returnResult;
         }
     }
 }

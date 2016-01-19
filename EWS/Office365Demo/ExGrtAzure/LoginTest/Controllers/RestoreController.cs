@@ -199,11 +199,14 @@ namespace LoginTest.Controllers
         public JsonResult DumpItems(CatalogJobParameter catalog,
             RestoreAdminUserInfo restoreAdminUserInfo,
             LoadedTreeItem selectedItem,
-            string notificationAddress )
+            string notificationAddress,
+            ExportType exportType)
         {
             IRestoreServiceEx restore = RestoreFactory.Instance.NewRestoreServiceEx(restoreAdminUserInfo.UserAddress, restoreAdminUserInfo.Password, string.Empty, restoreAdminUserInfo.Organization);
+            
             restore.CurrentRestoreCatalogJob = catalog;
             restore.Destination = RestoreFactory.Instance.NewDumpDestination();
+            restore.Destination.ExportType = exportType;
             restore.Destination.SetOtherInformation(notificationAddress);
             restore.Restore(selectedItem);
             return Json(new { IsSuccess = true });

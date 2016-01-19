@@ -34,8 +34,10 @@ namespace DataProtectInterface.Util
             return GetItemClass(GetItemClassStr(itemBase));
         }
 
-        public static string GetItemSuffix(IItemBase itemBase)
+        public static string GetItemSuffix(IItemBase itemBase, ExportType exportType)
         {
+            if (exportType == ExportType.Msg)
+                return ".msg";
             return GetItemSuffix(GetItemClass(itemBase));
         }
 

@@ -114,7 +114,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CompoundFileTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Controllers\HomeControllerTest.cs" />
     <Compile Include="UnitTest1.cs" />
@@ -128,10 +127,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CompoundFileImpl\CompoundFileImpl.csproj">
-      <Project>{dde4659b-120e-4e37-a402-5abfd214fb96}</Project>
-      <Name>CompoundFileImpl</Name>
-    </ProjectReference>
     <ProjectReference Include="..\DataProtectImpl\DataProtectImpl.csproj">
       <Project>{6e5dda9f-569b-46c9-9920-ab0166517421}</Project>
       <Name>DataProtectImpl</Name>

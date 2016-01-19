@@ -38,7 +38,7 @@ namespace ExGrtAzure.Tests
 
         public static IRestoreService GetRestoreService()
         {
-            var service = _factory.NewRestoreService("devO365admin@arcservemail.onmicrosoft.com", "Loro0237", null, "Arcserve");
+            var service = _factory.NewRestoreService("devO365admin@arcservemail.onmicrosoft.com", "arcserve1!", null, "Arcserve");
             return service;
         }
 

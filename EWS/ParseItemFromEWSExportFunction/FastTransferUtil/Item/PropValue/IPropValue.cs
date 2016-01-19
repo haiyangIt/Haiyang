@@ -8,7 +8,7 @@ namespace FTStreamUtil.Item.PropValue
 {
     public interface IPropValue : IFTTreeNode, IFTTransferUnit
     {
-        IPropTag PropTag { get; }
+        IPropTag PropTag { get; set; }
 
         IValue PropValue { get; }
 
@@ -17,9 +17,9 @@ namespace FTStreamUtil.Item.PropValue
     
     public interface IPropTag
     {
-        Int32 PropertyTag { get; }
-        Int16 PropertyId { get; }
-        Int16 PropertyType { get; }
+        uint PropertyTag { get; }
+        ushort PropertyId { get; }
+        ushort PropertyType { get; }
         byte[] Bytes { get; }
     }
 

@@ -22,27 +22,27 @@ namespace FTStreamUtil.Item
         public ushort PropId { get; private set; }
         public ushort PropType { get; private set; }
 
-        int IPropTag.PropertyTag
+        uint IPropTag.PropertyTag
         {
             get
             {
-                return (int)Data;
+                return Data;
             }
         }
 
-        public short PropertyId
+        public ushort PropertyId
         {
             get
             {
-                return (short)PropId;
+                return (ushort)PropId;
             }
         }
 
-        public short PropertyType
+        public ushort PropertyType
         {
             get
             {
-                return (short)PropType;
+                return (ushort)PropType;
             }
 
             set
@@ -109,8 +109,13 @@ namespace FTStreamUtil.Item
         private static HashSet<ushort> _mvTypeHash = new HashSet<ushort>();
         private static HashSet<ushort> _mvVarTypeHash = new HashSet<ushort>();
         private static Dictionary<ushort, short> _mvFixedTypeLengthDic = new Dictionary<ushort, short>();
+
+        private static Dictionary<ushort, short> _fixedTypeLengthDic = new Dictionary<ushort, short>();
         private static void Init()
         {
+            if (_markerHash.Count > 0)
+                return;
+
             #region initMarkerHash
             _markerHash.Add(StartTopFld);
             _markerHash.Add(EndFolder);
@@ -190,12 +195,18 @@ namespace FTStreamUtil.Item
             _mvFixedTypeLengthDic.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_I8, 8);
             _mvFixedTypeLengthDic.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_LONG, 4);
             _mvFixedTypeLengthDic.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_R4, 4);
-            _mvFixedTypeLengthDic.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_DOUBLE,8);
+            _mvFixedTypeLengthDic.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_DOUBLE, 8);
             _mvFixedTypeLengthDic.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_CURRENCY, 8);
             _mvFixedTypeLengthDic.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_APPTIME, 8);
             //_fixedTypeLengthDic.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_BOOLEAN, );
             _mvFixedTypeLengthDic.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_SYSTIME, 8);
             _mvFixedTypeLengthDic.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_CLSID, 16);
+
+            foreach(var keyvalue in _mvFixedTypeLengthDic)
+            {
+                _fixedTypeLengthDic.Add(keyvalue.Key, keyvalue.Value);
+            }
+            _fixedTypeLengthDic.Add((UInt16)FTStreamUtil.Item.PropertyType.PT_BOOLEAN, 1);
             #endregion
         }
 
@@ -207,26 +218,32 @@ namespace FTStreamUtil.Item
 
         public static bool IsMarker(PropertyTag propertyTag)
         {
-            if (_markerHash.Count == 0)
-                Init();
+            Init();
 
             return _markerHash.Contains(propertyTag.Data);
         }
 
         public static bool IsMetaProperty(PropertyTag propertyTag)
         {
-            if (_markerHash.Count == 0)
-                Init();
+            Init();
 
             return _metaPropertyHash.Contains(propertyTag.Data);
         }
 
         public static bool IsFixedType(PropertyTag propertyTag)
         {
-            if (_markerHash.Count == 0)
-                Init();
+            return IsFixProperty(propertyTag.PropType);
+        }
 
-            return _fixedTypeHash.Contains(propertyTag.PropType);
+        internal static bool IsFixProperty(ushort type)
+        {
+            Init();
+            return _fixedTypeHash.Contains(type);
+        }
+
+        internal static bool IsFixPropertyForMsg(IPropTag propTag)
+        {
+            return IsFixProperty((ushort)propTag.PropertyType);
         }
 
         public static bool IsGuidType(IPropTag propertyTag)
@@ -236,15 +253,24 @@ namespace FTStreamUtil.Item
 
         public static bool IsVarType(PropertyTag propertyTag)
         {
-            if (_markerHash.Count == 0)
-                Init();
+            return IsVarProperty(propertyTag.PropType);
+        }
 
 
-            if (_varTypeHash.Contains(propertyTag.PropType))
+        public static bool IsVarType(IPropTag propertyTag)
+        {
+            return IsVarProperty((ushort)propertyTag.PropertyType);
+        }
+
+        internal static bool IsVarProperty(ushort type)
+        {
+            Init();
+
+            if (_varTypeHash.Contains(type))
                 return true;
             else
             {
-                if((propertyTag.PropType & 0x8000) == 0x8000 && (propertyTag.PropType & 0x1000) != 0x1000)
+                if ((type & 0x8000) == 0x8000 && (type & 0x1000) != 0x1000)
                     return true; ;
             }
             return false;
@@ -252,14 +278,22 @@ namespace FTStreamUtil.Item
 
         public static bool IsMultiType(PropertyTag propertyTag)
         {
-            if (_markerHash.Count == 0)
-                Init();
+            return IsMultiProperty(propertyTag.PropType);
+        }
 
+        public static bool IsMultiType(IPropTag tag)
+        {
+            return IsMultiProperty((ushort)tag.PropertyType);
+        }
 
-            bool result = _mvTypeHash.Contains(propertyTag.PropType);
-            if(!result)
+        internal static bool IsMultiProperty(ushort type)
+        {
+            Init();
+
+            bool result = _mvTypeHash.Contains(type);
+            if (!result)
             {
-                if ((propertyTag.PropType & 0x9000) == 0x9000) // 0x8000 & 0x1000. 0x8000 means it's mv. 0x1000 means it's string.
+                if ((type & 0x9000) == 0x9000) // 0x8000 & 0x1000. 0x8000 means it's mv. 0x1000 means it's string.
                     return true;
             }
             return result;
@@ -267,24 +301,17 @@ namespace FTStreamUtil.Item
 
         public static bool IsMultiVarType(PropertyTag propertyTag)
         {
-            if (_markerHash.Count == 0)
-                Init();
+            return IsMultiVarType(propertyTag.PropType);
+        }
 
-
-            bool result = _mvVarTypeHash.Contains(propertyTag.PropType);
-            if (!result)
-            {
-                if ((propertyTag.PropType & 0x9000) == 0x9000)
-                    return true;
-            }
-            return result;
+        private static bool IsMultiVarType(IPropTag tag)
+        {
+            return IsMultiVarType((ushort)tag.PropertyType);
         }
 
         internal static bool IsMultiVarType(ushort propertyType)
         {
-            if (_markerHash.Count == 0)
-                Init();
-
+            Init();
 
             bool result = _mvVarTypeHash.Contains(propertyType);
             if (!result)
@@ -297,8 +324,7 @@ namespace FTStreamUtil.Item
 
         internal static int GetFixPropertyTypeLength(ushort propertyType)
         {
-            if (_markerHash.Count == 0)
-                Init();
+            Init();
             ushort temp = 0x0FFF;
             propertyType = (ushort)(propertyType & temp);
             short result;
@@ -307,7 +333,13 @@ namespace FTStreamUtil.Item
                 throw new ArgumentException();
             return result;
         }
-        
+
         #endregion
+        
+        public static int GetFixedValueLength(ushort propertyType)
+        {
+            Init();
+            return _fixedTypeLengthDic[propertyType];
+        }
     }
 }

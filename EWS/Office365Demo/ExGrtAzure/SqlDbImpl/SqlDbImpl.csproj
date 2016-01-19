@@ -119,6 +119,10 @@
     <Compile Include="Storage\TableDataAccess.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\ParseItemFromEWSExportFunction\FastTransferUtil\FastTransferUtil.csproj">
+      <Project>{724571a8-bf45-4efe-ab1e-bb065201513b}</Project>
+      <Name>FastTransferUtil</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DataProtectInterface\DataProtectInterface.csproj">
       <Project>{f8783799-5d60-441f-a3b6-ffdaae476a12}</Project>
       <Name>DataProtectInterface</Name>

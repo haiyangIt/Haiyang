@@ -15,6 +15,7 @@ using EwsFrame.Util;
 using SqlDbImpl.Model;
 using System.Web.Script.Serialization;
 using DataProtectInterface.Util;
+using FastTransferUtil.CompoundFile;
 
 namespace SqlDbImpl
 {
@@ -62,10 +63,7 @@ namespace SqlDbImpl
 
         public ExportType ExportType
         {
-            get
-            {
-                return ExportType.Eml;
-            }
+            get; set;
         }
 
         public void DealFolder(string displayName, Stack<IItemBase> dealItemStack)
@@ -95,12 +93,17 @@ namespace SqlDbImpl
             var dealItem = dealItemStack.Pop();
             dealItemStack.Push(dealItem);
 
-            sb.Append(ItemClassUtil.GetItemSuffix(dealItem));
+            sb.Append(ItemClassUtil.GetItemSuffix(dealItem, ExportType));
             return sb.ToString();
         }
 
         public void DealItem(string id, string displayName, byte[] itemData, Stack<IItemBase> dealItemStack)
         {
+            if(ExportType == ExportType.Msg)
+            {
+                itemData = CompoundFileUtil.Instance.ConvertBinToMsg(itemData);
+            }
+
             string path = GetPath(displayName, dealItemStack);
             _instance.WriteItem(path, itemData);
         }

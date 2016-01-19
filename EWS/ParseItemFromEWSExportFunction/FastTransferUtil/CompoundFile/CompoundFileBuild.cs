@@ -115,9 +115,4 @@ namespace FastTransferUtil.CompoundFile
             CurrentPropCollection = ((MessageContentStruct)CurrentPropCollection).CreateRecipient();
         }
     }
-
-    
-    
-    
-    
 }

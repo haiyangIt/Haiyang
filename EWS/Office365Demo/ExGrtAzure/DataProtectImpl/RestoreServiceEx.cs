@@ -330,7 +330,14 @@ namespace DataProtectImpl
 
         private void RestoreItemToDestination(string id, string displayName, IRestoreDestinationEx restoreDestination, Stack<IItemBase> dealItemStack)
         {
-            IItemData itemDetails = DataAccess.GetItemContent(id, displayName, restoreDestination.ExportType);
+            IItemData itemDetails = null;
+            if (restoreDestination.ExportType == ExportType.Msg)
+            {
+                itemDetails = DataAccess.GetItemContent(id, displayName, ExportType.TransferBin);
+
+            }
+            else 
+                itemDetails = DataAccess.GetItemContent(id, displayName, restoreDestination.ExportType);
             restoreDestination.DealItem(id, displayName, itemDetails.Data as byte[], dealItemStack);
         }
 

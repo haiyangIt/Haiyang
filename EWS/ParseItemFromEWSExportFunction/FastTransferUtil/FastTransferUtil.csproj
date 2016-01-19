@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="CompoundFile\BaseStruct.cs" />
     <Compile Include="CompoundFile\CompoundFileBuild.cs" />
+    <Compile Include="CompoundFile\CompoundFileParser.cs" />
     <Compile Include="CompoundFile\CompoundFileUtil.cs" />
     <Compile Include="CompoundFile\MsgStruct\Helper\Crc32.cs" />
     <Compile Include="CompoundFile\MsgStruct\AttachmentStruct.cs" />
@@ -120,6 +121,9 @@
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy /Y "$(TargetDir)$(ProjectName).dll" "$(SolutionDir)lib\$(ProjectName).dll"</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

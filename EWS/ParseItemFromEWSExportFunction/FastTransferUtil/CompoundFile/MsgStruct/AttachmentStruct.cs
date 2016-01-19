@@ -24,7 +24,6 @@ namespace FastTransferUtil.CompoundFile.MsgStruct
         public AttachmentStruct(BaseStruct parentStruct, int attachIndex) : base(parentStruct)
         {
             _attachIndex = attachIndex;
-            Storage = CompoundFileUtil.Instance.GetChildStorage(GetStorageName(attachIndex), true, parentStruct.Storage);
         }
 
         private string GetStorageName(int index)
@@ -46,9 +45,12 @@ namespace FastTransferUtil.CompoundFile.MsgStruct
 
         protected override void Release(bool hasError)
         {
-            if (!hasError)
-                Storage.Commit(0);
-            CompoundFileUtil.Instance.ReleaseComObj(Storage);
+            if (Storage != null)
+            {
+                if (!hasError && !isParser)
+                    Storage.Commit(0);
+                CompoundFileUtil.Instance.ReleaseComObj(Storage);
+            }
         }
 
         protected override byte[] ModifyPropertyValue(IPropValue property)
@@ -60,6 +62,22 @@ namespace FastTransferUtil.CompoundFile.MsgStruct
             return base.ModifyPropertyValue(property);
         }
 
+        protected override int ModifyPropertyLength(IPropValue property)
+        {
+            if (property.PropTag.PropertyId == 0x0FF9)
+            {
+                return 4;
+            }
+            return base.ModifyPropertyLength(property);
+        }
+
+        protected override void CreateSelfStorageForBuild()
+        {
+            if (Storage == null)
+            {
+                Storage = CompoundFileUtil.Instance.GetChildStorage(GetStorageName(_attachIndex), true, ParentStruct.Storage);
+            }
+        }
         protected override void BuildEx()
         {
             if (this.Properties.Properties.Count > 0)
@@ -99,6 +117,54 @@ namespace FastTransferUtil.CompoundFile.MsgStruct
             }
 
             base.BuildEx();
+        }
+
+        protected override void ParserHeader(IStream propertyHeaderStream, ref int readCount)
+        {
+            propertyHeaderStream.ReadInt64(ref readCount);
+        }
+
+        protected override void ParserEx()
+        {
+            base.ParserEx();
+            if (this.Properties.ContainProperty(0x3701000D))
+            {
+                Embed = new EmbedStruct(this);
+                Embed.Parser();
+            }
+        }
+
+        protected override void GetStorageForParser()
+        {
+            if(Storage == null)
+            {
+                Storage = CompoundFileUtil.Instance.GetChildStorage(GetStorageName(_attachIndex), false, ParentStruct.Storage);
+            }
+        }
+
+        public override bool Compare(object other, StringBuilder result, int indent)
+        {
+            var desStruct = other as AttachmentStruct;
+            if (desStruct == null)
+            {
+                BaseStruct.SetMessage(result, indent, "{0} Type is not AttachmentStruct.", Name);
+                return false;
+            }
+
+            bool returnResult = true;
+
+            var isSame = base.Compare(other, result, indent);
+            if (!isSame) returnResult = false;
+
+            if(Embed != null)
+            {
+                if(!Embed.Compare(desStruct.Embed, result, indent + 2))
+                {
+                    returnResult = false;
+                }
+            }
+
+            return returnResult;
         }
     }
 }

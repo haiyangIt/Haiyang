@@ -6,12 +6,17 @@ using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using FastTransferUtil.CompoundFile.MsgStruct.Helper;
+using FTStreamUtil;
+using FTStreamUtil.FTStream;
 
 namespace FastTransferUtil.CompoundFile
 {
-    public abstract class BaseStruct
+    public abstract class BaseStruct : ICompareMsg
     {
         protected abstract string Name { get; }
+
+        protected virtual bool isParser {
+            get; set; }
 
         protected BaseStruct(BaseStruct parentStruct)
         {
@@ -28,13 +33,52 @@ namespace FastTransferUtil.CompoundFile
             }
         }
 
+        protected virtual Dictionary<uint, uint> NamedPropIdToChangedId
+        {
+            get
+            {
+                return this.ParentStruct.NamedPropIdToChangedId;
+            }
+        }
+
+        #region Build Struct
         public virtual void AddProperties(IPropValue property)
         {
-            Properties.AddProperty(property);
             if (property.PropInfo is NamePropInfo)
             {
+                uint changedId = 0;
+                var dic = NamedPropIdToChangedId;
+                if (!dic.TryGetValue(property.PropTag.PropertyTag, out changedId))
+                {
+                    changedId = (uint)dic.Count + (uint)0x8000;
+                    changedId = (changedId << 16) | property.PropTag.PropertyType;
+                    dic.Add(property.PropTag.PropertyTag, changedId);
+                }
+
+                ModifyPropertyTag(property, changedId);
+
                 NamedProperties[property.PropTag.PropertyId] = property;
             }
+            Properties.AddProperty(property);
+        }
+
+        private void ModifyPropertyTag(IPropValue property, uint changedId)
+        {
+            property.PropTag = new PropertyTag((uint)changedId);
+        }
+
+        protected virtual void CreateStorageForBuild()
+        {
+            if(Storage == null)
+            {
+                ParentStruct.CreateStorageForBuild();
+                CreateSelfStorageForBuild();
+            }
+        }
+
+        protected virtual void CreateSelfStorageForBuild()
+        {
+
         }
 
         public void Build()
@@ -42,6 +86,7 @@ namespace FastTransferUtil.CompoundFile
             bool hasError = true;
             try
             {
+                CreateStorageForBuild();
                 BuildEx();
                 hasError = false;
             }
@@ -95,31 +140,41 @@ namespace FastTransferUtil.CompoundFile
             WritePropertyValueToStorage(storage, property);
         }
 
-        public static int GetPropertyTag(IPropTag propertyTag)
+        public static uint GetPropertyTag(IPropTag propertyTag)
         {
-            int tag = propertyTag.PropertyTag;
+            uint tag = propertyTag.PropertyTag;
             return GetPropertyTag(tag);
         }
 
-        public static int GetPropertyTag(int tag)
+        public static uint GetPropertyTag(uint tag)
         {
-            int propId = tag >> 16;
+            ushort propId = (ushort)(tag >> 16);
             if ((tag & 0x9000) == 0x9000)
             {
-                tag = propId << 16 | (int)PropertyType.PT_MV_UNICODE;
+                tag = (uint)(propId << 16) | (uint)PropertyType.PT_MV_UNICODE;
             }
             else if ((tag & 0x8000) == 0x8000)
             {
-                tag = propId << 16 | (int)PropertyType.PT_UNICODE;
+                tag = (uint)(propId << 16 )| (uint)PropertyType.PT_UNICODE;
             }
             return tag;
+        }
+
+        internal static string GetPropertyStreamName(IPropTag propTag)
+        {
+            return string.Format("__substg1.0_{0:X8}", GetPropertyTag(propTag));
+        }
+
+        internal static string GetMvVarPropertyStreamName(IPropTag propTag, int index)
+        {
+            return string.Format("__substg1.0_{0:X8}-{1:X8}", GetPropertyTag(propTag), index);
         }
 
         private void WritePropertyValueToStorage(IStorage storage, IPropValue property)
         {
             if (property is VarPropValue || PropertyTag.IsGuidType(property.PropTag) || property is SpecialVarBaseProperty)
             {
-                var streamName = string.Format("__substg1.0_{0:X8}", GetPropertyTag(property.PropTag));
+                var streamName = GetPropertyStreamName(property.PropTag); // string.Format("__substg1.0_{0:X8}", GetPropertyTag(property.PropTag));
                 IStream varPropStream = null;
                 try
                 {
@@ -137,7 +192,7 @@ namespace FastTransferUtil.CompoundFile
                 if (PropertyTag.IsMultiVarType((ushort)property.PropTag.PropertyTag)) // MVVarValue
                 {
                     // write length stream
-                    var streamName = string.Format("__substg1.0_{0:X8}", GetPropertyTag(property.PropTag));
+                    var streamName = GetPropertyStreamName(property.PropTag); //string.Format("__substg1.0_{0:X8}", GetPropertyTag(property.PropTag));
                     IStream propStream = null;
                     try
                     {
@@ -176,7 +231,7 @@ namespace FastTransferUtil.CompoundFile
                     foreach (var item in (MvVarSizeValue)property.PropValue)
                     {
                         MvVarSizeItem mvItem = item as MvVarSizeItem;
-                        string valueStreamName = string.Format("__substg1.0_{0:X8}-{1:X8}", GetPropertyTag(property.PropTag), itemIndex);
+                        string valueStreamName = GetMvVarPropertyStreamName(property.PropTag, itemIndex); // string.Format("__substg1.0_{0:X8}-{1:X8}", GetPropertyTag(property.PropTag), itemIndex);
                         IStream valueStream = null;
                         try
                         {
@@ -193,7 +248,7 @@ namespace FastTransferUtil.CompoundFile
                 }
                 else
                 {
-                    var streamName = string.Format("__substg1.0_{0:X8}", property.PropTag.PropertyTag);
+                    var streamName = GetPropertyStreamName(property.PropTag); // string.Format("__substg1.0_{0:X8}", property.PropTag.PropertyTag);
                     IStream propStream = null;
                     try
                     {
@@ -212,6 +267,11 @@ namespace FastTransferUtil.CompoundFile
         protected virtual byte[] ModifyPropertyValue(IPropValue property)
         {
             return property.PropValue.BytesForMsg;
+        }
+
+        protected virtual int ModifyPropertyLength(IPropValue property)
+        {
+            return property.PropValue.BytesCountForMsg;
         }
 
         protected virtual void WritePropertyInfoToPropertyStream(IStream propertyStream, IPropValue property)
@@ -249,7 +309,8 @@ namespace FastTransferUtil.CompoundFile
                 // 1.2.2.2 Set Flag
                 propertyStream.Write((Int32)0x06);
                 // 1.2.2.3 Set Size
-                var valueSize = property.PropValue.BytesCountForMsg;
+                var valueSize = ModifyPropertyLength(property);
+                //var valueSize = property.PropValue.BytesCountForMsg;
                 //if (property.PropValue is VarStringValue)
                 //{
 
@@ -292,10 +353,78 @@ namespace FastTransferUtil.CompoundFile
             throw new NotImplementedException();
         }
 
+
         protected virtual IStream CreatePropertyStream()
         {
-            return CompoundFileUtil.Instance.GetChildStream("__properties_version1.0", true, Storage);
+            return CompoundFileUtil.Instance.GetChildStream(GetPropertyHeaderStreamName(), true, Storage);
         }
+        #endregion
+
+        protected string GetPropertyHeaderStreamName()
+        {
+            return "__properties_version1.0";
+        }
+
+        #region Parser CompoundFile
+
+        public virtual void Parser()
+        {
+            bool hasError = true;
+            isParser = true;
+            try {
+                ParserEx();
+                hasError = false;
+            }
+            finally
+            {
+                Release(hasError);
+            }
+        }
+
+        protected virtual void ParserEx()
+        {
+            GetStorageForParser();
+            ParseProperty();
+        }
+
+        protected abstract void GetStorageForParser();
+
+        protected virtual void ParseProperty()
+        {
+            IStream propertyHeaderStream = null;
+            try {
+                propertyHeaderStream = CompoundFileUtil.Instance.GetChildStream(GetPropertyHeaderStreamName(), false, Storage);
+                int readCount = 0;
+                ParserHeader(propertyHeaderStream, ref readCount);
+                ParserProperties(Storage, propertyHeaderStream, ref readCount);
+            }
+            finally
+            {
+                CompoundFileUtil.Instance.ReleaseComObj(propertyHeaderStream);
+            }
+        }
+
+        protected virtual void ParserHeader(IStream propertyHeaderStream, ref int readCount) { }
+
+        protected virtual void ParserProperties(IStorage storage, IStream propertyHeaderStream, ref int readCount)
+        {
+            STATSTG stat;
+            propertyHeaderStream.Stat(out stat, 1);
+            int count = (int)stat.cbSize;
+
+            while (readCount < count)
+            {
+                var tag = propertyHeaderStream.ReadInt32(ref readCount);
+                var flag = propertyHeaderStream.ReadInt32(ref readCount);
+                var value = propertyHeaderStream.ReadInt64(ref readCount);
+                IPropValueForParser property = SpecialPropertyUtil.Instance.CreateNewPropValue(tag, value);
+
+                property.Parse(Storage);
+                Properties.AddProperty(property);
+            }
+        }
+        #endregion
+
 
         private string _string;
         public override string ToString()
@@ -310,9 +439,36 @@ namespace FastTransferUtil.CompoundFile
             }
             return sb.ToString();
         }
+
+        public virtual bool Compare(object other, StringBuilder result, int indent)
+        {
+            SetMessage(result, indent, "{0} Compare", Name);
+            
+            if (!(other is BaseStruct))
+            {
+                SetMessage(result, indent, "{0} other is not BaseStruct", Name);
+                return false;
+            }
+
+            var otherStruct = other as BaseStruct;
+            var isSame = Properties.Compare(otherStruct.Properties, result, indent + 2);
+            SetMessage(result, indent, "{0} Compare complete {1}.", Name, isSame);
+            return isSame;
+        }
+
+        public static void SetMessage(StringBuilder sb, int indent, string format, params object[] args)
+        {
+            sb.Append(" ".PadLeft(indent)).AppendFormat(format, args).AppendLine();
+        }
+        
     }
 
-    public class Props
+    public interface ICompareMsg
+    {
+        bool Compare(object other, StringBuilder result, int indent);
+    }
+
+    public class Props : ICompareMsg
     {
         public Dictionary<uint, IPropValue> Properties = new Dictionary<uint, IPropValue>();
         public void AddProperty(IPropValue property)
@@ -326,7 +482,7 @@ namespace FastTransferUtil.CompoundFile
             Properties[(uint)tag] = property;
         }
 
-        internal IPropValue GetProperty(int tag)
+        internal IPropValue GetProperty(uint tag)
         {
             tag = BaseStruct.GetPropertyTag(tag);
             return Properties[(uint)tag];
@@ -335,6 +491,90 @@ namespace FastTransferUtil.CompoundFile
         internal bool ContainProperty(int tag)
         {
             return Properties.ContainsKey((uint)tag);
+        }
+
+        public bool Compare(object other, StringBuilder result, int indent)
+        {
+            if (!(other is Props))
+            {
+                BaseStruct.SetMessage(result, indent, "other is not Props.");
+                return false;
+            }
+
+            var otherProperties = other as Props;
+            HashSet<uint> sour = new HashSet<uint>();
+            HashSet<uint> des = new HashSet<uint>(otherProperties.Properties.Keys);
+
+            HashSet<uint> notSame = new HashSet<uint>();
+
+            foreach(uint key in Properties.Keys)
+            {
+                if (des.Contains(key))
+                {
+                    var valueSour = Properties[key];
+                    var valueDes = otherProperties.Properties[key];
+
+                    bool isSame = true;
+                    if (((IFTTreeNode)valueSour).BytesCount != ((IFTTreeNode)valueDes).BytesCount || ((IFTTreeNode)valueSour).Bytes.Length != ((IFTTreeNode)valueDes).Bytes.Length)
+                    {
+                        isSame = false;
+                    }
+                    else
+                    {
+                        var count = ((IFTTreeNode)valueSour).Bytes.Length;
+                        for (int i = 0; i < count; i++)
+                        {
+                            if(((IFTTreeNode)valueSour).Bytes[i] != ((IFTTreeNode)valueDes).Bytes[i])
+                            {
+                                isSame = false;
+                                break;
+                            }
+
+                        }
+                    }
+
+                    if (!isSame)
+                    {
+                        notSame.Add(key);
+                    }
+
+                    des.Remove(key);
+                }
+                else
+                {
+                    sour.Add(key);
+                }
+            }
+
+            if (notSame.Count == 0 && sour.Count == 0 && des.Count == 0)
+            {
+                BaseStruct.SetMessage(result, indent, "All property is same.");
+                return true;
+            }
+
+            var newIndent = indent + 2;
+            BaseStruct.SetMessage(result, indent, "Following is not same property.");
+            foreach (var notSameKey in notSame)
+            {
+                BaseStruct.SetMessage(result, newIndent, "left :{0}.", SpecialPropertyUtil.Instance.GetString((ISpecialValue)Properties[notSameKey]));
+                BaseStruct.SetMessage(result, newIndent, "right:{0}.", SpecialPropertyUtil.Instance.GetString((ISpecialValue)otherProperties.Properties[notSameKey]));
+                result.AppendLine();
+            }
+
+            BaseStruct.SetMessage(result, indent, "Following is not in left.");
+            foreach (var sourExtra in sour)
+            {
+                BaseStruct.SetMessage(result, newIndent, "{0}.", SpecialPropertyUtil.Instance.GetString((ISpecialValue)Properties[sourExtra]));
+                result.AppendLine();
+            }
+
+            BaseStruct.SetMessage(result, indent, "Following is not in right.");
+            foreach (var desExtra in des)
+            {
+                BaseStruct.SetMessage(result, newIndent, "{0}.", SpecialPropertyUtil.Instance.GetString((ISpecialValue)otherProperties.Properties[desExtra]));
+                result.AppendLine();
+            }
+            return false;
         }
     }
 }

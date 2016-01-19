@@ -10,6 +10,7 @@ using System.Diagnostics;
 using FTStreamUtil;
 using FTStreamUtil.Item;
 using FTStreamUtil.Item.PropValue;
+using FastTransferUtil.CompoundFile.MsgStruct;
 
 namespace FastTransferUtil.CompoundFile
 {
@@ -37,6 +38,23 @@ namespace FastTransferUtil.CompoundFile
             iLockBytes.ReadAt(0, iLockBytesContent, iLockBytesContent.Length, null);
             return iLockBytesContent;
         }
+
+        public byte[] ConvertBinToMsg(byte[] binBytes)
+        {
+            ILockBytes memory = null;
+            try {
+                using (MemoryStream reader = new MemoryStream(binBytes))
+                {
+                    BuildMsgInMemoryWithBin(reader, out memory);
+                    var bytes = ReadAllByteInlockBytes(memory);
+                    return bytes;
+                }
+            }
+            finally
+            {
+                CompoundFileUtil.Instance.ReleaseComObj(memory);
+            }
+        }
         #endregion
 
         #region CompoundFileStorageUtil
@@ -49,6 +67,8 @@ namespace FastTransferUtil.CompoundFile
             }
         }
 
+
+
         public IStorage GetRootStorage(string name, bool isCreate)
         {
             IStorage result = null;
@@ -57,9 +77,16 @@ namespace FastTransferUtil.CompoundFile
             {
                 flag = STGM.CREATE | STGM.SHARE_EXCLUSIVE | STGM.READWRITE;
                 NativeDll.StgCreateDocfile(name, (uint)flag, 0, out result);
-                return result;
+
             }
-            NativeDll.StgOpenStorage(name, null, flag, IntPtr.Zero, 0, out result);
+            else
+                NativeDll.StgOpenStorage(name, null, flag, IntPtr.Zero, 0, out result);
+
+            var error = Marshal.GetLastWin32Error();
+            if (result == null)
+            {
+                throw new NullReferenceException(error.ToString("X8"));
+            }
             return result;
         }
 
@@ -84,13 +111,36 @@ namespace FastTransferUtil.CompoundFile
             {
                 parentStorage.OpenStream(streamName, IntPtr.Zero, (uint)flag, 0, out result);
             }
+
+            var error = Marshal.GetLastWin32Error();
+            if (result == null)
+            {
+                throw new NullReferenceException(error.ToString("X8"));
+            }
             return result;
+        }
+
+        public byte[] ReadStream(string streamName, IStorage parentStorage, int readCount)
+        {
+            IStream stream = null;
+            try
+            {
+                stream = GetChildStream(streamName, false, parentStorage);
+                byte[] result = new byte[readCount];
+                stream.Read(result, readCount, IntPtr.Zero);
+                return result;
+            }
+            finally
+            {
+                ReleaseComObj(stream);
+            }
         }
 
         public IStorage GetChildStorage(string stgName, bool isCreate, IStorage parentStorage = null)
         {
             IStorage result = null;
             STGM flag = STGM.DIRECT | STGM.READ | STGM.SHARE_EXCLUSIVE;
+            int error;
             if (isCreate)
             {
                 flag = STGM.CREATE | STGM.SHARE_EXCLUSIVE | STGM.READWRITE;
@@ -98,22 +148,26 @@ namespace FastTransferUtil.CompoundFile
             if (parentStorage == null)
             {
                 NativeDll.StgOpenStorage(stgName, null, flag, IntPtr.Zero, 0, out result);
-                return result;
+                error = Marshal.GetLastWin32Error();
             }
             else
             {
                 if (isCreate)
                 {
                     parentStorage.CreateStorage(stgName, (uint)flag, 0, 0, out result);
-                    var error = Marshal.GetLastWin32Error();
+                    error = Marshal.GetLastWin32Error();
                 }
                 else
                 {
                     parentStorage.OpenStorage(stgName, null, (uint)flag, IntPtr.Zero, 0, out result);
-                    var error = Marshal.GetLastWin32Error();
+                    error = Marshal.GetLastWin32Error();
                 }
             }
 
+            if (result == null)
+            {
+                throw new NullReferenceException(error.ToString("X8"));
+            }
             return result;
         }
 
@@ -176,8 +230,39 @@ namespace FastTransferUtil.CompoundFile
             }
         }
 
-        public IStorage RootStorage;
-        
+        public FTMessageTreeRoot ParseBin(Stream binFileInfoStream)
+        {
+            List<byte[]> allBuffer = GetContentFromBin(binFileInfoStream);
+            FTParserUtil util = new FTParserUtil(allBuffer);
+            return util.Parser();
+        }
+
+        public void CompareMsg(string sourMsg, string desMsg)
+        {
+            IStorage sourRootStorage = null;
+            IStorage desRootStorage = null;
+            try
+            {
+                sourRootStorage = GetRootStorage(sourMsg, false);
+                desRootStorage = GetRootStorage(desMsg, false);
+
+                var sourTopStruct = new TopLevelStruct(sourRootStorage);
+                var desRootStruct = new TopLevelStruct(desRootStorage);
+
+                sourTopStruct.Parser();
+                desRootStruct.Parser();
+
+                var stringbuilder = new StringBuilder();
+                sourTopStruct.Compare(desRootStruct, stringbuilder, 0);
+                Debug.WriteLine(stringbuilder.ToString());
+            }
+            finally
+            {
+                ReleaseComObj(sourRootStorage);
+                ReleaseComObj(desRootStorage);
+            }
+        }
+
         private List<byte[]> GetContentFromBin(Stream stream)
         {
             List<byte[]> allBuffer = new List<byte[]>();
@@ -185,7 +270,8 @@ namespace FastTransferUtil.CompoundFile
             stream.Seek(0, SeekOrigin.Begin);
             BinaryReader reader = new BinaryReader(stream);
             {
-                while (stream.Position < stream.Length) {
+                while (stream.Position < stream.Length)
+                {
                     int iGuessIsTag = reader.ReadInt32();
                     int subBufferCount = reader.ReadInt32();
                     byte[] subBuffer = null;
@@ -236,5 +322,5 @@ namespace FastTransferUtil.CompoundFile
         }
     }
 
-    
+
 }

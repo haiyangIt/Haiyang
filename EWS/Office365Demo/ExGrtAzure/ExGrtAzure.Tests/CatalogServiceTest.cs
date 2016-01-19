@@ -41,7 +41,7 @@ namespace ExGrtAzure.Tests
 
         public static ICatalogService GetCatalogService()
         {
-            var service = _factory.NewCatalogService("devO365admin@arcservemail.onmicrosoft.com", "Loro0237", null, "Arcserve");
+            var service = _factory.NewCatalogService("devO365admin@arcservemail.onmicrosoft.com", "arcserve1!", null, "Arcserve");
             return service;
         }
 

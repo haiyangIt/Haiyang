@@ -48,5 +48,29 @@ namespace FastTransferUtil.CompoundFile.MsgStruct.Helper
         {
             stream.Write(Zero, byteCount, IntPtr.Zero);
         }
+
+        public static Int64 ReadInt64(this IStream stream, ref int readCount)
+        {
+            byte[] value = new byte[8];
+            stream.Read(value, 8, IntPtr.Zero);
+            readCount += 8;
+            return BitConverter.ToInt64(value, 0);
+        }
+
+        public static Int32 ReadInt32(this IStream stream, ref int readCount)
+        {
+            byte[] value = new byte[4];
+            stream.Read(value, 4, IntPtr.Zero);
+            readCount += 4;
+            return BitConverter.ToInt32(value, 0);
+        }
+
+        public static Int16 ReadInt16(this IStream stream, ref int readCount)
+        {
+            byte[] value = new byte[2];
+            stream.Read(value, 2, IntPtr.Zero);
+            readCount += 2;
+            return BitConverter.ToInt16(value, 0);
+        }
     }
 }

@@ -33,12 +33,25 @@ namespace FastTransferUtil.CompoundFile.MsgStruct
             }
         }
 
+        private Dictionary<uint, uint> _namedPropIdToChangedId = new Dictionary<uint, uint>();
+        protected override Dictionary<uint, uint> NamedPropIdToChangedId
+        {
+            get
+            {
+                return _namedPropIdToChangedId;
+            }
+        }
+
         public TopLevelStruct(IStorage rootStorage) : base(null)
         {
             this.rootStorage = rootStorage;
             Storage = rootStorage;
         }
 
+        private static Guid PS_MAPI_CA = new Guid(0x00020328, 0x0000, 0x0000, 0xC0, 0x00, 0x0, 0x00, 0x0, 0x00, 0x00, 0x46);
+        private static Guid PS_PUBLIC_STRINGS_CA = new Guid(0x00020329, 0x0000, 0x0000, 0xC0, 0x00, 0x0, 0x00, 0x0, 0x00, 0x00, 0x46);
+
+        #region Build Struct
         protected override void BuildHeader(IStream propertyStream)
         {
             // 1.1.1 Set 8 bytes reserve.
@@ -62,9 +75,6 @@ namespace FastTransferUtil.CompoundFile.MsgStruct
             BuildInternal();
         }
 
-        private static Guid PS_MAPI_CA = new Guid(0x00020328, 0x0000, 0x0000, 0xC0, 0x00, 0x0, 0x00, 0x0, 0x00, 0x00, 0x46);
-        private static Guid PS_PUBLIC_STRINGS_CA = new Guid(0x00020329, 0x0000, 0x0000, 0xC0, 0x00, 0x0, 0x00, 0x0, 0x00, 0x00, 0x46);
-
         private void BuildNamedProperty()
         {
             //1. Create NameidStorage
@@ -86,8 +96,6 @@ namespace FastTransferUtil.CompoundFile.MsgStruct
 
                 //4. Create String Stream
                 m_pStringStream = CompoundFileUtil.Instance.GetChildStream("__substg1.0_00040102", true, m_pStorage);
-
-
 
                 uint index = 0;
                 uint size = (uint)NamedProperties.Count;
@@ -194,6 +202,7 @@ namespace FastTransferUtil.CompoundFile.MsgStruct
                     pStream.Write(id);
                     pStream.Write(indexKindPart);
 
+                    index++;
                 }
 
 
@@ -226,6 +235,26 @@ namespace FastTransferUtil.CompoundFile.MsgStruct
 
             }
         }
+        #endregion
+
+        #region Parser 
+        protected override void ParserHeader(IStream propertyHeaderStream, ref int readCount)
+        {
+            base.ParserHeader(propertyHeaderStream, ref readCount);
+            propertyHeaderStream.ReadInt64(ref readCount);
+        }
+
+        protected override void GetStorageForParser()
+        {
+            Storage = rootStorage;
+        }
+
+        public override void Parser()
+        {
+            ParserInternal();
+        }
+
+        #endregion
 
 
     }

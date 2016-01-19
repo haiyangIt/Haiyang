@@ -26,6 +26,10 @@ namespace EwsService.Impl
             {
                 return ExportType.TransferBin;
             }
+            set
+            {
+
+            }
         }
 
         private RestoreDestinationImpl _restoreHelper;

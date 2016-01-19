@@ -14,7 +14,7 @@ namespace TestBuildMessage
         [TestMethod]
         public void TestGlobal()
         {
-            
+
         }
 
         [TestMethod]
@@ -128,14 +128,15 @@ namespace TestBuildMessage
                 CompoundFileUtil.Instance.ReleaseComObj(lockBytes);
             }
         }
-        
+
         [TestMethod]
         public void TestCreateMsgFromBin()
         {
-            string binFilePath = @"D:\21GitHub\Haiyang\EWS\99TestFile\Old\Test.bin";
-            string msgFilePath = string.Format( @"D:\21GitHub\Haiyang\EWS\99TestFile\New\{0}.msg", DateTime.Now.ToString("yyyyMMddHHmmss"));
+            string binFilePath = @"D:\21GitHub\Haiyang\EWS\99TestFile\Old\TestAppointMent.bin";
+            string msgFilePath = string.Format(@"D:\21GitHub\Haiyang\EWS\99TestFile\New\{0}.msg", DateTime.Now.ToString("yyyyMMddHHmmss"));
             ILockBytes memory = null;
-            try {
+            try
+            {
                 using (StreamReader reader = new StreamReader(binFilePath))
                 {
                     CompoundFileUtil.Instance.BuildMsgInMemoryWithBin(reader.BaseStream, out memory);
@@ -149,6 +150,25 @@ namespace TestBuildMessage
             finally
             {
                 CompoundFileUtil.Instance.ReleaseComObj(memory);
+            }
+        }
+
+        [TestMethod]
+        public void CompareMsg()
+        {
+            string sourMsgFile = @"D:\21GitHub\Haiyang\EWS\99TestFile\Old\Contact.msg";
+            string desMsgFile = @"D:\21GitHub\Haiyang\EWS\99TestFile\New\20160119142609.msg";
+
+            CompoundFileUtil.Instance.CompareMsg(sourMsgFile, desMsgFile);
+        }
+
+        [TestMethod]
+        public void ParseContactBin()
+        {
+            string binFilePath = @"D:\21GitHub\Haiyang\EWS\99TestFile\Old\Contact-Chenguohua.bin";
+            using (StreamReader reader = new StreamReader(binFilePath))
+            {
+                CompoundFileUtil.Instance.ParseBin(reader.BaseStream);
             }
         }
     }

@@ -84,7 +84,7 @@
                     <div class="form-group">
                         <label class="col-md-5 control-label">Restore Admin Password:</label>
                         <div class="col-md-7">
-                            <input type="password" id="RestoreAdminPassword" value="Loro0237" name="RestoreAdminPassword" class="form-control" required />
+                            <input type="password" id="RestoreAdminPassword" value="arcserve1!" name="RestoreAdminPassword" class="form-control" required />
                         </div>
                     </div>
                     <div class="form-group hidden" id="restore_dump">
@@ -97,6 +97,15 @@
                         <label class="control-label col-md-5">Destination Folder:</label>
                         <div class="col-md-7">
                             <input type="text" id="RestoreFolder" name="RestoreFolder" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="form-group hidden" id="dump_type">
+                        <label class="control-label col-md-5">Destination Folder:</label>
+                        <div class="col-md-3" style="margin-top:8px;">
+                            <lable class="control-label" data-toggle="tooltip" title="Mail to eml, Contact to vcf, Appointment to vcs" ><input type="radio" id="RestoreTypeEml" name="ExportType" value="2" checked="checked" required />&nbsp;Eml/Vcf/Vcs..</lable>
+                        </div>
+                        <div class="col-md-4" style="margin-top:8px;">
+                            <lable class="control-label" data-toggle="tooltip" title="All item to msg" ><input type="radio" id="RestoreTypeMsg" name="ExportType" value="3" required />&nbsp;Msg</lable>
                         </div>
                     </div>
                 </fieldset>
@@ -347,6 +356,7 @@
                             $("[name='RestoreType']").bind("click.restore", function () {
                                 $("#restore_dump").toggleClass("hidden");
                                 $("#restore_original").toggleClass("hidden");
+                                $("#dump_type").toggleClass("hidden");
                             });
                         }
                     })
@@ -376,6 +386,7 @@
                     var adminUserName = $("#RestoreAdminUser").val();
                     var adminPassword = $("#RestoreAdminPassword").val();
                     var adminUser = { UserAddress: adminUserName, Password: adminPassword, Organization: organization };
+                    var exportType = $("[name='ExportType']:checked").val();
                     if (restoreType == "1") {
                         var date = new Date();
                         var folderName = $("#RestoreFolder").val();
@@ -401,7 +412,7 @@
 
                     }
                     else if (restoreType == "2") {
-                        var data = { catalog: catalogInfo, restoreAdminUserInfo: adminUser, selectedItem: selectedItems, notificationAddress: $("#NotificationAddress").val() };
+                        var data = { catalog: catalogInfo, restoreAdminUserInfo: adminUser, selectedItem: selectedItems, notificationAddress: $("#NotificationAddress").val(), exportType: exportType };
                         Arcserve.DataProtect.Util.Ajax.SetLoadingDialog({ title: "Processing", isLoading: true });
                         Arcserve.DataProtect.Util.Post(data, "@Url.Action("DumpItems")", function (data) {
 

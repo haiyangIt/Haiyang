@@ -70,27 +70,6 @@ namespace ExGrtAzure.Tests
         //    Assert.AreEqual(size, 10);
         //}
 
-            [TestMethod]
-        public void TestStack()
-        {
-            Stack<string> test = new Stack<string>();
-            test.Push("0");
-            test.Push("00");
-            test.Push("000");
-
-            List<string> testList = new List<string>(4);
-            testList.Add("0000");
-            testList.AddRange(test);
-
-            Stack<string> other = new Stack<string>(testList);
-
-            while (other.Count > 0)
-            {
-                Debug.WriteLine(other.Pop());
-            }
-
-        }
-
         [TestMethod]
         public void FormatString()
         {

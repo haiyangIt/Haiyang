@@ -25,6 +25,6 @@ namespace DataProtectInterface
 
         void RestoreComplete(bool success, Exception ex);
 
-        ExportType ExportType { get; }
+        ExportType ExportType { get; set; }
     }
 }

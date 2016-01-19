@@ -26,18 +26,24 @@ namespace FastTransferUtil.CompoundFile.MsgStruct
             }
         }
 
-        internal override IStorage Storage
+        //internal override IStorage Storage
+        //{
+        //    get
+        //    {
+        //        return ParentStruct.Storage;
+        //    }
+        //    set
+        //    {
+        //        throw new InvalidProgramException();
+        //    }
+        //}
+
+        protected override void CreateSelfStorageForBuild()
         {
-            get
-            {
-                return ParentStruct.Storage;
-            }
-            set
-            {
-                throw new InvalidProgramException();
-            }
+            Storage = ParentStruct.Storage;
         }
 
+        #region Build Struct
         public AttachmentStruct CreateAttachment()
         {
             var attachmentStruct = new AttachmentStruct(this, AttachmentProperties.Count);
@@ -104,10 +110,14 @@ namespace FastTransferUtil.CompoundFile.MsgStruct
                 this.Properties.AddProperty(new SpecialVarStringProperty(0x0E03001F, ccDisplayName));
                 this.Properties.AddProperty(new SpecialVarStringProperty(0x0E04001F, toDisplayName));
 
+                if (this.Properties.ContainProperty(0x3FD9001F))
+                {
+                    var property3FD9 = Properties.GetProperty(0x3FD9001F);
+                    this.Properties.AddProperty(new SpecialVarStringProperty(0x1000001F, property3FD9.PropValue.BytesForMsg));
+                }
+
             }
             base.BuildEx();
-
-
         }
 
         private byte[] GetDisplayName(RecvType type)
@@ -115,12 +125,12 @@ namespace FastTransferUtil.CompoundFile.MsgStruct
             if (RecipientProperties.Count == 0)
                 return new byte[0];
             List<byte> result = new List<byte>();
-            
-            foreach(var recvStruct in RecipientProperties)
+
+            foreach (var recvStruct in RecipientProperties)
             {
                 var recvTypeProp = recvStruct.Properties.GetProperty(0x0C150003);
                 var recvType = BitConverter.ToInt32(recvTypeProp.PropValue.BytesForMsg, 0);
-                if(recvType == (int)type)
+                if (recvType == (int)type)
                 {
                     IPropValue recvDisplayName = null;
                     if (recvStruct.Properties.ContainProperty(0x3001001F))
@@ -136,11 +146,15 @@ namespace FastTransferUtil.CompoundFile.MsgStruct
 
                     result.AddRange(recvDisplayName.PropValue.BytesForMsg);
                     result.AddRange(BitConverter.GetBytes((short)0x003B));
+                    result.AddRange(BitConverter.GetBytes((short)0x0020));
+
                 }
             }
 
-            if(result.Count > 0)
+            if (result.Count > 0)
             {
+                result.RemoveAt(result.Count - 1);
+                result.RemoveAt(result.Count - 1);
                 result.RemoveAt(result.Count - 1);
                 result.RemoveAt(result.Count - 1);
             }
@@ -163,9 +177,99 @@ namespace FastTransferUtil.CompoundFile.MsgStruct
             }
             return base.ModifyPropertyValue(property);
         }
+        #endregion
 
         protected override void Release(bool hasError)
         {
+        }
+
+        protected override void ParserHeader(IStream propertyHeaderStream, ref int readCount)
+        {
+            Int64 value = propertyHeaderStream.ReadInt64(ref readCount);
+            Int32 recipientCount = propertyHeaderStream.ReadInt32(ref readCount);
+            Int32 attachmentCount = propertyHeaderStream.ReadInt32(ref readCount);
+            recipientCount = propertyHeaderStream.ReadInt32(ref readCount);
+            attachmentCount = propertyHeaderStream.ReadInt32(ref readCount);
+
+            for (int i = 0; i < recipientCount; i++)
+            {
+                var recipientStruct = CreateRecipient();
+                recipientStruct.Parser();
+            }
+
+            for (int i = 0; i < attachmentCount; i++)
+            {
+                var attachmentStruct = CreateAttachment();
+                attachmentStruct.Parser();
+            }
+        }
+
+        protected override void GetStorageForParser()
+        {
+            if (Storage == null)
+            {
+                Storage = ParentStruct.Storage;
+            }
+        }
+
+        protected override void ParserEx()
+        {
+
+        }
+
+        internal void ParserInternal()
+        {
+            base.ParserEx();
+        }
+
+
+        public override bool Compare(object other, StringBuilder result, int indent)
+        {
+            var desStruct = other as MessageContentStruct;
+            if (desStruct == null)
+            {
+                BaseStruct.SetMessage(result, indent, "{0} Type is not messagecontent.", Name);
+                return false;
+            }
+
+            bool returnResult = true;
+
+            var isSame = base.Compare(other, result, indent);
+            if (!isSame) returnResult = false;
+
+            if (RecipientProperties.Count != desStruct.RecipientProperties.Count)
+            {
+                BaseStruct.SetMessage(result, indent, "{0} RecipientCount is not same, left: {1}, right: {2}.", Name, RecipientProperties.Count, desStruct.RecipientProperties.Count);
+            }
+            else
+            {
+                var count = RecipientProperties.Count;
+                for (int i = 0; i < count; i++)
+                {
+                    if(!RecipientProperties[i].Compare(desStruct.RecipientProperties[i], result, indent + 2))
+                    {
+                        returnResult = false;
+                    }
+                }
+            }
+
+            if (AttachmentProperties.Count != desStruct.AttachmentProperties.Count)
+            {
+                BaseStruct.SetMessage(result, indent, "{0} AttachmentCount is not same, left: {1}, right: {2}.", Name, AttachmentProperties.Count, desStruct.AttachmentProperties.Count);
+            }
+            else
+            {
+                var count = AttachmentProperties.Count;
+                for (int i = 0; i < count; i++)
+                {
+                    if(!AttachmentProperties[i].Compare(desStruct.AttachmentProperties[i], result, indent + 2))
+                    {
+                        returnResult = false;
+                    }
+                }
+            }
+
+            return returnResult;
         }
     }
 }
