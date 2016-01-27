@@ -15,7 +15,7 @@
 @Styles.Render("~/bundles/bootstrapselectcss")
 @Styles.Render("~/bundles/bootstrapdialogcss")
 
-@using (Ajax.BeginForm("Index", "Backup", new AjaxOptions { OnSuccess="SubmitFormSuccess" }, new { @class = "form-horizontal", role = "form" }))
+@using (Ajax.BeginForm("Index", "Backup", new AjaxOptions { OnSuccess = "SubmitFormSuccess" }, new { @class = "form-horizontal", role = "form", id = "BackupForm" }))
 {
     @Html.AntiForgeryToken()
     <hr />
@@ -38,19 +38,19 @@
         </div>
         <div class="tab-content">
             @*<div class="tab-pane" id="tab1">
-                <div class="form-group">
-                    <label class="col-md-3 control-label">Backup Job Name:</label>
-                    <div class="col-md-9">
-                        <input type="text" id="BackupJobName" name="BackupJobName" class="form-control" required/>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">Backup Job Name:</label>
+                        <div class="col-md-9">
+                            <input type="text" id="BackupJobName" name="BackupJobName" class="form-control" required/>
+                        </div>
                     </div>
-                </div>
-            </div>*@
+                </div>*@
 
             <div class="tab-pane" id="tab1">
                 <div class="form-group">
                     @Html.LabelFor(m => m.BackupUserMailAddress, new { @class = "col-md-3 control-label" })
                     <div class="col-md-9">
-                        @Html.TextBoxFor(m => m.BackupUserMailAddress, new { @class = "form-control" , @data_toggle="tooltip", @title="this user must be impersonated for the mailbox users who need backup." })
+                        @Html.TextBoxFor(m => m.BackupUserMailAddress, new { @class = "form-control", @data_toggle = "tooltip", @title = "this user must be impersonated for the mailbox users who need backup." })
                         @Html.ValidationMessageFor(m => m.BackupUserMailAddress, "", new { @class = "text-danger" })
                     </div>
                 </div>
@@ -104,7 +104,8 @@
 }
 
 @section Scripts {
-@Scripts.Render("~/bundles/bootstrapdialog")
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/bootstrapdialog")
     @Scripts.Render("~/bundles/bootstrapwizard")
     @Scripts.Render("~/bundles/arcserveutil")
     @Scripts.Render("~/bundles/three-status-select")
@@ -129,6 +130,10 @@
             var isFinished = false;
             wizard.bootstrapWizard({
                 onNext: function (tab, navigation, index) {
+                    if (!$("#BackupForm").valid()) {
+                        return false;
+                    }
+
                     Arcserve.DataProtect.Util.Ajax.SetLoadingDialog({ title: "Validation" });
                     Arcserve.DataProtect.Util.Ajax.loading();
                     if (index == parseInt("@ViewBag.SummaryStepNumber")) {
@@ -142,7 +147,7 @@
                         }
                     }
                     wizard.bootstrapWizard('show', index - 1);
-                    
+
                     $("#submitbtn").click();
                     return false;
                 },
@@ -245,8 +250,7 @@
                     return;
                 }
 
-                if (data.Index == parseInt("@ViewBag.MailboxAndFolderStepNumber"))
-                {
+                if (data.Index == parseInt("@ViewBag.MailboxAndFolderStepNumber")) {
                     if (typeof (data.IsSuccess) != "undefined") {
                         if (!data.IsSuccess) {
                             wizard.bootstrapWizard('show', data.Index - 1);

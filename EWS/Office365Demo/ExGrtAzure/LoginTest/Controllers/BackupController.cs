@@ -32,7 +32,7 @@ namespace LoginTest.Controllers
                 SettingModel model = context.Settings.Where(s => s.UserMail == user.Email).FirstOrDefault();
                 if(model == null)
                 {
-                    return View();
+                    return View(new BackupModel());
                 }
                 else
                 {
