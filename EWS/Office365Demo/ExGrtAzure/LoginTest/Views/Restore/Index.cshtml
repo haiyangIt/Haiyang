@@ -5,6 +5,9 @@
 
 @{
     ViewBag.Title = "Index";
+    ViewBag.Dump = 2;
+    ViewBag.Org = 3;
+    ViewBag.Alter = 1;
     //Layout = "~/Views/Shared/_Layout.cshtml";
 }
 @Styles.Render("~/bundles/bootstrapdialogcss")
@@ -65,11 +68,14 @@
                 <fieldset>
                     <legend>Choose Restore Type</legend>
                     <div class="form-group">
-                        <div class="col-md-3 col-md-offset-2">
-                            <lable class="control-label"><input type="radio" id="RestoreToOrg" name="RestoreType" value="1" checked="checked" required />&nbsp;Restore to Orginal</lable>
+                        <div class="col-md-3">
+                            <lable class="control-label"><input type="radio" id="RestoreToOrg" name="RestoreType" value="@ViewBag.Org" checked="checked" required />&nbsp;Restore Orginal</lable>
                         </div>
-                        <div class="col-md-6 col-md-offset-1">
-                            <lable class="control-label"><input type="radio" id="RestoreToAzure" name="RestoreType" value="2" required />&nbsp;Dump to Azure Storage</lable>
+                        <div class="col-md-3">
+                            <lable class="control-label"><input type="radio" id="RestoreToAlter" name="RestoreType" value="@ViewBag.Alter" required />&nbsp;Restore Alternative</lable>
+                        </div>
+                        <div class="col-md-6">
+                            <lable class="control-label"><input type="radio" id="RestoreToAzure" name="RestoreType" value="@ViewBag.Dump" required />&nbsp;Dump to Azure Storage</lable>
                         </div>
                     </div>
                 </fieldset>
@@ -93,21 +99,35 @@
                             <input type="text" id="NotificationAddress" name="NotificationAddress" class="form-control" />
                         </div>
                     </div>
-                    <div class="form-group" id="restore_original">
+                    <div class="form-group hidden" id="dump_type">
+                        <label class="control-label col-md-5">Dump Type:</label>
+                        <div class="col-md-3" style="margin-top:8px;">
+                            <lable class="control-label" data-toggle="tooltip" title="Mail to eml, Contact to vcf, Appointment to vcs"><input type="radio" id="RestoreTypeEml" name="ExportType" value="2" checked="checked" required />&nbsp;Eml/Vcf/Vcs..</lable>
+                        </div>
+                        <div class="col-md-4" style="margin-top:8px;">
+                            <lable class="control-label" data-toggle="tooltip" title="All item to msg"><input type="radio" id="RestoreTypeMsg" name="ExportType" value="3" required />&nbsp;Msg</lable>
+                        </div>
+                    </div>
+                    <div class="form-group hidden" id="restore_alternative_mailbox">
+                        <label class="control-label col-md-5">Destination Mailbox:</label>
+                        <div class="col-md-7">
+                            <input type="text" id="RestoreAlterMailbox" name="RestoreAlterMailbox" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="form-group hidden" id="restore_alternative_folder">
+                        <label class="control-label col-md-5">Destination Folder:</label>
+                        <div class="col-md-7">
+                            <input type="text" id="RestoreAlterFolder" name="RestoreAlterFolder" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="form-group" id="restore_original_folder">
                         <label class="control-label col-md-5">Destination Folder:</label>
                         <div class="col-md-7">
                             <input type="text" id="RestoreFolder" name="RestoreFolder" class="form-control" />
                         </div>
                     </div>
-                    <div class="form-group hidden" id="dump_type">
-                        <label class="control-label col-md-5">Destination Folder:</label>
-                        <div class="col-md-3" style="margin-top:8px;">
-                            <lable class="control-label" data-toggle="tooltip" title="Mail to eml, Contact to vcf, Appointment to vcs" ><input type="radio" id="RestoreTypeEml" name="ExportType" value="2" checked="checked" required />&nbsp;Eml/Vcf/Vcs..</lable>
-                        </div>
-                        <div class="col-md-4" style="margin-top:8px;">
-                            <lable class="control-label" data-toggle="tooltip" title="All item to msg" ><input type="radio" id="RestoreTypeMsg" name="ExportType" value="3" required />&nbsp;Msg</lable>
-                        </div>
-                    </div>
+                    
+                    
                 </fieldset>
             </div>
         </form>
@@ -304,7 +324,7 @@
                 modelDialogHtml = modelDialogHtml.replace(/(\r\n|\n|\r)/gm, "");
                 $(".restore-destination-container").html("");
                 var formValidator = null;
-                
+
 
                 $("#RestoreBtn").on("click", function () {
                     var isSelected = Restore.Item.IsSelectAnyItem(restoreCacheKey);
@@ -341,6 +361,12 @@
                                     RestoreFolder: {
                                         required: "#RestoreToOrg:checked"
                                     },
+                                    RestoreAlterFolder:{
+                                        required: "#RestoreToAlter:checked"
+                                    },
+                                    RestoreAlterMailbox:{
+                                        required: "#RestoreToAlter:checked"
+                                    },
                                     NotificationAddress: {
                                         required: "#RestoreToAzure:checked"
                                     },
@@ -354,9 +380,28 @@
                             });
 
                             $("[name='RestoreType']").bind("click.restore", function () {
-                                $("#restore_dump").toggleClass("hidden");
-                                $("#restore_original").toggleClass("hidden");
-                                $("#dump_type").toggleClass("hidden");
+                                var exportType = $("[name='ExportType']:checked").val();
+                                if (exportType == "@ViewBag.Org") {
+                                    $("#restore_dump").addClass("hidden");
+                                    $("#restore_alternative_mailbox").addClass("hidden");
+                                    $("#restore_alternative_folder").addClass("hidden");
+                                    $("#restore_original_folder").removeClass("hidden");
+                                    $("#dump_type").addClass("hidden");
+                                }
+                                else if(exportType == "@ViewBag.Alter") {
+                                    $("#restore_dump").addClass("hidden");
+                                    $("#restore_alternative_mailbox").removeClass("hidden");
+                                    $("#restore_alternative_folder").removeClass("hidden");
+                                    $("#restore_original_folder").addClass("hidden");
+                                    $("#dump_type").addClass("hidden");
+                                }
+                                else if (exportType == "@ViewBag.Dump") {
+                                    $("#restore_dump").removeClass("hidden");
+                                    $("#restore_alternative_mailbox").addClass("hidden");
+                                    $("#restore_alternative_folder").addClass("hidden");
+                                    $("#restore_original_folder").addClass("hidden");
+                                    $("#dump_type").removeClass("hidden");
+                                }
                             });
                         }
                     })
@@ -381,20 +426,20 @@
                         Arcserve.DataProtect.Util.Alert({ message: "No item selected." });
                         return;
                     }
-                    
+
                     var restoreType = $("[name='RestoreType']:checked").val();
                     var adminUserName = $("#RestoreAdminUser").val();
                     var adminPassword = $("#RestoreAdminPassword").val();
                     var adminUser = { UserAddress: adminUserName, Password: adminPassword, Organization: organization };
                     var exportType = $("[name='ExportType']:checked").val();
-                    if (restoreType == "1") {
+                    if (restoreType == "@ViewBag.Alter") {
                         var date = new Date();
-                        var folderName = $("#RestoreFolder").val();
-                        //var folderName = (+date).toString();
-                        var destination = { MailboxAddress: "haiyang.ling@arcserve.com", FolderPath: folderName };
+                        var folderName = $("#RestoreAlterFolder").val();
+                        var mailboxAddress = $("#RestoreAlterMailbox").val();
+                        var destination = { MailboxAddress: mailboxAddress, FolderPath: folderName };
                         var data = { catalog: catalogInfo, restoreAdminUserInfo: adminUser, destination: destination, selectedItem: selectedItems };
                         Arcserve.DataProtect.Util.Ajax.SetLoadingDialog({ title: "Processing" ,isLoading: true});
-                        Arcserve.DataProtect.Util.Post(data, "@Url.Action("RestoreItems")", function (data) {
+                        Arcserve.DataProtect.Util.Post(data, "@Url.Action("RestoreItemsToAlter")", function (data) {
 
                             Arcserve.DataProtect.Util.Alert({
                                 type: BootstrapDialog.TYPE_INFO,
@@ -411,7 +456,29 @@
                         });
 
                     }
-                    else if (restoreType == "2") {
+                    else if (restoreType == "@ViewBag.Org") {
+                        var date = new Date();
+                        var folderName = $("#RestoreFolder").val();
+                        var destination = { FolderPath: folderName };
+                        var data = { catalog: catalogInfo, restoreAdminUserInfo: adminUser, destination: destination, selectedItem: selectedItems };
+                        Arcserve.DataProtect.Util.Ajax.SetLoadingDialog({ title: "Processing" ,isLoading: true});
+                        Arcserve.DataProtect.Util.Post(data, "@Url.Action("RestoreItemsToOrg")", function (data) {
+
+                            Arcserve.DataProtect.Util.Alert({
+                                type: BootstrapDialog.TYPE_INFO,
+                                title: "Info",
+                                message: "restore finished.",
+                                callbackForYes: function (infoDialog) {
+                                    //dialog.dialog("close");
+                                    infoDialog.close();
+                                    selfDialog.close();
+                                }
+                            })
+
+                            //alert("restore finished.");
+                        });
+                    }
+                    else if (restoreType == "@ViewBag.Dump") {
                         var data = { catalog: catalogInfo, restoreAdminUserInfo: adminUser, selectedItem: selectedItems, notificationAddress: $("#NotificationAddress").val(), exportType: exportType };
                         Arcserve.DataProtect.Util.Ajax.SetLoadingDialog({ title: "Processing", isLoading: true });
                         Arcserve.DataProtect.Util.Post(data, "@Url.Action("DumpItems")", function (data) {

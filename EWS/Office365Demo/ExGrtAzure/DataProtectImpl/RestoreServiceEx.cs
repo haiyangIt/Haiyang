@@ -101,6 +101,13 @@ namespace DataProtectImpl
 
             isLoadUnloadChildren = false;
             isEnd = false;
+
+            if (item.CanSelect == 0)
+            {
+                isEnd = true;
+                return;
+            }
+
             switch (itemStatus)
             {
                 case SelectedItemStatus.Selected:
@@ -358,7 +365,7 @@ namespace DataProtectImpl
 
         private void RestoreEnd()
         {
-            Destination.RestoreComplete(true, null);
+            Destination.RestoreComplete(true, this, null);
         }
 
         private void RestoreStart()

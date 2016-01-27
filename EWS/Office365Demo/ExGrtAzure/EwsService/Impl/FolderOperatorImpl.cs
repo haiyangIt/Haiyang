@@ -7,6 +7,7 @@ using EwsServiceInterface;
 using System.Threading;
 using DataProtectInterface.Util;
 using EwsDataInterface;
+using DataProtectInterface;
 
 namespace EwsService.Impl
 {
@@ -16,6 +17,7 @@ namespace EwsService.Impl
         {
             CurrentExchangeService = service;
         }
+
 
         public ExchangeService CurrentExchangeService
         {
@@ -56,11 +58,6 @@ namespace EwsService.Impl
         public bool IsFolderNeedGenerateCatalog(Folder folder)
         {
             return FolderClassUtil.IsFolderValid(folder.FolderClass);
-        }
-
-        public IItem NewItemOperatorInstance()
-        {
-            return new ItemOperatorImpl(CurrentExchangeService);
         }
 
         public FolderId CreateChildFolder(IFolderDataBase folderData, FolderId parentFolderId)

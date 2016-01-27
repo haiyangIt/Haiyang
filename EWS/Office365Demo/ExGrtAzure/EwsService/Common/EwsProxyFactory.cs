@@ -28,6 +28,7 @@ namespace EwsService.Common
                 sError += string.Format("Error: {0}\r\n", oException.HResult);
                 sError += oException.ToString();
                 LogFactory.LogInstance.WriteLog(LogLevel.ERR, "Autodiscovery error", sError);
+                throw new ApplicationException("Autodiscovery error", oException);
                 return false;
             }
             catch (System.IO.IOException oIOException)
@@ -35,6 +36,7 @@ namespace EwsService.Common
                 sError += string.Format("Error: {0}\r\n", oIOException.HResult);
                 sError = oIOException.ToString();
                 LogFactory.LogInstance.WriteLog(LogLevel.ERR, "Autodiscovery error", sError);
+                throw new ApplicationException("Autodiscovery error", oIOException);
                 return false;
             }
 

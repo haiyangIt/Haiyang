@@ -12,7 +12,6 @@ namespace DataProtectInterface
         string CurrentMailbox { get; set; }
         IServiceContext CurrentContext { get; }
         EwsServiceArgument Argument { get; }
-        Dictionary<string, object> OtherInformation { get; }
 
         IDataAccess DataAccessObj { get; }
 

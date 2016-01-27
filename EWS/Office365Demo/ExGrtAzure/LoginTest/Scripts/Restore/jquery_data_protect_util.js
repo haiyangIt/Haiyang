@@ -19,13 +19,16 @@ defaultOptions:{
 Arcserve.DataProtect.Util.Ajax = function (options) {
     var setting = $.extend({}, Arcserve.DataProtect.Util.Ajax.DefaultOptions, options);
     var data = "";
+    var contentType = "application/x-www-form-urlencoded; charset=UTF-8";
     if (options.data instanceof Object) {
         data = JSON.stringify(options.data);
+        contentType = setting.contentType;
     }
+    else if (typeof(options.data) == "string")
+        data = options.data;
 
     if (typeof (setting.url) === "undefined")
         alert("please check code, missing ajax url.");
-
 
     var isLoading = false;
     var timeOut = setTimeout(function () {
@@ -37,7 +40,7 @@ Arcserve.DataProtect.Util.Ajax = function (options) {
         url: setting.url,
         type: setting.type,
         method: setting.method,
-        contentType: setting.contentType,// "application/json; charset=utf-8",
+        contentType: contentType,// "application/json; charset=utf-8",
         data: data,
         error: function (jqXhr, textStatus, errorThrown) {
             setting.error(jqXhr, textStatus, errorThrown);
@@ -55,7 +58,8 @@ Arcserve.DataProtect.Util.Ajax = function (options) {
         }
     });
 
-    
+
+
 };
 
 Arcserve.DataProtect.Util.Post = function (data, url, success, complete, error) {

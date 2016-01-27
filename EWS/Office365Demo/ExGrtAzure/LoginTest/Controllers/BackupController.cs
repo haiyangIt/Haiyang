@@ -14,6 +14,7 @@ using Demo.Models.Restore;
 using EwsDataInterface;
 using EwsServiceInterface;
 using System.Web.Script.Serialization;
+using LoginTest.Models.Setting;
 
 namespace LoginTest.Controllers
 {
@@ -25,14 +26,27 @@ namespace LoginTest.Controllers
         {
             var currentUserId = User.Identity.GetUserId();
             ApplicationUser user = HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>().FindById(currentUserId);
-            var backupModel = new BackupModel()
+
+            using (ApplicationDbContext context = new ApplicationDbContext())
             {
-                BackupUserMailAddress = "devO365admin@arcservemail.onmicrosoft.com",// todo  user.Email,
-                BackupUserOrganization = user.Organization,
-                BackupUserPassword = "arcserve1!",
-                Index = 0
-            };
-            return View(backupModel);
+                SettingModel model = context.Settings.Where(s => s.UserMail == user.Email).FirstOrDefault();
+                if(model == null)
+                {
+                    return View();
+                }
+                else
+                {
+                    var backupModel = new BackupModel()
+                    {
+                        BackupUserMailAddress = model.AdminUserName,// todo  user.Email,
+                        BackupUserOrganization = user.Organization,
+                        BackupUserPassword = model.AdminPassword,
+                        Index = 0
+                    };
+                    return View(backupModel);
+                }
+            }
+                
         }
 
         [Authorize]
@@ -45,34 +59,98 @@ namespace LoginTest.Controllers
                 model.Index++;
                 if (model.Index == 3)
                     Run(model);
+
+                if (model.Index == 1)
+                {
+                    IMailbox mailboxOper = CatalogFactory.Instance.NewMailboxOperatorImpl();
+                    EwsServiceArgument argument = new EwsServiceArgument();
+                    argument.ServiceCredential = new System.Net.NetworkCredential(model.BackupUserMailAddress, model.BackupUserPassword);
+                    argument.UseDefaultCredentials = false;
+                    argument.SetConnectMailbox(model.BackupUserMailAddress);
+                    try
+                    {
+                        mailboxOper.ConnectMailbox(argument, model.BackupUserMailAddress);
+                        return Json(model);
+                    }
+                    catch
+                    {
+                        return Json(new { IsSuccess = false, Index = model.Index });
+                    }
+                }
             }
 
             return Json(model);
         }
 
-        public ActionResult GetAllMailbox(string mailbox, string password, string organization)
+        [Authorize]
+        [HttpPost]
+        public ActionResult GetAllMailbox(BackupModel model)
         {
+            var mailbox = model.BackupUserMailAddress;
+            var password = model.BackupUserPassword;
+            var organization = model.BackupUserOrganization;
             ICatalogService service = CatalogFactory.Instance.NewCatalogService(mailbox, password, null, organization);
             var allMailboxes = service.GetAllUserMailbox();
 
             List<Item> infos = new List<Item>(allMailboxes.Count);
+            IMailboxData loginMailbox = null;
+            IMailboxData adminMailbox = null;
+            var loginUserName = User.Identity.GetUserName().ToLower();
+            var adminMailAddress = mailbox.ToLower();
             foreach (var data in allMailboxes)
             {
-                if (data.MailAddress == "haiyang.ling@arcserve.com")
+                var temp = data.MailAddress.ToLower();
+                if (temp == loginUserName)
                 {
-                    infos.Add(new Item()
-                    {
-                        Id = data.MailAddress,
-                        DisplayName = data.DisplayName,
-                        ChildCount = int.MaxValue,
-                        ItemType = ItemTypeStr.Mailbox,
-                        OtherInformation = mailbox
-                    });
-                    break;
+                    loginMailbox = data;
+                }
+                else if (temp == adminMailAddress)
+                {
+                    adminMailbox = data;
+                }
+                else
+                {
+                    AddToResult(data, infos);
                 }
             }
 
+            if(adminMailbox != null)
+            {
+                AddToResult(adminMailbox, infos, 0);
+            }
+
+            if (loginMailbox != null)
+            {
+                AddToResult(loginMailbox, infos, 0);
+            }
+
             return Json(new { Details = infos });
+        }
+
+        private void AddToResult(IMailboxData data, List<Item> infos, int position = -1)
+        {
+            if(position == -1)
+            infos.Add(new Item()
+            {
+                Id = data.MailAddress,
+                DisplayName = data.DisplayName,
+                ChildCount = int.MaxValue,
+                ItemType = ItemTypeStr.Mailbox,
+                CanSelect = 0,
+                OtherInformation = data
+            });
+            else
+            {
+                infos.Insert(position, new Item()
+                {
+                    Id = data.MailAddress,
+                    DisplayName = data.DisplayName,
+                    ChildCount = int.MaxValue,
+                    ItemType = ItemTypeStr.Mailbox,
+                    CanSelect = 1,
+                    OtherInformation = data
+                });
+            }
         }
 
         public ActionResult GetFolderInMailbox(string adminMailbox, string password, string organization, string mailbox, string parentFolderId)
@@ -109,6 +187,7 @@ namespace LoginTest.Controllers
                 //return View(model);
                 // todo need use job table to save job status.
                 var service = CatalogFactory.Instance.NewCatalogService(model.BackupUserMailAddress, model.BackupUserPassword, null, model.BackupUserOrganization);
+                service.CatalogJobName = model.BackupJobName;
                 IFilterItem filterObj = CatalogFactory.Instance.NewFilterItemBySelectTree(selectedItem);
                 service.GenerateCatalog(filterObj);
             }

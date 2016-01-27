@@ -52,7 +52,7 @@ namespace SqlDbImpl.Model
                 throw new NotImplementedException();
             }
         }
-        
+
         [Required]
         [MaxLength(512)]
         [CaseSensitive]
@@ -99,7 +99,7 @@ namespace SqlDbImpl.Model
         internal static string GetItemContainerName(string folderIdMd5Str, int index)
         {
             var context = CatalogFactory.Instance.GetServiceContext();
-            return string.Format("{0}{3}{1}{3}{2}",context.GetOrganizationPrefix(), folderIdMd5Str, index, BlobDataAccess.DashChar);
+            return string.Format("{0}{3}{1}{3}{2}", context.GetOrganizationPrefix(), folderIdMd5Str, index, BlobDataAccess.DashChar);
         }
 
         internal static string GetItemContainerName(IItemData itemData)

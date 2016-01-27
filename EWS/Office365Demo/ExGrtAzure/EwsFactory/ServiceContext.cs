@@ -12,8 +12,6 @@ namespace EwsFrame
     {
         public OrganizationAdminInfo AdminInfo { get; private set; }
 
-        public Dictionary<string, object> OtherInformation { get; private set; }
-
         [ThreadStatic]
         private static IServiceContext _ContextInstance;
 
@@ -21,7 +19,7 @@ namespace EwsFrame
         {
             get
             {
-                if(_ContextInstance == null)
+                if (_ContextInstance == null)
                 {
                     throw new NullReferenceException();
                 }
@@ -31,7 +29,8 @@ namespace EwsFrame
 
         public IServiceContext CurrentContext
         {
-            get {
+            get
+            {
                 return ContextInstance;
             }
         }
@@ -39,31 +38,32 @@ namespace EwsFrame
         [ThreadStatic]
         private static IDataAccess _dataAccessObj;
 
-        public static IDataAccess GetDataAccessInstance(TaskType taskType)
+        public static IDataAccess GetDataAccessInstance(TaskType taskType, EwsServiceArgument argument, string organization)
         {
             if (_dataAccessObj == null)
-                CreateDataAccess(taskType);
+                CreateDataAccess(taskType, argument, organization);
             return _dataAccessObj;
         }
 
-        public IDataAccess DataAccessObj {
+        public IDataAccess DataAccessObj
+        {
             get
             {
-                if(_dataAccessObj == null)
+                if (_dataAccessObj == null)
                 {
-                    CreateDataAccess(TaskType);
+                    CreateDataAccess(TaskType, Argument, AdminInfo.OrganizationName);
                 }
                 return _dataAccessObj;
             }
         }
 
-        private static void CreateDataAccess(TaskType taskType)
+        private static void CreateDataAccess(TaskType taskType, EwsServiceArgument argument, string organization)
         {
-            if(_dataAccessObj == null)
+            if (_dataAccessObj == null)
             {
                 if (taskType == TaskType.Catalog)
                 {
-                    _dataAccessObj = CatalogFactory.Instance.NewCatalogDataAccessInternal();
+                    _dataAccessObj = CatalogFactory.Instance.NewCatalogDataAccessInternal(argument, organization);
                 }
                 else
                 {
@@ -75,21 +75,22 @@ namespace EwsFrame
         public TaskType TaskType { get; private set; }
 
         private EwsServiceArgument _argument;
-        public EwsServiceArgument Argument {
+        public EwsServiceArgument Argument
+        {
             get
             {
-                if(!String.IsNullOrEmpty(CurrentMailbox))
+                if (!String.IsNullOrEmpty(CurrentMailbox))
                 {
-                    _argument.ServiceEmailAddress = CurrentMailbox;
-                    _argument.UserToImpersonate = new ImpersonatedUserId(ConnectingIdType.SmtpAddress, CurrentMailbox);
-                    _argument.SetXAnchorMailbox = true;
-                    _argument.XAnchorMailbox = CurrentMailbox;
+                    _argument.SetConnectMailbox(CurrentMailbox);
                 }
                 return _argument;
             }
         }
 
-        public string Organization { get {
+        public string Organization
+        {
+            get
+            {
                 if (AdminInfo != null)
                     return AdminInfo.OrganizationName;
                 return string.Empty;
@@ -97,16 +98,15 @@ namespace EwsFrame
         }
 
         private string _currentMailbox;
-        public string CurrentMailbox {
+        public string CurrentMailbox
+        {
             get { return _currentMailbox; }
-            set {
+            set
+            {
                 _currentMailbox = value;
                 if (!String.IsNullOrEmpty(CurrentMailbox))
                 {
-                    _argument.ServiceEmailAddress = CurrentMailbox;
-                    _argument.UserToImpersonate = new ImpersonatedUserId(ConnectingIdType.SmtpAddress, CurrentMailbox);
-                    _argument.SetXAnchorMailbox = true;
-                    _argument.XAnchorMailbox = CurrentMailbox;
+                    _argument.SetConnectMailbox(CurrentMailbox);
                 }
             }
         }
@@ -116,29 +116,28 @@ namespace EwsFrame
             get; set;
         }
 
-        private ServiceContext(string userName, string password, string domainName, string organization, TaskType taskType)
+        private ServiceContext(string adminUserName, string adminPassword, string domainName, string organization, TaskType taskType)
         {
             AdminInfo = new OrganizationAdminInfo();
 
-            AdminInfo.UserName = userName;
-            AdminInfo.UserPassword = password;
+            AdminInfo.UserName = adminUserName;
+            AdminInfo.UserPassword = adminPassword;
             AdminInfo.UserDomain = domainName;
             AdminInfo.OrganizationName = organization;
 
-
-
             _argument = new EwsServiceArgument();
-            _argument.ServiceCredential = new System.Net.NetworkCredential(userName, password);
+            _argument.ServiceCredential = new System.Net.NetworkCredential(adminUserName, adminPassword);
             _argument.UseDefaultCredentials = false;
 
-            OtherInformation = new Dictionary<string, object>();
+            CurrentMailbox = adminUserName;
+
             TaskType = taskType;
-            CreateDataAccess(TaskType);
+            CreateDataAccess(TaskType, Argument, organization);
         }
 
         public static IServiceContext NewServiceContext(string userName, string password, string domainName, string organization, TaskType taskType)
         {
-            if(_ContextInstance == null)
+            if (_ContextInstance == null)
                 _ContextInstance = new ServiceContext(userName, password, domainName, organization, taskType);
             return ContextInstance;
         }

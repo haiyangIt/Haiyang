@@ -18,24 +18,26 @@ using SqlDbImpl.Model;
 using System.Data.SqlClient;
 using System.Data.Entity.Core.EntityClient;
 using System.Transactions;
+using EwsServiceInterface;
 
 namespace SqlDbImpl
 {
     public class CatalogDataAccess : DataAccessBase, ICatalogDataAccess
     {
-        private delegate void AddToDbSet<TEntity>(CatalogDbContext context, List<TEntity> lists) where TEntity : class;
-
-        private IServiceContext ServiceContext
+        public CatalogDataAccess(EwsServiceArgument argument, string organization)
         {
-            get
-            {
-                return CatalogFactory.Instance.GetServiceContext();
-            }
+            _argument = argument;
+            _organization = organization;
         }
+
+        private readonly EwsServiceArgument _argument;
+        private readonly string _organization;
+
+        private delegate void AddToDbSet<TEntity>(CatalogDbContext context, List<TEntity> lists) where TEntity : class;
 
         public ICatalogJob GetLastCatalogJob(DateTime thisJobStartTime)
         {
-            using (var context = new CatalogDbContext(new OrganizationModel() { Name = ServiceContext.AdminInfo.OrganizationName }))
+            using (var context = new CatalogDbContext(new OrganizationModel() { Name = _organization }))
             {
                 var lastCatalogInfoQuery = context.Catalogs.Where(c => c.StartTime < thisJobStartTime).OrderByDescending(c => c.StartTime).Take(1);
                 var lastCatalogInfo = lastCatalogInfoQuery.FirstOrDefault();
@@ -50,7 +52,7 @@ namespace SqlDbImpl
             CatalogInfoModel information = catalogJob as CatalogInfoModel;
             if (information == null)
                 throw new ArgumentException("argument type is not right or argument is null", "catalogJob");
-            using (var context = new CatalogDbContext(new OrganizationModel() { Name = ServiceContext.AdminInfo.OrganizationName }, SqlConn, false))
+            using (var context = new CatalogDbContext(new OrganizationModel() { Name = _organization }, SqlConn, false))
             {
                 context.Catalogs.Add(information);
                 context.SaveChanges();
@@ -126,8 +128,7 @@ namespace SqlDbImpl
 
             string containerName = string.Empty;
 
-            var itemOper = CatalogFactory.Instance.NewItemOperatorImpl(itemInEws.Service);
-            IServiceContext context = CatalogFactory.Instance.GetServiceContext();
+            var itemOper = CatalogFactory.Instance.NewItemOperatorImpl(itemInEws.Service, this);
             var itemLocationModel = new ItemLocationModel();
             List<MailLocation> locationInfos = new List<MailLocation>(3);
 
@@ -138,7 +139,7 @@ namespace SqlDbImpl
             try
             {
                 binStream = new MemoryStream();
-                itemOper.ExportItem(itemInEws, binStream, ServiceContext.Argument);
+                itemOper.ExportItem(itemInEws, binStream, _argument);
                 binStream.Capacity = (int)binStream.Length;
                 binStream.Seek(0, SeekOrigin.Begin);
                 var binLocation = new ExportItemSizeInfo() { Type = ExportType.TransferBin, Size = (int)binStream.Length };
@@ -146,7 +147,7 @@ namespace SqlDbImpl
                 binStreamLength = (int)binStream.Length;
 
                 emlStream = new MemoryStream();
-                itemOper.ExportEmlItem(itemInEws, emlStream, ServiceContext.Argument);
+                itemOper.ExportEmlItem(itemInEws, emlStream, _argument);
                 emlStream.Capacity = (int)emlStream.Length;
                 emlStream.Seek(0, SeekOrigin.Begin);
                 var emlLocation = new ExportItemSizeInfo() { Type = ExportType.Eml, Size = (int)emlStream.Length };
@@ -186,7 +187,7 @@ namespace SqlDbImpl
 
         public bool IsItemContentExist(string itemId)
         {
-            using (var context = new CatalogDbContext(new OrganizationModel() { Name = ServiceContext.AdminInfo.OrganizationName }))
+            using (var context = new CatalogDbContext(new OrganizationModel() { Name = _organization }))
             {
                 var result = from m in context.ItemLocations
                              where m.ItemId == itemId
@@ -216,6 +217,20 @@ namespace SqlDbImpl
             SaveModelCache(model, false, keyName, pageCount, delegateFunc, isInTransaction);
         }
 
+        [ThreadStatic]
+        private Dictionary<string, object> _otherInformation;
+        private Dictionary<string, object> OtherInformation
+        {
+            get
+            {
+                if(_otherInformation == null)
+                {
+                    _otherInformation = new Dictionary<string, object>();
+                }
+                return _otherInformation;
+            }
+        }
+
         /// <summary>
         /// batch save informatioin.
         /// </summary>
@@ -228,10 +243,10 @@ namespace SqlDbImpl
         private void SaveModelCache<T>(T modelData, bool isEnd, string keyName, int pageCount, AddToDbSet<T> delegateFunc, bool isInTransaction = true) where T : class
         {
             object modelListObject;
-            if (!ServiceContext.OtherInformation.TryGetValue(keyName, out modelListObject))
+            if (!OtherInformation.TryGetValue(keyName, out modelListObject))
             {
                 modelListObject = new List<T>(pageCount);
-                ServiceContext.OtherInformation.Add(keyName, modelListObject);
+                OtherInformation.Add(keyName, modelListObject);
             }
             List<T> modelList = modelListObject as List<T>;
             
@@ -259,7 +274,7 @@ namespace SqlDbImpl
 
                 if (isInTransaction)
                 {
-                    using (var context = new CatalogDbContext(new OrganizationModel() { Name = ServiceContext.AdminInfo.OrganizationName }, SqlConn, false))
+                    using (var context = new CatalogDbContext(new OrganizationModel() { Name = _organization }, SqlConn, false))
                     {
                         delegateFunc(context, modelList);
                         context.SaveChanges();
@@ -267,7 +282,7 @@ namespace SqlDbImpl
                 }
                 else
                 {
-                    using (var context = new CatalogDbContext(new OrganizationModel() { Name = ServiceContext.AdminInfo.OrganizationName }))
+                    using (var context = new CatalogDbContext(new OrganizationModel() { Name = _organization }))
                     {
                         delegateFunc(context, modelList);
                         context.SaveChanges();
@@ -287,7 +302,7 @@ namespace SqlDbImpl
             {
                 if(_sqlConn == null)
                 {
-                    _sqlConn = new SqlConnection(CatalogDbContext.GetConnectString(ServiceContext.AdminInfo.OrganizationName));
+                    _sqlConn = new SqlConnection(CatalogDbContext.GetConnectString(_organization));
                     _sqlConn.Open();
                     var scope = TransactionScope;
                 }

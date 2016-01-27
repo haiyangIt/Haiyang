@@ -215,6 +215,7 @@ namespace DataProtectImpl
                         IMailbox mailboxOperator = NewMailboxOperatorInstance();
 
                         OnMailboxProgressChanged(CatalogMailboxProgressType.ConnectMailboxStart, userMailbox);
+                        ServiceContext.CurrentContext.CurrentMailbox = userMailbox.MailAddress;
                         mailboxOperator.ConnectMailbox(ServiceContext.Argument, userMailbox.MailAddress);
                         OnMailboxProgressChanged(CatalogMailboxProgressType.ConnectMailboxEnd, userMailbox);
 
@@ -228,8 +229,8 @@ namespace DataProtectImpl
                         userMailbox.RootFolderId = rootFolder.Id.UniqueId;
                         IMailboxData mailboxData = dataConvert.Convert(userMailbox);
 
-                        IFolderData rootFolderData = dataConvert.Convert(rootFolder);
-                        IItem itemOperator = CatalogFactory.Instance.NewItemOperatorImpl(folderOperator.CurrentExchangeService);
+                        IFolderData rootFolderData = dataConvert.Convert(rootFolder, userMailbox.MailAddress);
+                        IItem itemOperator = CatalogFactory.Instance.NewItemOperatorImpl(folderOperator.CurrentExchangeService, dataAccess);
                         //dataAccess.SaveFolder(rootFolderData, mailboxData, null); // root folder don't need save.
 
                         folderStack.Push(rootFolderData);
@@ -366,7 +367,7 @@ namespace DataProtectImpl
                     {
                         childFolderIndex++;
 
-                        IFolderData childFolderData = dataConvert.Convert(childFolder);
+                        IFolderData childFolderData = dataConvert.Convert(childFolder, mailboxData.MailAddress);
                         if (!folderOperator.IsFolderNeedGenerateCatalog(childFolder))
                         {
                             OnFolderProgressChanged(CatalogFolderProgressType.ChildFolderSkip, mailboxData, folderStack, folderData, null, null, new Process(childFolderIndex, childFolderCount));
@@ -620,7 +621,7 @@ namespace DataProtectImpl
             {
                 if (folderOper.IsFolderNeedGenerateCatalog(folder))
                 {
-                    IFolderData folderData = dataConvert.Convert(folder);
+                    IFolderData folderData = dataConvert.Convert(folder, mailbox);
                     folderdatas.Add(folderData);
                 }
             }

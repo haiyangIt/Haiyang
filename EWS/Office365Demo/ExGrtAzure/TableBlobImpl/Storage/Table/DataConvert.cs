@@ -34,7 +34,7 @@ namespace TableBlobImpl.Storage.Table
             return ItemEntity.CreateItemEntityFromEws(item, StartTime);
         }
 
-        public IFolderData Convert(Folder folder)
+        public IFolderData Convert(Folder folder, string folderMailbox)
         {
             return FolderEntity.CreateFolderEntityFromEws(folder, StartTime);
         }

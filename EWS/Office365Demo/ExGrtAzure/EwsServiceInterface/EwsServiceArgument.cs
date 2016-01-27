@@ -22,7 +22,7 @@ namespace EwsServiceInterface
         public bool? OverrideTimeout;
         public int? Timeout = null;
         public bool? UseDefaultCredentials = null;
-        public ImpersonatedUserId UserToImpersonate = null;
+        public ImpersonatedUserId UserToImpersonate;
         public string UserAgent;
 
         public bool SetDefaultProxy = false;
@@ -66,6 +66,28 @@ namespace EwsServiceInterface
 
             SetXAnchorMailbox = EWSSetting.Instance.SetXAnchorMailbox;
             XAnchorMailbox = EWSSetting.Instance.XAnchorMailbox;
+        }
+
+        public void SetConnectMailbox(string currentMailbox)
+        {
+            if (currentMailbox.ToLower() != ServiceCredential.UserName.ToLower())
+            {
+                ServiceEmailAddress = currentMailbox;
+                UserToImpersonate = new ImpersonatedUserId(ConnectingIdType.SmtpAddress, currentMailbox);
+                SetXAnchorMailbox = true;
+                XAnchorMailbox = currentMailbox;
+            }
+            else
+            {
+                if(UserToImpersonate != null)
+                {
+                    UserToImpersonate = null;
+                    SetXAnchorMailbox = false;
+                    XAnchorMailbox = string.Empty;
+                }
+                ServiceEmailAddress = currentMailbox;
+            }
+
         }
     }
 }

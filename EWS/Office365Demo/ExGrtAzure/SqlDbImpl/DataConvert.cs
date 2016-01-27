@@ -18,14 +18,7 @@ namespace SqlDbImpl
         {
             get; set;
         }
-
-        private IServiceContext Context
-        {
-            get
-            {
-                return CatalogFactory.Instance.GetServiceContext();
-            }
-        }
+        
         public IOrganizationData Convert(string mailboxAddress)
         {
             throw new NotImplementedException();
@@ -67,7 +60,7 @@ namespace SqlDbImpl
             return model;
         }
 
-        public IFolderData Convert(Microsoft.Exchange.WebServices.Data.Folder folder)
+        public IFolderData Convert(Microsoft.Exchange.WebServices.Data.Folder folder, string folderMailbox)
         {
             FolderModel model = new FolderModel()
             {
@@ -78,8 +71,8 @@ namespace SqlDbImpl
                 FolderType = folder.FolderClass,
                 ChildItemCount = 0,
                 ChildFolderCount = 0,
-                MailboxAddress = Context.CurrentMailbox
-                
+                MailboxAddress = folderMailbox
+
             };
             return model;
         }

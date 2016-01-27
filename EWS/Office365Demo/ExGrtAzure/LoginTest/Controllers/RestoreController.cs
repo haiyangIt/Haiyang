@@ -182,15 +182,29 @@ namespace LoginTest.Controllers
         }
 
         [Authorize]
-        public JsonResult RestoreItems(CatalogJobParameter catalog,
+        public JsonResult RestoreItemsToAlter(CatalogJobParameter catalog,
             RestoreAdminUserInfo restoreAdminUserInfo,
             RestoreDestination destination,
             LoadedTreeItem selectedItem)
         {
             IRestoreServiceEx restore = RestoreFactory.Instance.NewRestoreServiceEx(restoreAdminUserInfo.UserAddress, restoreAdminUserInfo.Password, string.Empty, restoreAdminUserInfo.Organization);
             restore.CurrentRestoreCatalogJob = catalog;
-            restore.Destination = RestoreFactory.Instance.NewRestoreDestinationEx();
+            restore.Destination = RestoreFactory.Instance.NewRestoreDestinationEx(restore.ServiceContext.Argument);
             restore.Destination.SetOtherInformation(destination.MailboxAddress, destination.FolderPath);
+            restore.Restore(selectedItem);
+            return Json(new { IsSuccess = true });
+        }
+
+        [Authorize]
+        public JsonResult RestoreItemsToOrg(CatalogJobParameter catalog,
+            RestoreAdminUserInfo restoreAdminUserInfo,
+            RestoreDestination destination,
+            LoadedTreeItem selectedItem)
+        {
+            IRestoreServiceEx restore = RestoreFactory.Instance.NewRestoreServiceEx(restoreAdminUserInfo.UserAddress, restoreAdminUserInfo.Password, string.Empty, restoreAdminUserInfo.Organization);
+            restore.CurrentRestoreCatalogJob = catalog;
+            restore.Destination = RestoreFactory.Instance.NewRestoreDestinationOrgEx(restore.ServiceContext.Argument);
+            restore.Destination.SetOtherInformation(destination.FolderPath);
             restore.Restore(selectedItem);
             return Json(new { IsSuccess = true });
         }

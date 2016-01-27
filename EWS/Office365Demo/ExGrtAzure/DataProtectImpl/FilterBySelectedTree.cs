@@ -66,7 +66,7 @@ namespace DataProtectImpl
                     if (folderItemUtil == null)
                         return true;
 
-                    if (folderItemUtil.Item.Status == (int)SelectedItemStatus.Selected)
+                    if (folderItemUtil.Item.Status == (int)SelectedItemStatus.Selected && folderItemUtil.Item.CanSelect == 1)
                         return false;
                     else if (folderItemUtil.Item.Status == (int)SelectedItemStatus.UnSelected)
                         return true;
@@ -100,7 +100,7 @@ namespace DataProtectImpl
                     return true;
             }
 
-            if (mailboxItem.Item.Status == (int)SelectedItemStatus.Selected)
+            if (mailboxItem.Item.Status == (int)SelectedItemStatus.Selected && mailboxItem.Item.CanSelect == 1)
                 return false;
             else if (mailboxItem.Item.Status == (int)SelectedItemStatus.UnSelected)
                 return true;

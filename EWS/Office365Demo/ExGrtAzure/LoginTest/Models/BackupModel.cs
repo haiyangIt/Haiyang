@@ -11,11 +11,11 @@ namespace LoginTest.Models
     {
         [Required]
         [EmailAddress]
-        [Display(Name = "Backup User Mail Address")]
+        [Display(Name = "Backup Admin Account")]
         public string BackupUserMailAddress { get; set; }
 
         [Required]
-        [Display(Name = "Backup User Password")]
+        [Display(Name = "Backup Admin Password")]
         [DataType(DataType.Password)]
         public string BackupUserPassword { get; set; }
 
@@ -27,5 +27,8 @@ namespace LoginTest.Models
         public int Index { get; set; }
 
         public string BackupSelectItems { get; set; }
+
+        //[Required]
+        public string BackupJobName { get; set; }
     }
 }

@@ -46,12 +46,12 @@ namespace ExGrtAzure.Tests
         public void TestRestoreMailbox()
         {
             IRestoreService service = GetRestoreService();
-            using (IRestoreDestination destination = _factory.NewRestoreDestination())
+            using (IRestoreDestination destination = _factory.NewRestoreDestination(service.ServiceContext.Argument))
             {
                 service.Destination = destination;
                 destination.InitOtherInformation("haiyang.ling@arcserve.com", "Restore1");
 
-                IQueryCatalogDataAccess dataAccess = (IQueryCatalogDataAccess)ServiceContext.GetDataAccessInstance(TaskType.Restore);
+                IQueryCatalogDataAccess dataAccess = (IQueryCatalogDataAccess)ServiceContext.GetDataAccessInstance(TaskType.Restore, service.ServiceContext.Argument, "Arcserve");
                 var allJob = dataAccess.GetAllCatalogJob();
                 dataAccess.CatalogJob = allJob[0];
                 service.CurrentRestoreCatalogJob = allJob[0];

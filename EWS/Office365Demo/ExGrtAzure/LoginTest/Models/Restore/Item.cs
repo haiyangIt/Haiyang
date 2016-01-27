@@ -10,6 +10,11 @@ namespace Demo.Models.Restore
 {
     public class Item : IItemBase
     {
+        public Item()
+        {
+            CanSelect = 1;
+        }
+
         public string Id { get; set; }
         public string DisplayName { get; set; }
         public object OtherInformation { get; set; }
@@ -21,6 +26,8 @@ namespace Demo.Models.Restore
         /// </summary>
         public int ChildCount { get; set; }
         public string ItemType { get; set; }
+
+        public int CanSelect { get; set; }
 
         public ItemKind ItemKind
         {

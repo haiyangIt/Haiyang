@@ -1,0 +1,151 @@
+﻿@model LoginTest.Models.Setting.SettingViewModel
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@Styles.Render("~/bundles/bootstrapdialogcss")
+<h2>Setting</h2>
+
+@using (Ajax.BeginForm("SaveSetting", "Setting", new AjaxOptions { OnSuccess = "SubmitFormSuccess" }, new { @class = "form-horizontal", role = "form", id="SettingForm" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <h4>Config admin account and exchange ews url.</h4>
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.UserMail, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.UserMail, new { htmlAttributes = new { @class = "form-control" ,@readonly = "readonly"} })
+                @Html.ValidationMessageFor(model => model.UserMail, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.AdminUserName, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.AdminUserName, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.AdminUserName, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.AdminPassword, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.AdminPassword, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.AdminPassword, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.ConfirmPassword, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.ConfirmPassword, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.ConfirmPassword, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.EwsConnectUrl, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.EwsConnectUrl, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                @Html.ValidationMessageFor(model => model.EwsConnectUrl, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-12">
+                <input value="Save" type="button" id="SaveBtn" class="btn btn-primary btn-default" />
+                <input value="Test Connection" type="button" id="TestBtn" class="btn btn-primary btn-default" />
+                <input value="Cancel" type="button" id="CancelBtn" class="btn btn-primary btn-default" />
+                <input type="submit" id="SubmitBtn" value="Save" class="btn btn-default hidden" />
+            </div>
+            @Html.HiddenFor(model => model.IsExist)
+        </div>
+    </div>
+}
+
+@*<div>
+        @Html.ActionLink("Back to List", "Index")
+    </div>*@
+
+@section Scripts{
+@Scripts.Render("~/bundles/jqueryval")
+@Scripts.Render("~/bundles/bootstrapdialog")
+@Scripts.Render("~/bundles/arcserveutil")
+    <script>
+         
+
+        $(document).ready(function () {
+
+            $("#SaveBtn").click(function () {
+                Arcserve.DataProtect.Util.Ajax.SetLoadingDialog({ title: "Saving" });
+                Arcserve.DataProtect.Util.Ajax.loading();
+                $("#SubmitBtn").click();
+            })
+
+            SubmitFormSuccess = function (data) {
+                Arcserve.DataProtect.Util.Alert({
+                    type: BootstrapDialog.TYPE_INFO,
+                    title: "Info",
+                    message: "Save setting successful.",
+                    callbackForYes: function (dialog) {
+                        Arcserve.DataProtect.Util.Ajax.close();
+                        var url = "@Url.Action("Index","Home")";
+                        window.location.href = url;
+                    }
+                });
+            }
+
+            $("#CancelBtn").click(function () {
+                var url = "@Url.Action("Index","Home")";
+                window.location.href = url;
+            });
+
+            $("#TestBtn").click(function () {
+                if ($("#SettingForm").valid()) {
+                    Arcserve.DataProtect.Util.Ajax.SetLoadingDialog({ title: "Testing" });
+                    Arcserve.DataProtect.Util.Ajax.loading();
+
+
+                    var formData = $("#SettingForm").serialize();
+                    Arcserve.DataProtect.Util.Post(formData, "@Url.Action("TestConnect","Setting")", function (data) {
+                        if (data.Success === "undefined") {
+
+                        }
+                        if (data.Success) {
+                            if (!data.IsChangeUrl)
+                                Arcserve.DataProtect.Util.Alert({
+                                    type: BootstrapDialog.TYPE_INFO,
+                                    title: "Info",
+                                    message: "Connect exchange by ews successful."
+                                });
+                            else {
+                                Arcserve.DataProtect.Util.Alert({
+                                    type: BootstrapDialog.TYPE_WARNING,
+                                    title: "Info",
+                                    message: "Connect exchange by ews successful, but the ews connect url is changed.",
+                                    callbackForYes: function (dialog) {
+                                        $("#EwsConnectUrl").val(data.Url);
+                                        dialog.close();
+                                    }
+                                });
+                            }
+                        }
+                        else {
+                            Arcserve.DataProtect.Util.Alert({
+                                type: BootstrapDialog.TYPE_DANGER,
+                                title: "Error",
+                                message: "Cann't connect exchange, please check the exchange server status."
+                            });
+                        }
+                        Arcserve.DataProtect.Util.Ajax.close();
+                    })
+                }
+            })
+        });
+    </script>
+}

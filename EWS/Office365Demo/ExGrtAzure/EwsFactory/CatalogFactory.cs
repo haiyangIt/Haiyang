@@ -70,14 +70,14 @@ namespace EwsFrame
         {
             return (IFolder)CreateType<IFolder>(EwsServiceImplAssembly, service);
         }
-        public IItem NewItemOperatorImpl(ExchangeService service)
+        public IItem NewItemOperatorImpl(ExchangeService service, IDataAccess dataAccess)
         {
-            return (IItem)CreateType<IItem>(EwsServiceImplAssembly, service);
+            return (IItem)CreateType<IItem>(EwsServiceImplAssembly, service, dataAccess);
         }
 
-        internal ICatalogDataAccess NewCatalogDataAccessInternal()
+        internal ICatalogDataAccess NewCatalogDataAccessInternal(EwsServiceArgument argument, string organization)
         {
-            return (ICatalogDataAccess)CreateType<ICatalogDataAccess>(EwsDataImplAssembly);
+            return (ICatalogDataAccess)CreateType<ICatalogDataAccess>(EwsDataImplAssembly, argument, organization);
         }
 
         public IDataConvert NewDataConvert()

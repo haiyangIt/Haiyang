@@ -14,7 +14,7 @@ namespace EwsDataInterface
         IOrganizationData Convert(string organizationName);
         ICatalogJob Convert(ICatalogJob catalogJobInfo);
         IMailboxData Convert(IMailboxData mailbox);
-        IFolderData Convert(Folder folder);
+        IFolderData Convert(Folder folder, string folderMailbox);
         IItemData Convert(Item item);
     }
 }

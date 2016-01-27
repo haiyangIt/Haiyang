@@ -28,7 +28,7 @@ namespace EwsService.Impl
 
         public void ConnectMailbox(EwsServiceArgument argument, string connectMailAddress)
         {
-            ServiceContext.ContextInstance.CurrentMailbox = connectMailAddress;
+            argument.SetConnectMailbox(connectMailAddress);
             MailboxPrincipalAddress = connectMailAddress;
             CurrentExchangeService = EwsProxyFactory.CreateExchangeService(argument, MailboxPrincipalAddress);
         }

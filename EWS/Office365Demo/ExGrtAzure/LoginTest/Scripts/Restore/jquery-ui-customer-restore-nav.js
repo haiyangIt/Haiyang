@@ -140,13 +140,14 @@ $.widget("custom.restorenav",
                    var self = this;
                    var restoreItem = Restore.Item.GetItem(parentId, self.options.cacheKey);
                    if (parentId == "0" && restoreItem == null) {
-                       restoreItem = Restore.Item.CreateItem(parentId, {}, parentChildCount, "Organization", "Root", self.options.cacheKey, function (event, data) {
+                       restoreItem = Restore.Item.CreateItem(parentId, {}, parentChildCount, "Organization", "Root", 1, self.options.cacheKey, function (event, data) {
                            self._modifyCheckBoxStatus(data);
                        });
                    }
 
                    $.each(childContainers, function (i, item) {
-                       var childItem = Restore.Item.CreateItem(item.Id, item, item.ChildCount, item.ItemType, item.DisplayName, self.options.cacheKey, function (event, data) {
+
+                       var childItem = Restore.Item.CreateItem(item.Id, item, item.ChildCount, item.ItemType, item.DisplayName, item.CanSelect, self.options.cacheKey, function (event, data) {
                            self._modifyCheckBoxStatus(data)
                        });
                        restoreItem.AddChild(childItem);
@@ -181,9 +182,10 @@ $.widget("custom.restorenav",
                        .text("");
                },
 
-               _createCheckboxItem: function (id, itemId, text, appendDom) {
-                   var dom = $('<input type="checkbox" class="restore-check restore-unselected" itemid="' + itemId + '" id="' + id + '" />').appendTo(appendDom);
-                   var spanDom = $('<span class="nav-checkbox-span">' + text + '</span>').appendTo(appendDom)
+               _createCheckboxItem: function (id, itemId, text, canSelect, appendDom) {
+                   var disabledAttribute = canSelect == 1 ? "" : "disabled"
+                   var dom = $('<input type="checkbox" class="restore-check restore-unselected '+disabledAttribute+'" itemid="' + itemId + '" id="' + id + '" ' + disabledAttribute + ' />').appendTo(appendDom);
+                   var spanDom = $('<span class="nav-checkbox-span '+disabledAttribute+'">' + text + '</span>').appendTo(appendDom)
                    dom.tristate();
                },
 
@@ -226,6 +228,8 @@ $.widget("custom.restorenav",
                    var $target = $(e.target);
 
                    var li = $target.is("li") ? $target : $target.parents("li");
+                   if ($target.is(".disabled"))
+                       return;
                    if (li.length > 1)
                        li = $(li[0]);
 
@@ -290,25 +294,29 @@ $.widget("custom.restorenav",
                        var item = childItems[i];
 
                        var ids = self._getNavItemId(item.Id);
-                       var eachItemElement = $("<li class='restorenav-item' itemid='" + item.Id + "'></li>").appendTo(navList);
+                       var attribute = "";
+                       if (item.CanSelect == "0") {
+                           attribute = "disabled";
+                       }
+                       var eachItemElement = $("<li class='restorenav-item "+attribute+"' itemid='" + item.Id + "' " + attribute + "></li>").appendTo(navList);
 
-                       var anchorElement = $("<a href='javascript:void(0);' ></a>").appendTo(eachItemElement);
-                       this._createCheckboxItem(ids.checkbox, item.Id, item.DisplayName, anchorElement);
+                       var anchorElement = $("<a href='javascript:void(0);' " + attribute + "></a>").appendTo(eachItemElement);
+                       this._createCheckboxItem(ids.checkbox, item.Id, item.DisplayName, item.CanSelect, anchorElement);
 
 
                        var hasChildren = item.Container && item.Container.length;
                        var containerLength = 0;
                        if (hasChildren) {
-                           $('<span class="glyphicon glyphicon-chevron-right navbar-right open-children" ></span>').appendTo(anchorElement);
+                           $('<span class="glyphicon glyphicon-chevron-right navbar-right open-children" ' + attribute + '></span>').appendTo(anchorElement);
                            containerLength = item.Container.length;
                        }
 
                        if (this.isShowCount)
-                           $('<span class="badge navbar-right ' + (hasChildren ? ' ' : ' restore-nav-placehold ') + '">' + (item.ChildCount - containerLength) + '</span>').appendTo(anchorElement);
+                           $('<span ' + attribute + ' class="badge navbar-right ' + (hasChildren ? ' ' : ' restore-nav-placehold ') + '">' + (item.ChildCount - containerLength) + '</span>').appendTo(anchorElement);
 
                        if (hasChildren) {
-                           var childList = $('<ul class="nav nav-pills nav-stacked hidden nav-children" ></ul>').appendTo(eachItemElement);
-                           self._updateNavChildren(item.Container, childList, false, levelIndex+1);
+                           var childList = $('<ul class="nav nav-pills nav-stacked hidden nav-children" ' + attribute + '></ul>').appendTo(eachItemElement);
+                           self._updateNavChildren(item.Container, childList, false, levelIndex + 1);
                        }
                    }
 
@@ -369,7 +377,7 @@ $.widget("custom.mailboxnav", $.custom.restorenav, {
         this._parentId = "0";
     },
     _createSelectAllCheckbox: function (parentDom) {
-        this._createCheckboxItem("selectallInMailbox", "0", "Select All", parentDom);
+        this._createCheckboxItem("selectallInMailbox", "0", "Select All", 1, parentDom);
         this.checkAllElement = $("#selectallInMailbox");
     },
     _onSelectAllItem: function (e) {
@@ -388,7 +396,7 @@ $.widget("custom.foldernav", $.custom.restorenav, {
 
     },
     _createSelectAllCheckbox: function (parentDom) {
-        this._createCheckboxItem("selectallInFolder", "", "Select All", parentDom);
+        this._createCheckboxItem("selectallInFolder", "", "Select All", 1, parentDom);
         this.checkAllElement = $("#selectallInFolder");
     },
     _onSelectAllItem: function (e) {
@@ -428,38 +436,37 @@ $.widget("custom.foldernavForSteped", $.custom.foldernav, {
 
         for (var i = startIndex, j = 0; j < count && i < childItems.length; j++, i++) {
             var item = childItems[i];
-
+            var disabledAttribute = item.CanSelect == 1 ? "" : "disabled";
             var ids = self._getNavItemId(item.Id);
-            var eachItemElement = $("<li class='restorenav-item' itemid='" + item.Id + "'></li>").appendTo(navList);
+            var eachItemElement = $("<li class='restorenav-item "+disabledAttribute+"' itemid='" + item.Id + "' " + disabledAttribute + "></li>").appendTo(navList);
 
-            var anchorElement = $("<a href='javascript:void(0);' ></a>").appendTo(eachItemElement);
-            this._createCheckboxItem(ids.checkbox, item.Id, item.DisplayName, anchorElement);
+            var anchorElement = $("<a href='javascript:void(0);' " + disabledAttribute + "></a>").appendTo(eachItemElement);
+            this._createCheckboxItem(ids.checkbox, item.Id, item.DisplayName, item.CanSelect, anchorElement);
 
             var hasChildren = item.Container && item.Container.length;
-            
+
             var containerLength = 0;
             if (hasChildren) {
-                $('<span class="glyphicon glyphicon-chevron-right navbar-right open-children" ></span>').appendTo(anchorElement);
+                $('<span class="glyphicon glyphicon-chevron-right navbar-right open-children" ' + disabledAttribute + '></span>').appendTo(anchorElement);
                 containerLength = item.Container.length;
             }
             else if (item.ChildCount > 0) {
-                $('<span class="glyphicon glyphicon-chevron-right navbar-right open-children" ></span>').appendTo(anchorElement);
+                $('<span class="glyphicon glyphicon-chevron-right navbar-right open-children" ' + disabledAttribute + '></span>').appendTo(anchorElement);
             }
 
 
-            if (this.isShowCount)
-            {
+            if (this.isShowCount) {
                 if (hasChildren) {
-                    $('<span class="badge navbar-right ' + (hasChildren ? ' ' : ' restore-nav-placehold ') + '">' + (item.ChildCount - containerLength) + '</span>').appendTo(anchorElement);
+                    $('<span ' + disabledAttribute + ' class="badge navbar-right ' + (hasChildren ? ' ' : ' restore-nav-placehold ') + '">' + (item.ChildCount - containerLength) + '</span>').appendTo(anchorElement);
                 }
                 else if (item.ChildCount > 0) {
-                    $('<span class="badge navbar-right restore-nav-placehold "></span>').appendTo(anchorElement);
+                    $('<span ' + disabledAttribute + ' class="badge navbar-right restore-nav-placehold "></span>').appendTo(anchorElement);
                 }
             }
-                
+
 
             if (hasChildren) {
-                var childList = $('<ul class="nav nav-pills nav-stacked hidden nav-children" ></ul>').appendTo(eachItemElement);
+                var childList = $('<ul class="nav nav-pills nav-stacked hidden nav-children" ' + disabledAttribute + '></ul>').appendTo(eachItemElement);
                 self._updateNavChildren(item.Container, childList, false, levelIndex + 1);
             }
         }
@@ -470,13 +477,13 @@ $.widget("custom.foldernavForSteped", $.custom.foldernav, {
         var restoreItem = Restore.Item.GetItem(parentId, self.options.cacheKey);
         restoreItem.ChildItemCount = parentChildCount;
         if (parentId == "0" && restoreItem == null) {
-            restoreItem = Restore.Item.CreateItem(parentId, {}, parentChildCount, "Organization", "Root", self.options.cacheKey, function (event, data) {
+            restoreItem = Restore.Item.CreateItem(parentId, {}, parentChildCount, "Organization", "Root", 1, self.options.cacheKey, function (event, data) {
                 self._modifyCheckBoxStatus(data);
             });
         }
 
         $.each(childContainers, function (i, item) {
-            var childItem = Restore.Item.CreateItem(item.Id, item, item.ChildCount, item.ItemType, item.DisplayName, self.options.cacheKey, function (event, data) {
+            var childItem = Restore.Item.CreateItem(item.Id, item, item.ChildCount, item.ItemType, item.DisplayName, item.CanSelect, self.options.cacheKey, function (event, data) {
                 self._modifyCheckBoxStatus(data)
             });
             restoreItem.AddChild(childItem);
@@ -486,15 +493,14 @@ $.widget("custom.foldernavForSteped", $.custom.foldernav, {
             }
         });
     },
-    
+
     updateChildContainer: function (parentId, childContainerData) {
         var parentLi = $("li[itemid='" + parentId + "']", this.element);
         // 1. check the childContainerData has any data, if no data, set the parent Item has no child and remove the right chevron
-        if(typeof(childContainerData) === "undefined" || childContainerData == null || childContainerData.length == 0)
-        {
+        if (typeof (childContainerData) === "undefined" || childContainerData == null || childContainerData.length == 0) {
             $("span.open-children", parentLi).remove();
         }
-        // 2. if contains child data, update .
+            // 2. if contains child data, update .
         else {
             $("span.badge", parentLi).removeClass("restore-nav-placehold").text(childContainerData.length);
 
@@ -507,7 +513,7 @@ $.widget("custom.foldernavForSteped", $.custom.foldernav, {
             var parentItem = this.navDatasId2Item[parentId];
             parentItem.Container = childContainerData;
             parentItem.ChildCount = childContainerData.length;
-            
+
             $target.toggleClass("glyphicon-chevron-right").toggleClass("glyphicon-chevron-down");
             $("ul.nav-children:first", $target.parent().parent()).toggleClass("hidden");
         }

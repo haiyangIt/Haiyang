@@ -20,12 +20,19 @@ namespace DataProtectInterface
         public List<LoadedTreeItem> LoadedChildren { get; set; }
         public string ItemData { get; set; }
 
+        public int CanSelect { get; set; }
+
         public ItemKind ItemKind
         {
             get
             {
                 return ItemType.GetItemKind();
             }
+        }
+
+        public LoadedTreeItem()
+        {
+            CanSelect = 1;
         }
     }
 

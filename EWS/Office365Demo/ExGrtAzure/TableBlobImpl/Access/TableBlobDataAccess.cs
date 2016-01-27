@@ -98,68 +98,71 @@ namespace TableBlobImpl.Access
 
         public void SaveItemContent(IItemData item, DateTime startTime, bool isCheckExist = false, bool isExist = false)
         {
-            Item itemInEws = item.Data as Item;
-            byte[] buffer = new byte[itemInEws.Size];
+            // todo undo the comment.
+            //Item itemInEws = item.Data as Item;
+            //byte[] buffer = new byte[itemInEws.Size];
 
-            var itemOper = CatalogFactory.Instance.NewItemOperatorImpl(itemInEws.Service);
-            IServiceContext context = CatalogFactory.Instance.GetServiceContext();
-            TableDataAccess tableDataAccess = new TableDataAccess(TableClient);
-            using (MemoryStream stream = new MemoryStream(buffer))
-            {
-                itemOper.ExportItem(itemInEws, stream, context.Argument);
-                stream.Seek(0, SeekOrigin.Begin);
+            //var itemOper = CatalogFactory.Instance.NewItemOperatorImpl(itemInEws.Service, null);
+            //IServiceContext context = CatalogFactory.Instance.GetServiceContext();
+            //TableDataAccess tableDataAccess = new TableDataAccess(TableClient);
+            //using (MemoryStream stream = new MemoryStream(buffer))
+            //{
+            //    itemOper.ExportItem(itemInEws, stream, context.Argument);
+            //    stream.Seek(0, SeekOrigin.Begin);
 
-                var location = ItemLocationEntity.GetLocation(itemInEws, startTime, true);
-                var locationTableEntity = ItemLocationEntity.NewItemLocationEntity(item.ItemId, item.ParentFolderId, location);
-                BlobDataAccessObj.SaveBlob(location, item.ItemId, stream);
+            //    var location = ItemLocationEntity.GetLocation(itemInEws, startTime, true);
+            //    var locationTableEntity = ItemLocationEntity.NewItemLocationEntity(item.ItemId, item.ParentFolderId, location);
+            //    BlobDataAccessObj.SaveBlob(location, item.ItemId, stream);
 
-                string locationTableName = ItemLocationEntity.GetItemLocationTableName(context.AdminInfo.OrganizationName, item.ParentFolderId);
-                locationTableName = TableDataAccess.ValidateTableName(locationTableName);
-                CloudTable locationTable = tableDataAccess.CreateIfNotExist(locationTableName);
-                TableResult locationTableResult = tableDataAccess.InsertEntity(locationTable, locationTableEntity);
-                LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.DEBUG, "Insert item to table", "Insert item {0} to table {1} result, Etag:{2}, HttpStatusCode:{3},",
-                    item.DisplayName, locationTableName, locationTableResult.Etag, locationTableResult.HttpStatusCode);
-            }
+            //    string locationTableName = ItemLocationEntity.GetItemLocationTableName(context.AdminInfo.OrganizationName, item.ParentFolderId);
+            //    locationTableName = TableDataAccess.ValidateTableName(locationTableName);
+            //    CloudTable locationTable = tableDataAccess.CreateIfNotExist(locationTableName);
+            //    TableResult locationTableResult = tableDataAccess.InsertEntity(locationTable, locationTableEntity);
+            //    LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.DEBUG, "Insert item to table", "Insert item {0} to table {1} result, Etag:{2}, HttpStatusCode:{3},",
+            //        item.DisplayName, locationTableName, locationTableResult.Etag, locationTableResult.HttpStatusCode);
+            //}
         }
 
         public void SaveCatalogJob(ICatalogJob service)
         {
-            var catalogEntity = service as CatalogEntity;
-            if (catalogEntity == null)
-                throw new ArgumentNullException("CatalogEntity.");
+            //todo undo the comment
+            //var catalogEntity = service as CatalogEntity;
+            //if (catalogEntity == null)
+            //    throw new ArgumentNullException("CatalogEntity.");
 
-            IServiceContext context = CatalogFactory.Instance.GetServiceContext();
+            //IServiceContext context = CatalogFactory.Instance.GetServiceContext();
             
-            string orignizeName = context.AdminInfo.OrganizationName;
-            string tableName = CatalogEntity.GetCatalogJobTableName(orignizeName);
-            tableName = TableDataAccess.ValidateTableName(tableName);
-            TableDataAccess tableDataAccess = new TableDataAccess(TableClient);
-            CloudTable table = tableDataAccess.CreateIfNotExist(tableName);
+            //string orignizeName = context.AdminInfo.OrganizationName;
+            //string tableName = CatalogEntity.GetCatalogJobTableName(orignizeName);
+            //tableName = TableDataAccess.ValidateTableName(tableName);
+            //TableDataAccess tableDataAccess = new TableDataAccess(TableClient);
+            //CloudTable table = tableDataAccess.CreateIfNotExist(tableName);
 
-            TableResult tableResult = tableDataAccess.InsertEntity(table, catalogEntity);
-            LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.DEBUG, "Insert catalog job to table", "Insert catalog job {0} to table {1} result, Etag:{2}, HttpStatusCode:{3},",
-                catalogEntity.CatalogJobName, tableName, tableResult.Etag, tableResult.HttpStatusCode);
+            //TableResult tableResult = tableDataAccess.InsertEntity(table, catalogEntity);
+            //LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.DEBUG, "Insert catalog job to table", "Insert catalog job {0} to table {1} result, Etag:{2}, HttpStatusCode:{3},",
+            //    catalogEntity.CatalogJobName, tableName, tableResult.Etag, tableResult.HttpStatusCode);
         }
 
         public ICatalogJob GetLastCatalogJob(DateTime thisJobStartTime)
         {
-            IServiceContext context = CatalogFactory.Instance.GetServiceContext();
-            string orignizeName = context.AdminInfo.OrganizationName;
-            string tableName = CatalogEntity.GetCatalogJobTableName(orignizeName);
-            tableName = TableDataAccess.ValidateTableName(tableName);
-            TableDataAccess tableDataAccess = new TableDataAccess(TableClient);
-            CloudTable table = tableDataAccess.CreateIfNotExist(tableName);
+            //todo undo the comment
+            //IServiceContext context = CatalogFactory.Instance.GetServiceContext();
+            //string orignizeName = context.AdminInfo.OrganizationName;
+            //string tableName = CatalogEntity.GetCatalogJobTableName(orignizeName);
+            //tableName = TableDataAccess.ValidateTableName(tableName);
+            //TableDataAccess tableDataAccess = new TableDataAccess(TableClient);
+            //CloudTable table = tableDataAccess.CreateIfNotExist(tableName);
 
-            TableQuery<CatalogEntity> query = new TableQuery<CatalogEntity>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, orignizeName));
-            query.TakeCount = 1;
+            //TableQuery<CatalogEntity> query = new TableQuery<CatalogEntity>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, orignizeName));
+            //query.TakeCount = 1;
 
-            var result = table.ExecuteQuery(query);
+            //var result = table.ExecuteQuery(query);
             
-            foreach(CatalogEntity entity in result)
-            {
-                CatalogEntity.SetOtherByPartitionRowKeys(entity);
-                return entity;
-            }
+            //foreach(CatalogEntity entity in result)
+            //{
+            //    CatalogEntity.SetOtherByPartitionRowKeys(entity);
+            //    return entity;
+            //}
             return null;
         }
 

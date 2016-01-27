@@ -11,7 +11,7 @@ namespace DataProtectInterface
     {
         void InitOtherInformation(params object[] information);
         void WriteItem(IRestoreItemInformation item, byte[] itemData);
-        void RestoreComplete(bool success, Exception ex);
+        void RestoreComplete(bool success, string restoreJobName, Exception ex);
         ExportType ExportType { get; }
     }
 
@@ -23,7 +23,7 @@ namespace DataProtectInterface
         void DealMailbox(string displayName, Stack<IItemBase> dealItemStack);
         void DealOrganization(string organization, Stack<IItemBase> dealItemStack);
 
-        void RestoreComplete(bool success, Exception ex);
+        void RestoreComplete(bool success, IRestoreServiceEx restoreService, Exception ex);
 
         ExportType ExportType { get; set; }
     }

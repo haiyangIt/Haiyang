@@ -14,6 +14,13 @@ namespace EwsService.Impl
 {
     public class RestoreDestinationImpl : IRestoreDestination
     {
+        public RestoreDestinationImpl(EwsServiceArgument argument)
+        {
+            _argument = argument;
+        }
+
+        private readonly EwsServiceArgument _argument;
+
         public string DesMailboxAddress { get; set; }
         public string DesFolderDisplayNamePath
         {
@@ -60,12 +67,11 @@ namespace EwsService.Impl
                 if (CurrentMailbox == null)
                 {
                     CurrentMailbox = mailboxAddress;
-                    RestoreFactory.Instance.GetServiceContext().CurrentMailbox = CurrentMailbox;
                 }
 
                 IMailbox mailboxOper = RestoreFactory.Instance.NewMailboxOperatorImpl();
-                IServiceContext context = RestoreFactory.Instance.GetServiceContext();
-                mailboxOper.ConnectMailbox(context.Argument, mailboxAddress);
+                _argument.SetConnectMailbox(mailboxAddress);
+                mailboxOper.ConnectMailbox(_argument, mailboxAddress);
                 CurrentExService = mailboxOper.CurrentExchangeService;
                 CreatedFolders = new Dictionary<string, FolderId>();
             }
@@ -161,7 +167,7 @@ namespace EwsService.Impl
                     throw new NotSupportedException("Can not import not support itemclass.");
             }
             IItem itemOperatorImpl = RestoreFactory.Instance.NewItemOperatorImpl(CurrentExService);
-            var argument = RestoreFactory.Instance.GetServiceContext().Argument;
+            var argument = _argument;
             itemOperatorImpl.ImportItem(folderId, itemData, argument);
         }
 
@@ -173,7 +179,7 @@ namespace EwsService.Impl
             var folder = CreateFoldersIfNotExist(path);
             folderId = folder;
             IItem itemOperatorImpl = RestoreFactory.Instance.NewItemOperatorImpl(CurrentExService);
-            var argument = RestoreFactory.Instance.GetServiceContext().Argument;
+            var argument = _argument;
             itemOperatorImpl.ImportItem(folderId, itemData, argument);
         }
 
@@ -183,7 +189,7 @@ namespace EwsService.Impl
             DesFolderDisplayNamePath = information[1] as string;
         }
 
-        public void RestoreComplete(bool success, Exception ex)
+        public void RestoreComplete(bool success, string restoreJobName, Exception ex)
         {
         }
 

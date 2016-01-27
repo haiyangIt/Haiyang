@@ -113,7 +113,7 @@ namespace ExGrtAzure.Tests
             CatalogFactory.LibPath = directory;
             IServiceContext context = ServiceContext.NewServiceContext("haiyang.ling@arcserve.com", "", "", "Arcserve", DataProtectInterface.TaskType.Catalog);
             context.CurrentContext.CurrentMailbox = "haiyang.ling@arcserve.com";
-            var dataAccess = ServiceContext.GetDataAccessInstance(TaskType.Catalog);
+            var dataAccess = ServiceContext.GetDataAccessInstance(TaskType.Catalog, context.Argument, "Arcserve");
             dataAccess.ResetAllStorage();
             dataAccess.ResetAllStorage("Arcserve");
         }

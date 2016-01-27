@@ -3,7 +3,8 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
-using LoginTest.Migrations;
+using System;
+using LoginTest.Models.Setting;
 
 namespace LoginTest.Models
 {
@@ -26,13 +27,30 @@ namespace LoginTest.Models
         public ApplicationDbContext()
             : base("DefaultConnection", throwIfV1Schema: false)
         {
-            Database.SetInitializer(new MigrateDatabaseToLatestVersion<ApplicationDbContext, Configuration>("DefaultConnection"));
-            //Database.SetInitializer(new MigrateDatabaseToLatestVersion<ApplicationDbContext, ApplicationDataLayer.Migrations.Configuration>("SchoolDBConnectionString"));
+            Database.SetInitializer<ApplicationDbContext>(new CustomerApplicationDbInitializer());
         }
 
         public static ApplicationDbContext Create()
         {
             return new ApplicationDbContext();
+        }
+
+        public DbSet<SettingModel> Settings { get; set; }
+    }
+
+    public class CustomerApplicationDbInitializer : CreateDatabaseIfNotExists<ApplicationDbContext>
+    {
+        public override void InitializeDatabase(ApplicationDbContext context)
+        {
+            if (!context.Database.Exists())
+            {
+                base.InitializeDatabase(context);
+            }
+
+            if (!context.Database.CompatibleWithModel(true))
+            {
+                throw new NotSupportedException("The model is not compatible with the database.");
+            }
         }
     }
 }

@@ -71,12 +71,12 @@ namespace ExGrtAzure.Tests
             IDataConvert dataConvert = _factory.NewDataConvert();
             dataConvert.StartTime = DateTime.Now;
             dataConvert.OrganizationName = ServiceContext.ContextInstance.AdminInfo.OrganizationName;
-            GetChildFolder(dataConvert, folder, rootFolder, 1);
+            GetChildFolder(dataConvert, folder, rootFolder, "haiyang.ling@arcserve.com", 1);
         }
 
-        private void GetChildFolder(IDataConvert dataConvert, IFolder folder, Folder parentFolder, int level)
+        private void GetChildFolder(IDataConvert dataConvert, IFolder folder, Folder parentFolder, string mailbox, int level)
         {
-            IFolderData folderData = dataConvert.Convert(parentFolder);
+            IFolderData folderData = dataConvert.Convert(parentFolder, mailbox);
 
             OutputFolderData(folderData, level);
             if (parentFolder.ChildFolderCount == 0)
@@ -85,7 +85,7 @@ namespace ExGrtAzure.Tests
             var childFolders = folder.GetChildFolder(parentFolder);
             foreach (Folder childFolder in childFolders)
             {
-                GetChildFolder(dataConvert, folder, childFolder, level + 1);
+                GetChildFolder(dataConvert, folder, childFolder, mailbox, level + 1);
             }
         }
 
@@ -104,7 +104,7 @@ namespace ExGrtAzure.Tests
         [Description("Test Item Operation")]
         public void TestItemOperator()
         {
-            IItem itemOper = _factory.NewItemOperatorImpl(_ewsContext);
+            IItem itemOper = _factory.NewItemOperatorImpl(_ewsContext, null);
             Folder inboxFolder = Folder.Bind(_ewsContext, WellKnownFolderName.SentItems);
             var items = itemOper.GetFolderItems(inboxFolder);
 
@@ -112,7 +112,7 @@ namespace ExGrtAzure.Tests
             dataConvert.StartTime = DateTime.Now;
             dataConvert.OrganizationName = ServiceContext.ContextInstance.AdminInfo.OrganizationName;
 
-            foreach(var item in items)
+            foreach (var item in items)
             {
                 var itemData = dataConvert.Convert(item);
             }
@@ -125,7 +125,7 @@ namespace ExGrtAzure.Tests
 
             IFolder folderOper = _factory.NewFolderOperatorImpl(_ewsContext);
             var findFolderId = folderOper.FindFolder(new FolderDataBaseDefault() { DisplayName = "Test" }, inboxFolder.Id);
-            if(findFolderId != null)
+            if (findFolderId != null)
             {
                 folderOper.DeleteFolder(findFolderId);
             }
@@ -146,7 +146,7 @@ namespace ExGrtAzure.Tests
         [TestMethod]
         public void TestClearBlobData()
         {
-            
+
         }
     }
 }

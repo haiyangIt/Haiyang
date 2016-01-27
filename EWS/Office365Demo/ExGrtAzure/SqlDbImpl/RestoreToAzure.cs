@@ -61,6 +61,8 @@ namespace SqlDbImpl
 
         }
 
+
+
         public ExportType ExportType
         {
             get; set;
@@ -137,14 +139,14 @@ namespace SqlDbImpl
             _instance.Dispose();
         }
 
-        public void RestoreComplete(bool success, Exception ex)
+        public void RestoreComplete(bool success, IRestoreServiceEx restoreService, Exception ex)
         {
             _instance.Dispose();
 
             if (success)
             {
-                List<string> urls = ((QueryCatalogDataAccess)(ServiceContext.ContextInstance.DataAccessObj)).BlobDataAccessObj.GetBlobShareUris(_instance.ContainerName, _instance.BlobNames);
-                string subject = "Restore Finished";
+                List<string> urls = ((QueryCatalogDataAccess)(restoreService.ServiceContext.DataAccessObj)).BlobDataAccessObj.GetBlobShareUris(_instance.ContainerName, _instance.BlobNames);
+                string subject = string.Format("Restore {0} Finished", restoreService.RestoreJobName);
                 SendMailHelper sendMailHelper = new SendMailHelper();
                 sendMailHelper.AddDownloadUrls(urls);
                 string body = sendMailHelper.GetHtmlBody();

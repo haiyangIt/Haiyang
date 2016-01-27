@@ -14,7 +14,7 @@ namespace DataProtectInterface
 
         //DateTime LastCatalogTime { get; }
 
-        string CatalogJobName { get; }
+        string CatalogJobName { get; set; }
 
         OrganizationAdminInfo AdminInfo { get; }
 

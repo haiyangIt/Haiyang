@@ -7,12 +7,19 @@ using System.Threading.Tasks;
 using EwsDataInterface;
 using Microsoft.Exchange.WebServices.Data;
 using DataProtectInterface.Util;
+using EwsServiceInterface;
 
 namespace EwsService.Impl
 {
     public class RestoreDestinationExImpl : IRestoreDestinationEx
     {
-        //private ExchangeService CurrentExService;
+        public RestoreDestinationExImpl(EwsServiceArgument argument)
+        {
+            _argument = argument;
+        }
+
+        protected readonly EwsServiceArgument _argument;
+        
 
         public string DestinationMailbox { get; set; }
         public string DestinationFolder {
@@ -32,30 +39,28 @@ namespace EwsService.Impl
             }
         }
 
-        private RestoreDestinationImpl _restoreHelper;
+        protected RestoreDestinationImpl _restoreHelperCache;
 
         public void DealFolder(string displayName, Stack<IItemBase> dealItemStack)
         {
             
         }
 
-        public void DealItem(string id, string displayName, byte[] itemData, Stack<IItemBase> dealItemStack)
+        protected virtual void CreateHelperCache(Stack<IItemBase> dealItemStack)
         {
-            if(_restoreHelper == null)
+            if (_restoreHelperCache == null)
             {
-                _restoreHelper = new RestoreDestinationImpl();
-                _restoreHelper.DesMailboxAddress = DestinationMailbox;
-                _restoreHelper.DesFolderDisplayNamePath = DestinationFolder;
+                _restoreHelperCache = new RestoreDestinationImpl(_argument);
+                _restoreHelperCache.DesMailboxAddress = DestinationMailbox;
+                _restoreHelperCache.DesFolderDisplayNamePath = DestinationFolder;
             }
+        }
 
-            var item = dealItemStack.Pop();
-            dealItemStack.Push(item);
-            var itemClass = ItemClassUtil.GetItemClass(item);
-
-            var restoreItemInfo = new RestoreItemInformationImpl() { ItemId = id , DisplayName = displayName, ItemClass = itemClass };
+        protected virtual List<IFolderDataBase> GetPaths(Stack<IItemBase> dealItemStack)
+        {
             var paths = new List<IFolderDataBase>(dealItemStack.Count);
 
-            foreach(var itemBase in dealItemStack)
+            foreach (var itemBase in dealItemStack)
             {
                 IFolderDataBase folderDataBase = FolderClassUtil.NewFolderDataBase(itemBase);
                 paths.Insert(0, folderDataBase);
@@ -63,12 +68,24 @@ namespace EwsService.Impl
 
             if (dealItemStack.Count > 0)
                 paths.RemoveAt(dealItemStack.Count - 1);
-            
-            restoreItemInfo.FolderPathes = paths;
-            _restoreHelper.WriteItem(restoreItemInfo, itemData);
+            return paths;
         }
 
-        public void DealMailbox(string displayName, Stack<IItemBase> dealItemStack)
+        public virtual void DealItem(string id, string displayName, byte[] itemData, Stack<IItemBase> dealItemStack)
+        {
+            CreateHelperCache(dealItemStack);
+
+            var item = dealItemStack.Pop();
+            dealItemStack.Push(item);
+            var itemClass = ItemClassUtil.GetItemClass(item);
+
+            var restoreItemInfo = new RestoreItemInformationImpl() { ItemId = id , DisplayName = displayName, ItemClass = itemClass };
+            
+            restoreItemInfo.FolderPathes = GetPaths(dealItemStack);
+            _restoreHelperCache.WriteItem(restoreItemInfo, itemData);
+        }
+
+        public virtual void DealMailbox(string displayName, Stack<IItemBase> dealItemStack)
         {
             
         }
@@ -78,13 +95,13 @@ namespace EwsService.Impl
             
         }
 
-        public void SetOtherInformation(params object[] args)
+        public virtual void SetOtherInformation(params object[] args)
         {
             DestinationMailbox = args[0].ToString();
             DestinationFolder = args[1].ToString();
         }
 
-        public void RestoreComplete(bool success, Exception ex)
+        public void RestoreComplete(bool success, IRestoreServiceEx restoreService, Exception ex)
         {
         }
 
@@ -111,6 +128,61 @@ namespace EwsService.Impl
             {
                 get; set;
             }
+        }
+    }
+
+    public class RestoreDestinationOrgExImpl : RestoreDestinationExImpl
+    {
+        public RestoreDestinationOrgExImpl(EwsServiceArgument argument) : base(argument)
+        {
+        }
+
+        public override void SetOtherInformation(params object[] args)
+        {
+            DestinationFolder = args[0].ToString();
+        }
+
+
+        public override void DealMailbox(string displayName, Stack<IItemBase> dealItemStack)
+        {
+
+        }
+
+        Dictionary<string, RestoreDestinationImpl> helperDic = new Dictionary<string, RestoreDestinationImpl>();
+        protected override void CreateHelperCache(Stack<IItemBase> dealItemStack)
+        {
+            var mailAddress = "";
+            foreach (var itemBase in dealItemStack)
+            {
+                if (itemBase.ItemKind == ItemKind.Mailbox)
+                {
+                    mailAddress = itemBase.DisplayName;
+                }
+            }
+            RestoreDestinationImpl instance = null;
+            if(!helperDic.TryGetValue(mailAddress, out instance))
+            {
+                instance = new RestoreDestinationImpl(_argument);
+                instance.DesMailboxAddress = mailAddress;
+                instance.DesFolderDisplayNamePath = DestinationFolder;
+                helperDic.Add(mailAddress, instance);
+            }
+            _restoreHelperCache = instance;
+        }
+
+        protected override List<IFolderDataBase> GetPaths(Stack<IItemBase> dealItemStack)
+        {
+            var paths = new List<IFolderDataBase>(dealItemStack.Count);
+            foreach (var itemBase in dealItemStack)
+            {
+                if (itemBase.ItemKind == ItemKind.Folder)
+                {
+                    IFolderDataBase folderDataBase = FolderClassUtil.NewFolderDataBase(itemBase);
+                    paths.Insert(0, folderDataBase);
+                }
+            }
+
+            return paths;
         }
     }
 }

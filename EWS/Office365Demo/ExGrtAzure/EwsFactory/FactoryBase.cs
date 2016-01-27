@@ -19,7 +19,7 @@ namespace EwsFrame
         protected Assembly EwsServiceImplAssembly = null;
         protected Assembly DataProtectImplAssembly = null;
         protected Assembly LogImplAssembly = null;
-        
+
         protected abstract Dictionary<Type, string> InterfaceImplTypeNameDic
         {
             get;
@@ -30,11 +30,27 @@ namespace EwsFrame
         {
             get
             {
-                if(string.IsNullOrEmpty(_libPath))
+                if (string.IsNullOrEmpty(_libPath))
                 {
                     var directory = AppDomain.CurrentDomain.BaseDirectory;
-                    directory = Path.Combine(directory, "..\\lib");
-                    _libPath = directory;
+
+                    var temp = Path.Combine(directory, "bin");
+                    if (IsDllExist(temp))
+                    {
+                        _libPath = temp;
+                    }
+                    else
+                    {
+                        temp = Path.Combine(directory, "..\\lib");
+
+                        if (IsDllExist(temp)) {
+                            _libPath = directory;
+                        }
+                        else
+                        {
+                            throw new NotSupportedException();
+                        }
+                    }
                 }
                 return _libPath;
             }
@@ -42,6 +58,12 @@ namespace EwsFrame
             {
                 _libPath = value;
             }
+        }
+
+        private static bool IsDllExist(string directory)
+        {
+            var result = Directory.EnumerateFiles(directory, "*EwsDataInterface.dll*");
+            return result.Count() > 0;
         }
 
         protected object CreateType<T>(Assembly assemble)
@@ -60,6 +82,12 @@ namespace EwsFrame
         {
             var dataAccessImplType = assemble.GetType(typeName);
             return Activator.CreateInstance(dataAccessImplType);
+        }
+
+        protected object CreateTypeWithName<T>(Assembly assemble, string typeName, params object[] constructParams)
+        {
+            var dataAccessImplType = assemble.GetType(typeName);
+            return Activator.CreateInstance(dataAccessImplType, constructParams);
         }
     }
 }

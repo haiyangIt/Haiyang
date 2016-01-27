@@ -15,11 +15,13 @@ namespace EwsService.Impl
 {
     public class ItemOperatorImpl : IItem
     {
-        public ItemOperatorImpl(ExchangeService service)
+        public ItemOperatorImpl(ExchangeService service, IDataAccess dataAccess)
         {
             CurrentExchangeService = service;
+            _dataAccess = dataAccess;
         }
-        
+
+        private readonly IDataAccess _dataAccess;
 
         public ExchangeService CurrentExchangeService
         {
@@ -79,7 +81,7 @@ namespace EwsService.Impl
 
         public bool IsItemNew(Item item, DateTime lastTime, DateTime thisTime)
         {
-            var dataAccess = (ICatalogDataAccess)ServiceContext.ContextInstance.DataAccessObj;
+            var dataAccess = (ICatalogDataAccess)_dataAccess;
             return !dataAccess.IsItemContentExist(item.Id.UniqueId);
 
             //return (item.DateTimeCreated > lastTime && item.DateTimeCreated <= thisTime) || (item.LastModifiedTime > lastTime && item.LastModifiedTime <= thisTime);

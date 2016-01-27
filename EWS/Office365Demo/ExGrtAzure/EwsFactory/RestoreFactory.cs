@@ -72,9 +72,9 @@ namespace EwsFrame
             return (IRestoreService)CreateType<IRestoreService>(DataProtectImplAssembly, adminUserName, organizationName);
         }
 
-        public IRestoreDestination NewRestoreDestination()
+        public IRestoreDestination NewRestoreDestination(EwsServiceArgument argument)
         {
-            return (IRestoreDestination)CreateType<IRestoreDestination>(EwsServiceImplAssembly);
+            return (IRestoreDestination)CreateType<IRestoreDestination>(EwsServiceImplAssembly, argument);
         }
 
         public IRestoreServiceEx NewRestoreServiceEx(string adminUserName, string adminPassword, string domainName, string organizationName)
@@ -82,9 +82,14 @@ namespace EwsFrame
             return (IRestoreServiceEx)CreateType<IRestoreServiceEx>(DataProtectImplAssembly, adminUserName, adminPassword, domainName, organizationName);
         }
 
-        public IRestoreDestinationEx NewRestoreDestinationEx()
+        public IRestoreDestinationEx NewRestoreDestinationEx(EwsServiceArgument argument)
         {
-            return (IRestoreDestinationEx)CreateType<IRestoreDestinationEx>(EwsServiceImplAssembly);
+            return (IRestoreDestinationEx)CreateType<IRestoreDestinationEx>(EwsServiceImplAssembly, argument);
+        }
+
+        public IRestoreDestinationEx NewRestoreDestinationOrgEx(EwsServiceArgument argument)
+        {
+            return (IRestoreDestinationEx)(CreateTypeWithName<IRestoreDestinationEx>(EwsServiceImplAssembly, "EwsService.Impl.RestoreDestinationOrgExImpl", argument));
         }
 
         public IQueryCatalogDataAccess NewDataAccessForQuery()

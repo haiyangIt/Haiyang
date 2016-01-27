@@ -23,7 +23,7 @@ namespace LogImpl
                     if (string.IsNullOrEmpty(logFolder))
                     {
                         logFolder = AppDomain.CurrentDomain.BaseDirectory;
-                        logFolder = Path.Combine(logFolder, "..\\Log\\");
+                        logFolder = Path.Combine(logFolder, "Log");
                     }
                     if (!Directory.Exists(logFolder))
                     {
