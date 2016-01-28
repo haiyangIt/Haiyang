@@ -78,34 +78,29 @@ $.widget("custom.restorenav",
                    var self = this;
                    this._ajaxInfo = ajaxInfo;
                    self._setOtherInformation();
-                   $.ajax({
-                       url: ajaxInfo.url,
-                       type: "POST",
-                       data: ajaxInfo.data, //this.options.getdataargs,
-                       success: function (data) {
-                           if (data && data != null) {
-                               self.catalogTime = data.CatalogTime;
-                               self.navDatas = data.Details;
+                   Arcserve.DataProtect.Util.Post(ajaxInfo.data, ajaxInfo.url, function (data) {
+                       if (data && data != null) {
+                           self.catalogTime = data.CatalogTime;
+                           self.navDatas = data.Details;
 
-                               self.navDatasId2Item = [];
-                               self._createDic(self.navDatas, self.navDatasId2Item);
+                           self.navDatasId2Item = [];
+                           self._createDic(self.navDatas, self.navDatasId2Item);
 
-                               if (self.isPage)
-                                   self._updatePage();
+                           if (self.isPage)
+                               self._updatePage();
 
-                               if (self.navDatas.length) {
-                                   self._updateNavItem();
+                           if (self.navDatas.length) {
+                               self._updateNavItem();
 
-                                   self._addToTree(self._parentId, self.navDatas.length, self.navDatas);
+                               self._addToTree(self._parentId, self.navDatas.length, self.navDatas);
 
-                                   $("li:first", self.navList).click();
-                               }
-                           }
-                           else {
-                               self._clear();
+                               $("li:first", self.navList).click();
                            }
                        }
-                   })
+                       else {
+                           self._clear();
+                       }
+                   });
                },
 
                _clear: function () {
