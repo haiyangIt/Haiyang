@@ -80,7 +80,7 @@
          
 
         $(document).ready(function () {
-
+            var form = $("#SettingForm");
             $("#SaveBtn").click(function () {
                 if ($("#SettingForm").valid()) {
                     Arcserve.DataProtect.Util.Ajax.loading("Saving");
