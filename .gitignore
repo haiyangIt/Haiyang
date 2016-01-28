@@ -249,3 +249,5 @@ MAPI&AD/Store&CompondFile/Correct.msg
 MAPI&AD/DomainSearch/DomainSearch.zip
 EWS/ParseItemFromEWSExportFunction/ManagedCOM.zip
 *.msg
+[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].txt
+[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]EwsTrace.txt
