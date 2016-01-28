@@ -28,6 +28,7 @@
                             <span id="catalogInDays" style="float:left" class=""></span>
 
                             <input type="button" class="btn btn-primary" id="RestoreBtn" style="float:right" value="Restore" />
+                            <input type="button" class="btn btn-primary" id="Mailboxes" style="margin-right:10px; float:right" value="Mailboxes" />
                         </div>
                     </div>
                 </div>
@@ -280,6 +281,13 @@
                     var folderUpdateData = { url: getFolderUrl, data: { catalogJob: catalogInfo, mailAddress: item.OtherInformation.MailAddress } };
                     folderNav.foldernav("setRootFolderId", item.Id);
                     folderNav.foldernav("update", folderUpdateData);
+                });
+
+                $("#Mailboxes").on("click", function () {
+                    mailboxNav.show();
+                    mailboxDetail.show();
+                    folderNav.hide();
+                    mailItemDetail.hide();
                 });
 
                 folderNav.on("onSelect", function (e, item) {

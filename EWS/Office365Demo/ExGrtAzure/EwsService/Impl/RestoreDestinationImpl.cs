@@ -80,10 +80,11 @@ namespace EwsService.Impl
         }
 
         private Dictionary<string, FolderId> CreatedFolders;
-        private FolderId FindAndCreateFolder(IFolderDataBase folder, FolderId parentFolderId)
+        private FolderId FindAndCreateFolder(IFolderDataBase folder, FolderId parentFolderId, StringBuilder keyBuilder)
         {
             FolderId folderId = null;
-            var key = string.Format("{0}-{1}", folder.DisplayName, parentFolderId.UniqueId);
+            keyBuilder.Append(folder.DisplayName).Append("\\");
+            var key = keyBuilder.ToString(); //string.Format("{0}-{1}", folder.DisplayName, parentFolderId.UniqueId);
             if (CreatedFolders.TryGetValue(key, out folderId))
                 return folderId;
 
@@ -100,9 +101,10 @@ namespace EwsService.Impl
             ConnectMailbox(DesMailboxAddress);
             IFolder folderOper = RestoreFactory.Instance.NewFolderOperatorImpl(CurrentExService);
             FolderId parentFolderId = folderOper.GetRootFolder().Id;
+            StringBuilder sb = new StringBuilder();
             foreach (var folder in folders)
             {
-                parentFolderId = FindAndCreateFolder(folder, parentFolderId);
+                parentFolderId = FindAndCreateFolder(folder, parentFolderId, sb);
             }
             return parentFolderId;
         }
