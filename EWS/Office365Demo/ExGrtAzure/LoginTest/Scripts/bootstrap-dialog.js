@@ -344,6 +344,15 @@
 
             return this;
         },
+
+        updateZIndexEx: function(zIndex){
+            var $modal = this.getModal();
+            var $backdrop = $modal.data('bs.modal').$backdrop;
+            $modal.css('z-index', zIndex);
+            $backdrop.css('z-index', zIndex);
+            return this;
+        },
+
         open: function () {
             !this.isRealized() && this.realize();
             this.getModal().modal('show');

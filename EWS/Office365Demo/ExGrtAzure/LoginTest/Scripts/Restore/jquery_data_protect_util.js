@@ -18,49 +18,92 @@ defaultOptions:{
 */
 Arcserve.DataProtect.Util.Ajax = function (options) {
     var setting = $.extend({}, Arcserve.DataProtect.Util.Ajax.DefaultOptions, options);
+    var ajaxObj = new Arcserve.DataProtect.Util.AjaxClass(setting);
+    ajaxObj.Ajax();
+};
+
+Arcserve.DataProtect.Util.AjaxClass = function (setting) {
+    this.setting = setting;
+    this.timeOut = null;
+    this.isLoading = false;
+}
+
+Arcserve.DataProtect.Util.AjaxClass.prototype.Ajax = function () {
+    var self = this;
     var data = "";
     var contentType = "application/x-www-form-urlencoded; charset=UTF-8";
-    if (options.data instanceof Object) {
-        data = JSON.stringify(options.data);
-        contentType = setting.contentType;
+    if (this.setting.data instanceof Object) {
+        data = JSON.stringify(this.setting.data);
+        contentType = this.setting.contentType;
     }
-    else if (typeof(options.data) == "string")
-        data = options.data;
+    else if (typeof (this.setting.data) == "string")
+        data = this.setting.data;
 
-    if (typeof (setting.url) === "undefined")
+    if (typeof (this.setting.url) === "undefined")
         alert("please check code, missing ajax url.");
 
-    var isLoading = false;
-    var timeOut = setTimeout(function () {
-        Arcserve.DataProtect.Util.Ajax.loading();
-        isLoading = true;
+    this.timeOut = setTimeout(function () {
+        self.isLoading = true;
+        Arcserve.DataProtect.Util.Ajax.loading(null, null);
     }, 1000);
 
     $.ajax({
-        url: setting.url,
-        type: setting.type,
-        method: setting.method,
+        url: this.setting.url,
+        type: this.setting.type,
+        method: this.setting.method,
         contentType: contentType,// "application/json; charset=utf-8",
         data: data,
         error: function (jqXhr, textStatus, errorThrown) {
-            setting.error(jqXhr, textStatus, errorThrown);
+            self.FailureCallback(jqXhr, textStatus, errorThrown);
         },
         success: function (data, textStatus, jqXhr) {
-            setting.success(data, textStatus, jqXhr);
+            self.SuccessCallback(data, textStatus, jqXhr);
         },
         complete: function (jqXhr, textStatus) {
-            clearTimeout(timeOut);
-            if (isLoading) {
-                Arcserve.DataProtect.Util.Ajax.close();
-                isLoading = false;
-            }
-            setting.complete(jqXhr, textStatus);
+            self.CompleteCallback(jqXhr, textStatus);
         }
     });
+}
 
+Arcserve.DataProtect.Util.AjaxClass.prototype.SuccessCallback = function (data, textStatus, jqXhr) {
 
+    this.ResetLoading();
+    this.setting.success(data, textStatus, jqXhr);
+}
 
-};
+Arcserve.DataProtect.Util.AjaxClass.prototype.FailureCallback = function (jqXhr, textStatus, errorThrown) {
+
+    var data = $.parseJSON(jqXhr.responseText);
+    Arcserve.DataProtect.Util.Alert({
+        type: BootstrapDialog.TYPE_DANGER,
+        title: "Error",
+        message: data.Exception,
+        btnYesText: "Ok",
+        callbackForYes: function (dialogWarning) {
+            dialogWarning.close();
+        }
+    });
+    this.ResetLoading();
+    this.setting.error(jqXhr, textStatus, errorThrown);
+}
+
+Arcserve.DataProtect.Util.AjaxClass.prototype.CompleteCallback = function (jqXhr, textStatus) {
+
+    this.ResetLoading();
+    this.setting.complete(jqXhr, textStatus);
+}
+
+Arcserve.DataProtect.Util.AjaxClass.prototype.ResetLoading = function () {
+    var self = this;
+    if (this.timeOut != null) {
+        clearTimeout(this.timeOut);
+        this.timeOut = null;
+    }
+    if (self.isLoading) {
+        self.isLoading = false;
+        Arcserve.DataProtect.Util.Ajax.close();
+    }
+}
 
 Arcserve.DataProtect.Util.Post = function (data, url, success, complete, error) {
     Arcserve.DataProtect.Util.Ajax({ data: data, url: url, success: success, complete: complete, error: error });
@@ -70,63 +113,77 @@ Arcserve.DataProtect.Util.Ajax.DefaultOptions = {
     type: "POST",
     method: "POST",
     contentType: "application/json; charset=utf-8",
-    error: function (jqXhr, textStatus, errorThrown) { alert(textStatus + errorThrown); },
-    success: function (data, textStatus, jqXhr) { alert("operator success."); },
-    complete: function (jqXhr, textStatus) { }
+    error: function (jqXhr, textStatus, errorThrown) {
+
+    },
+    success: function (data, textStatus, jqXhr) {
+
+    },
+    complete: function (jqXhr, textStatus) {
+
+    }
 };
 
-Arcserve.DataProtect.Util.Ajax.loading = function () {
-    var self = Arcserve.DataProtect.Util.Ajax;
-    var title = "loading";
-    if (self.dialogOptions.title)
-        title = self.dialogOptions.title;
 
-    if (!self.loadingDialog) {
-        self.loadingDialog = new BootstrapDialog.show({
-            type: BootstrapDialog.TYPE_INFO,
-            title: "loading",
-            message: "<p>Please wait...</p>",
-            animate: false,
-            closable: false
-        });
+Arcserve.DataProtect.Util.Ajax.LoadingDialog = function (title, message) {
+    this.SetOptions(title, message);
+    this.loadingDialog = new BootstrapDialog({
+        type: BootstrapDialog.TYPE_INFO,
+        title: self.title,
+        message: self.message,
+        animate: false,
+        closable: false
+    });
+    this.loadingCount = 0;
+}
 
-        self.loadingCounter = 0;
-    }
-
-    if (self.loadingCounter == 0) {
-        self.loadingDialog.setTitle(title);
+Arcserve.DataProtect.Util.Ajax.LoadingDialog.prototype.Open = function (title, message) {
+    var self = this;
+    self.SetOptions(title, message);
+    self.loadingDialog.setTitle(self.title);
+    self.loadingDialog.setMessage(self.message);
+    if (self.loadingCount == 0) {
         self.loadingDialog.open();
+        self.loadingDialog.updateZIndexEx(3000);
     }
-    self.loadingCounter++;
+    else {
+        self.loadingDialog.updateZIndexEx(3000);
+    }
+    self.loadingCount++;
+}
 
-    Arcserve.DataProtect.Util.Ajax.ResetDialogOptions();
+Arcserve.DataProtect.Util.Ajax.LoadingDialog.prototype.SetOptions = function (title, message) {
+    if (title === null) {
+        this.title = this.title || "loading";
+    }
+    else
+        this.title = title || "loading";
+
+    if (message == null) {
+        this.message = this.message || "<p>Please wait...</p>";
+    }
+    else
+        this.message = message || "<p>Please wait...</p>";
+}
+
+Arcserve.DataProtect.Util.Ajax.LoadingDialog.prototype.Close = function () {
+    var self = this;
+    if (this.loadingCount > 0) {
+        this.loadingCount--;
+        if (this.loadingCount == 0) {
+            this.loadingDialog.close();
+            this.title = "loading";
+            this.message = "<p>Please wait...</p>";
+        }
+    }
+}
+Arcserve.DataProtect.Util.Ajax.LoadingObj = new Arcserve.DataProtect.Util.Ajax.LoadingDialog();
+Arcserve.DataProtect.Util.Ajax.loading = function (title, message) {
+    Arcserve.DataProtect.Util.Ajax.LoadingObj.Open(title, message);
 };
 
 Arcserve.DataProtect.Util.Ajax.close = function () {
-    var self = Arcserve.DataProtect.Util.Ajax;
-    if (self.loadingCounter > 0) {
-        self.loadingCounter--;
-    }
-    if (self.loadingCounter == 0) {
-        self.loadingDialog.close();
-    }
-};
-
-Arcserve.DataProtect.Util.Ajax.Dialog = Arcserve.DataProtect.Util.Ajax.Dialog || {};
-
-Arcserve.DataProtect.Util.Ajax.Dialog.DefaultOptions = {
-    title: "loading"
-};
-
-Arcserve.DataProtect.Util.Ajax.ResetDialogOptions = function () {
-    Arcserve.DataProtect.Util.Ajax.dialogOptions = Arcserve.DataProtect.Util.Ajax.Dialog.DefaultOptions;
-};
-
-Arcserve.DataProtect.Util.Ajax.dialogOptions = Arcserve.DataProtect.Util.Ajax.Dialog.DefaultOptions;
-
-Arcserve.DataProtect.Util.Ajax.SetLoadingDialog = function (options) {
-    var self = Arcserve.DataProtect.Util.Ajax;
-    self.dialogOptions = $.extend({}, self.Dialog.DefaultOptions, options);
+    Arcserve.DataProtect.Util.Ajax.LoadingObj.Close();
 };
 
 

@@ -5,6 +5,7 @@ using EwsFrame;
 using EwsFrame.Util;
 using LoginTest.Models;
 using LoginTest.Models.Restore;
+using LoginTest.Utils;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using System;
@@ -15,6 +16,7 @@ using System.Web.Mvc;
 
 namespace LoginTest.Controllers
 {
+    [CustomErrorHandler]
     public class RestoreController : Controller
     {
         private static IRestoreService GetRestoreService(RestoreUserInfo restoreUser)
@@ -189,7 +191,7 @@ namespace LoginTest.Controllers
         {
             IRestoreServiceEx restore = RestoreFactory.Instance.NewRestoreServiceEx(restoreAdminUserInfo.UserAddress, restoreAdminUserInfo.Password, string.Empty, restoreAdminUserInfo.Organization);
             restore.CurrentRestoreCatalogJob = catalog;
-            restore.Destination = RestoreFactory.Instance.NewRestoreDestinationEx(restore.ServiceContext.Argument);
+            restore.Destination = RestoreFactory.Instance.NewRestoreDestinationEx(restore.ServiceContext.Argument, restore.ServiceContext.DataAccessObj);
             restore.Destination.SetOtherInformation(destination.MailboxAddress, destination.FolderPath);
             restore.Restore(selectedItem);
             return Json(new { IsSuccess = true });
@@ -203,7 +205,7 @@ namespace LoginTest.Controllers
         {
             IRestoreServiceEx restore = RestoreFactory.Instance.NewRestoreServiceEx(restoreAdminUserInfo.UserAddress, restoreAdminUserInfo.Password, string.Empty, restoreAdminUserInfo.Organization);
             restore.CurrentRestoreCatalogJob = catalog;
-            restore.Destination = RestoreFactory.Instance.NewRestoreDestinationOrgEx(restore.ServiceContext.Argument);
+            restore.Destination = RestoreFactory.Instance.NewRestoreDestinationOrgEx(restore.ServiceContext.Argument, restore.ServiceContext.DataAccessObj);
             restore.Destination.SetOtherInformation(destination.FolderPath);
             restore.Restore(selectedItem);
             return Json(new { IsSuccess = true });

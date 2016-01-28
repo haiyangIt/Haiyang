@@ -68,13 +68,13 @@
                 <fieldset>
                     <legend>Choose Restore Type</legend>
                     <div class="form-group">
-                        <div class="col-md-3">
+                        <div class="col-md-3 col-md-offset-1">
                             <lable class="control-label"><input type="radio" id="RestoreToOrg" name="RestoreType" value="@ViewBag.Org" checked="checked" required />&nbsp;Restore Orginal</lable>
                         </div>
                         <div class="col-md-3">
                             <lable class="control-label"><input type="radio" id="RestoreToAlter" name="RestoreType" value="@ViewBag.Alter" required />&nbsp;Restore Alternative</lable>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-5">
                             <lable class="control-label"><input type="radio" id="RestoreToAzure" name="RestoreType" value="@ViewBag.Dump" required />&nbsp;Dump to Azure Storage</lable>
                         </div>
                     </div>
@@ -380,22 +380,22 @@
                             });
 
                             $("[name='RestoreType']").bind("click.restore", function () {
-                                var exportType = $("[name='ExportType']:checked").val();
-                                if (exportType == "@ViewBag.Org") {
+                                var restoreType = $("[name='RestoreType']:checked").val();
+                                if (restoreType == "@ViewBag.Org") {
                                     $("#restore_dump").addClass("hidden");
                                     $("#restore_alternative_mailbox").addClass("hidden");
                                     $("#restore_alternative_folder").addClass("hidden");
                                     $("#restore_original_folder").removeClass("hidden");
                                     $("#dump_type").addClass("hidden");
                                 }
-                                else if(exportType == "@ViewBag.Alter") {
+                                else if (restoreType == "@ViewBag.Alter") {
                                     $("#restore_dump").addClass("hidden");
                                     $("#restore_alternative_mailbox").removeClass("hidden");
                                     $("#restore_alternative_folder").removeClass("hidden");
                                     $("#restore_original_folder").addClass("hidden");
                                     $("#dump_type").addClass("hidden");
                                 }
-                                else if (exportType == "@ViewBag.Dump") {
+                                else if (restoreType == "@ViewBag.Dump") {
                                     $("#restore_dump").removeClass("hidden");
                                     $("#restore_alternative_mailbox").addClass("hidden");
                                     $("#restore_alternative_folder").addClass("hidden");
@@ -432,13 +432,14 @@
                     var adminPassword = $("#RestoreAdminPassword").val();
                     var adminUser = { UserAddress: adminUserName, Password: adminPassword, Organization: organization };
                     var exportType = $("[name='ExportType']:checked").val();
+                    
                     if (restoreType == "@ViewBag.Alter") {
                         var date = new Date();
                         var folderName = $("#RestoreAlterFolder").val();
                         var mailboxAddress = $("#RestoreAlterMailbox").val();
                         var destination = { MailboxAddress: mailboxAddress, FolderPath: folderName };
                         var data = { catalog: catalogInfo, restoreAdminUserInfo: adminUser, destination: destination, selectedItem: selectedItems };
-                        Arcserve.DataProtect.Util.Ajax.SetLoadingDialog({ title: "Processing" ,isLoading: true});
+                        Arcserve.DataProtect.Util.Ajax.loading("Processing");
                         Arcserve.DataProtect.Util.Post(data, "@Url.Action("RestoreItemsToAlter")", function (data) {
 
                             Arcserve.DataProtect.Util.Alert({
@@ -449,10 +450,13 @@
                                     //dialog.dialog("close");
                                     infoDialog.close();
                                     selfDialog.close();
+                                    Arcserve.DataProtect.Util.Ajax.close();
                                 }
                             })
 
                             //alert("restore finished.");
+                        }, function () {
+                            Arcserve.DataProtect.Util.Ajax.close();
                         });
 
                     }
@@ -461,7 +465,7 @@
                         var folderName = $("#RestoreFolder").val();
                         var destination = { FolderPath: folderName };
                         var data = { catalog: catalogInfo, restoreAdminUserInfo: adminUser, destination: destination, selectedItem: selectedItems };
-                        Arcserve.DataProtect.Util.Ajax.SetLoadingDialog({ title: "Processing" ,isLoading: true});
+                        Arcserve.DataProtect.Util.Ajax.loading("Processing");
                         Arcserve.DataProtect.Util.Post(data, "@Url.Action("RestoreItemsToOrg")", function (data) {
 
                             Arcserve.DataProtect.Util.Alert({
@@ -472,15 +476,18 @@
                                     //dialog.dialog("close");
                                     infoDialog.close();
                                     selfDialog.close();
+                                    Arcserve.DataProtect.Util.Ajax.close();
                                 }
                             })
 
                             //alert("restore finished.");
+                        }, function () {
+                            Arcserve.DataProtect.Util.Ajax.close();
                         });
                     }
                     else if (restoreType == "@ViewBag.Dump") {
                         var data = { catalog: catalogInfo, restoreAdminUserInfo: adminUser, selectedItem: selectedItems, notificationAddress: $("#NotificationAddress").val(), exportType: exportType };
-                        Arcserve.DataProtect.Util.Ajax.SetLoadingDialog({ title: "Processing", isLoading: true });
+                        Arcserve.DataProtect.Util.Ajax.loading("Processing");
                         Arcserve.DataProtect.Util.Post(data, "@Url.Action("DumpItems")", function (data) {
 
                             Arcserve.DataProtect.Util.Alert({
@@ -492,10 +499,13 @@
 
                                     infoDialog.close();
                                     selfDialog.close();
+                                    Arcserve.DataProtect.Util.Ajax.close();
                                 }
                             })
                             //alert("restore finished");
                             //dialog.dialog("close");
+                        }, function () {
+                            Arcserve.DataProtect.Util.Ajax.close();
                         });
                     }
                 }

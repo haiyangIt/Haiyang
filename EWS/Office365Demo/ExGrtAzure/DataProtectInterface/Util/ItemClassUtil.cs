@@ -269,4 +269,69 @@ namespace DataProtectInterface.Util
             }
         }
     }
+
+    public class MailClassUtil
+    {
+        public static IMailboxData GetMailboxData(IItemBase itemBase)
+        {
+            if (itemBase.ItemKind != ItemKind.Mailbox)
+                throw new ArgumentException("Type is wrong.", "itemBase");
+            if (itemBase is LoadedTreeItem)
+            {
+                var str = ((LoadedTreeItem)itemBase).ItemData;
+                var des = new JavaScriptSerializer();
+                MailClass item = des.Deserialize<MailClass>(str);
+                return item;
+            }
+            else if (itemBase is IMailboxData)
+            {
+                return itemBase as IMailboxData;
+            }
+            else
+                throw new NotSupportedException("Type is wrong.");
+        }
+
+        class MailClass : IMailboxData
+        {
+            public int ChildFolderCount
+            {
+                get; set;
+            }
+
+            public string DisplayName
+            {
+                get; set;
+            }
+
+            public string Id
+            {
+                get; set;
+            }
+
+            public ItemKind ItemKind
+            {
+                get; set;
+            }
+
+            public string Location
+            {
+                get; set;
+            }
+
+            public string MailAddress
+            {
+                get; set;
+            }
+
+            public string RootFolderId
+            {
+                get; set;
+            }
+
+            public IMailboxData Clone()
+            {
+                throw new NotImplementedException();
+            }
+        }
+    }
 }

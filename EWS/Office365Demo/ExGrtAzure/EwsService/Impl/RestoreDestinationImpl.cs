@@ -14,12 +14,14 @@ namespace EwsService.Impl
 {
     public class RestoreDestinationImpl : IRestoreDestination
     {
-        public RestoreDestinationImpl(EwsServiceArgument argument)
+        public RestoreDestinationImpl(EwsServiceArgument argument, IDataAccess dataAccess)
         {
             _argument = argument;
+            _dataAccess = dataAccess;
         }
 
         private readonly EwsServiceArgument _argument;
+        private readonly IDataAccess _dataAccess;
 
         public string DesMailboxAddress { get; set; }
         public string DesFolderDisplayNamePath
@@ -166,7 +168,7 @@ namespace EwsService.Impl
                 default:
                     throw new NotSupportedException("Can not import not support itemclass.");
             }
-            IItem itemOperatorImpl = RestoreFactory.Instance.NewItemOperatorImpl(CurrentExService);
+            IItem itemOperatorImpl = RestoreFactory.Instance.NewItemOperatorImpl(CurrentExService, _dataAccess);
             var argument = _argument;
             itemOperatorImpl.ImportItem(folderId, itemData, argument);
         }
@@ -178,7 +180,7 @@ namespace EwsService.Impl
             List<IFolderDataBase> path = GetFolderPathArray(item.FolderPathes);
             var folder = CreateFoldersIfNotExist(path);
             folderId = folder;
-            IItem itemOperatorImpl = RestoreFactory.Instance.NewItemOperatorImpl(CurrentExService);
+            IItem itemOperatorImpl = RestoreFactory.Instance.NewItemOperatorImpl(CurrentExService, _dataAccess);
             var argument = _argument;
             itemOperatorImpl.ImportItem(folderId, itemData, argument);
         }

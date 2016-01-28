@@ -148,7 +148,7 @@
                    var restoreItem = Restore.Item.GetItem(parentId, self.options.cacheKey);
 
                    $.each(childContainers, function (i, item) {
-                       var childItem = Restore.Item.CreateItem(item.Id, item, 0, item.ItemType, item.DisplayName, self.options.cacheKey, function (event, data) {
+                       var childItem = Restore.Item.CreateItem(item.Id, item, 0, item.ItemType, item.DisplayName, item.CanSelect, self.options.cacheKey, function (event, data) {
                            self._modifyHtmlForCheckStatusChange(data);
                        });
                        restoreItem.AddChild(childItem);

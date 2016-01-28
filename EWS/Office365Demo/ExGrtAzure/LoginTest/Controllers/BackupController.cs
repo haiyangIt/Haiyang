@@ -15,9 +15,11 @@ using EwsDataInterface;
 using EwsServiceInterface;
 using System.Web.Script.Serialization;
 using LoginTest.Models.Setting;
+using LoginTest.Utils;
 
 namespace LoginTest.Controllers
 {
+    [CustomErrorHandler]
     public class BackupController : Controller
     {
         [Authorize]
@@ -30,7 +32,7 @@ namespace LoginTest.Controllers
             using (ApplicationDbContext context = new ApplicationDbContext())
             {
                 SettingModel model = context.Settings.Where(s => s.UserMail == user.Email).FirstOrDefault();
-                if(model == null)
+                if (model == null)
                 {
                     return View(new BackupModel());
                 }
@@ -46,7 +48,7 @@ namespace LoginTest.Controllers
                     return View(backupModel);
                 }
             }
-                
+
         }
 
         [Authorize]
@@ -56,6 +58,7 @@ namespace LoginTest.Controllers
         {
             if (ModelState.IsValid)
             {
+
                 model.Index++;
                 if (model.Index == 3)
                     Run(model);
@@ -67,15 +70,8 @@ namespace LoginTest.Controllers
                     argument.ServiceCredential = new System.Net.NetworkCredential(model.BackupUserMailAddress, model.BackupUserPassword);
                     argument.UseDefaultCredentials = false;
                     argument.SetConnectMailbox(model.BackupUserMailAddress);
-                    try
-                    {
-                        mailboxOper.ConnectMailbox(argument, model.BackupUserMailAddress);
-                        return Json(model);
-                    }
-                    catch
-                    {
-                        return Json(new { IsSuccess = false, Index = model.Index });
-                    }
+                    mailboxOper.ConnectMailbox(argument, model.BackupUserMailAddress);
+                    return Json(model);
                 }
             }
 
@@ -114,7 +110,7 @@ namespace LoginTest.Controllers
                 }
             }
 
-            if(adminMailbox != null)
+            if (adminMailbox != null)
             {
                 AddToResult(adminMailbox, infos, 0);
             }
@@ -129,16 +125,16 @@ namespace LoginTest.Controllers
 
         private void AddToResult(IMailboxData data, List<Item> infos, int position = -1)
         {
-            if(position == -1)
-            infos.Add(new Item()
-            {
-                Id = data.MailAddress,
-                DisplayName = data.DisplayName,
-                ChildCount = int.MaxValue,
-                ItemType = ItemTypeStr.Mailbox,
-                CanSelect = 0,
-                OtherInformation = data
-            });
+            if (position == -1)
+                infos.Add(new Item()
+                {
+                    Id = data.MailAddress,
+                    DisplayName = data.DisplayName,
+                    ChildCount = int.MaxValue,
+                    ItemType = ItemTypeStr.Mailbox,
+                    CanSelect = 0,
+                    OtherInformation = data
+                });
             else
             {
                 infos.Insert(position, new Item()
@@ -156,7 +152,7 @@ namespace LoginTest.Controllers
         public ActionResult GetFolderInMailbox(string adminMailbox, string password, string organization, string mailbox, string parentFolderId)
         {
             ICatalogService service = CatalogFactory.Instance.NewCatalogService(adminMailbox, password, null, organization);
-            
+
             var allFolder = service.GetFolder(mailbox, parentFolderId, false);
             var result = new List<Item>();
             foreach (var folder in allFolder)
@@ -179,7 +175,7 @@ namespace LoginTest.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Run(BackupModel model)
         {
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 JavaScriptSerializer js = new JavaScriptSerializer();
                 LoadedTreeItem selectedItem = js.Deserialize<LoadedTreeItem>(model.BackupSelectItems);

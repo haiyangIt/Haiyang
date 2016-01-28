@@ -15,11 +15,11 @@
 @Styles.Render("~/bundles/bootstrapselectcss")
 @Styles.Render("~/bundles/bootstrapdialogcss")
 
-@using (Ajax.BeginForm("Index", "Backup", new AjaxOptions { OnSuccess = "SubmitFormSuccess" }, new { @class = "form-horizontal", role = "form", id = "BackupForm" }))
+@using (Ajax.BeginForm("Index", "Backup", new AjaxOptions { OnSuccess = "SubmitFormSuccess", OnFailure="SubmitFailure", OnComplete = "SubmitComplete" }, new { @class = "form-horizontal", role = "form", id = "BackupForm" }))
 {
     @Html.AntiForgeryToken()
     <hr />
-    @Html.ValidationSummary("", new { @class = "text-danger" })
+    @*@Html.ValidationSummary("", new { @class = "text-danger" })*@
     <div id="rootwizard">
         <div class="navbar navbar-inverse">
             <div class="navbar-inner">
@@ -128,14 +128,16 @@
             var isMailboxInit = false;
 
             var isFinished = false;
+            var form = $("#BackupForm");
+
             wizard.bootstrapWizard({
                 onNext: function (tab, navigation, index) {
-                    if (!$("#BackupForm").valid()) {
+                    
+                    if (!form.valid()) {
                         return false;
                     }
 
-                    Arcserve.DataProtect.Util.Ajax.SetLoadingDialog({ title: "Validation" });
-                    Arcserve.DataProtect.Util.Ajax.loading();
+                    Arcserve.DataProtect.Util.Ajax.loading("Validation");
                     if (index == parseInt("@ViewBag.SummaryStepNumber")) {
                         var rootSelectItem = Restore.Item.GetRootItem(selectCacheKey);
                         if (rootSelectItem.Status == Restore.Item.UnSelectedStatus) {
@@ -148,7 +150,11 @@
                     }
                     wizard.bootstrapWizard('show', index - 1);
 
-                    $("#submitbtn").click();
+                    Arcserve.DataProtect.Util.Post(form.serialize(), form.attr("action"), SubmitFormSuccess, function () {
+                        Arcserve.DataProtect.Util.Ajax.close();
+                    })
+
+                    //$("#submitbtn").click();
                     return false;
                 },
                 onFinish: function (tab, navigation, lastIndex) {
@@ -157,10 +163,13 @@
                         var selectItems = Restore.Item.GetTotalSelectItems(selectCacheKey);
                         $("#BackupSelectItems").val(JSON.stringify(selectItems));
 
-                        $("#submitbtn").click();
                         isFinished = true;
-                        Arcserve.DataProtect.Util.Ajax.SetLoadingDialog({ title: "Processing" });
-                        Arcserve.DataProtect.Util.Ajax.loading();
+                        Arcserve.DataProtect.Util.Ajax.loading("Processing");
+
+                        Arcserve.DataProtect.Util.Post(form.serialize(), form.attr("action"), SubmitFormSuccess, function () {
+                            Arcserve.DataProtect.Util.Ajax.close();
+                        })
+
                     }
                     else {
                         Arcserve.DataProtect.Util.Alert({
@@ -250,7 +259,7 @@
                     return;
                 }
 
-                if (data.Index == parseInt("@ViewBag.MailboxAndFolderStepNumber")) {
+                @*if (data.Index == parseInt("@ViewBag.MailboxAndFolderStepNumber")) {
                     if (typeof (data.IsSuccess) != "undefined") {
                         if (!data.IsSuccess) {
                             wizard.bootstrapWizard('show', data.Index - 1);
@@ -266,7 +275,7 @@
                             return;
                         }
                     }
-                }
+                }*@
 
                 adminMailbox = data.BackupUserMailAddress;
                 adminPassword = data.BackupUserPassword;

@@ -46,7 +46,7 @@ namespace ExGrtAzure.Tests
         public void TestRestoreMailbox()
         {
             IRestoreService service = GetRestoreService();
-            using (IRestoreDestination destination = _factory.NewRestoreDestination(service.ServiceContext.Argument))
+            using (IRestoreDestination destination = _factory.NewRestoreDestination(service.ServiceContext.Argument, _service.ServiceContext.DataAccessObj))
             {
                 service.Destination = destination;
                 destination.InitOtherInformation("haiyang.ling@arcserve.com", "Restore1");

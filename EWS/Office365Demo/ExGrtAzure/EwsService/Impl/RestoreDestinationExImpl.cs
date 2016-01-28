@@ -13,13 +13,14 @@ namespace EwsService.Impl
 {
     public class RestoreDestinationExImpl : IRestoreDestinationEx
     {
-        public RestoreDestinationExImpl(EwsServiceArgument argument)
+        public RestoreDestinationExImpl(EwsServiceArgument argument, IDataAccess dataAccess)
         {
             _argument = argument;
+            _dataAccess = dataAccess;
         }
 
         protected readonly EwsServiceArgument _argument;
-        
+        protected readonly IDataAccess _dataAccess;
 
         public string DestinationMailbox { get; set; }
         public string DestinationFolder {
@@ -50,7 +51,7 @@ namespace EwsService.Impl
         {
             if (_restoreHelperCache == null)
             {
-                _restoreHelperCache = new RestoreDestinationImpl(_argument);
+                _restoreHelperCache = new RestoreDestinationImpl(_argument, _dataAccess);
                 _restoreHelperCache.DesMailboxAddress = DestinationMailbox;
                 _restoreHelperCache.DesFolderDisplayNamePath = DestinationFolder;
             }
@@ -133,7 +134,7 @@ namespace EwsService.Impl
 
     public class RestoreDestinationOrgExImpl : RestoreDestinationExImpl
     {
-        public RestoreDestinationOrgExImpl(EwsServiceArgument argument) : base(argument)
+        public RestoreDestinationOrgExImpl(EwsServiceArgument argument, IDataAccess dataAccess) : base(argument, dataAccess)
         {
         }
 
@@ -156,13 +157,18 @@ namespace EwsService.Impl
             {
                 if (itemBase.ItemKind == ItemKind.Mailbox)
                 {
-                    mailAddress = itemBase.DisplayName;
+                    var des = MailClassUtil.GetMailboxData(itemBase);
+                    mailAddress = des.MailAddress;
+                    break;
                 }
             }
+            if (string.IsNullOrEmpty(mailAddress))
+                throw new ArgumentException();
+
             RestoreDestinationImpl instance = null;
             if(!helperDic.TryGetValue(mailAddress, out instance))
             {
-                instance = new RestoreDestinationImpl(_argument);
+                instance = new RestoreDestinationImpl(_argument, _dataAccess);
                 instance.DesMailboxAddress = mailAddress;
                 instance.DesFolderDisplayNamePath = DestinationFolder;
                 helperDic.Add(mailAddress, instance);

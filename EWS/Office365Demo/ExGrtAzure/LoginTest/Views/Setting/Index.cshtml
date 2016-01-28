@@ -82,9 +82,15 @@
         $(document).ready(function () {
 
             $("#SaveBtn").click(function () {
-                Arcserve.DataProtect.Util.Ajax.SetLoadingDialog({ title: "Saving" });
-                Arcserve.DataProtect.Util.Ajax.loading();
-                $("#SubmitBtn").click();
+                if ($("#SettingForm").valid()) {
+                    Arcserve.DataProtect.Util.Ajax.loading("Saving");
+
+                    Arcserve.DataProtect.Util.Post(form.serialize(), form.attr("action"), SubmitFormSuccess, function () {
+                        Arcserve.DataProtect.Util.Ajax.close();
+                    });
+                }
+
+                //$("#SubmitBtn").click();
             })
 
             SubmitFormSuccess = function (data) {
@@ -107,9 +113,7 @@
 
             $("#TestBtn").click(function () {
                 if ($("#SettingForm").valid()) {
-                    Arcserve.DataProtect.Util.Ajax.SetLoadingDialog({ title: "Testing" });
-                    Arcserve.DataProtect.Util.Ajax.loading();
-
+                    Arcserve.DataProtect.Util.Ajax.loading("Testing" );
 
                     var formData = $("#SettingForm").serialize();
                     Arcserve.DataProtect.Util.Post(formData, "@Url.Action("TestConnect","Setting")", function (data) {
@@ -143,7 +147,9 @@
                             });
                         }
                         Arcserve.DataProtect.Util.Ajax.close();
-                    })
+                    }, function () {
+                        Arcserve.DataProtect.Util.Ajax.close();
+                    });
                 }
             })
         });

@@ -2,6 +2,7 @@
 using EwsServiceInterface;
 using LoginTest.Models;
 using LoginTest.Models.Setting;
+using LoginTest.Utils;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using System;
@@ -12,6 +13,7 @@ using System.Web.Mvc;
 
 namespace LoginTest.Controllers
 {
+    [CustomErrorHandler]
     public class SettingController : Controller
     {
         [Authorize]

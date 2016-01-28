@@ -72,9 +72,9 @@ namespace EwsFrame
             return (IRestoreService)CreateType<IRestoreService>(DataProtectImplAssembly, adminUserName, organizationName);
         }
 
-        public IRestoreDestination NewRestoreDestination(EwsServiceArgument argument)
+        public IRestoreDestination NewRestoreDestination(EwsServiceArgument argument, IDataAccess dataAccess)
         {
-            return (IRestoreDestination)CreateType<IRestoreDestination>(EwsServiceImplAssembly, argument);
+            return (IRestoreDestination)CreateType<IRestoreDestination>(EwsServiceImplAssembly, argument, dataAccess);
         }
 
         public IRestoreServiceEx NewRestoreServiceEx(string adminUserName, string adminPassword, string domainName, string organizationName)
@@ -82,14 +82,14 @@ namespace EwsFrame
             return (IRestoreServiceEx)CreateType<IRestoreServiceEx>(DataProtectImplAssembly, adminUserName, adminPassword, domainName, organizationName);
         }
 
-        public IRestoreDestinationEx NewRestoreDestinationEx(EwsServiceArgument argument)
+        public IRestoreDestinationEx NewRestoreDestinationEx(EwsServiceArgument argument, IDataAccess dataAccess)
         {
-            return (IRestoreDestinationEx)CreateType<IRestoreDestinationEx>(EwsServiceImplAssembly, argument);
+            return (IRestoreDestinationEx)CreateType<IRestoreDestinationEx>(EwsServiceImplAssembly, argument, dataAccess);
         }
 
-        public IRestoreDestinationEx NewRestoreDestinationOrgEx(EwsServiceArgument argument)
+        public IRestoreDestinationEx NewRestoreDestinationOrgEx(EwsServiceArgument argument, IDataAccess dataAccess)
         {
-            return (IRestoreDestinationEx)(CreateTypeWithName<IRestoreDestinationEx>(EwsServiceImplAssembly, "EwsService.Impl.RestoreDestinationOrgExImpl", argument));
+            return (IRestoreDestinationEx)(CreateTypeWithName<IRestoreDestinationEx>(EwsServiceImplAssembly, "EwsService.Impl.RestoreDestinationOrgExImpl", argument, dataAccess));
         }
 
         public IQueryCatalogDataAccess NewDataAccessForQuery()
@@ -122,9 +122,9 @@ namespace EwsFrame
             return (IFolder)CreateType<IFolder>(EwsServiceImplAssembly, currentExService);
         }
 
-        public IItem NewItemOperatorImpl(ExchangeService currentExService)
+        public IItem NewItemOperatorImpl(ExchangeService currentExService, IDataAccess dataAccess)
         {
-            return (IItem)CreateType<IItem>(EwsServiceImplAssembly, currentExService);
+            return (IItem)CreateType<IItem>(EwsServiceImplAssembly, currentExService, dataAccess);
         }
 
         public ICatalogJob NewCatalogJob(string organizationName, string catalogJobName, DateTime catalogTime)
