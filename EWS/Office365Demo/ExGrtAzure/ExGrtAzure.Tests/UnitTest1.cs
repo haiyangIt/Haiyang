@@ -15,6 +15,8 @@ using DataProtectInterface;
 using SqlDbImpl;
 using System.IO.Compression;
 using System.Net.Mail;
+using Microsoft.WindowsAzure.Storage.Blob;
+using Microsoft.WindowsAzure.Storage;
 
 namespace ExGrtAzure.Tests
 {
@@ -116,6 +118,29 @@ namespace ExGrtAzure.Tests
             var dataAccess = ServiceContext.GetDataAccessInstance(TaskType.Catalog, context.Argument, "Arcserve");
             dataAccess.ResetAllStorage();
             dataAccess.ResetAllStorage("Arcserve");
+        }
+
+        [TestMethod]
+        public void CreateBlob()
+        {
+            CloudStorageAccount StorageAccount = FactoryBase.GetStorageAccount();
+
+            CloudBlobClient BlobClient = StorageAccount.CreateCloudBlobClient();
+            CloudBlobContainer container = BlobClient.GetContainerReference("aaaa");
+            container.CreateIfNotExists();
+            CloudBlockBlob blockBlob = container.GetBlockBlobReference("block.log");
+            if (!blockBlob.Exists())
+            {
+                blockBlob.UploadText("ceshiyixia");
+            }
+
+            CloudAppendBlob appBlob = container.GetAppendBlobReference("abc.log");
+
+            if (!appBlob.Exists())
+            {
+                appBlob.CreateOrReplace();
+            }
+
         }
 
         [TestMethod]
@@ -283,16 +308,16 @@ namespace ExGrtAzure.Tests
             var left = new List<IFolderDataBase>(left1);
             var right = new List<IFolderDataBase>(right1);
             Assert.AreEqual(left.Count, right.Count);
-            if(isEqualByOrder)
+            if (isEqualByOrder)
             {
-                for(int i = 0; i < right.Count; i++)
+                for (int i = 0; i < right.Count; i++)
                 {
                     Assert.AreEqual(left[i], right[i]);
                 }
             }
             else
             {
-                for(int i = 0; i < left.Count; i++)
+                for (int i = 0; i < left.Count; i++)
                 {
                     int j = right.IndexOf(left[i]);
                     Assert.IsTrue(j >= 0);

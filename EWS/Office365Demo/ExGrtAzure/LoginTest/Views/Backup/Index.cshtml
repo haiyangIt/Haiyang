@@ -168,6 +168,7 @@
 
                         Arcserve.DataProtect.Util.Post(form.serialize(), form.attr("action"), SubmitFormSuccess, function () {
                             Arcserve.DataProtect.Util.Ajax.close();
+                            isFinished = false;
                         })
 
                     }

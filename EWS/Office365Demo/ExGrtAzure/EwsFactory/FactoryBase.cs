@@ -1,8 +1,11 @@
 ﻿using DataProtectInterface;
 using EwsDataInterface;
 using EwsServiceInterface;
+using Microsoft.WindowsAzure.ServiceRuntime;
+using Microsoft.WindowsAzure.Storage;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -43,7 +46,8 @@ namespace EwsFrame
                     {
                         temp = Path.Combine(directory, "..\\lib");
 
-                        if (IsDllExist(temp)) {
+                        if (IsDllExist(temp))
+                        {
                             _libPath = directory;
                         }
                         else
@@ -88,6 +92,23 @@ namespace EwsFrame
         {
             var dataAccessImplType = assemble.GetType(typeName);
             return Activator.CreateInstance(dataAccessImplType, constructParams);
+        }
+
+        public static CloudStorageAccount GetStorageAccount()
+        {
+            if (!IsRunningOnAzure())
+                return CloudStorageAccount.Parse(
+        ConfigurationManager.ConnectionStrings["StorageConnectionString"].ConnectionString);
+            else
+            {
+                return CloudStorageAccount.Parse(
+        ConfigurationManager.ConnectionStrings["StorageConnectionStringRunning"].ConnectionString);
+            }
+        }
+
+        public static bool IsRunningOnAzure()
+        {
+            return !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME"));
         }
     }
 }

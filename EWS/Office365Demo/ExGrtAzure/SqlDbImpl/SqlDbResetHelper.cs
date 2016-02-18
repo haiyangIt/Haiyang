@@ -1,4 +1,5 @@
-﻿using Microsoft.WindowsAzure.Storage;
+﻿using EwsFrame;
+using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using SqlDbImpl.Model;
 using SqlDbImpl.Storage;
@@ -15,8 +16,7 @@ namespace SqlDbImpl
     {
         public void ResetBlobData(string organization, bool isResetAll = false)
         {
-            CloudStorageAccount StorageAccount = CloudStorageAccount.Parse(
-  ConfigurationManager.ConnectionStrings["StorageConnectionString"].ConnectionString);
+            CloudStorageAccount StorageAccount = FactoryBase.GetStorageAccount();
 
             CloudBlobClient BlobClient = StorageAccount.CreateCloudBlobClient();
             BlobDataAccess blobDataAccess = new BlobDataAccess(BlobClient);

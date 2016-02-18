@@ -35,7 +35,7 @@ namespace LoginTest.Controllers
                 {
                     viewModel = new SettingViewModel()
                     {
-                        AdminUserName = model.UserMail,
+                        AdminUserName = model.AdminUserName,
                         AdminPassword = model.AdminPassword,
                         ConfirmPassword = model.AdminPassword,
                         EwsConnectUrl = model.EwsConnectUrl,

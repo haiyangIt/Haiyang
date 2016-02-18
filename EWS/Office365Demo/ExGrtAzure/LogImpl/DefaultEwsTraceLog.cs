@@ -13,7 +13,7 @@ namespace LogImpl
         {
             get
             {
-                return string.Format("{0}EwsTrace.txt", DateTime.Now.ToString("yyyyMMddHHmmss"));
+                return string.Format("{0}EwsTrace.txt", DateTime.Now.ToString("yyyyMMdd"));
             }
         }
     }

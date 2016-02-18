@@ -137,8 +137,8 @@ namespace EwsFrame
 
         public static IServiceContext NewServiceContext(string userName, string password, string domainName, string organization, TaskType taskType)
         {
-            if (_ContextInstance == null)
-                _ContextInstance = new ServiceContext(userName, password, domainName, organization, taskType);
+            //if (_ContextInstance == null)
+            _ContextInstance = new ServiceContext(userName, password, domainName, organization, taskType);
             return ContextInstance;
         }
 

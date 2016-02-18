@@ -64,7 +64,7 @@ namespace DataProtectInterface.Util
                 return result;
 
             else if (itemClass.IndexOf("IPM.Appointment") >= 0)
-                return ItemClass.Contact;
+                return ItemClass.Appointment;
 
             else
                 throw new NotSupportedException("Modify code to support this type");

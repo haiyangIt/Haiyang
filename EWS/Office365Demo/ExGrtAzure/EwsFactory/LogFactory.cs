@@ -1,4 +1,5 @@
 ﻿using LogInterface;
+using Microsoft.WindowsAzure.ServiceRuntime;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -18,7 +19,7 @@ namespace EwsFrame
                 if(_instance == null)
                 {
                     _instance = new LogFactory();
-                    var logImplAssemblyPath = Path.Combine(LibPath, "LogImpl.dll");
+                    string logImplAssemblyPath = Path.Combine(LibPath, "LogImpl.dll");
                     _instance.LogImplAssembly = Assembly.LoadFrom(logImplAssemblyPath);
                 }
                 return _instance;
@@ -62,8 +63,16 @@ namespace EwsFrame
 
         private void InitLog()
         {
-            _logInstance = (ILog)(CreateTypeWithName<ILog>(LogImplAssembly, "LogImpl.DefaultLog"));
-            _ewsTraceLogInstance = (ILog)(CreateTypeWithName<ILog>(LogImplAssembly, "LogImpl.DefaultEwsTraceLog"));
+            if (!IsRunningOnAzure())
+            {
+                _logInstance = (ILog)(CreateTypeWithName<ILog>(LogImplAssembly, "LogImpl.DefaultLog"));
+                _ewsTraceLogInstance = (ILog)(CreateTypeWithName<ILog>(LogImplAssembly, "LogImpl.DefaultEwsTraceLog"));
+            }
+            else
+            {
+                _logInstance = (ILog)(CreateTypeWithName<ILog>(LogImplAssembly, "LogImpl.LogToBlob"));
+                _ewsTraceLogInstance = (ILog)(CreateTypeWithName<ILog>(LogImplAssembly, "LogImpl.LogToBlobEwsTrace"));
+            }
         }
     }
 }

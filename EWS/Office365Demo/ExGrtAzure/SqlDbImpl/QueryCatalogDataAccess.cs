@@ -153,8 +153,7 @@ namespace SqlDbImpl
                 );
         }
 
-        private static CloudStorageAccount StorageAccount = CloudStorageAccount.Parse(
-    ConfigurationManager.ConnectionStrings["StorageConnectionString"].ConnectionString);
+        private static CloudStorageAccount StorageAccount = FactoryBase.GetStorageAccount();
 
         internal static CloudTableClient TableClient = StorageAccount.CreateCloudTableClient();
 

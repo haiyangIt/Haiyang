@@ -9,6 +9,7 @@ using EwsServiceInterface;
 using Microsoft.Exchange.WebServices.Data;
 using System.Reflection;
 using System.IO;
+using Microsoft.WindowsAzure.ServiceRuntime;
 
 namespace EwsFrame
 {
@@ -22,7 +23,6 @@ namespace EwsFrame
                 if (_instance == null)
                 {
                     _instance = new RestoreFactory();
-
                     var sqlDbImplPath = Path.Combine(LibPath, "SqlDbImpl.dll");
                     var ewsServicePath = Path.Combine(LibPath, "EwsService.dll");
                     var dataProtectPath = Path.Combine(LibPath, "DataProtectImpl.dll");

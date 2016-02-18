@@ -1,4 +1,5 @@
 ﻿using EwsFrame;
+using Microsoft.WindowsAzure.ServiceRuntime;
 using Microsoft.WindowsAzure.Storage.Blob;
 using System;
 using System.Collections.Generic;
@@ -18,7 +19,7 @@ namespace SqlDbImpl.Storage
             {
                 if (_blobMaxSize == 0)
                 {
-                    if (ConfigurationManager.AppSettings["UseEmulator"] == "1")
+                    if(!FactoryBase.IsRunningOnAzure())
                     {
                         _blobMaxSize = 2 * 1024 * 1024;
                     }

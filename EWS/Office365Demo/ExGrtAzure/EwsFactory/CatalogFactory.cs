@@ -2,6 +2,7 @@
 using EwsDataInterface;
 using EwsServiceInterface;
 using Microsoft.Exchange.WebServices.Data;
+using Microsoft.WindowsAzure.ServiceRuntime;
 using System;
 using System.Collections.Generic;
 using System.IO;

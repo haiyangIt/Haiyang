@@ -3,6 +3,7 @@ using SqlDbImpl.Model;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data.Common;
 using System.Data.Entity;
 using System.Data.Entity.Core.EntityClient;
 using System.Data.Entity.Infrastructure.Annotations;
@@ -47,12 +48,7 @@ namespace SqlDbImpl
 
         public static string GetConnectString(string organizationName)
         {
-            SqlConnectionStringBuilder sqlBuilder = new SqlConnectionStringBuilder();
-            sqlBuilder.DataSource = ConfigurationManager.AppSettings["DataSource"];
-            sqlBuilder.UserID = ConfigurationManager.AppSettings["UserId"];
-            sqlBuilder.Password = ConfigurationManager.AppSettings["Password"];
-            sqlBuilder.PersistSecurityInfo = Convert.ToBoolean(ConfigurationManager.AppSettings["PersistSecurityInfo"]);
-            sqlBuilder.IntegratedSecurity = false;
+            SqlConnectionStringBuilder sqlBuilder = new SqlConnectionStringBuilder(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString);
             sqlBuilder.InitialCatalog = organizationName;
             return sqlBuilder.ToString();
         }

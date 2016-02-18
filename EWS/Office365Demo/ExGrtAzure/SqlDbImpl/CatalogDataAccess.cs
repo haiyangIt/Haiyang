@@ -108,8 +108,7 @@ namespace SqlDbImpl
             SaveModel<IItemData, ItemModel>(item, CacheKeyNameDic[typeof(ItemModel)], CachPageCountDic[typeof(ItemModel)], (context, lists) => context.Items.AddRange(lists));
         }
 
-        private static CloudStorageAccount StorageAccount = CloudStorageAccount.Parse(
-    ConfigurationManager.ConnectionStrings["StorageConnectionString"].ConnectionString);
+        private static CloudStorageAccount StorageAccount = FactoryBase.GetStorageAccount();
 
         internal static CloudBlobClient BlobClient = StorageAccount.CreateCloudBlobClient();
 

@@ -17,7 +17,7 @@ namespace LogImpl
         {
             get
             {
-                if(string.IsNullOrEmpty(_logPath))
+                if (string.IsNullOrEmpty(_logPath))
                 {
                     string logFolder = ConfigurationManager.AppSettings["LogPath"];
                     if (string.IsNullOrEmpty(logFolder))
@@ -41,16 +41,16 @@ namespace LogImpl
         {
             get
             {
-                return string.Format("{0}.txt", DateTime.Now.ToString("yyyyMMddHHmmss"));
+                return string.Format("{0}.txt", DateTime.Now.ToString("yyyyMMdd"));
             }
         }
-        
+
 
         public DefaultLog()
         {
-           
+
         }
-        
+
 
         private readonly Guid _streamKey = Guid.NewGuid();
 
@@ -59,9 +59,9 @@ namespace LogImpl
             get
             {
                 var val = LogThreadManager.Instance.GetStream(_streamKey);
-                if(val == null)
+                if (val == null)
                 {
-                    val = new FileStream(LogPath, FileMode.Append);
+                    val = new FileStream(LogPath, FileMode.Append, FileAccess.Write, FileShare.Read);
                     LogThreadManager.Instance.AddStream(val, _streamKey);
                 }
                 val.Flush();
@@ -71,44 +71,86 @@ namespace LogImpl
 
         public void WriteException(LogLevel level, string message, Exception exception, string exMsg)
         {
-            lock(LogThreadManager.Instance.SyncLockObj)
+            lock (LogThreadManager.Instance.SyncLockObj)
             {
-                const string blank = "    ";
-
                 var writer = new StreamWriter(LogStream);
-                writer.WriteLine(string.Join(blank, DateTime.Now.ToString("yyyyMMddHHmmss"),
-                    LogLevelHelper.GetLevelString(level),
-                    message,
-                    exception.Message,
-                    exception.StackTrace.Replace("\r", "    ").Replace("\n", "    ")));
+                writer.WriteLine(GetExceptionString(level, message, exception, exMsg));
+                writer.Flush();
             }
+        }
+        const string blank = "\t";
+
+        internal static string GetExceptionString(LogLevel level, string message, Exception exception, string exMsg)
+        {
+            StringBuilder sb = new StringBuilder();
+            var curEx = exception;
+            while (curEx != null)
+            {
+                sb.AppendLine(string.Join(blank, DateTime.Now.ToString("yyyyMMddHHmmss"),
+                    LogLevelHelper.GetLevelString(level),
+                    message.RemoveRN(),
+                    curEx.Message.RemoveRN(),
+                    curEx.StackTrace.RemoveRN()));
+
+
+                curEx = curEx.InnerException;
+            }
+            sb.AppendLine();
+            return sb.ToString();
         }
 
         public void WriteLog(LogLevel level, string message)
         {
             lock (LogThreadManager.Instance.SyncLockObj)
             {
-                const string blank = "    ";
-
                 var writer = new StreamWriter(LogStream);
-                writer.WriteLine(string.Join(blank, DateTime.Now.ToString("yyyyMMddHHmmss"),
-                    LogLevelHelper.GetLevelString(level),
-                    message));
+                writer.WriteLine(GetLogString(level, message));
+                writer.Flush();
             }
+        }
+
+        internal static string GetLogString(LogLevel level, string message)
+        {
+            return string.Join(blank, DateTime.Now.ToString("yyyyMMddHHmmss"),
+                LogLevelHelper.GetLevelString(level),
+                message.RemoveRN());
         }
 
         public void WriteLog(LogLevel level, string message, string format, params object[] args)
         {
             lock (LogThreadManager.Instance.SyncLockObj)
             {
-                const string blank = "    ";
-
                 var writer = new StreamWriter(LogStream);
-                writer.WriteLine(string.Join(blank, DateTime.Now.ToString("yyyyMMddHHmmss"),
-                    LogLevelHelper.GetLevelString(level),
-                    message,
-                    args.Length >0 ? string.Format(format, args) : format));
+                writer.WriteLine(GetLogString(level, message, format, args));
+                writer.Flush();
             }
+        }
+
+        internal static string GetLogString(LogLevel level, string message, string format, params object[] args)
+        {
+            return string.Join(blank, DateTime.Now.ToString("yyyyMMddHHmmss"),
+                LogLevelHelper.GetLevelString(level),
+                message.RemoveRN(),
+                args.Length > 0 ? string.Format(format, args).RemoveRN() : format.RemoveRN());
+        }
+
+        public string GetTotalLog(DateTime date)
+        {
+            if (File.Exists(LogPath))
+                using (var stream = new FileStream(LogPath, FileMode.Open, FileAccess.Read))
+                {
+                    StreamReader reader = new StreamReader(stream);
+                    return reader.ReadToEnd();
+                }
+            else
+                return "Log file is not exist.";
+        }
+    }
+    internal static class StringEx
+    {
+        internal static string RemoveRN(this string message)
+        {
+            return message.Replace('\r', ' ').Replace('\n', ' ');
         }
     }
 
@@ -120,11 +162,11 @@ namespace LogImpl
         {
             get
             {
-                if(_instance == null)
+                if (_instance == null)
                 {
                     lock (instanceLockObj)
                     {
-                        if(_instance == null)
+                        if (_instance == null)
                         {
                             _instance = new LogThreadManager();
                         }
@@ -155,13 +197,13 @@ namespace LogImpl
             {
                 DateTime now = DateTime.Now;
 
-                Dispose(_allStream, now, (m)  => { m.Close(); m.Dispose(); });
+                Dispose(_allStream, now, (m) => { m.Close(); m.Dispose(); });
                 Dispose(_allDisposableObj, now, m => m.Dispose());
             }
         }
 
         private delegate void DisposeCallFunc<T>(T obj);
-        private void Dispose<T>(Dictionary<Guid,DisposableObj<T>> objects, DateTime now, DisposeCallFunc<T> func)
+        private void Dispose<T>(Dictionary<Guid, DisposableObj<T>> objects, DateTime now, DisposeCallFunc<T> func)
         {
             List<Guid> expireStreams = new List<Guid>(4);
             foreach (var keyValue in objects)
@@ -181,9 +223,9 @@ namespace LogImpl
 
         public void AddStream(Stream stream, Guid key)
         {
-            lock(SyncLockObj)
+            lock (SyncLockObj)
             {
-                _allStream.Add(key, new DisposableObj<Stream>() { obj = stream, addTime = DateTime.Now});
+                _allStream.Add(key, new DisposableObj<Stream>() { obj = stream, addTime = DateTime.Now });
             }
         }
 
@@ -197,10 +239,10 @@ namespace LogImpl
 
         public Stream GetStream(Guid key)
         {
-            lock(SyncLockObj)
+            lock (SyncLockObj)
             {
                 DisposableObj<Stream> val;
-                if(_allStream.TryGetValue(key, out val))
+                if (_allStream.TryGetValue(key, out val))
                 {
                     return val.obj;
                 }
