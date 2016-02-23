@@ -38,15 +38,25 @@ namespace EwsFrame
                     var directory = AppDomain.CurrentDomain.BaseDirectory;
 
                     var temp = Path.Combine(directory, "bin");
-                    if (IsDllExist(temp))
+                    if (Directory.Exists(temp))
                     {
-                        _libPath = temp;
+                        if (IsDllExist(temp))
+                        {
+                            _libPath = temp;
+                        }
+                    }
+                    else if (Directory.Exists(directory))
+                    {
+                        if (IsDllExist(directory))
+                        {
+                            _libPath = directory;
+                        }
                     }
                     else
                     {
                         temp = Path.Combine(directory, "..\\lib");
 
-                        if (IsDllExist(temp))
+                        if (Directory.Exists(temp) && IsDllExist(temp))
                         {
                             _libPath = directory;
                         }
