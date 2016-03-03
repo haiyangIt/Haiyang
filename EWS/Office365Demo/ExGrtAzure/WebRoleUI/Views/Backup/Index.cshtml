@@ -1,0 +1,305 @@
+﻿@using WebRoleUI.Models
+@model BackupModel
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Backup Data";
+    ViewBag.TotalStepCount = 3;
+    ViewBag.SummaryStepNumber = 2;
+    ViewBag.MailboxAndFolderStepNumber = 1;
+    ViewBag.AdminAccountStepNumber = 0;
+    ViewBag.JobNameSepNumber = 0;
+}
+
+@Styles.Render("~/bundles/customerMailboxcss")
+@Styles.Render("~/bundles/bootstrapselectcss")
+@Styles.Render("~/bundles/bootstrapdialogcss")
+
+@using (Ajax.BeginForm("Index", "Backup", new AjaxOptions { OnSuccess = "SubmitFormSuccess", OnFailure="SubmitFailure", OnComplete = "SubmitComplete" }, new { @class = "form-horizontal", role = "form", id = "BackupForm" }))
+{
+    @Html.AntiForgeryToken()
+    <hr />
+    @*@Html.ValidationSummary("", new { @class = "text-danger" })*@
+    <div id="rootwizard">
+        <div class="navbar navbar-inverse">
+            <div class="navbar-inner">
+                <div class="container">
+                    <ul class="nav navbar-nav">
+                        @*<li><a href="#tab1" data-toggle="tab">Backup Job Name</a></li>*@
+                        <li><a href="#tab1" data-toggle="tab">Input Backup User Information</a></li>
+                        <li><a href="#tab2" data-toggle="tab">Select Backup Mailbox and Folders</a></li>
+                        <li><a href="#tab3" data-toggle="tab">Backup Summary</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div id="bar" class="progress progress-striped active">
+            <div class="bar"></div>
+        </div>
+        <div class="tab-content">
+            @*<div class="tab-pane" id="tab1">
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">Backup Job Name:</label>
+                        <div class="col-md-9">
+                            <input type="text" id="BackupJobName" name="BackupJobName" class="form-control" required/>
+                        </div>
+                    </div>
+                </div>*@
+
+            <div class="tab-pane" id="tab1">
+                <div class="form-group">
+                    @Html.LabelFor(m => m.BackupUserMailAddress, new { @class = "col-md-3 control-label" })
+                    <div class="col-md-9">
+                        @Html.TextBoxFor(m => m.BackupUserMailAddress, new { @class = "form-control", @data_toggle = "tooltip", @title = "this user must be impersonated for the mailbox users who need backup." })
+                        @Html.ValidationMessageFor(m => m.BackupUserMailAddress, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(m => m.BackupUserPassword, new { @class = "col-md-3 control-label" })
+                    <div class="col-md-9">
+                        @Html.PasswordFor(m => m.BackupUserPassword, new { value = Model.BackupUserPassword, @class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.BackupUserPassword, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(m => m.BackupUserOrganization, new { @class = "col-md-3 control-label" })
+                    <div class="col-md-9">
+                        @Html.TextBoxFor(m => m.BackupUserOrganization, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.BackupUserOrganization, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="tab2">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div id="mail-list"></div>
+                        </div>
+                        <div class="col-md-8">
+                            <div id="folder-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="tab3">
+                <div class="jumbotron">
+                    <p id="summary">
+
+                    </p>
+                </div>
+            </div>
+            <ul class="pager wizard">
+                <li class="previous first" style="display:none;"><a href="#">First</a></li>
+                <li class="previous"><a href="#">Previous</a></li>
+                <li class="next last" style="display:none;"><a href="#">Last</a></li>
+                <li class="next"><a href="#">Next</a></li>
+                <li class="finish"><a href="#">Finish</a></li>
+            </ul>
+        </div>
+        <input type="submit" id="submitbtn" class="btn hidden" />
+        <input type="hidden" name="BackupSelectItems" id="BackupSelectItems" />
+        @Html.HiddenFor(m => m.Index)
+    </div>
+
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/bootstrapdialog")
+    @Scripts.Render("~/bundles/bootstrapwizard")
+    @Scripts.Render("~/bundles/arcserveutil")
+    @Scripts.Render("~/bundles/three-status-select")
+    @Scripts.Render("~/bundles/three-status-select-nav")
+    @Scripts.Render("~/bundles/customerPaginator")
+
+    <script>
+        $(document).ready(function () {
+            var wizard = $('#rootwizard');
+            var self = this;
+            var adminMailbox = "";
+            var adminPassword = "";
+            var organization = "";
+            var index = 0;
+
+            var selectCacheKey = "Backup_Setting_Select_Cache";
+            var mailboxNav = $("#mail-list").mailboxnav({ cacheKey: selectCacheKey });
+            var folderNav = $("#folder-list").foldernavForSteped({ cacheKey: selectCacheKey });
+
+            var isMailboxInit = false;
+
+            var isFinished = false;
+            var form = $("#BackupForm");
+
+            wizard.bootstrapWizard({
+                onNext: function (tab, navigation, index) {
+                    
+                    if (!form.valid()) {
+                        return false;
+                    }
+
+                    Arcserve.DataProtect.Util.Ajax.loading("Validation");
+                    if (index == parseInt("@ViewBag.SummaryStepNumber")) {
+                        var rootSelectItem = Restore.Item.GetRootItem(selectCacheKey);
+                        if (rootSelectItem.Status == Restore.Item.UnSelectedStatus) {
+                            //alert("please select mailbox or folder.");
+                            Arcserve.DataProtect.Util.Alert({
+                                message: "please select mailbox or folder."
+                            });
+                            return false;
+                        }
+                    }
+                    wizard.bootstrapWizard('show', index - 1);
+
+                    Arcserve.DataProtect.Util.Post(form.serialize(), form.attr("action"), SubmitFormSuccess, function () {
+                        Arcserve.DataProtect.Util.Ajax.close();
+                    })
+
+                    //$("#submitbtn").click();
+                    return false;
+                },
+                onFinish: function (tab, navigation, lastIndex) {
+                    if (!isFinished) {
+
+                        var selectItems = Restore.Item.GetTotalSelectItems(selectCacheKey);
+                        $("#BackupSelectItems").val(JSON.stringify(selectItems));
+
+                        isFinished = true;
+                        Arcserve.DataProtect.Util.Ajax.loading("Processing");
+
+                        Arcserve.DataProtect.Util.Post(form.serialize(), form.attr("action"), SubmitFormSuccess, function () {
+                            Arcserve.DataProtect.Util.Ajax.close();
+                            isFinished = false;
+                        })
+
+                    }
+                    else {
+                        Arcserve.DataProtect.Util.Alert({
+                            message: "can't submit task. there is running catalog job "
+                        });
+                        //alert("can't submit task. there is running catalog job ")
+                    }
+                },
+                onTabShow: function (tab, navigation, index) {
+                    $("#Index").val(index);
+
+                    var $total = navigation.find('li').length;
+                    var $current = index + 1;
+                    var $percent = ($current / $total) * 100;
+                    $('#rootwizard').find('.bar').css({ width: $percent + '%' });
+                },
+                onTabClick: function () {
+                    return false;
+                }
+            });
+
+            $(".rootwizard ul.navbar-nav li[data-toggle='tab'] a").click(function () { return false; });
+
+            _InitMailboxNav = function (data) {
+                var mailbox = adminMailbox;
+                var password = adminPassword;
+                var org = organization;
+                //var data = { mailbox: mailbox, password: password, organization: org };
+                var url = "@Url.Action("GetAllMailbox")";
+
+                mailboxNav.mailboxnav("update", { url: url, data: data });
+            };
+
+            var currentSelectMailbox = "";
+            mailboxNav.on("onSelect", function (e, item) {
+                currentSelectMailbox = item.Id;
+
+                var mailbox = adminMailbox;
+                var password = adminPassword;
+                var org = organization;
+                folderNav.foldernavForSteped("setRootFolderId", item.Id);
+
+                folderNav.foldernavForSteped("update", {
+                    url: "@Url.Action("GetFolderInMailbox")",
+                    data: { adminMailbox: mailbox, password: password, organization: org, mailbox: item.Id, parentFolderId: "0" }
+                });
+            });
+
+            folderNav.on("onOpenAndGetChildData", function (e, data) {
+                var parentId = data.item.Id;
+                var mailbox = adminMailbox;
+                var password = adminPassword;
+                var org = organization;
+
+                var data = {
+                    adminMailbox: mailbox,
+                    password: password,
+                    organization: org,
+                    mailbox: currentSelectMailbox,
+                    parentFolderId: data.item.Id
+                };
+
+                Arcserve.DataProtect.Util.Post(data, "@Url.Action("GetFolderInMailbox")", function (data) {
+                    //debugger;
+                    folderNav.foldernavForSteped("updateChildContainer", parentId, data.Details);
+                })
+            });
+
+            SubmitFormSuccess = function (data) {
+                if (data.Index == parseInt("@ViewBag.TotalStepCount")) {
+                    isFinished = false;
+
+                    Arcserve.DataProtect.Util.Alert({
+                        type: BootstrapDialog.TYPE_INFO,
+                        title: "Info",
+                        message: "Generate Catalog successful.",
+                        callbackForYes: function (dialog) {
+                            Arcserve.DataProtect.Util.Ajax.close();
+                            dialog.close();
+                            var url = "@Url.Action("Index","Home")";
+                            window.location.href = url;
+                        }
+                    });
+
+                    //alert("Generate Catalog successful.");
+
+                    return;
+                }
+
+                @*if (data.Index == parseInt("@ViewBag.MailboxAndFolderStepNumber")) {
+                    if (typeof (data.IsSuccess) != "undefined") {
+                        if (!data.IsSuccess) {
+                            wizard.bootstrapWizard('show', data.Index - 1);
+                            Arcserve.DataProtect.Util.Alert({
+                                type: BootstrapDialog.TYPE_DANGER,
+                                title: "Error",
+                                message: "Cannot connect exchange service, backup admin account may be not right.",
+                                callbackForYes: function (dialog) {
+                                    Arcserve.DataProtect.Util.Ajax.close();
+                                    dialog.close();
+                                }
+                            });
+                            return;
+                        }
+                    }
+                }*@
+
+                adminMailbox = data.BackupUserMailAddress;
+                adminPassword = data.BackupUserPassword;
+                organization = data.BackupUserOrganization;
+                index = data.Index;
+
+                $("input#Index").val(index);
+
+                if (index == parseInt("@ViewBag.MailboxAndFolderStepNumber") && !isMailboxInit) {
+                    isMailboxInit = true;
+                    _InitMailboxNav(data);
+                }
+
+                if (index == parseInt("@ViewBag.SummaryStepNumber")) {
+                    var summary = "Will use account " + adminMailbox + " to backup " + organization + " mailboxes.";
+                    $("#summary").text(summary);
+                }
+
+                wizard.bootstrapWizard('show', index);
+                Arcserve.DataProtect.Util.Ajax.close();
+            };
+        });
+    </script>
+}
+
+

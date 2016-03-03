@@ -1,0 +1,60 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@Styles.Render("~/bundles/bootstrapdialogcss")
+
+<h2>Index</h2>
+<div class="form-group">
+    <div class="col-md-12">
+        <input value="Test IsInAzure" type="button" id="TestIsInAzure" class="btn btn-primary btn-default" />
+        <input value="Test LibPath" type="button" id="TestLibPath" class="btn btn-primary btn-default" />
+        <input value="Test LoadAssembly" type="button" id="TestLoadAssembly" class="btn btn-primary btn-default" />
+        <input value="Test AppendLog" type="button" id="TestAppendLog" class="btn btn-primary btn-default" />
+        <input value="Test DownloadLog" type="button" id="TestDownloadLog" class="btn btn-primary btn-default" />
+    </div>
+    <div class="col-md-12">
+        <textarea class="form-control" rows="8" id="comment" style="width:90%; max-width:100%;"></textarea>
+    </div>
+</div>
+<h3></h3>
+
+@section Scripts{
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/bootstrapdialog")
+    @Scripts.Render("~/bundles/arcserveutil")
+    <script>
+        $(document).ready(function () {
+
+            $("#TestIsInAzure").click(function () {
+                Arcserve.DataProtect.Util.Post("", "@Url.Action("TestIsInAzure","Test")", function () {
+                    alert("pass");
+                });
+            });
+
+            $("#TestLoadAssembly").click(function () {
+                Arcserve.DataProtect.Util.Post("", "@Url.Action("TestLoadAssembly", "Test")", function () {
+                    alert("pass");
+                });
+            });
+
+            $("#TestAppendLog").click(function () {
+                Arcserve.DataProtect.Util.Post("", "@Url.Action("TestAppendLog", "Test")", function () {
+                    alert("pass");
+                });
+            });
+
+            $("#TestDownloadLog").click(function () {
+                Arcserve.DataProtect.Util.Post("", "@Url.Action("TestDownloadLog", "Test")", function (data) {
+                    $("#comment").val(data.Log);
+                });
+            });
+            $("#TestLibPath").click(function () {
+                Arcserve.DataProtect.Util.Post("", "@Url.Action("TestLibPath", "Test")", function (data) {
+                    $("#comment").val(data.Result);
+                });
+            });
+        });
+</script>
+}

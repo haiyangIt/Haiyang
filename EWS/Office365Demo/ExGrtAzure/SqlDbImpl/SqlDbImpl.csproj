@@ -110,6 +110,7 @@
     <Compile Include="Model\ItemModel.cs" />
     <Compile Include="Model\MailboxModel.cs" />
     <Compile Include="Model\OrganizationData.cs" />
+    <Compile Include="Model\PlanModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueryCatalogDataAccess.cs" />
     <Compile Include="RestoreToAzure.cs" />

@@ -62,6 +62,7 @@
     <Compile Include="IDataAccess.cs" />
     <Compile Include="IFilterItem.cs" />
     <Compile Include="INotify.cs" />
+    <Compile Include="IPlanDataAccess.cs" />
     <Compile Include="IQueryCatalogAdvanced.cs" />
     <Compile Include="IQueryCatalogDataAccess.cs" />
     <Compile Include="IRestoreDestination.cs" />
@@ -70,6 +71,7 @@
     <Compile Include="IServiceContext.cs" />
     <Compile Include="ItemKindEx.cs" />
     <Compile Include="OrganizationAdminInfo.cs" />
+    <Compile Include="Plan\IPlanData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SelectedItem.cs" />
     <Compile Include="TaskType.cs" />

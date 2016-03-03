@@ -64,6 +64,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MsgFileBuildTest", "..\..\P
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FastTransferUtil", "..\..\ParseItemFromEWSExportFunction\FastTransferUtil\FastTransferUtil.csproj", "{724571A8-BF45-4EFE-AB1E-BB065201513B}"
 EndProject
+Project("{CC5FD16D-436D-48AD-A40C-5A424C6E3E79}") = "Office365Protect", "Office365Protect\Office365Protect.ccproj", "{B5808EA5-FE44-450B-9159-FFE411112DE2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebRoleUI", "WebRoleUI\WebRoleUI.csproj", "{DB548580-24D9-4317-8568-83E762BB6A86}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkerRoleWithSBQueue", "WorkerRoleWithSBQueue\WorkerRoleWithSBQueue.csproj", "{1BF36FA3-1C61-4F16-8825-1415ADB550A0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -138,6 +144,18 @@ Global
 		{724571A8-BF45-4EFE-AB1E-BB065201513B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{724571A8-BF45-4EFE-AB1E-BB065201513B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{724571A8-BF45-4EFE-AB1E-BB065201513B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5808EA5-FE44-450B-9159-FFE411112DE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5808EA5-FE44-450B-9159-FFE411112DE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5808EA5-FE44-450B-9159-FFE411112DE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5808EA5-FE44-450B-9159-FFE411112DE2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DB548580-24D9-4317-8568-83E762BB6A86}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DB548580-24D9-4317-8568-83E762BB6A86}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DB548580-24D9-4317-8568-83E762BB6A86}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DB548580-24D9-4317-8568-83E762BB6A86}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1BF36FA3-1C61-4F16-8825-1415ADB550A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1BF36FA3-1C61-4F16-8825-1415ADB550A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1BF36FA3-1C61-4F16-8825-1415ADB550A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1BF36FA3-1C61-4F16-8825-1415ADB550A0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
