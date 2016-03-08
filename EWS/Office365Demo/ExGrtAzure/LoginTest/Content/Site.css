@@ -28,8 +28,12 @@ textarea {
 
 }
 
+.main-index .jumbotron h2{
+    height: 70px;
+}
+
 .main-index .jumbotron h2 + p{
-    height: 120px;
+    height: 180px;
 }
 
 .main-index .jumbotron p > input {

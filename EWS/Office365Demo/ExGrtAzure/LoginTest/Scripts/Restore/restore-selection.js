@@ -69,6 +69,10 @@ Restore.GetDateTime = function (jsonDateTime) {
     return jsonDateTime;
 }
 
+Restore.GetDateString = function (dateTime) {
+    return (dateTime.getMonth() + 1) + "/" + dateTime.getDate() + "/" + dateTime.getFullYear();
+}
+
 Restore.Item = function (itemId, itemData, childItemCount, itemType, displayName, canSelect, modifyHtmlForStatusChangeCallback) {
     this.ChildrenLoaded = [];
     this.ItemData = itemData;

@@ -10,7 +10,16 @@
 }
 
 .restore .restore-navs{
+    
+}
 
+.restore .col-fixed-300{
+    width:300px;
+    position:fixed;
+}
+
+.restore .col-offset-300{
+    padding-left:30px;
 }
 
 .restore .restore-navs .list-pagation
@@ -19,7 +28,8 @@
 }
 
 .restore .restore-details{
-    
+    margin-left: 300px;
+    width:auto;
 }
 
 .restore-dialog .modal-dialog {
