@@ -188,7 +188,8 @@
                 var catalogCalendar = $("#catalog-calendar").datepicker({
                     onSelect: function (date, inst) {
                         var selectDate = new Date(date);
-                        if (haveCatalogDaysInMonths[selectDate]) {
+                        var dateString = Restore.GetDateString(selectDate);
+                        if (haveCatalogDaysInMonths[dateString]) {
                             var updateData = { url: getCatalogsInDayUrl, data: { day: selectDate, organization: organization } };
                             catalogSelection.catalogselection("update", updateData);
                         }
@@ -208,7 +209,8 @@
                                 var days = result.Days;
                                 $.each(days, function (i, day) {
                                     var dayTime = Restore.GetDateTime(day);
-                                    haveCatalogDaysInMonths[dayTime] = true;
+                                    var dateString = Restore.GetDateString(dayTime);
+                                    haveCatalogDaysInMonths[dateString] = true;
                                 });
                                 $("#catalog-calendar").datepicker("refresh");
                             })
@@ -216,7 +218,8 @@
                     },
                     beforeShowDay: function (date) {
                         if (haveCatalogDaysInMonths) {
-                            if (haveCatalogDaysInMonths[date]) {
+                            var dateString = Restore.GetDateString(date);
+                            if (haveCatalogDaysInMonths[dateString]) {
                                 return [true, 'restore-data'];
                             }
                         }
@@ -307,7 +310,8 @@
 
                                 $.each(data.Days, function (i, item) {
                                     data.Days[i] = Restore.GetDateTime(item);
-                                    haveCatalogDaysInMonths[data.Days[i]] = true;
+                                    var dateString = Restore.GetDateString(data.Days[i]);
+                                    haveCatalogDaysInMonths[dateString] = true;
                                 })
 
                                 data.LatestCatalogJob.StartTime = Restore.GetDateTime(data.LatestCatalogJob.StartTime);
