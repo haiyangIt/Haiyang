@@ -203,7 +203,7 @@ ClientBin/
 *.dbmdl
 *.dbproj.schemaview
 *.pfx
-*.publishsettings
+# *.publishsettings
 node_modules/
 bower_components/
 
