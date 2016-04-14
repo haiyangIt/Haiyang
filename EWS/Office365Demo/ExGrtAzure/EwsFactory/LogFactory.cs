@@ -63,7 +63,7 @@ namespace EwsFrame
 
         private void InitLog()
         {
-            if (!IsRunningOnAzure())
+            if (!IsRunningOnAzure() && !IsGetAzureLogInstance)
             {
                 _logInstance = (ILog)(CreateTypeWithName<ILog>(LogImplAssembly, "LogImpl.DefaultLog"));
                 _ewsTraceLogInstance = (ILog)(CreateTypeWithName<ILog>(LogImplAssembly, "LogImpl.DefaultEwsTraceLog"));
@@ -74,5 +74,7 @@ namespace EwsFrame
                 _ewsTraceLogInstance = (ILog)(CreateTypeWithName<ILog>(LogImplAssembly, "LogImpl.LogToBlobEwsTrace"));
             }
         }
+
+        public bool IsGetAzureLogInstance = false;
     }
 }

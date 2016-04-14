@@ -127,6 +127,11 @@ namespace EwsFrame.Manager.Impl
             {
 
             }
+
+            internal void CreateClient()
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

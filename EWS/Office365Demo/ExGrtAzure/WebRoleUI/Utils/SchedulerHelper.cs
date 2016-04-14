@@ -16,6 +16,7 @@ using EwsFrame;
 using DataProtectInterface.Plan;
 using Microsoft.ServiceBus;
 using EwsFrame.Util;
+using EwsFrame.ServiceBus;
 
 namespace WebRoleUI.Utils
 {

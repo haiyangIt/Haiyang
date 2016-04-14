@@ -22,7 +22,7 @@ namespace EwsFrame.Manager.Impl
                 arcJobQueue.Enqueue(job);
             }
 
-            TriggerOtherEvent();
+            TriggerOtherEvent(0);
         }
 
         Dictionary<Guid, IArcJob> _JobBuffer = new Dictionary<Guid, IArcJob>();
@@ -41,7 +41,7 @@ namespace EwsFrame.Manager.Impl
             throw new NotImplementedException();
         }
 
-        protected override void MethodWhenOtherEventTriggered()
+        protected override void MethodWhenOtherEventTriggered(int eventIndex)
         {
             AddJobInInternalThread();
         }

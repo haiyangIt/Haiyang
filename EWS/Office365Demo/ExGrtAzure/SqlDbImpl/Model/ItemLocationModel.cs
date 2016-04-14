@@ -14,6 +14,7 @@ using System.Linq;
 using System.Web;
 using System.Security.Cryptography;
 using EwsFrame.EF;
+using EwsFrame.Util;
 
 namespace SqlDbImpl.Model
 {

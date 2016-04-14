@@ -149,5 +149,24 @@ namespace ExGrtAzure.Tests
         {
 
         }
+
+        [TestMethod]
+        public void ExportLog()
+        {
+            DateTime time = DateTime.Now;
+            var yesterday0413 = time.AddDays(-1).Date;
+            var str = LogFactory.LogInstance.GetTotalLog(yesterday0413);
+            using(StreamWriter writer = new StreamWriter(time.ToString("yyyyMMddHHmmssfff") + "log.txt"))
+            {
+                writer.Write(str);
+            }
+
+            using (StreamWriter writer = new StreamWriter(time.ToString("yyyyMMddHHmmssfff") + "Tracelog.txt"))
+            {
+                str = LogFactory.EwsTraceLogInstance.GetTotalLog(yesterday0413);
+                writer.Write(str);
+            }
+
+        }
     }
 }

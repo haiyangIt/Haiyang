@@ -34,15 +34,15 @@ namespace EwsFrame.Manager.Impl
                 addingProgress.Enqueue(progressInfo);
             }
 
-            TriggerOtherEvent();
+            TriggerOtherEvent(0);
         }
 
         public string GetLatestProgress()
         {
-            return Convert(_progressCache.Last());
+            return JobFactory.Convert(_progressCache.Last());
         }
 
-        protected override void MethodWhenOtherEventTriggered()
+        protected override void MethodWhenOtherEventTriggered(int eventIndex)
         {
             AddingProgress();
         }
@@ -108,11 +108,11 @@ namespace EwsFrame.Manager.Impl
                 {
                     return string.Empty;
                 }
-                return ProgressManager.Convert(result.Last());
+                return JobFactory.Convert(result.Last());
             }
         }
 
-        protected override void MethodWhenOtherEventTriggered()
+        protected override void MethodWhenOtherEventTriggered(int index)
         {
             AddProgress();
         }
@@ -155,7 +155,7 @@ namespace EwsFrame.Manager.Impl
                 _progress.Enqueue(e.ProgressInfo);
             }
 
-            TriggerOtherEvent();
+            TriggerOtherEvent(0);
         }
     }
 }

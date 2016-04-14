@@ -161,6 +161,10 @@
       <Project>{37af831f-ce50-4c6c-b211-e86b6e3138e8}</Project>
       <Name>LogImpl</Name>
     </ProjectReference>
+    <ProjectReference Include="..\LogInterface\LogInterface.csproj">
+      <Project>{ED66D5C0-8D87-4DD6-9E6C-7D21B5BB8585}</Project>
+      <Name>LogInterface</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SqlDbImpl\SqlDbImpl.csproj">
       <Project>{f2a93db3-b506-49c0-a576-70836dde9e86}</Project>
       <Name>SqlDbImpl</Name>

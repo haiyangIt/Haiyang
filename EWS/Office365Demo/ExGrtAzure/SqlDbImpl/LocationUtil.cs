@@ -1,5 +1,6 @@
 ﻿using EwsDataInterface;
 using EwsFrame;
+using EwsFrame.Util;
 using System;
 using System.Collections.Generic;
 using System.IO;
