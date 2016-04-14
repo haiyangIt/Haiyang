@@ -102,7 +102,7 @@ namespace LogImpl
                 do
                 {
                     appBlob = container.GetAppendBlobReference(
-                        string.Format(BlobNameFormat, DateTime.Now.ToString("yyyyMMdd"), index++, ".log")
+                        string.Format(BlobNameFormat, date.ToString("yyyyMMdd"), index++, ".log")
                     );
 
                     if (appBlob.Exists())
