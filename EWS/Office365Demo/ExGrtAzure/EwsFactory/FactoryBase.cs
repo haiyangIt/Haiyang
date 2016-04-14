@@ -118,7 +118,9 @@ namespace EwsFrame
 
         public static bool IsRunningOnAzure()
         {
-            return !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME"));
+            var isDebugAzure = ConfigurationManager.AppSettings["ForDebugAzure"];
+            return !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME")) || isDebugAzure == "1";
         }
     }
+
 }
