@@ -58,6 +58,14 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\Microsoft\Exchange\Web Services\2.2\Microsoft.Exchange.WebServices.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.ServiceBus, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\WindowsAzure.ServiceBus.3.1.5\lib\net45-full\Microsoft.ServiceBus.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAzure.Configuration, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.WindowsAzure.ConfigurationManager.3.2.1\lib\net40\Microsoft.WindowsAzure.Configuration.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.WindowsAzure.ServiceRuntime, Version=2.7.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.WindowsAzure.Storage, Version=6.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\WindowsAzure.Storage.6.2.0\lib\net40\Microsoft.WindowsAzure.Storage.dll</HintPath>
@@ -71,6 +79,8 @@
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Spatial, Version=5.6.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Spatial.5.6.4\lib\net40\System.Spatial.dll</HintPath>
       <Private>True</Private>
@@ -97,10 +107,33 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>MailConfig.resx</DependentUpon>
     </Compile>
-    <Compile Include="MD5Utility.cs" />
+    <Compile Include="Manager\Data\ProtectProgressInfo.cs" />
+    <Compile Include="Manager\IF\IArcJob.cs" />
+    <Compile Include="Manager\IF\IJobManager.cs" />
+    <Compile Include="Manager\IF\IManager.cs" />
+    <Compile Include="Manager\IF\IProgressInfo.cs" />
+    <Compile Include="Manager\IF\IProgressManager.cs" />
+    <Compile Include="Manager\IF\IThreadManager.cs" />
+    <Compile Include="Manager\Impl\ArcJobBase.cs" />
+    <Compile Include="Manager\Impl\JobFactory.cs" />
+    <Compile Include="Manager\Impl\JobManager.cs" />
+    <Compile Include="Manager\Impl\ManagerBase.cs" />
+    <Compile Include="Manager\Data\ProgressArgs.cs" />
+    <Compile Include="Manager\Impl\ProgressInfoBase.cs" />
+    <Compile Include="Manager\Impl\ProgressManager.cs" />
+    <Compile Include="ServiceBus\Relay\LogSolver.cs" />
+    <Compile Include="ServiceBus\Relay\ServiceClientHelper.cs" />
+    <Compile Include="ServiceBus\Relay\ServiceHostManager.cs" />
+    <Compile Include="Manager\Impl\ThreadManager.cs" />
+    <Compile Include="Util\MD5Utility.cs" />
+    <Compile Include="PlanFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RestoreFactory.cs" />
+    <Compile Include="ServiceBus\Relay\ILogSolver.cs" />
     <Compile Include="ServiceContext.cs" />
+    <Compile Include="ServiceBus\AzureServiceBusHelper.cs" />
+    <Compile Include="Util\Deque.cs" />
+    <Compile Include="Util\PlanUtil.cs" />
     <Compile Include="Util\SendMailHelper.cs" />
     <Compile Include="Util\TreeNode.cs" />
   </ItemGroup>

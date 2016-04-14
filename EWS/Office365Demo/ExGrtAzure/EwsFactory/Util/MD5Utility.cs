@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
 
-namespace EwsFrame
+namespace EwsFrame.Util
 {
     public class MD5Utility
     {

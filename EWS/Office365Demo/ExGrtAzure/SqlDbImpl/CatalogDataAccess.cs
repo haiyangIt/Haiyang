@@ -22,22 +22,19 @@ using EwsServiceInterface;
 
 namespace SqlDbImpl
 {
-    public class CatalogDataAccess : DataAccessBase, ICatalogDataAccess
+    public class CatalogDataAccess : CatalogDataAccessBase, ICatalogDataAccess
     {
-        public CatalogDataAccess(EwsServiceArgument argument, string organization)
+        public CatalogDataAccess(EwsServiceArgument argument, string organization) : base(organization)
         {
             _argument = argument;
-            _organization = organization;
         }
 
         private readonly EwsServiceArgument _argument;
-        private readonly string _organization;
 
-        private delegate void AddToDbSet<TEntity>(CatalogDbContext context, List<TEntity> lists) where TEntity : class;
 
         public ICatalogJob GetLastCatalogJob(DateTime thisJobStartTime)
         {
-            using (var context = new CatalogDbContext(new OrganizationModel() { Name = _organization }))
+            using (var context = NewCatalogDbContext(false))
             {
                 var lastCatalogInfoQuery = context.Catalogs.Where(c => c.StartTime < thisJobStartTime).OrderByDescending(c => c.StartTime).Take(1);
                 var lastCatalogInfo = lastCatalogInfoQuery.FirstOrDefault();
@@ -52,7 +49,7 @@ namespace SqlDbImpl
             CatalogInfoModel information = catalogJob as CatalogInfoModel;
             if (information == null)
                 throw new ArgumentException("argument type is not right or argument is null", "catalogJob");
-            using (var context = new CatalogDbContext(new OrganizationModel() { Name = _organization }, SqlConn, false))
+            using (var context = NewCatalogDbContext(true))
             {
                 context.Catalogs.Add(information);
                 context.SaveChanges();
@@ -100,12 +97,12 @@ namespace SqlDbImpl
 
         public void SaveFolder(IFolderData folder, IMailboxData mailboxData, IFolderData parentFolderData)
         {
-            SaveModel<IFolderData, FolderModel>(folder, CacheKeyNameDic[typeof(FolderModel)], CachPageCountDic[typeof(FolderModel)], (context, lists) => context.Folders.AddRange(lists));
+            BatchSaveModel<IFolderData, FolderModel>(folder, CacheKeyNameDic[typeof(FolderModel)], CachPageCountDic[typeof(FolderModel)], (context, lists) => context.Folders.AddRange(lists));
         }
 
         public void SaveItem(IItemData item, IMailboxData mailboxData, IFolderData parentFolderData)
         {
-            SaveModel<IItemData, ItemModel>(item, CacheKeyNameDic[typeof(ItemModel)], CachPageCountDic[typeof(ItemModel)], (context, lists) => context.Items.AddRange(lists));
+            BatchSaveModel<IItemData, ItemModel>(item, CacheKeyNameDic[typeof(ItemModel)], CachPageCountDic[typeof(ItemModel)], (context, lists) => context.Items.AddRange(lists));
         }
 
         private static CloudStorageAccount StorageAccount = FactoryBase.GetStorageAccount();
@@ -181,12 +178,12 @@ namespace SqlDbImpl
             itemLocationModel.Location = mailLocation.Path;
             itemLocationModel.ActualSize = binStreamLength;
 
-            SaveModel<IItemData, ItemLocationModel>(itemLocationModel, CacheKeyNameDic[typeof(ItemLocationModel)], CachPageCountDic[typeof(ItemLocationModel)], (dbContext, lists) => dbContext.ItemLocations.AddRange(lists), false);
+            BatchSaveModel<IItemData, ItemLocationModel>(itemLocationModel, CacheKeyNameDic[typeof(ItemLocationModel)], CachPageCountDic[typeof(ItemLocationModel)], (dbContext, lists) => dbContext.ItemLocations.AddRange(lists), false);
         }
 
         public bool IsItemContentExist(string itemId)
         {
-            using (var context = new CatalogDbContext(new OrganizationModel() { Name = _organization }))
+            using (var context = new CatalogDbContext(new OrganizationModel() { Name = Organization }))
             {
                 var result = from m in context.ItemLocations
                              where m.ItemId == itemId
@@ -202,141 +199,7 @@ namespace SqlDbImpl
 
         public void SaveMailbox(IMailboxData mailboxAddress)
         {
-            SaveModel<IMailboxData, MailboxModel>(mailboxAddress, CacheKeyNameDic[typeof(MailboxModel)], CachPageCountDic[typeof(MailboxModel)], (context, lists) => context.Mailboxes.AddRange(lists));
+            BatchSaveModel<IMailboxData, MailboxModel>(mailboxAddress, CacheKeyNameDic[typeof(MailboxModel)], CachPageCountDic[typeof(MailboxModel)], (context, lists) => context.Mailboxes.AddRange(lists));
         }
-
-        private void SaveModel<IT, TImpl>(IT data, string keyName, int pageCount, AddToDbSet<TImpl> delegateFunc, bool isInTransaction = true) where TImpl : class, IT
-        {
-            if (data == null)
-            {
-                throw new ArgumentException("argument type is not right or argument is null", "folder");
-            } 
-
-            TImpl model = (TImpl)data;
-            SaveModelCache(model, false, keyName, pageCount, delegateFunc, isInTransaction);
-        }
-
-        [ThreadStatic]
-        private Dictionary<string, object> _otherInformation;
-        private Dictionary<string, object> OtherInformation
-        {
-            get
-            {
-                if(_otherInformation == null)
-                {
-                    _otherInformation = new Dictionary<string, object>();
-                }
-                return _otherInformation;
-            }
-        }
-
-        /// <summary>
-        /// batch save informatioin.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="modelData"></param>
-        /// <param name="isEnd">is the last data.</param>
-        /// <param name="keyName"></param>
-        /// <param name="pageCount">the count in each batch save operation.</param>
-        /// <param name="delegateFunc"></param>
-        private void SaveModelCache<T>(T modelData, bool isEnd, string keyName, int pageCount, AddToDbSet<T> delegateFunc, bool isInTransaction = true) where T : class
-        {
-            object modelListObject;
-            if (!OtherInformation.TryGetValue(keyName, out modelListObject))
-            {
-                modelListObject = new List<T>(pageCount);
-                OtherInformation.Add(keyName, modelListObject);
-            }
-            List<T> modelList = modelListObject as List<T>;
-            
-
-            if (modelData != null)
-                modelList.Add(modelData);
-
-            if (modelList.Count >= pageCount || isEnd)
-            {
-                HashSet<string> ids = new HashSet<string>();
-                bool isMultiItem = false;
-                foreach (var item in modelList)
-                {
-                    IItemData temp = item as IItemData;
-                    if(temp != null){
-                        if (ids.Contains(temp.Id))
-                        {
-                            isMultiItem = true;
-                        }
-                        else
-                            ids.Add(temp.Id);
-                    }
-                }
-
-
-                if (isInTransaction)
-                {
-                    using (var context = new CatalogDbContext(new OrganizationModel() { Name = _organization }, SqlConn, false))
-                    {
-                        delegateFunc(context, modelList);
-                        context.SaveChanges();
-                    }
-                }
-                else
-                {
-                    using (var context = new CatalogDbContext(new OrganizationModel() { Name = _organization }))
-                    {
-                        delegateFunc(context, modelList);
-                        context.SaveChanges();
-                    }
-                }
-                modelList.Clear();
-            }
-        }
-
-        private SqlConnection _sqlConn;
-        /// <summary>
-        /// Get sql connect and start transaction.
-        /// </summary>
-        SqlConnection SqlConn
-        {
-            get
-            {
-                if(_sqlConn == null)
-                {
-                    _sqlConn = new SqlConnection(CatalogDbContext.GetConnectString(_organization));
-                    _sqlConn.Open();
-                    var scope = TransactionScope;
-                }
-                return _sqlConn;
-            }
-        }
-
-        private TransactionScope _transactionScope;
-        private TransactionScope TransactionScope
-        {
-            get
-            {
-                if(_transactionScope == null)
-                {
-                    _transactionScope = new TransactionScope();
-                }
-                return _transactionScope;
-            }
-        }
-
-        public override void BeginTransaction()
-        {
-            
-        }
-
-        public override void EndTransaction(bool isCommit)
-        {
-            if (_transactionScope != null) {
-                if (isCommit)
-                    TransactionScope.Complete();
-
-                TransactionScope.Dispose();
-                SqlConn.Dispose();
-            }
-        }
-        
     }
 }

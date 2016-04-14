@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Net;
 using System.Threading;
-using Microsoft.ServiceBus;
 using Microsoft.ServiceBus.Messaging;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.ServiceRuntime;
+using EwsFrame.ServiceBus;
+using EwsFrame.Manager.Impl;
 
 namespace WorkerRoleWithSBQueue
 {
@@ -24,6 +22,9 @@ namespace WorkerRoleWithSBQueue
         public override void Run()
         {
             Trace.WriteLine("Starting processing of messages");
+            OnMessageOptions options = new OnMessageOptions();
+            options.AutoComplete = false;
+            options.AutoRenewTimeout = TimeSpan.FromMinutes(1);
 
             // Initiates the message pump and callback is invoked for each message that is received, calling close on the client will stop the pump.
             Client.OnMessage((receivedMessage) =>
@@ -32,12 +33,28 @@ namespace WorkerRoleWithSBQueue
                     {
                         // Process the message
                         Trace.WriteLine("Processing Service Bus message: " + receivedMessage.SequenceNumber.ToString());
+                        var messageType = AzureServiceBusHelper.GetMessageType(receivedMessage.ContentType);
+                        var body = receivedMessage.GetBody<string>();
+
+                        switch (messageType)
+                        {
+                            case MessageType.Backup:
+                                JobFactory.Instance.JobManager.AddJob(new BackupJob(receivedMessage.Properties));
+                                break;
+                            case MessageType.Cancel:
+                                break;
+                            default:
+                                throw new NotImplementedException();
+                        }
+
+                        receivedMessage.Complete();
                     }
                     catch
                     {
+                        receivedMessage.Abandon();
                         // Handle any message processing specific exceptions here
                     }
-                });
+                }, options);
 
             CompletedEvent.WaitOne();
         }
@@ -45,18 +62,15 @@ namespace WorkerRoleWithSBQueue
         public override bool OnStart()
         {
             // Set the maximum number of concurrent connections 
-            ServicePointManager.DefaultConnectionLimit = 12;
+            //ServicePointManager.DefaultConnectionLimit = 12;
 
-            // Create the queue if it does not exist already
-            string connectionString = CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.ConnectionString");
-            var namespaceManager = NamespaceManager.CreateFromConnectionString(connectionString);
-            if (!namespaceManager.QueueExists(QueueName))
-            {
-                namespaceManager.CreateQueue(QueueName);
-            }
+            Client = AzureServiceBusHelper.GetQueueClient(CloudConfigurationManager.GetSetting("ServiceBusQueueName"));
+            JobFactory.Instance.ThreadManager.Start();
+            JobFactory.Instance.JobManager.Start();
+            JobFactory.Instance.ProgressManager.Start();
 
-            // Initialize the connection to Service Bus Queue
-            Client = QueueClient.CreateFromConnectionString(connectionString, QueueName);
+            OrganizationProgressManager.Instance.Start();
+
             return base.OnStart();
         }
 
@@ -64,7 +78,15 @@ namespace WorkerRoleWithSBQueue
         {
             // Close the connection to Service Bus Queue
             Client.Close();
+
+            OrganizationProgressManager.Instance.End();
+
+            JobFactory.Instance.ProgressManager.End();
+            JobFactory.Instance.JobManager.End();
+            JobFactory.Instance.ThreadManager.End();
+
             CompletedEvent.Set();
+            
             base.OnStop();
         }
     }

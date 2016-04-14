@@ -6,6 +6,8 @@
 #include <Mapiutil.h>
 #include "edkmdb.h"
 #include <IMessage.h>
+#include <stdlib.h>
+#include <string.h>
 
 
 #define CONVERT_CODE_PAGE 1253
@@ -1029,6 +1031,8 @@ void Test(){
 
 	MAPIUninitialize();
 }
+
+
 
 typedef int(* MytestFunc)(int a, int b);
 

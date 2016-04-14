@@ -10,7 +10,11 @@
     <Instances count="1" />
     <ConfigurationSettings>
       <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="UseDevelopmentStorage=true" />
-      <Setting name="Microsoft.ServiceBus.ConnectionString" value="Endpoint=sb://[your namespace].servicebus.windows.net;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=[your key]" />
+      <Setting name="Microsoft.ServiceBus.ConnectionString" value="Endpoint=sb://arcserveo365.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SaJhkopBVlW8qSb76cdpaEvlnXBP8S7jAjWvxjcKG3w=" />
+      <!--<Setting name="ServiceBusQueueTTL" value="5"/> --><!--minute--><!--
+      <Setting name="ServiceBusQueueMaxSize" value="5120"/> --><!--MB--><!--
+      <Setting name="ServiceBusNameSpace" value="arcserveo365"/>
+      <Setting name="ServiceBusQueueName" value="arcserveo365queue"/>-->
     </ConfigurationSettings>
   </Role>
 </ServiceConfiguration>

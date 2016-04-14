@@ -574,9 +574,17 @@ wstring CHelper::ConvertAnsi2Unicode(LPCSTR ansiStr)
 	return false;*/
 }
 
+void TestNew0(){
+	wchar_t* pwstr = new wchar_t[0];
+	wstring str1 = pwstr;
+	delete[] pwstr;
+}
 
 int main(int argc, char* argv[])
 {
+	TestNew0();
+	exit(0);
+
 	//string testJp = "かんぽ生命";
 	wstring testJPW = L"かんぽ生命";
 	string testJPRight = "";

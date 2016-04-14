@@ -101,6 +101,8 @@ namespace DataProtectImpl
             if (string.IsNullOrEmpty(adminPassword))
                 throw new ArgumentException("password is null", "adminPassword");
 
+            LatestStatus = new CatalogProgressArgs(CatalogProgressType.Init);
+
             AdminInfo = new OrganizationAdminInfo();
             AdminInfo.UserName = adminUserName;
             AdminInfo.UserPassword = adminPassword;
@@ -108,6 +110,7 @@ namespace DataProtectImpl
             AdminInfo.OrganizationName = organizationName;
 
             _serviceContext = EwsFrame.ServiceContext.NewServiceContext(AdminInfo.UserName, AdminInfo.UserPassword, AdminInfo.UserDomain, AdminInfo.OrganizationName, TaskType.Catalog);
+
         }
 
         public List<IMailboxData> GetAllUserMailbox()
@@ -171,6 +174,18 @@ namespace DataProtectImpl
             return GetAllUserMailbox();
         }
 
+        private int GetFolderCount()
+        {
+            if (Filter is IFilterItemWithMailbox)
+            {
+                return ((IFilterItemWithMailbox)Filter).GetFolderCount();
+            }
+            throw new NotSupportedException("Cannot get folders count.");
+        }
+
+        private Process MailboxProgress = null;
+        private Process FolderProgress = null;
+        private Process ItemProgress = null;
         /// <summary>
         /// 
         /// </summary>
@@ -188,7 +203,7 @@ namespace DataProtectImpl
             {
                 OnProgressChanged(CatalogProgressType.GetAllMailboxStart);
                 List<IMailboxData> allUserMailbox = GetAllUserMailboxFromFilter();
-                OnProgressChanged(CatalogProgressType.GetAllMailboxEnd, new Process(-1, allUserMailbox.Count));
+                OnProgressChanged(CatalogProgressType.GetAllMailboxEnd);
                 ICatalogDataAccess dataAccess = NewDataAccessInstance();
                 IDataConvert dataConvert = NewDataConvertInstance();
                 dataConvert.StartTime = StartTime;
@@ -200,31 +215,32 @@ namespace DataProtectImpl
                 foreach (IMailboxData userMailbox in allUserMailbox)
                 {
                     mailboxIndex++;
+                    MailboxProgress = new Process(mailboxIndex, allUserMailbox.Count);
 
-                    if(Filter.IsFilterMailbox(userMailbox))
+                    if (Filter.IsFilterMailbox(userMailbox))
                     {
-                        OnMailboxProgressChanged(CatalogMailboxProgressType.SkipMailbox, userMailbox);
+                        OnProgressChanged(CatalogMailboxProgressType.SkipMailbox, MailboxProgress, userMailbox);
                         continue;
                     }
 
-                    MailboxGenerateStart(userMailbox, mailboxIndex, totalMailboxCount);
+                    MailboxGenerateStart(userMailbox);
 
                     bool hasError = true;
                     try
                     {
                         IMailbox mailboxOperator = NewMailboxOperatorInstance();
-
-                        OnMailboxProgressChanged(CatalogMailboxProgressType.ConnectMailboxStart, userMailbox);
+                        
+                        OnProgressChanged(CatalogMailboxProgressType.ConnectMailboxStart, MailboxProgress, userMailbox);
                         ServiceContext.CurrentContext.CurrentMailbox = userMailbox.MailAddress;
                         mailboxOperator.ConnectMailbox(ServiceContext.Argument, userMailbox.MailAddress);
-                        OnMailboxProgressChanged(CatalogMailboxProgressType.ConnectMailboxEnd, userMailbox);
+                        OnProgressChanged(CatalogMailboxProgressType.ConnectMailboxEnd, MailboxProgress, userMailbox);
 
                         IFolder folderOperator = CatalogFactory.Instance.NewFolderOperatorImpl(mailboxOperator.CurrentExchangeService);
 
-                        OnMailboxProgressChanged(CatalogMailboxProgressType.GetRootFolderStart, userMailbox);
+                        OnProgressChanged(CatalogMailboxProgressType.GetRootFolderStart, MailboxProgress, userMailbox);
                         Folder rootFolder = folderOperator.GetRootFolder();
-                        
-                        OnMailboxProgressChanged(CatalogMailboxProgressType.GetRootFolderEnd, userMailbox);
+
+                        OnProgressChanged(CatalogMailboxProgressType.GetRootFolderEnd, MailboxProgress, userMailbox);
 
                         userMailbox.RootFolderId = rootFolder.Id.UniqueId;
                         IMailboxData mailboxData = dataConvert.Convert(userMailbox);
@@ -233,26 +249,27 @@ namespace DataProtectImpl
                         IItem itemOperator = CatalogFactory.Instance.NewItemOperatorImpl(folderOperator.CurrentExchangeService, dataAccess);
                         //dataAccess.SaveFolder(rootFolderData, mailboxData, null); // root folder don't need save.
 
+                        int folderCount = GetFolderCount();
                         folderStack.Push(rootFolderData);
                         GenerateEachFolderCatalog(mailboxData,
                             rootFolderData, rootFolder,
                             folderOperator, itemOperator,
                             dataAccess,
-                            dataConvert,
+                            dataConvert, folderCount, 0,
                             folderStack);
                         folderStack.Pop();
 
-                        OnMailboxProgressChanged(CatalogMailboxProgressType.SaveMailboxStart, userMailbox);
+                        OnProgressChanged(CatalogMailboxProgressType.SaveMailboxStart, MailboxProgress, userMailbox);
                         mailboxData.ChildFolderCount = rootFolderData.ChildFolderCount;
                         dataAccess.SaveMailbox(mailboxData);
-                        OnMailboxProgressChanged(CatalogMailboxProgressType.SaveMailboxEnd, userMailbox);
+                        OnProgressChanged(CatalogMailboxProgressType.SaveMailboxEnd, MailboxProgress, userMailbox);
 
                         hasError = false;
                     }
 
                     finally
                     {
-                        MailboxGenerateEnd(userMailbox, hasError, mailboxIndex, totalMailboxCount);
+                        MailboxGenerateEnd(userMailbox, hasError);
                     }
                 }
 
@@ -278,22 +295,25 @@ namespace DataProtectImpl
            IItem itemOperator,
            ICatalogDataAccess dataAccess,
            IDataConvert dataConvert,
+           int totalFolderCount,
+           int currentFolderIndex,
            Stack<IFolderData> folderStack,
            int level = 0)
         {
+            FolderProgress = new Process(currentFolderIndex, totalFolderCount);
             GenerateFolderStart(folderStack, mailboxData, folderData);
             bool hasError = true;
             try
             {
                 if (level != 0) // root folder don't need save items;
                 {
-                    OnFolderProgressChanged(CatalogFolderProgressType.ChildItemStart, mailboxData, folderStack, folderData);
+                    OnProgressChanged(CatalogFolderProgressType.ChildItemStart, MailboxProgress, mailboxData, FolderProgress, folderData);
                     if (folder.TotalCount > 0)
                     {
-                        OnFolderProgressChanged(CatalogFolderProgressType.GetChildItemStart, mailboxData, folderStack, folderData);
+                        OnProgressChanged(CatalogFolderProgressType.GetChildItemStart, MailboxProgress, mailboxData, FolderProgress, folderData);
                         List<Item> folderItems = itemOperator.GetFolderItems(folder);
                         int itemCount = folderItems.Count;
-                        OnFolderProgressChanged(CatalogFolderProgressType.GetChildItemsEnd, mailboxData, folderStack, folderData, new Process(-1, itemCount));
+                        OnProgressChanged(CatalogFolderProgressType.GetChildItemsEnd, MailboxProgress, mailboxData, FolderProgress, folderData);
 
                         if (itemCount > 0)
                         {
@@ -302,37 +322,37 @@ namespace DataProtectImpl
                             foreach (var item in folderItems)
                             {
                                 itemIndex++;
+                                ItemProgress = new Process(itemIndex, itemCount);
                                 IItemData itemData = dataConvert.Convert(item);
                                 if (Filter.IsFilterItem(itemData, mailboxData, folderStack))
                                 {
-                                    OnItemProgressChanged(CatalogItemProgressType.SkipItem, mailboxData, folderStack, folderData, itemData);
+                                    OnProgressChanged(CatalogItemProgressType.SkipItem, MailboxProgress, mailboxData, FolderProgress, folderData, ItemProgress, itemData);
                                     continue;
                                 }
 
                                 bool itemHasError = true;
 
-                                
-                                OnFolderProgressChanged(CatalogFolderProgressType.ProcessingItemStart, mailboxData, folderStack, folderData, new Process(itemIndex, itemCount), itemData);
+                                OnProgressChanged(CatalogFolderProgressType.ProcessingItemStart, MailboxProgress, mailboxData, FolderProgress, folderData);
                                 GenerateItemStart(itemData, mailboxData, folderStack, folderData);
                                 try
                                 {
-                                    OnItemProgressChanged(CatalogItemProgressType.SaveItemStart, mailboxData, folderStack, folderData, itemData);
+                                    OnProgressChanged(CatalogItemProgressType.SaveItemStart, MailboxProgress, mailboxData, FolderProgress, folderData, ItemProgress, itemData);
                                     dataAccess.SaveItem(itemData, mailboxData, folderData);
                                     folderData.ChildItemCount++;
-                                    OnItemProgressChanged(CatalogItemProgressType.SaveItemEnd, mailboxData, folderStack, folderData, itemData);
+                                    OnProgressChanged(CatalogItemProgressType.SaveItemEnd, MailboxProgress, mailboxData, FolderProgress, folderData, ItemProgress, itemData);
 
                                     bool isCheckExist = false;
                                     bool isExist = false;
                                     var itemIsNew = itemOperator.IsItemNew(item, DateTime.MinValue, StartTime);
                                     if (itemIsNew)
                                     {
-                                        OnItemProgressChanged(CatalogItemProgressType.SaveItemContentStart, mailboxData, folderStack, folderData, itemData);
+                                        OnProgressChanged(CatalogItemProgressType.SaveItemContentStart, MailboxProgress, mailboxData, FolderProgress, folderData, ItemProgress, itemData);
                                         dataAccess.SaveItemContent(itemData, StartTime, true, !itemIsNew);
-                                        OnItemProgressChanged(CatalogItemProgressType.SaveItemContentEnd, mailboxData, folderStack, folderData, itemData);
+                                        OnProgressChanged(CatalogItemProgressType.SaveItemContentEnd, MailboxProgress, mailboxData, FolderProgress, folderData, ItemProgress, itemData);
                                     }
                                     else
                                     {
-                                        OnItemProgressChanged(CatalogItemProgressType.SaveItemContentEndForExist, mailboxData, folderStack, folderData, itemData);
+                                        OnProgressChanged(CatalogItemProgressType.SaveItemContentEndForExist, MailboxProgress, mailboxData, FolderProgress, folderData, ItemProgress, itemData);
                                     }
                                     itemHasError = false;
                                 }
@@ -340,28 +360,28 @@ namespace DataProtectImpl
                                 {
                                     GenerateItemEnd(itemData, mailboxData, folderStack, folderData, itemHasError);
                                     if (itemHasError)
-                                        OnFolderProgressChanged(CatalogFolderProgressType.ProcessingItemEndWithError, mailboxData, folderStack, folderData, new Process(itemIndex, itemCount), itemData);
+                                        OnProgressChanged(CatalogFolderProgressType.ProcessingItemEndWithError, MailboxProgress, mailboxData, FolderProgress, folderData);
                                     else
-                                        OnFolderProgressChanged(CatalogFolderProgressType.ProcessingItemEndNoError, mailboxData, folderStack, folderData, new Process(itemIndex, itemCount), itemData);
+                                        OnProgressChanged(CatalogFolderProgressType.ProcessingItemEndNoError, MailboxProgress, mailboxData, FolderProgress, folderData);
                                 }
                             }
                         }
                         else
                         {
-                            OnFolderProgressChanged(CatalogFolderProgressType.NoChildItem, mailboxData, folderStack, folderData);
+                            OnProgressChanged(CatalogFolderProgressType.NoChildItem, MailboxProgress, mailboxData, FolderProgress, folderData);
                         }
                     }
-                    OnFolderProgressChanged(CatalogFolderProgressType.ChildItemEnd, mailboxData, folderStack, folderData);
+                    OnProgressChanged(CatalogFolderProgressType.ChildItemEnd, MailboxProgress, mailboxData, FolderProgress, folderData);
                 }
 
-                OnFolderProgressChanged(CatalogFolderProgressType.ChildFolderStart, mailboxData, folderStack, folderData);
+                OnProgressChanged(CatalogFolderProgressType.ChildFolderStart, MailboxProgress, mailboxData, FolderProgress, folderData);
                 if (folder.ChildFolderCount > 0)
                 {
-                    OnFolderProgressChanged(CatalogFolderProgressType.GetChildFoldersStart, mailboxData, folderStack, folderData);
+                    OnProgressChanged(CatalogFolderProgressType.GetChildFoldersStart, MailboxProgress, mailboxData, FolderProgress, folderData);
                     List<Folder> childFolders = folderOperator.GetChildFolder(folder);
                     int childFolderIndex = 0;
                     int childFolderCount = childFolders.Count;
-                    OnFolderProgressChanged(CatalogFolderProgressType.GetChildFoldersEnd, mailboxData, folderStack, folderData, null, null, new Process(-1, childFolderCount));
+                    OnProgressChanged(CatalogFolderProgressType.GetChildFoldersEnd, MailboxProgress, mailboxData, FolderProgress, folderData);
 
                     foreach (var childFolder in childFolders)
                     {
@@ -370,31 +390,34 @@ namespace DataProtectImpl
                         IFolderData childFolderData = dataConvert.Convert(childFolder, mailboxData.MailAddress);
                         if (!folderOperator.IsFolderNeedGenerateCatalog(childFolder))
                         {
-                            OnFolderProgressChanged(CatalogFolderProgressType.ChildFolderSkip, mailboxData, folderStack, folderData, null, null, new Process(childFolderIndex, childFolderCount));
+                            OnProgressChanged(CatalogFolderProgressType.ChildFolderSkip, MailboxProgress, mailboxData, FolderProgress, folderData);
                             continue;
                         }
 
                         if (Filter.IsFilterFolder(childFolderData, mailboxData, folderStack))
                         {
-                            OnFolderProgressChanged(CatalogFolderProgressType.ChildFolderSkip, mailboxData, folderStack, folderData, null, null, new Process(childFolderIndex, childFolderCount));
+                            OnProgressChanged(CatalogFolderProgressType.ChildFolderSkip, MailboxProgress, mailboxData, FolderProgress, folderData);
                             continue;
                         }
                         
                         folderStack.Push(childFolderData);
-                        GenerateEachFolderCatalog(mailboxData, childFolderData, childFolder, folderOperator, itemOperator, dataAccess, dataConvert, folderStack, level + 1);
+                        GenerateEachFolderCatalog(mailboxData, childFolderData, childFolder, 
+                            folderOperator, itemOperator, dataAccess, dataConvert, totalFolderCount, currentFolderIndex + 1,
+                            folderStack, level + 1);
+                        //FolderProgress = new Process(currentFolderIndex, totalFolderCount);
                         folderStack.Pop();
 
-                        OnFolderProgressChanged(CatalogFolderProgressType.SaveFolderStart, mailboxData, folderStack, folderData, null, null, new Process(childFolderIndex, childFolderCount));
+                        OnProgressChanged(CatalogFolderProgressType.SaveFolderStart, MailboxProgress, mailboxData, FolderProgress, folderData);
                         folderData.ChildFolderCount++;
                         dataAccess.SaveFolder(childFolderData, mailboxData, folderData);
-                        OnFolderProgressChanged(CatalogFolderProgressType.SaveFolderEnd, mailboxData, folderStack, folderData, null, null, new Process(childFolderIndex, childFolderCount));
+                        OnProgressChanged(CatalogFolderProgressType.SaveFolderEnd, MailboxProgress, mailboxData, FolderProgress, folderData);
                     }
                 }
                 else
                 {
-                    OnFolderProgressChanged(CatalogFolderProgressType.NoChildFolder, mailboxData, folderStack, folderData);
+                    OnProgressChanged(CatalogFolderProgressType.NoChildFolder, MailboxProgress, mailboxData, FolderProgress, folderData);
                 }
-                OnFolderProgressChanged(CatalogFolderProgressType.ChildFolderEnd, mailboxData, folderStack, folderData);
+                OnProgressChanged(CatalogFolderProgressType.ChildFolderEnd, MailboxProgress, mailboxData, FolderProgress, folderData);
 
                 hasError = false;
             }
@@ -405,17 +428,21 @@ namespace DataProtectImpl
         }
 
         public event EventHandler<CatalogProgressArgs> ProgressChanged;
-        public event EventHandler<CatalogMailboxArgs> MailboxProgressChanged;
-        public event EventHandler<CatalogFolderArgs> FolderProgressChanged;
-        public event EventHandler<CatalogItemArgs> ItemProgressChanged;
+        //public event EventHandler<CatalogMailboxArgs> MailboxProgressChanged;
+        //public event EventHandler<CatalogFolderArgs> FolderProgressChanged;
+        //public event EventHandler<CatalogItemArgs> ItemProgressChanged;
         public event EventHandler<EventExceptionArgs> ExceptionThrowed;
 
-        private void OnProgressChanged(CatalogProgressType type, Process mailboxProcess = null, IMailboxData mailbox = null)
+        public CatalogProgressArgs LatestStatus { get; private set; }
+
+        private void OnProgressChanged(CatalogMailboxProgressType type, Process mailboxProcess, IMailboxData mailbox)
         {
             if(ProgressChanged != null)
             {
                 try {
-                    ProgressChanged(this, new CatalogProgressArgs(type, mailboxProcess, mailbox));
+                    //OnMailboxProgressChanged(type, mailbox);
+                    LatestStatus = new CatalogProgressArgs(type, mailboxProcess, mailbox);
+                    ProgressChanged(this, LatestStatus);
                 }
                 catch(Exception e)
                 {
@@ -424,34 +451,14 @@ namespace DataProtectImpl
             }
         }
 
-        private void OnMailboxProgressChanged(CatalogMailboxProgressType type, IMailboxData mailbox = null)
+        private void OnProgressChanged(CatalogProgressType type)
         {
-            if(MailboxProgressChanged != null)
+            if (ProgressChanged != null)
             {
                 try
                 {
-                    MailboxProgressChanged(this, new CatalogMailboxArgs(type, mailbox));
-                }
-                catch(Exception e)
-                {
-                    OnExceptionThrowed(e);
-                }
-            }
-        }
-
-        private void OnFolderProgressChanged(CatalogFolderProgressType type,
-            IMailboxData currentMailbox,
-            Stack<IFolderData> folderStack = null,
-            IFolderData currentFolder = null,
-            Process itemProcess = null,
-            IItemData currentItem = null,
-            Process childFolderProcess = null)
-        {
-            if (FolderProgressChanged != null)
-            {
-                try
-                {
-                    FolderProgressChanged(this, new CatalogFolderArgs(type, currentMailbox, folderStack, currentFolder, itemProcess, currentItem, childFolderProcess));
+                    LatestStatus = new CatalogProgressArgs(type);
+                    ProgressChanged(this, LatestStatus);
                 }
                 catch (Exception e)
                 {
@@ -460,13 +467,15 @@ namespace DataProtectImpl
             }
         }
 
-        private void OnItemProgressChanged(CatalogItemProgressType type, IMailboxData mailbox, Stack<IFolderData> folderStack, IFolderData folder, IItemData currentItem = null)
+        private void OnProgressChanged(CatalogFolderProgressType type, Process mailboxProcess , IMailboxData mailbox , 
+            Process folderProcess, IFolderData folder)
         {
-            if (ItemProgressChanged != null)
+            if (ProgressChanged != null)
             {
                 try
                 {
-                    ItemProgressChanged(this, new CatalogItemArgs(type, mailbox, folderStack, folder,  currentItem));
+                    LatestStatus = new CatalogProgressArgs(type, mailboxProcess, mailbox, folderProcess, folder);
+                    ProgressChanged(this, LatestStatus);
                 }
                 catch (Exception e)
                 {
@@ -474,6 +483,75 @@ namespace DataProtectImpl
                 }
             }
         }
+
+        private void OnProgressChanged(CatalogItemProgressType type, Process mailboxProcess, IMailboxData mailbox,
+            Process folderProcess, IFolderData folder,
+            Process itemProcess, IItemData item)
+        {
+            if (ProgressChanged != null)
+            {
+                try
+                {
+                    LatestStatus = new CatalogProgressArgs(type, mailboxProcess, mailbox, folderProcess, folder, itemProcess, item);
+                    ProgressChanged(this, LatestStatus);
+                }
+                catch (Exception e)
+                {
+                    OnExceptionThrowed(e);
+                }
+            }
+        }
+
+        //private void OnMailboxProgressChanged(CatalogMailboxProgressType type, IMailboxData mailbox = null)
+        //{
+        //    if(MailboxProgressChanged != null)
+        //    {
+        //        try
+        //        {
+        //            MailboxProgressChanged(this, new CatalogMailboxArgs(type, mailbox));
+        //        }
+        //        catch(Exception e)
+        //        {
+        //            OnExceptionThrowed(e);
+        //        }
+        //    }
+        //}
+
+        //private void OnFolderProgressChanged(CatalogFolderProgressType type,
+        //    IMailboxData currentMailbox,
+        //    Stack<IFolderData> folderStack = null,
+        //    IFolderData currentFolder = null,
+        //    Process itemProcess = null,
+        //    IItemData currentItem = null,
+        //    Process childFolderProcess = null)
+        //{
+        //    if (FolderProgressChanged != null)
+        //    {
+        //        try
+        //        {
+        //            FolderProgressChanged(this, new CatalogFolderArgs(type, currentMailbox, folderStack, currentFolder, itemProcess, currentItem, childFolderProcess));
+        //        }
+        //        catch (Exception e)
+        //        {
+        //            OnExceptionThrowed(e);
+        //        }
+        //    }
+        //}
+
+        //private void OnItemProgressChanged(CatalogItemProgressType type, IMailboxData mailbox, Stack<IFolderData> folderStack, IFolderData folder, IItemData currentItem = null)
+        //{
+        //    if (ItemProgressChanged != null)
+        //    {
+        //        try
+        //        {
+        //            ItemProgressChanged(this, new CatalogItemArgs(type, mailbox, folderStack, folder,  currentItem));
+        //        }
+        //        catch (Exception e)
+        //        {
+        //            OnExceptionThrowed(e);
+        //        }
+        //    }
+        //}
 
         private void OnExceptionThrowed(Exception e)
         {
@@ -490,31 +568,28 @@ namespace DataProtectImpl
             }
         }
 
-        public void MailboxGenerateStart(IMailboxData mailbox, int mailboxIndex, int mailboxCount)
+        public void MailboxGenerateStart(IMailboxData mailbox)
         {
-            OnProgressChanged(CatalogProgressType.GRTForMailboxStart, new Process(mailboxIndex, mailboxCount), mailbox);
-            OnMailboxProgressChanged(CatalogMailboxProgressType.Start, mailbox);
+           // OnProgressChanged(CatalogProgressType.GRTForMailboxStart,  mailbox);
+            OnProgressChanged(CatalogMailboxProgressType.Start, MailboxProgress, mailbox);
 
             _serviceContext.CurrentMailbox = mailbox.MailAddress;
             MailboxCacheManager.CacheManager.ReleaseCache();
         }
 
-        public void MailboxGenerateEnd(IMailboxData mailbox, bool hasError, int mailboxIndex, int mailboxCount)
+        public void MailboxGenerateEnd(IMailboxData mailbox, bool hasError)
         {
             if (!hasError)
             {
                 MailboxCacheManager.CacheManager.ReleaseCache(true);
-                OnProgressChanged(CatalogProgressType.GRTForMailboxEndWithNoError, new Process(mailboxIndex, mailboxCount), mailbox);
-                OnMailboxProgressChanged(CatalogMailboxProgressType.EndWithNoError, mailbox);
+                OnProgressChanged(CatalogMailboxProgressType.EndWithNoError, MailboxProgress, mailbox);
             }
             else
             {
                 MailboxCacheManager.CacheManager.ReleaseCache();
-                OnProgressChanged(CatalogProgressType.GRTForMailboxEndWithError, new Process(mailboxIndex, mailboxCount), mailbox);
-                OnMailboxProgressChanged(CatalogMailboxProgressType.EndWithError, mailbox);
+                OnProgressChanged(CatalogMailboxProgressType.EndWithError, MailboxProgress, mailbox);
             }
             ServiceContext.CurrentMailbox = string.Empty;
-
         }
 
         public void GenerateCatalogStart()
@@ -535,27 +610,30 @@ namespace DataProtectImpl
         private void GenerateItemEnd(IItemData item,IMailboxData mailboxData,Stack<IFolderData> folderStack,IFolderData folderData, bool itemHasError)
         {
             if (itemHasError)
-                OnItemProgressChanged(CatalogItemProgressType.EndWithError,mailboxData,folderStack,folderData, item);
+                OnProgressChanged(CatalogItemProgressType.EndWithError, MailboxProgress, mailboxData, FolderProgress, folderData, ItemProgress, item);
+            //OnItemProgressChanged(CatalogItemProgressType.EndWithError,mailboxData,folderStack,folderData, item);
             else
-                OnItemProgressChanged(CatalogItemProgressType.EndWithNoError, mailboxData, folderStack, folderData, item);
+                OnProgressChanged(CatalogItemProgressType.EndWithNoError, MailboxProgress, mailboxData, FolderProgress, folderData, ItemProgress, item);
+           // OnItemProgressChanged(CatalogItemProgressType.EndWithNoError, mailboxData, folderStack, folderData, item);
         }
 
         private void GenerateItemStart(IItemData item, IMailboxData mailboxData, Stack<IFolderData> folderStack, IFolderData folderData)
         {
-            OnItemProgressChanged(CatalogItemProgressType.Start, mailboxData, folderStack, folderData, item);
+            OnProgressChanged(CatalogItemProgressType.Start, MailboxProgress, mailboxData, FolderProgress, folderData, ItemProgress, item);
+            //OnItemProgressChanged(CatalogItemProgressType.Start, mailboxData, folderStack, folderData, item);
         }
 
         private void GenerateFolderEnd(Stack<IFolderData> folderStack, IMailboxData mailboxData, IFolderData folderData, bool hasError)
         {
             if (!hasError)
-                OnFolderProgressChanged(CatalogFolderProgressType.EndWithNoError, mailboxData, folderStack, folderData);
+                OnProgressChanged(CatalogFolderProgressType.EndWithNoError, MailboxProgress, mailboxData, FolderProgress, folderData);
             else
-                OnFolderProgressChanged(CatalogFolderProgressType.EndWithError, mailboxData, folderStack, folderData);
+                OnProgressChanged(CatalogFolderProgressType.EndWithError, MailboxProgress, mailboxData, FolderProgress, folderData);
         }
 
         private void GenerateFolderStart(Stack<IFolderData> folderStack, IMailboxData mailboxData, IFolderData folderData)
         {
-            OnFolderProgressChanged(CatalogFolderProgressType.Start, mailboxData, folderStack, folderData);
+            OnProgressChanged(CatalogFolderProgressType.Start, MailboxProgress, mailboxData, FolderProgress, folderData);
         }
 
 

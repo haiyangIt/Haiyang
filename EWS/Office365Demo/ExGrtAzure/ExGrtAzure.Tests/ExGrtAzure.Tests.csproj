@@ -119,6 +119,8 @@
     <Compile Include="UnitTest1.cs" />
     <Compile Include="CatalogServiceTest.cs" />
     <Compile Include="RestoreServiceTest.cs" />
+    <Compile Include="ThreadTest.cs" />
+    <Compile Include="SyncTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="App.config" />
@@ -146,6 +148,10 @@
     <ProjectReference Include="..\EwsServiceInterface\EwsServiceInterface.csproj">
       <Project>{ec82b108-4a69-4517-966b-328cf90ed3b5}</Project>
       <Name>EwsServiceInterface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\EwsService\EwsService.csproj">
+      <Project>{7737cc80-0266-4ed8-b265-628a9b0dfbcb}</Project>
+      <Name>EwsService</Name>
     </ProjectReference>
     <ProjectReference Include="..\ExGrtAzure\ExGrtAzure.csproj">
       <Project>{90E0E3A4-A4C6-48DA-8DF4-BDE73B8E88C6}</Project>

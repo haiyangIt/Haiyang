@@ -1,14 +1,15 @@
-﻿using EwsFrame.EF;
+﻿using DataProtectInterface.Plan;
+using EwsFrame.EF;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.WindowsAzure.Scheduler.Models;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SqlDbImpl.Model
 {
-    public class PlanModel
+    [Table("PlanBaseInfo")]
+    public class PlanModel : IPlanData
     {
         [Key]
         [CaseSensitive("Name")]
@@ -18,11 +19,23 @@ namespace SqlDbImpl.Model
         public string Organization { get; set; }
         [MaxLength(512)]
         public string CredentialInfo { get; set; }
-        [MaxLength(512)]
-        public string ScheduleInfo { get; set; }
+        public string PlanMailInfos { get; set; }
+
+        public DateTime FirstStartTime
+        {
+            get; set;
+        }
+
+        public DateTime NextFullBackupTime
+        {
+            get; set;
+        }
+
+        public string LastSyncStaus { get; set; }
     }
 
-    public class PlanMailInfo
+    [Table("PlanMailInfo")]
+    public class PlanMailInfo : IPlanMailInfo
     {
         [Key]
         [CaseSensitive("Name")]
@@ -31,9 +44,15 @@ namespace SqlDbImpl.Model
         [MaxLength(256)]
         public string Mailbox { get; set; }
         public string FolderInfos { get; set; }
+
+        public static string GetString(List<IPlanMailInfo> mailInfos)
+        {
+            throw new NotImplementedException();
+        }
     }
 
-    public class PlanAzureInfo
+    [Table("PlanAzureSchedulerInfo")]
+    public class PlanAzureInfo : IPlanAzureInfo
     {
         [Key]
         [CaseSensitive("Name")]
@@ -43,5 +62,12 @@ namespace SqlDbImpl.Model
         public string CloudService { get; set; }
         [MaxLength(256)]
         public string JobCollectionName { get; set; }
+        [MaxLength(1024)]
+        public string JobInfo { get; set; }
+        [NotMapped]
+        public Job Job
+        {
+            get; set;
+        }
     }
 }

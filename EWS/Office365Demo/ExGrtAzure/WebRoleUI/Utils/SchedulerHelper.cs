@@ -6,12 +6,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Web;
-using System.Configuration
+using System.Configuration;
 using Microsoft.WindowsAzure.Management.Scheduler.Models;
 using Microsoft.WindowsAzure.Scheduler.Models;
-using WebRoleUI.Models;
 using System.Xml.Linq;
 using System.IO;
+using SqlDbImpl.Model;
+using EwsFrame;
+using DataProtectInterface.Plan;
+using Microsoft.ServiceBus;
+using EwsFrame.Util;
 
 namespace WebRoleUI.Utils
 {
@@ -29,49 +33,130 @@ namespace WebRoleUI.Utils
             return CertificateCloudCredentialsFactory.FromPublishSettingsFile(subscriptionName, out subscriptionId);
         }
 
-        public static void CreateOrUpdateScheduleJob(string planName, string organization, ScheduleInfo scheduleInfo)
+        private static readonly int JobMaxCountInStandardCollection = 50;
+        public static void CreateSchdule(PlanModel planModel, PlanAzureInfo planAzureInfo)
         {
-            var cloudServiceName = GetCloudServiceName(organization);
+            planAzureInfo.Job.Action = CreateBackupJobAction(planModel, planAzureInfo);
+            planAzureInfo.Job.Id = planModel.Name;
+
+            var planDataAccess = PlanFactory.Instance.NewPlanDataAccess(planModel.Organization);
+            // 1. Check the plan name is exist.
+            IPlanData planData = planDataAccess.GetPlan(planModel.Name);
+            if (planData != null)
+                throw new ArgumentException(string.Format("Plan {0} exists, cannot create.", planModel.Name));
+
             string subscriptionId = string.Empty;
-            var cert = GetCertificate(out subscriptionId);
+            CertificateCloudCredentials cert = GetCertificate(out subscriptionId);
 
-            var schedulerMgmCli = new SchedulerManagementClient(cert);
-            var cloudServiceMgmCli = new CloudServiceManagementClient(cert);
-
-            var cloudServiceResponse = cloudServiceMgmCli.CloudServices.Get(cloudServiceName);
-            var isCloudServiceExist = cloudServiceResponse.StatusCode == System.Net.HttpStatusCode.OK;
-            if (isCloudServiceExist)
+            // 2. Check the cloud service name is exist.
+            bool isCloudServiceExist = planDataAccess.IsCloudServiceExist(planAzureInfo.CloudService);
+            bool isJobCollectionExist = false;
+            int jobCountInCollection = 0;
+            if (!isCloudServiceExist)
             {
-                schedulerMgmCli.JobCollections.Get(cloudServiceName, )
+                CreateCloudService(planAzureInfo.CloudService, cert);
             }
             else
             {
-
+                // 3. Check the collection is exist.
+                isJobCollectionExist = planDataAccess.IsJobCollectionExist(planAzureInfo.CloudService, planAzureInfo.JobCollectionName);
+                if (!isJobCollectionExist)
+                {
+                    CreateJobCollection(planAzureInfo.CloudService, planAzureInfo.JobCollectionName, cert);
+                }
             }
+            if (isJobCollectionExist)
+            {
+                jobCountInCollection = planDataAccess.GetJobCountInCollection(planAzureInfo.CloudService, planAzureInfo.JobCollectionName);
+            }
+
+            // 4. Check the collection count is valid. 
+            // The default max jobs quota is 5 jobs in a free job collection and 50 jobs in a standard job collection.
+            if (jobCountInCollection >= JobMaxCountInStandardCollection)
+            {
+                planAzureInfo.JobCollectionName = string.Format("{0}{1}", planModel.Organization, DateTime.Now.ToString("yyyyMMddHHmmss"));
+                CreateJobCollection(planAzureInfo.CloudService, planAzureInfo.JobCollectionName, cert);
+            }
+
+            // 5. Create Job
+            CreateJob(planAzureInfo.CloudService, planAzureInfo.JobCollectionName, cert, planAzureInfo.Job);
+            // 6. Insert data to Db.
+            planDataAccess.InsertPlanModel(planModel);
+            planDataAccess.InsertPlanAzureInfo(planAzureInfo);
         }
 
-        public static SchedulerClient CreateJob()
+        private static void CreateJob(string cloudServiceName, string jobCollectionName, CertificateCloudCredentials credentials, Job job)
         {
-
-
-            // create management credencials and cloud service management client
-
+            var schedulerClient = new SchedulerClient(cloudServiceName, jobCollectionName, credentials);
+            var jobAction = job.Action;
+            var jobRecurrence = job.Recurrence; 
+            var jobCreateOrUpdateParameters = new JobCreateOrUpdateParameters()
+            {
+                Action = jobAction,
+                Recurrence = jobRecurrence,
+                StartTime = job.StartTime
+            };
+            var jobCreateResponse = schedulerClient.Jobs.CreateOrUpdate(job.Id, jobCreateOrUpdateParameters);
+            if (jobCreateResponse.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                throw new HttpException(string.Format("Create job [{0}] failed, status code: [{1}]."
+                    , job.Id, jobCreateResponse.StatusCode));
+            }
             
-            var credentials = new CertificateCloudCredentials(subscriptionId, certificate);
+
+        }
+
+        private static JobAction CreateBackupJobAction(PlanModel planModel, PlanAzureInfo planAzureInfo)
+        {
+            string connectionString =
+                CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.ConnectionString");
+            ServiceBusConnectionStringBuilder parser = new ServiceBusConnectionStringBuilder(connectionString);
+
+            var jobAction = new JobAction(JobActionType.ServiceBusQueue);
+            var serviceBusQueueMessage = new JobServiceBusQueueMessage();
+            serviceBusQueueMessage.Authentication = new JobServiceBusAuthentication();
+            serviceBusQueueMessage.Authentication.SasKeyName = parser.SharedAccessKeyName;
+            serviceBusQueueMessage.Authentication.SasKey = parser.SharedAccessKey;
+            serviceBusQueueMessage.TransportType = JobServiceBusTransportType.AMQP;
+            serviceBusQueueMessage.Namespace = CloudConfigurationManager.GetSetting("ServiceBusNameSpace");
+            serviceBusQueueMessage.QueueName = CloudConfigurationManager.GetSetting("ServiceBusQueueName");
+            serviceBusQueueMessage.Message = planModel.Name;
+            var keyValue = new Dictionary<string, string>();
+            keyValue["planBaseInfo"] = planModel.ToString();
+            //keyValue["planMailInfo"] = PlanUtil.GetMailString(planMailInfo); //todo can delete
+            keyValue["planJobStartTime"] = DateTime.UtcNow.Ticks.ToString();
+            serviceBusQueueMessage.CustomMessageProperties = keyValue;
+
+            var brokeredMessageProp = new JobServiceBusBrokeredMessageProperties();
+            brokeredMessageProp.ContentType = AzureServiceBusHelper.GetContentTypeByMessageType(MessageType.Backup);
+            serviceBusQueueMessage.BrokeredMessageProperties = brokeredMessageProp;
+            
+            jobAction.ServiceBusQueueMessage = serviceBusQueueMessage;
+            return jobAction;
+        }
+
+        private static void CreateCloudService(string cloudServiceName, CertificateCloudCredentials credentials)
+        {
             var cloudServiceMgmCli = new CloudServiceManagementClient(credentials);
 
             // create cloud service
             var cloudServiceCreateParameters = new CloudServiceCreateParameters()
             {
                 Description = "Office365 Protection Scheduler Service",
-                GeoRegion = "South Central US",
+                GeoRegion = "East Asia",
                 Label = "Office365ProtectionSchedulerServiceL"
             };
 
-            var cloudServiceName = "Office365ProtectionSchedulerService";
-            var cloudService = cloudServiceMgmCli.CloudServices.Create(cloudServiceName, cloudServiceCreateParameters);
+            var cloudServiceResponse = cloudServiceMgmCli.CloudServices.Create(cloudServiceName, cloudServiceCreateParameters);
+            if (cloudServiceResponse.HttpStatusCode != System.Net.HttpStatusCode.OK)
+            {
+                throw new HttpException(string.Format("Create cloud service [{0}] failed, error code: [{1}], error message:[{2}], status code: [{2}]."
+                    , cloudServiceName, cloudServiceResponse.Error.Code, cloudServiceResponse.Error.Message, cloudServiceResponse.HttpStatusCode));
+            }
+        }
 
-            // create job collection
+        private static void CreateJobCollection(string cloudServiceName, string jobCollectionName, CertificateCloudCredentials credentials)
+        {
             var schedulerMgmCli = new SchedulerManagementClient(credentials);
             var jobCollectionIntrinsicSettings = new JobCollectionIntrinsicSettings()
             {
@@ -87,36 +172,17 @@ namespace WebRoleUI.Utils
                 //    }
                 //}
             };
-            var jobCollectionName = "Office365ProtectionJobCollection";
             var jobCollectionCreateParameters = new JobCollectionCreateParameters()
             {
                 IntrinsicSettings = jobCollectionIntrinsicSettings,
                 Label = jobCollectionName
             };
             var jobCollectionCreateResponse = schedulerMgmCli.JobCollections.Create(cloudServiceName, jobCollectionName, jobCollectionCreateParameters);
-
-            // create job
-            var schedulerClient = new SchedulerClient(cloudServiceName, jobCollectionName, credentials);
-            var jobAction = new JobAction()
+            if (jobCollectionCreateResponse.HttpStatusCode != System.Net.HttpStatusCode.OK)
             {
-                Type = JobActionType.Http,
-                Request = new JobHttpRequest()
-                {
-                    Uri = new Uri("http://blog.shaunxu.me"),
-                    Method = "GET"
-                }
-            };
-            var jobRecurrence = new JobRecurrence()
-            {
-                Frequency = JobRecurrenceFrequency.Hour,
-                Interval = 1
-            };
-            var jobCreateOrUpdateParameters = new JobCreateOrUpdateParameters()
-            {
-                Action = jobAction,
-                Recurrence = jobRecurrence
-            };
-            var jobCreateResponse = schedulerClient.Jobs.CreateOrUpdate("poll_blog", jobCreateOrUpdateParameters);
+                throw new HttpException(string.Format("Create job collection [{0}] failed, error code: [{1}], error message:[{2}], status code: [{2}]."
+                    , jobCollectionName, jobCollectionCreateResponse.Error.Code, jobCollectionCreateResponse.Error.Message, jobCollectionCreateResponse.HttpStatusCode));
+            }
         }
     }
 
@@ -142,13 +208,13 @@ namespace WebRoleUI.Utils
             paths.Add(Path.Combine(path, "bin"));
             paths.Add(Path.Combine("..", path));
 
-            foreach(var p in paths)
+            foreach (var p in paths)
             {
                 var file = Path.Combine(path, "credentials.publishsettings");
                 if (File.Exists(file))
                     return file;
             }
-            
+
             throw new FileNotFoundException();
         }
     }

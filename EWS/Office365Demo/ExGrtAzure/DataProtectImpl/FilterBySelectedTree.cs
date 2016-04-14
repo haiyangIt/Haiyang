@@ -29,6 +29,11 @@ namespace DataProtectImpl
             return mailboxDatas;
         }
 
+        public int GetFolderCount()
+        {
+            throw new NotImplementedException();
+        }
+
         public bool IsFilterFolder(IFolderData currentFolder, IMailboxData mailbox, Stack<IFolderData> folders)
         {
             var mailboxItem = _orgSelectedItemUtils.GetChild(mailbox.Id);

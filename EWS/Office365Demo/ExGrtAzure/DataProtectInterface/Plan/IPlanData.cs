@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.WindowsAzure.Scheduler.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,41 +12,19 @@ namespace DataProtectInterface.Plan
         string Name { get; }
         string Organization { get; }
         string CredentialInfo { get; }
+        string PlanMailInfos { get; }
+        DateTime FirstStartTime { get; }
+        DateTime NextFullBackupTime { get; }
+        string LastSyncStaus { get; }
     }
 
-    public class ScheduleInfo
+    public interface IPlanMailInfo
     {
-        public DateTime StartTime { get; set; }
-        public int Interval { get; set; }
-        public FrequencyEnum Frequency { get; set; }
-        public DateTime EndTime { get; set; }
-        public int RecurCount { get; set; }
-        public Schedule Schedules { get; set; }
+
     }
 
-    public class Schedule
+    public interface IPlanAzureInfo
     {
-        public int Minutes { get; set; }
-        public int Hours { get; set; }
-        public int WeekDays { get; set; }
-        public int MonthDays { get; set; }
-        public MonthlyOccurrence MonthlyOccurrences { get; set; }
+        Job Job { get; }
     }
-
-    public class MonthlyOccurrence
-    {
-        public int WeekDay { get; set; }
-        public int WeekDayInMonthPlace { get; set; }
-    }
-
-    public enum FrequencyEnum
-    {
-        Minute,
-        Hour,
-        Day,
-        Week,
-        Month,
-        Year
-    }
-
 }

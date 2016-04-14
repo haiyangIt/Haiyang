@@ -27,6 +27,10 @@ namespace DataProtectInterface
         void GenerateCatalog();
 
         void GenerateCatalog(IFilterItem filter);
+
+        CatalogProgressArgs LatestStatus { get; }
+
+
     }
 
     

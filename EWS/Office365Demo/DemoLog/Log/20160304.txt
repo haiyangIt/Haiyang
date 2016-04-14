@@ -1,0 +1,2 @@
+20160304101708	I	Allow URL redirection	URL: https://autodiscover-s.outlook.com/autodiscover/autodiscover.xml
+20160304102225	I	Allow URL redirection	URL: https://autodiscover-s.outlook.com/autodiscover/autodiscover.xml

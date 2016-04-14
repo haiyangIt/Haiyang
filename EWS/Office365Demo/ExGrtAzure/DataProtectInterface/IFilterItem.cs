@@ -17,5 +17,6 @@ namespace DataProtectInterface
     public interface IFilterItemWithMailbox : IFilterItem
     {
         List<IMailboxData> GetAllMailbox();
+        int GetFolderCount();
     }
 }

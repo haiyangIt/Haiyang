@@ -2,12 +2,13 @@
 {
     public enum CatalogProgressType : byte
     {
+        Init,
         Start,
         GetAllMailboxStart,
         GetAllMailboxEnd,
-        GRTForMailboxStart,
-        GRTForMailboxEndWithNoError,
-        GRTForMailboxEndWithError,
+        GRTForMailboxRunning,
+        GRTForFolderRunning,
+        GRTForItemRunning,
         EndWithNoError,
         EndWithError
     }

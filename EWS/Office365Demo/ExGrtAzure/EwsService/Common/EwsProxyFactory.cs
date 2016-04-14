@@ -64,7 +64,7 @@ namespace EwsService.Common
                 throw new ArgumentException("Please input password first.");
             }
 
-            ewsServiceArgument.EwsUrl = null;
+            //ewsServiceArgument.EwsUrl = null;
             ExchangeService service = null;
             TimeZoneInfo oTimeZone = null;
             if (ewsServiceArgument.SelectedTimeZoneId != null)
@@ -210,24 +210,40 @@ namespace EwsService.Common
             }
 
             StringCacheKey mailboxKey = new StringCacheKey(domainName);
-            object urlObj = null;
-            if(!urlCache.TryGetValue(mailboxKey, out urlObj))
+            if (service.Url != null)
             {
-                DoAutodiscover(service, mailboxAddress);
-                urlObj = service.Url;
-                urlCache.AddKeyValue(mailboxKey, urlObj);
-            }
-            else
-            {
-                try
-                {
-                    service.Url = new Uri(urlObj.ToString());
+                try {
                     TestExchangeService(service);
+                    urlCache.SetKeyValue(mailboxKey, service.Url);
                 }
                 catch(Exception ex)
                 {
                     DoAutodiscover(service, mailboxAddress);
                     urlCache.SetKeyValue(mailboxKey, service.Url);
+                }
+            }
+            else
+            {
+                
+                object urlObj = null;
+                if (!urlCache.TryGetValue(mailboxKey, out urlObj))
+                {
+                    DoAutodiscover(service, mailboxAddress);
+                    urlObj = service.Url;
+                    urlCache.AddKeyValue(mailboxKey, urlObj);
+                }
+                else
+                {
+                    try
+                    {
+                        service.Url = new Uri(urlObj.ToString());
+                        TestExchangeService(service);
+                    }
+                    catch (Exception ex)
+                    {
+                        DoAutodiscover(service, mailboxAddress);
+                        urlCache.SetKeyValue(mailboxKey, service.Url);
+                    }
                 }
             }
 

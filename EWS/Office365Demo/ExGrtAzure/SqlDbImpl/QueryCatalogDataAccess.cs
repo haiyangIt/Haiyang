@@ -18,14 +18,12 @@ using System.Data.Entity;
 
 namespace SqlDbImpl
 {
-    public class QueryCatalogDataAccess : DataAccessBase, IQueryCatalogDataAccess
+    public class QueryCatalogDataAccess : CatalogDataAccessBase, IQueryCatalogDataAccess
     {
-        private delegate IQueryable<T> QueryFunc<T>(CatalogDbContext context);
-        private delegate int QueryCountFunc<T>(CatalogDbContext context);
         public ICatalogJob CatalogJob { get; set; }
 
         private string _organization;
-        public string Organization
+        public override string Organization
         {
             get
             {
@@ -49,41 +47,7 @@ namespace SqlDbImpl
             }
         }
 
-        private List<T> QueryDatas<T>(QueryFunc<T> funcObj)
-        {
-            using (var context = new CatalogDbContext(new OrganizationModel() { Name = Organization }))
-            {
-                IQueryable<T> query = funcObj(context);
-                return query.ToList();
-            }
-        }
-
-        private T QueryData<T>(QueryFunc<T> funcObj)
-        {
-            using (var context = new CatalogDbContext(new OrganizationModel() { Name = Organization }))
-            {
-                IQueryable<T> query = funcObj(context);
-                return query.FirstOrDefault();
-            }
-        }
-
-        private int QueryData<T>(QueryCountFunc<T> funcObj)
-        {
-            using (var context = new CatalogDbContext(new OrganizationModel() { Name = Organization }))
-            {
-                return funcObj(context);
-            }
-        }
-
-        private List<T> QueryData<T>(QueryFunc<T> funcObj, int pageIndex, int pageCount)
-        {
-            using (var context = new CatalogDbContext(new OrganizationModel() { Name = Organization }))
-            {
-                var skip = pageCount * pageIndex;
-                IQueryable<T> query = funcObj(context).Skip(skip).Take(pageCount);
-                return query.ToList();
-            }
-        }
+        
 
         public List<IFolderData> GetAllChildFolder(IFolderData parentFolder)
         {

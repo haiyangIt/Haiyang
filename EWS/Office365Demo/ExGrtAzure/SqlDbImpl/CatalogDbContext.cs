@@ -81,6 +81,10 @@ namespace SqlDbImpl
         public DbSet<ItemModel> Items { get; set; }
         public DbSet<ItemLocationModel> ItemLocations { get; set; }
 
+        public DbSet<PlanModel> PlanModels { get; set; }
+        public DbSet<PlanMailInfo> PlanMailInfos { get; set; }
+        public DbSet<PlanAzureInfo> PlanAzureInfos { get; set; }
+
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             modelBuilder.Conventions.Add(new AttributeToColumnAnnotationConvention<CaseSensitiveAttribute, CaseSensitiveAttribute>(

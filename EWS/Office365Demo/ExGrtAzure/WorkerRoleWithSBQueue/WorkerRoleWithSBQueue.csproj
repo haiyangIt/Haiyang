@@ -84,6 +84,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BackupJob.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WorkerRole.cs" />
   </ItemGroup>
@@ -91,6 +92,21 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DataProtectInterface\DataProtectInterface.csproj">
+      <Project>{f8783799-5d60-441f-a3b6-ffdaae476a12}</Project>
+      <Name>DataProtectInterface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\EwsDataInterface\EwsDataInterface.csproj">
+      <Project>{943fa512-7de9-47d2-9f9a-5e1dc1628f8e}</Project>
+      <Name>EwsDataInterface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\EwsFactory\EwsFrame.csproj">
+      <Project>{16a3fa6c-9796-4072-b4fa-ca7dc33bac00}</Project>
+      <Name>EwsFrame</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

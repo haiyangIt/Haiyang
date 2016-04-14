@@ -192,6 +192,7 @@ namespace LogImpl
         private const int ExpireSecond = 120 * 1000;
         private void Run()
         {
+            // todo if process stop, this must be disposed. So we can use sleep.
             Thread.Sleep(120 * 1000);
             lock (SyncLockObj)
             {
