@@ -9,7 +9,18 @@ namespace EwsFrame.Manager.IF
 {
     public interface IJobManager : IManager
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="job"></param>
+        /// <exception cref="">if job end, will throw exception.</exception>
         void AddJob(IArcJob job);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="jobId"></param>
+        /// <returns>if not find, return null.</returns>
         IArcJob GetJob(Guid jobId);
     }
 

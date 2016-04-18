@@ -143,6 +143,16 @@ namespace EwsFrame.ServiceBus
             return SubscriptionClient.CreateFromConnectionString(connectionString, topicName, filter);
         }
 
+        public static void DeleteSubscriptionClientWithFilter(string topicName, string filter)
+        {
+            string connectionString = CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.ConnectionString");
+            var namespaceManager = NamespaceManager.CreateFromConnectionString(connectionString);
+            if (namespaceManager.SubscriptionExists(topicName, filter))
+            {
+                namespaceManager.DeleteSubscription(topicName, filter);
+            }
+        }
+
         public static void CreateSubscriptionWithFilter(string topicName, string filter)
         {
             string connectionString =

@@ -116,7 +116,8 @@
     <Compile Include="Manager\IF\ISubScriptionManager.cs" />
     <Compile Include="Manager\IF\IThreadManager.cs" />
     <Compile Include="Manager\Impl\ArcJobBase.cs" />
-    <Compile Include="Manager\Impl\JobFactory.cs" />
+    <Compile Include="Manager\Impl\JobFactoryClient.cs" />
+    <Compile Include="Manager\Impl\JobFactoryServer.cs" />
     <Compile Include="Manager\Impl\JobManager.cs" />
     <Compile Include="Manager\Impl\ManagerBase.cs" />
     <Compile Include="Manager\Data\ProgressArgs.cs" />

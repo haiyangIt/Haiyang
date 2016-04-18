@@ -39,7 +39,7 @@ namespace WorkerRoleWithSBQueue
                         switch (messageType)
                         {
                             case MessageType.Backup:
-                                JobFactory.Instance.JobManager.AddJob(new BackupJob(receivedMessage.Properties));
+                                JobFactoryServer.Instance.JobManager.AddJob(new BackupJob(receivedMessage.Properties)); // todo if job manager end.
                                 break;
                             case MessageType.Cancel:
                                 break;
@@ -51,6 +51,7 @@ namespace WorkerRoleWithSBQueue
                     }
                     catch
                     {
+                        // todo log.
                         receivedMessage.Abandon();
                         // Handle any message processing specific exceptions here
                     }
@@ -65,9 +66,9 @@ namespace WorkerRoleWithSBQueue
             //ServicePointManager.DefaultConnectionLimit = 12;
 
             Client = AzureServiceBusHelper.GetQueueClient(CloudConfigurationManager.GetSetting("ServiceBusQueueName"));
-            JobFactory.Instance.ThreadManager.Start();
-            JobFactory.Instance.JobManager.Start();
-            JobFactory.Instance.ProgressManager.Start();
+            JobFactoryServer.Instance.ThreadManager.Start();
+            JobFactoryServer.Instance.JobManager.Start();
+            JobFactoryServer.Instance.ProgressManager.Start();
 
             OrganizationProgressManager.Instance.Start();
 
@@ -81,9 +82,9 @@ namespace WorkerRoleWithSBQueue
 
             OrganizationProgressManager.Instance.End();
 
-            JobFactory.Instance.ProgressManager.End();
-            JobFactory.Instance.JobManager.End();
-            JobFactory.Instance.ThreadManager.End();
+            JobFactoryServer.Instance.ProgressManager.End();
+            JobFactoryServer.Instance.JobManager.End();
+            JobFactoryServer.Instance.ThreadManager.End();
 
             CompletedEvent.Set();
             

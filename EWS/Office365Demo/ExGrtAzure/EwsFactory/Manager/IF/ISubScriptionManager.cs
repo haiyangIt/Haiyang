@@ -8,7 +8,9 @@ namespace EwsFrame.Manager.IF
 {
     public interface ISubScriptionManager : IManager
     {
-        void AddCallback(string subscriptionFilter, Action<IProgressInfo> callback);
-        void RemoveCallback(string subscriptionFilter);
+        void AddListener(string subscriptionFilter, Action<IProgressInfo> callback);
+        void RemoveListener(string subscriptionFilter);
+
+        void DisposeSubScript(string subscriptionFilter);
     }
 }

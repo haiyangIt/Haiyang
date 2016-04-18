@@ -15,9 +15,13 @@ namespace EwsFrame.Manager.Impl
         Dictionary<string, IThreadObj> _allThread = new Dictionary<string, IThreadObj>();
         // todo public int MaxThreadCount = 10;
 
+            public string ManagerName { get
+            {
+                return "ThreadManager";
+            } }
+
         public void Start()
         {
-
         }
 
         public void End()
@@ -52,7 +56,7 @@ namespace EwsFrame.Manager.Impl
             // now create new as a temp solution.
             lock (_allThread)
             {
-                var obj = JobFactory.Instance.NewThreadObj(threadName);
+                var obj = JobFactoryServer.Instance.NewThreadObj(threadName);
                 _allThread.Add(obj.ThreadName, obj);
                 return obj;
             }
@@ -61,7 +65,7 @@ namespace EwsFrame.Manager.Impl
         {
             lock (_allThread)
             {
-                var obj = JobFactory.Instance.NewThreadObj(threadName);
+                var obj = JobFactoryServer.Instance.NewThreadObj(threadName);
                 _allThread.Add(obj.ThreadName, obj);
                 return obj;
             }
@@ -110,7 +114,7 @@ namespace EwsFrame.Manager.Impl
                 _threadId = threadName;
 
         }
-        public void CancelJob()
+        public void CancelThread()
         {
             DoJob(_job, Operator.Cancel);
         }

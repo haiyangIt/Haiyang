@@ -12,14 +12,14 @@ namespace EwsFrame.Manager.Impl
     /// Please note: The factory instance and all manager instance must be used in work role not web role.
     /// work role and web role communicate each other by service bus, please use classes in EwsFrame.ServiceBus namespace.
     /// </summary>
-    public class JobFactory
+    public class JobFactoryServer
     {
-        private JobFactory() { }
+        private JobFactoryServer() { }
 
         /// <summary>
         /// 
         /// </summary>
-        public static JobFactory Instance = new JobFactory();
+        public static JobFactoryServer Instance = new JobFactoryServer();
 
         private static IJobManager _jobManager;
         public IJobManager JobManager

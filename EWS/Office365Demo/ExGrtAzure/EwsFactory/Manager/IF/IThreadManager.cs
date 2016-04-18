@@ -19,7 +19,7 @@ namespace EwsFrame.Manager.IF
         void Run(IArcJob job);
         ArcThreadState State { get; }
         string ThreadName { get; }
-        void CancelJob();
+        void CancelThread();
         void EndThread(AutoResetEvent waitingHandle);
     }
 

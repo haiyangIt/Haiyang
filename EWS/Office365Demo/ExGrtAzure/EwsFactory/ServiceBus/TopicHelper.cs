@@ -11,8 +11,6 @@ namespace EwsFrame.ServiceBus
 {
     public class TopicHelper
     {
-        
-
         public TopicHelper(BrokeredMessage message)
         {
             _message = message;
@@ -36,7 +34,7 @@ namespace EwsFrame.ServiceBus
                     {
                         _message = new BrokeredMessage();
                         _message.Properties["JobId"] = _progressInfo.Job.JobId.ToString();
-                        _message.Properties["ProgressInfo"] = JobFactory.Convert(_progressInfo);
+                        _message.Properties["ProgressInfo"] = JobFactoryServer.Convert(_progressInfo);
                     }
                 }
                 return _message;
@@ -54,11 +52,16 @@ namespace EwsFrame.ServiceBus
                         throw new InvalidProgramException();
                     else
                     {
-                        _progressInfo = JobFactory.Convert(_message.Properties["ProgressInfo"].ToString());
+                        _progressInfo = JobFactoryServer.Convert(_message.Properties["ProgressInfo"].ToString());
                     }
                 }
                 return _progressInfo;
             }
+        }
+
+        public static string GetFilterByJobId(string jobId)
+        {
+            return string.Format("JobId == {0}", jobId);
         }
     }
 }

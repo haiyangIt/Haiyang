@@ -39,7 +39,7 @@ namespace EwsFrame.Manager.Impl
 
         public string GetLatestProgress()
         {
-            return JobFactory.Convert(_progressCache.Last());
+            return JobFactoryServer.Convert(_progressCache.Last());
         }
 
         protected override void MethodWhenOtherEventTriggered(int eventIndex)
@@ -108,7 +108,7 @@ namespace EwsFrame.Manager.Impl
                 {
                     return string.Empty;
                 }
-                return JobFactory.Convert(result.Last());
+                return JobFactoryServer.Convert(result.Last());
             }
         }
 
@@ -143,7 +143,7 @@ namespace EwsFrame.Manager.Impl
 
         protected override void BeforeStart()
         {
-            JobFactory.Instance.ProgressManager.NewProgressEvent += ProgressManagerNewProgressEvent;
+            JobFactoryServer.Instance.ProgressManager.NewProgressEvent += ProgressManagerNewProgressEvent;
         }
 
         private void ProgressManagerNewProgressEvent(object sender, ProgressArgs e)

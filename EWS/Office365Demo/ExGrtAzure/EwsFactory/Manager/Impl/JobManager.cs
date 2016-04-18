@@ -12,6 +12,12 @@ namespace EwsFrame.Manager.Impl
 {
     internal class JobManager : ManagerBase, IJobManager
     {
+        protected override void BeforeStart()
+        {
+            // todo Get un-completed job from db.
+            base.BeforeStart();
+        }
+
         public void AddJob(IArcJob job)
         {
             CheckOtherEventCanExecute();
@@ -59,7 +65,7 @@ namespace EwsFrame.Manager.Impl
                 if (job != null)
                 {
                     var threadName = string.Format("thread-{0}-{1}", job.JobType, job.JobId);
-                    var threadObj = JobFactory.Instance.ThreadManager.NewThread(threadName);
+                    var threadObj = JobFactoryServer.Instance.ThreadManager.NewThread(threadName);
                     if (threadObj == null)
                     {
                         arcJobQueue.EnqueueLast(job);

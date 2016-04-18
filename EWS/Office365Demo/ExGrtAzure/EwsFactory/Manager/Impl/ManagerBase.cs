@@ -112,7 +112,7 @@ namespace EwsFrame.Manager.Impl
         public void Start()
         {
             BeforeStart();
-            var internalRunning = JobFactory.Instance.ThreadManager.StartThread(ManagerName);
+            var internalRunning = JobFactoryServer.Instance.ThreadManager.StartThread(ManagerName);
             var jobManagerInternalJob = new ArcSystemJob(InternalThread, ManagerName + "Job");
             internalRunning.Run(jobManagerInternalJob);
             AfterStart();

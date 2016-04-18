@@ -75,7 +75,7 @@ namespace WorkerRoleWithSBQueue
         private void Service_ProgressChanged(object sender, DataProtectInterface.Event.CatalogProgressArgs e)
         {
             var progressInfo = new BackupProgressInfo(e, this);
-            JobFactory.Instance.ProgressManager.AddProgress(progressInfo);
+            JobFactoryServer.Instance.ProgressManager.AddProgress(progressInfo);
         }
     }
 
