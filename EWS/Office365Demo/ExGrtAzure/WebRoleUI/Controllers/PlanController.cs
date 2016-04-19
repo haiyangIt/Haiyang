@@ -42,5 +42,10 @@ namespace WebRoleUI.Controllers
         {
             return Json(new { });
         }
+
+        public JsonResult TestPlan()
+        {
+            return Json(new { });
+        }
     }
 }

@@ -25,13 +25,16 @@ textarea {
 
 /*following is the main index css*/
 .main-index {
-
 }
 
-.main-index .jumbotron h2 + p{
-    height: 120px;
-}
+    .main-index .jumbotron h2 {
+        height: 70px;
+    }
 
-.main-index .jumbotron p > input {
-    width: 232px;
-}
+        .main-index .jumbotron h2 + p {
+            height: 180px;
+        }
+
+    .main-index .jumbotron p > input {
+        width: 232px;
+    }

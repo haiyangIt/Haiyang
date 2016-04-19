@@ -1,5 +1,6 @@
 ﻿using DataProtectInterface;
 using EwsDataInterface;
+using EwsFrame.Util.Setting;
 using EwsServiceInterface;
 using Microsoft.WindowsAzure.ServiceRuntime;
 using Microsoft.WindowsAzure.Storage;
@@ -106,21 +107,10 @@ namespace EwsFrame
 
         public static CloudStorageAccount GetStorageAccount()
         {
-            if (!IsRunningOnAzure())
-                return CloudStorageAccount.Parse(
-        ConfigurationManager.ConnectionStrings["StorageConnectionString"].ConnectionString);
-            else
-            {
-                return CloudStorageAccount.Parse(
-        ConfigurationManager.ConnectionStrings["StorageConnectionStringRunning"].ConnectionString);
-            }
+            return CloudConfig.Instance.StorageAccount;
         }
 
-        public static bool IsRunningOnAzure()
-        {
-            var isDebugAzure = ConfigurationManager.AppSettings["ForDebugAzure"];
-            return !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME")) || isDebugAzure == "1";
-        }
+        
     }
 
 }

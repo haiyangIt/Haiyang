@@ -98,11 +98,11 @@
     <Compile Include="Cache\MailboxCacheManager.cs" />
     <Compile Include="Cache\OrganizationCacheManager.cs" />
     <Compile Include="CatalogFactory.cs" />
-    <Compile Include="Config.cs" />
+    <Compile Include="Util\Setting\Config.cs" />
     <Compile Include="EF\CustomApplicationDbConfiguration.cs" />
     <Compile Include="FactoryBase.cs" />
     <Compile Include="LogFactory.cs" />
-    <Compile Include="MailConfig.Designer.cs">
+    <Compile Include="Util\Setting\MailConfig.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>MailConfig.resx</DependentUpon>
@@ -139,6 +139,7 @@
     <Compile Include="Util\Deque.cs" />
     <Compile Include="Util\PlanUtil.cs" />
     <Compile Include="Util\SendMailHelper.cs" />
+    <Compile Include="Util\Setting\CloudConfig.cs" />
     <Compile Include="Util\TreeNode.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -160,7 +161,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="MailConfig.resx">
+    <EmbeddedResource Include="Util\Setting\MailConfig.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>MailConfig.Designer.cs</LastGenOutput>
     </EmbeddedResource>

@@ -5,6 +5,7 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using System;
 using WebRoleUI.Models.Setting;
+using EwsFrame.Util.Setting;
 
 namespace WebRoleUI.Models
 {
@@ -25,7 +26,7 @@ namespace WebRoleUI.Models
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public ApplicationDbContext()
-            : base("DefaultConnection", throwIfV1Schema: false)
+            : base(CloudConfig.Instance.DbDefaultConnectString, throwIfV1Schema: false)
         {
             Database.SetInitializer<ApplicationDbContext>(new CustomerApplicationDbInitializer());
         }

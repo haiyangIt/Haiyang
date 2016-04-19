@@ -1,5 +1,6 @@
 ﻿using EwsFrame.Manager.IF;
 using EwsFrame.ServiceBus;
+using EwsFrame.Util.Setting;
 using Microsoft.Azure;
 using Microsoft.ServiceBus.Messaging;
 using System;
@@ -206,7 +207,7 @@ namespace EwsFrame.Manager.Impl
 
             private void CreateClient()
             {
-                string topicName = CloudConfigurationManager.GetSetting("ServiceBusTopicName");
+                string topicName = CloudConfig.Instance.ServiceBusTopicName;
                 SubClient = AzureServiceBusHelper.GetSubscriptionClientWithFilter(topicName, SubscriptFilterInfo);
 
                 OnMessageOptions options = new OnMessageOptions();
@@ -245,7 +246,7 @@ namespace EwsFrame.Manager.Impl
 
             internal void ReleaseSubscription()
             {
-                string topicName = CloudConfigurationManager.GetSetting("ServiceBusTopicName");
+                string topicName = CloudConfig.Instance.ServiceBusTopicName;
                 AzureServiceBusHelper.DeleteSubscriptionClientWithFilter(topicName, SubscriptFilterInfo);
             }
         }

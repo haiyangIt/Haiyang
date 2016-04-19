@@ -1,4 +1,5 @@
-﻿using LogInterface;
+﻿using EwsFrame.Util.Setting;
+using LogInterface;
 using Microsoft.WindowsAzure.ServiceRuntime;
 using System;
 using System.Collections.Generic;
@@ -63,7 +64,7 @@ namespace EwsFrame
 
         private void InitLog()
         {
-            if (!IsRunningOnAzure())
+            if (!CloudConfig.IsRunningOnAzure())
             {
                 _logInstance = (ILog)(CreateTypeWithName<ILog>(LogImplAssembly, "LogImpl.DefaultLog"));
                 _ewsTraceLogInstance = (ILog)(CreateTypeWithName<ILog>(LogImplAssembly, "LogImpl.DefaultEwsTraceLog"));

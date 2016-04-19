@@ -93,6 +93,14 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\ParseItemFromEWSExportFunction\FastTransferUtil\FastTransferUtil.csproj">
+      <Project>{724571a8-bf45-4efe-ab1e-bb065201513b}</Project>
+      <Name>FastTransferUtil</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DataProtectImpl\DataProtectImpl.csproj">
+      <Project>{6e5dda9f-569b-46c9-9920-ab0166517421}</Project>
+      <Name>DataProtectImpl</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DataProtectInterface\DataProtectInterface.csproj">
       <Project>{f8783799-5d60-441f-a3b6-ffdaae476a12}</Project>
       <Name>DataProtectInterface</Name>
@@ -104,6 +112,26 @@
     <ProjectReference Include="..\EwsFactory\EwsFrame.csproj">
       <Project>{16a3fa6c-9796-4072-b4fa-ca7dc33bac00}</Project>
       <Name>EwsFrame</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\EwsServiceInterface\EwsServiceInterface.csproj">
+      <Project>{ec82b108-4a69-4517-966b-328cf90ed3b5}</Project>
+      <Name>EwsServiceInterface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\EwsService\EwsService.csproj">
+      <Project>{7737cc80-0266-4ed8-b265-628a9b0dfbcb}</Project>
+      <Name>EwsService</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\LogImpl\LogImpl.csproj">
+      <Project>{37af831f-ce50-4c6c-b211-e86b6e3138e8}</Project>
+      <Name>LogImpl</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\LogInterface\LogInterface.csproj">
+      <Project>{ed66d5c0-8d87-4dd6-9e6c-7d21b5bb8585}</Project>
+      <Name>LogInterface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SqlDbImpl\SqlDbImpl.csproj">
+      <Project>{f2a93db3-b506-49c0-a576-70836dde9e86}</Project>
+      <Name>SqlDbImpl</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

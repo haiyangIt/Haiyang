@@ -10,6 +10,34 @@
     </Sites>
     <ConfigurationSettings>
       <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" />
+      <Setting name="Microsoft.ServiceBus.ConnectionString" />
+      <Setting name="ForDebugAzure" />
+      <!--Subscription Name for Azure-->
+      <Setting name="SubscriptionNameForScheduler" />
+      <!--Service Bus Config-->
+      <Setting name="ServiceBusNameSpace"/>
+      <!--Queue-->
+      <!--minute in value-->
+      <Setting name="ServiceBusQueueTTL" />
+      <!--MB in value-->
+      <Setting name="ServiceBusQueueMaxSize" />
+      <Setting name="ServiceBusQueueName" />
+      <!--Topic-->
+      <!--minute in value-->
+      <Setting name="ServiceBusTopicTTL" />
+      <!--MB in value-->
+      <Setting name="ServiceBusTopicMaxSize"/>
+      <Setting name="ServiceBusTopicName"/>
+
+      <!--Storage Connection String-->
+      <Setting name="StorageConnectionString"  />
+      <Setting name="StorageConnectionStringRunning" />
+      <!--Db Connection String-->
+      <Setting name="DefaultConnection" />
+      <Setting name="Organization"  />
+
+      <!--following is only in local-->
+      <Setting name="LogPath" />
     </ConfigurationSettings>
     <Endpoints>
       <InputEndpoint name="Endpoint1" protocol="http" port="80" />
@@ -19,6 +47,33 @@
     <ConfigurationSettings>
       <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" />
       <Setting name="Microsoft.ServiceBus.ConnectionString" />
+      <Setting name="ForDebugAzure" />
+      <!--Subscription Name for Azure-->
+      <Setting name="SubscriptionNameForScheduler" />
+      <!--Service Bus Config-->
+      <Setting name="ServiceBusNameSpace"/>
+      <!--Queue-->
+      <!--minute in value-->
+      <Setting name="ServiceBusQueueTTL" />
+      <!--MB in value-->
+      <Setting name="ServiceBusQueueMaxSize" />
+      <Setting name="ServiceBusQueueName" />
+      <!--Topic-->
+      <!--minute in value-->
+      <Setting name="ServiceBusTopicTTL" />
+      <!--MB in value-->
+      <Setting name="ServiceBusTopicMaxSize"/>
+      <Setting name="ServiceBusTopicName"/>
+
+      <!--Storage Connection String-->
+      <Setting name="StorageConnectionString"  />
+      <Setting name="StorageConnectionStringRunning" />
+      <!--Db Connection String-->
+      <Setting name="DefaultConnection" />
+      <Setting name="Organization"  />
+
+      <!--following is only in local-->
+      <Setting name="LogPath" />
     </ConfigurationSettings>
   </WorkerRole>
 </ServiceDefinition>

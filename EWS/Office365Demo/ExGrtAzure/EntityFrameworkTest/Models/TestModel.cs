@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EwsFrame.Util.Setting;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Configuration;
@@ -27,14 +28,9 @@ namespace EntityFrameworkTest.Models
             Database.Initialize(true);
         }
 
-        private static string GetConnectString(string dbName)
+        public static string GetConnectString(string dbName)
         {
-            SqlConnectionStringBuilder sqlBuilder = new SqlConnectionStringBuilder();
-            sqlBuilder.DataSource = ConfigurationManager.AppSettings["DataSource"];
-            sqlBuilder.UserID = ConfigurationManager.AppSettings["UserId"];
-            sqlBuilder.Password = ConfigurationManager.AppSettings["Password"];
-            sqlBuilder.PersistSecurityInfo = Convert.ToBoolean(ConfigurationManager.AppSettings["PersistSecurityInfo"]);
-            sqlBuilder.IntegratedSecurity = false;
+            SqlConnectionStringBuilder sqlBuilder = new SqlConnectionStringBuilder(CloudConfig.Instance.DbConnectString);
             sqlBuilder.InitialCatalog = dbName;
             return sqlBuilder.ToString();
         }

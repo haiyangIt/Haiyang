@@ -1,4 +1,5 @@
 ﻿using EwsFrame;
+using EwsFrame.Util.Setting;
 using LoginTest.Utils;
 using System;
 using System.Collections.Generic;
@@ -20,7 +21,7 @@ namespace LoginTest.Controllers
 
         public JsonResult TestIsInAzure()
         {
-            if (FactoryBase.IsRunningOnAzure())
+            if (CloudConfig.IsRunningOnAzure())
                 return Json("");
             else
                 throw new InvalidOperationException("the method FactoryBase.IsRunningOnAzure may be wrong.");

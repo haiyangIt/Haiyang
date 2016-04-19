@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using EwsFrame.Util.Setting;
 
 namespace WebRoleUI.Controllers
 {
@@ -20,7 +21,7 @@ namespace WebRoleUI.Controllers
 
         public JsonResult TestIsInAzure()
         {
-            if (FactoryBase.IsRunningOnAzure())
+            if (CloudConfig.IsRunningOnAzure())
                 return Json("");
             else
                 throw new InvalidOperationException("the method FactoryBase.IsRunningOnAzure may be wrong.");

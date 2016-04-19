@@ -17,6 +17,7 @@ using DataProtectInterface.Plan;
 using Microsoft.ServiceBus;
 using EwsFrame.Util;
 using EwsFrame.ServiceBus;
+using EwsFrame.Util.Setting;
 
 namespace WebRoleUI.Utils
 {
@@ -29,7 +30,7 @@ namespace WebRoleUI.Utils
 
         private static CertificateCloudCredentials GetCertificate(out string subscriptionId)
         {
-            var subscriptionName = ConfigurationManager.AppSettings["SubscriptionNameForScheduler"];
+            var subscriptionName = CloudConfig.Instance.SubscriptionNameForAzure;
             subscriptionId = string.Empty;
             return CertificateCloudCredentialsFactory.FromPublishSettingsFile(subscriptionName, out subscriptionId);
         }
@@ -109,8 +110,7 @@ namespace WebRoleUI.Utils
 
         private static JobAction CreateBackupJobAction(PlanModel planModel, PlanAzureInfo planAzureInfo)
         {
-            string connectionString =
-                CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.ConnectionString");
+            string connectionString = CloudConfig.Instance.ServiceBusConnectionString;
             ServiceBusConnectionStringBuilder parser = new ServiceBusConnectionStringBuilder(connectionString);
 
             var jobAction = new JobAction(JobActionType.ServiceBusQueue);
@@ -119,8 +119,8 @@ namespace WebRoleUI.Utils
             serviceBusQueueMessage.Authentication.SasKeyName = parser.SharedAccessKeyName;
             serviceBusQueueMessage.Authentication.SasKey = parser.SharedAccessKey;
             serviceBusQueueMessage.TransportType = JobServiceBusTransportType.AMQP;
-            serviceBusQueueMessage.Namespace = CloudConfigurationManager.GetSetting("ServiceBusNameSpace");
-            serviceBusQueueMessage.QueueName = CloudConfigurationManager.GetSetting("ServiceBusQueueName");
+            serviceBusQueueMessage.Namespace = CloudConfig.Instance.SubscriptionNameForAzure;
+            serviceBusQueueMessage.QueueName = CloudConfig.Instance.ServiceBusQueueName;
             serviceBusQueueMessage.Message = planModel.Name;
             var keyValue = new Dictionary<string, string>();
             keyValue["planBaseInfo"] = planModel.ToString();
@@ -145,7 +145,7 @@ namespace WebRoleUI.Utils
             {
                 Description = "Office365 Protection Scheduler Service",
                 GeoRegion = "East Asia",
-                Label = "Office365ProtectionSchedulerServiceL"
+                Label = cloudServiceName + "Label"
             };
 
             var cloudServiceResponse = cloudServiceMgmCli.CloudServices.Create(cloudServiceName, cloudServiceCreateParameters);

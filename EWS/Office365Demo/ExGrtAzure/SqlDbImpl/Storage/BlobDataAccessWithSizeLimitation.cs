@@ -1,4 +1,5 @@
 ﻿using EwsFrame;
+using EwsFrame.Util.Setting;
 using Microsoft.WindowsAzure.ServiceRuntime;
 using Microsoft.WindowsAzure.Storage.Blob;
 using System;
@@ -19,7 +20,7 @@ namespace SqlDbImpl.Storage
             {
                 if (_blobMaxSize == 0)
                 {
-                    if(!FactoryBase.IsRunningOnAzure())
+                    if(!CloudConfig.IsRunningOnAzure())
                     {
                         _blobMaxSize = 2 * 1024 * 1024;
                     }

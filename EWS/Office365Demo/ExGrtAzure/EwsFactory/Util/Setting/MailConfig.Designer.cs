@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace EwsFrame {
+namespace EwsFrame.Util.Setting {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace EwsFrame {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("EwsFrame.MailConfig", typeof(MailConfig).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("EwsFrame.Util.Setting.MailConfig", typeof(MailConfig).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

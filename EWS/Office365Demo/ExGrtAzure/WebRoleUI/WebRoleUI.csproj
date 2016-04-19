@@ -326,6 +326,11 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201604180945100_InitCreate.cs" />
+    <Compile Include="Migrations\201604180945100_InitCreate.Designer.cs">
+      <DependentUpon>201604180945100_InitCreate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\BackupModel.cs" />
     <Compile Include="Models\IdentityModels.cs" />
@@ -619,6 +624,11 @@
       <Name>SqlDbImpl</Name>
       <Private>True</Private>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\201604180945100_InitCreate.resx">
+      <DependentUpon>201604180945100_InitCreate.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

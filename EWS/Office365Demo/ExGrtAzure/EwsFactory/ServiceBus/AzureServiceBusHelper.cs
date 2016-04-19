@@ -1,6 +1,7 @@
 ﻿using DataProtectInterface.Event;
 using EwsFrame.Manager.IF;
 using EwsFrame.Manager.Impl;
+using EwsFrame.Util.Setting;
 using Microsoft.Azure;
 using Microsoft.ServiceBus;
 using Microsoft.ServiceBus.Messaging;
@@ -31,7 +32,7 @@ namespace EwsFrame.ServiceBus
             //     CurrentRunningJob Unique Id( for this id can cancel the job)
             //     Progress Information
             //     Plan Name
-            string topicName = CloudConfigurationManager.GetSetting("ServiceBusTopicName");
+            string topicName = CloudConfig.Instance.ServiceBusTopicName;
             var topicClient = GetTopicClient(topicName);
             TopicHelper helper = new TopicHelper(progress);
             BrokeredMessage message = helper.Message;
@@ -54,8 +55,7 @@ namespace EwsFrame.ServiceBus
 
         private static void SendMessageToQueue(string queueName, BrokeredMessage message)
         {
-            string connectionString =
-    CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.ConnectionString");
+            string connectionString = CloudConfig.Instance.ServiceBusConnectionString;
 
             CreateQueue(queueName);
 
@@ -69,8 +69,7 @@ namespace EwsFrame.ServiceBus
         public static void CreateQueue(string queueName)
         {
             // Create a new queue with custom settings.
-            string connectionString =
-                CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.ConnectionString");
+            string connectionString = CloudConfig.Instance.ServiceBusConnectionString;
 
             var namespaceManager =
                 NamespaceManager.CreateFromConnectionString(connectionString);
@@ -79,15 +78,15 @@ namespace EwsFrame.ServiceBus
             {
                 // Configure queue settings.
                 QueueDescription qd = new QueueDescription(queueName);
-                qd.MaxSizeInMegabytes = Convert.ToInt32(CloudConfigurationManager.GetSetting("ServiceBusQueueMaxSize"));
-                var minute = Convert.ToInt32(CloudConfigurationManager.GetSetting("ServiceBusQueueTTL"));
+                qd.MaxSizeInMegabytes = CloudConfig.Instance.ServiceBusQueueMaxSize;
+                var minute = CloudConfig.Instance.ServiceBusQueueTTL;
                 qd.DefaultMessageTimeToLive = new TimeSpan(0, minute, 0);
                 namespaceManager.CreateQueue(qd);
             }
         }
         public static QueueClient GetQueueClient(string queueName)
         {
-            string connectionString = CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.ConnectionString");
+            string connectionString = CloudConfig.Instance.ServiceBusConnectionString;
             var namespaceManager = NamespaceManager.CreateFromConnectionString(connectionString);
 
             CreateQueue(queueName);
@@ -99,8 +98,7 @@ namespace EwsFrame.ServiceBus
         public static void CreateTopic(string topicName)
         {
             // Create a new queue with custom settings.
-            string connectionString =
-                CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.ConnectionString");
+            string connectionString = CloudConfig.Instance.ServiceBusConnectionString;
 
             var namespaceManager =
                 NamespaceManager.CreateFromConnectionString(connectionString);
@@ -109,16 +107,16 @@ namespace EwsFrame.ServiceBus
             {
                 // Configure queue settings.
                 TopicDescription qd = new TopicDescription(topicName);
-                qd.MaxSizeInMegabytes = Convert.ToInt32(CloudConfigurationManager.GetSetting("ServiceBusTopicMaxSize"));
-                var minute = Convert.ToInt32(CloudConfigurationManager.GetSetting("ServiceBusTopicTTL"));
+                qd.MaxSizeInMegabytes = CloudConfig.Instance.ServiceBusTopicMaxSize;
+                var minute = CloudConfig.Instance.ServiceBusTopicTTL;
                 qd.DefaultMessageTimeToLive = new TimeSpan(0, minute, 0);
                 namespaceManager.CreateTopic(qd);
             }
         }
-
+        
         public static TopicClient GetTopicClient(string topicName)
         {
-            string connectionString = CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.ConnectionString");
+            string connectionString = CloudConfig.Instance.ServiceBusConnectionString;
             var namespaceManager = NamespaceManager.CreateFromConnectionString(connectionString);
 
             CreateTopic(topicName);
@@ -129,7 +127,7 @@ namespace EwsFrame.ServiceBus
 
         public static SubscriptionClient GetSubscriptionClientForEachJob(string topicName, string jobId)
         {
-            string connectionString = CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.ConnectionString");
+            string connectionString = CloudConfig.Instance.ServiceBusConnectionString;
             var namespaceManager = NamespaceManager.CreateFromConnectionString(connectionString);
             CreateSubscriptionWithJobId(topicName, jobId);
             return SubscriptionClient.CreateFromConnectionString(connectionString, topicName, jobId);
@@ -137,7 +135,7 @@ namespace EwsFrame.ServiceBus
 
         public static SubscriptionClient GetSubscriptionClientWithFilter(string topicName, string filter)
         {
-            string connectionString = CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.ConnectionString");
+            string connectionString = CloudConfig.Instance.ServiceBusConnectionString;
             var namespaceManager = NamespaceManager.CreateFromConnectionString(connectionString);
             CreateSubscriptionWithFilter(topicName, filter);
             return SubscriptionClient.CreateFromConnectionString(connectionString, topicName, filter);
@@ -145,7 +143,7 @@ namespace EwsFrame.ServiceBus
 
         public static void DeleteSubscriptionClientWithFilter(string topicName, string filter)
         {
-            string connectionString = CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.ConnectionString");
+            string connectionString = CloudConfig.Instance.ServiceBusConnectionString;
             var namespaceManager = NamespaceManager.CreateFromConnectionString(connectionString);
             if (namespaceManager.SubscriptionExists(topicName, filter))
             {
@@ -155,8 +153,7 @@ namespace EwsFrame.ServiceBus
 
         public static void CreateSubscriptionWithFilter(string topicName, string filter)
         {
-            string connectionString =
-    CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.ConnectionString");
+            string connectionString = CloudConfig.Instance.ServiceBusConnectionString;
 
             var namespaceManager =
                 NamespaceManager.CreateFromConnectionString(connectionString);
@@ -175,8 +172,7 @@ namespace EwsFrame.ServiceBus
 
         public static void CreateSubscriptionWithJobId(string topicName, string jobId)
         {
-            string connectionString =
-    CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.ConnectionString");
+            string connectionString = CloudConfig.Instance.ServiceBusConnectionString;
 
             var namespaceManager =
                 NamespaceManager.CreateFromConnectionString(connectionString);

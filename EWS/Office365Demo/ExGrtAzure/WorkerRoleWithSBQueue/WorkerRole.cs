@@ -6,6 +6,7 @@ using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.ServiceRuntime;
 using EwsFrame.ServiceBus;
 using EwsFrame.Manager.Impl;
+using EwsFrame.Util.Setting;
 
 namespace WorkerRoleWithSBQueue
 {
@@ -65,7 +66,7 @@ namespace WorkerRoleWithSBQueue
             // Set the maximum number of concurrent connections 
             //ServicePointManager.DefaultConnectionLimit = 12;
 
-            Client = AzureServiceBusHelper.GetQueueClient(CloudConfigurationManager.GetSetting("ServiceBusQueueName"));
+            Client = AzureServiceBusHelper.GetQueueClient(CloudConfig.Instance.ServiceBusQueueName);
             JobFactoryServer.Instance.ThreadManager.Start();
             JobFactoryServer.Instance.JobManager.Start();
             JobFactoryServer.Instance.ProgressManager.Start();

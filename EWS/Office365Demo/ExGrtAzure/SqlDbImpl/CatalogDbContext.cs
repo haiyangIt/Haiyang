@@ -1,4 +1,5 @@
 ﻿using EwsFrame.EF;
+using EwsFrame.Util.Setting;
 using SqlDbImpl.Model;
 using System;
 using System.Collections.Generic;
@@ -22,7 +23,7 @@ namespace SqlDbImpl
     [DbConfigurationType(typeof(CustomApplicationDbConfiguration))]
     public class CatalogDbContext : DbContext
     {
-        public CatalogDbContext() : base("name=Organization")
+        public CatalogDbContext() : base(CloudConfig.Instance.DbConnectString)
         {
             Database.SetInitializer<CatalogDbContext>(new CustomerCatalogDbInitializer());
         }
@@ -48,8 +49,9 @@ namespace SqlDbImpl
 
         public static string GetConnectString(string organizationName)
         {
-            SqlConnectionStringBuilder sqlBuilder = new SqlConnectionStringBuilder(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString);
+            SqlConnectionStringBuilder sqlBuilder = new SqlConnectionStringBuilder(CloudConfig.Instance.DbConnectString);
             sqlBuilder.InitialCatalog = organizationName;
+            
             return sqlBuilder.ToString();
         }
 

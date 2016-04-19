@@ -1,4 +1,5 @@
-﻿using LogInterface;
+﻿using EwsFrame.Util.Setting;
+using LogInterface;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -19,7 +20,7 @@ namespace LogImpl
             {
                 if (string.IsNullOrEmpty(_logPath))
                 {
-                    string logFolder = ConfigurationManager.AppSettings["LogPath"];
+                    string logFolder = CloudConfig.Instance.LogPath;
                     if (string.IsNullOrEmpty(logFolder))
                     {
                         logFolder = AppDomain.CurrentDomain.BaseDirectory;

@@ -141,6 +141,10 @@
     <Compile Include="Migrations\201601060503412_InitDatabase.Designer.cs">
       <DependentUpon>201601060503412_InitDatabase.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201604180922010_AddPlanModel.cs" />
+    <Compile Include="Migrations\201604180922010_AddPlanModel.Designer.cs">
+      <DependentUpon>201604180922010_AddPlanModel.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Model\CatalogInfoModel.cs" />
     <Compile Include="Model\FolderModel.cs" />
@@ -211,6 +215,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\201601060503412_InitDatabase.resx">
       <DependentUpon>201601060503412_InitDatabase.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201604180922010_AddPlanModel.resx">
+      <DependentUpon>201604180922010_AddPlanModel.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
