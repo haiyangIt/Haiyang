@@ -1,8 +1,10 @@
-﻿using EwsFrame.Util.Setting;
+﻿using EwsFrame.Util;
+using EwsFrame.Util.Setting;
 using LogInterface;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -11,73 +13,66 @@ using System.Threading.Tasks;
 
 namespace LogImpl
 {
-    public class DefaultLog : ILog
+    public class DefaultLog : ILog , IDisposable
     {
-        private string _logPath;
-        protected virtual string LogPath
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_logPath))
-                {
-                    string logFolder = CloudConfig.Instance.LogPath;
-                    if (string.IsNullOrEmpty(logFolder))
-                    {
-                        logFolder = AppDomain.CurrentDomain.BaseDirectory;
-                        logFolder = Path.Combine(logFolder, "Log");
-                    }
-                    if (!Directory.Exists(logFolder))
-                    {
-                        Directory.CreateDirectory(logFolder);
-                    }
-                    var logPath = Path.Combine(logFolder, LogFileName);
-                    _logPath = logPath;
-
-                }
-                return _logPath;
-            }
-        }
-
-        protected virtual string LogFileName
-        {
-            get
-            {
-                return string.Format("{0}.txt", DateTime.Now.ToString("yyyyMMdd"));
-            }
-        }
-
-
         public DefaultLog()
         {
 
         }
 
+        private ReaderWriterLockSlim LogStreamsProviderLock = new ReaderWriterLockSlim();
 
-        private readonly Guid _streamKey = Guid.NewGuid();
+        private Dictionary<Guid, ILogStreamProvider> LogStreamsProvider = new Dictionary<Guid, ILogStreamProvider>(2);
 
-        private Stream LogStream
+        private void Check()
         {
-            get
+            using (LogStreamsProviderLock.Read())
             {
-                var val = LogThreadManager.Instance.GetStream(_streamKey);
-                if (val == null)
+                if (LogStreamsProvider.Count == 0)
                 {
-                    val = new FileStream(LogPath, FileMode.Append, FileAccess.Write, FileShare.Read);
-                    LogThreadManager.Instance.AddStream(val, _streamKey);
+                    throw new NotSupportedException();
                 }
-                val.Flush();
-                return val;
+            }
+        }
+
+        private void Write(string logDetail)
+        {
+            using (LogStreamsProviderLock.Read())
+            {
+                foreach (var stream in LogStreamsProvider.Values)
+                {
+                    using (stream.SyncObj.LockWhile(stream.Write, logDetail))
+                    {
+                    }
+
+                    //lock (stream.SyncObj)
+                    //{
+                    //    stream.Write(logDetail);
+                    //}
+                }
+            }
+        }
+
+        private void WriteLine(string logDetail)
+        {
+            using (LogStreamsProviderLock.Read())
+            {
+                foreach (var stream in LogStreamsProvider.Values)
+                {
+                    using (stream.SyncObj.LockWhile(stream.WriteLine, logDetail))
+                    {
+                    }
+                    //lock (stream.SyncObj)
+                    //{
+                    //    stream.WriteLine(logDetail);
+                    //}
+                }
             }
         }
 
         public void WriteException(LogLevel level, string message, Exception exception, string exMsg)
         {
-            lock (LogThreadManager.Instance.SyncLockObj)
-            {
-                var writer = new StreamWriter(LogStream);
-                writer.WriteLine(GetExceptionString(level, message, exception, exMsg));
-                writer.Flush();
-            }
+            WriteLine(GetExceptionString(level, message, exception, exMsg));
         }
         const string blank = "\t";
 
@@ -102,12 +97,7 @@ namespace LogImpl
 
         public void WriteLog(LogLevel level, string message)
         {
-            lock (LogThreadManager.Instance.SyncLockObj)
-            {
-                var writer = new StreamWriter(LogStream);
-                writer.WriteLine(GetLogString(level, message));
-                writer.Flush();
-            }
+            WriteLine(GetLogString(level, message));
         }
 
         internal static string GetLogString(LogLevel level, string message)
@@ -119,12 +109,7 @@ namespace LogImpl
 
         public void WriteLog(LogLevel level, string message, string format, params object[] args)
         {
-            lock (LogThreadManager.Instance.SyncLockObj)
-            {
-                var writer = new StreamWriter(LogStream);
-                writer.WriteLine(GetLogString(level, message, format, args));
-                writer.Flush();
-            }
+            WriteLine(GetLogString(level, message, format, args));
         }
 
         internal static string GetLogString(LogLevel level, string message, string format, params object[] args)
@@ -137,14 +122,89 @@ namespace LogImpl
 
         public string GetTotalLog(DateTime date)
         {
-            if (File.Exists(LogPath))
-                using (var stream = new FileStream(LogPath, FileMode.Open, FileAccess.Read))
+            using (LogStreamsProviderLock.Read())
+            {
+                foreach (var stream in LogStreamsProvider.Values)
                 {
-                    StreamReader reader = new StreamReader(stream);
-                    return reader.ReadToEnd();
+                    lock (stream.SyncObj)
+                    {
+                        return stream.GetTotalLog(date);
+                    }
                 }
-            else
-                return "Log file is not exist.";
+            }
+            return "Log file is not exist.";
+        }
+
+        public void WriteLog(string module, LogLevel level, string message)
+        {
+            WriteLine(GetLogString(module, level, message));
+        }
+
+        public void WriteException(string module, LogLevel level, string message, Exception exception, string exMsg)
+        {
+            WriteLine(GetExceptionString(module, level, message, exception, exMsg));
+        }
+
+        public void WriteLog(string module, LogLevel level, string message, string format, params object[] args)
+        {
+            WriteLine(GetLogString(module, level, message, format, args));
+        }
+
+        internal static string GetExceptionString(string module, LogLevel level, string message, Exception exception, string exMsg)
+        {
+            StringBuilder sb = new StringBuilder();
+            var curEx = exception;
+            while (curEx != null)
+            {
+                sb.AppendLine(string.Join(blank, DateTime.Now.ToString("yyyyMMddHHmmss"), module,
+                    LogLevelHelper.GetLevelString(level),
+                    message.RemoveRN(),
+                    curEx.Message.RemoveRN(),
+                    curEx.StackTrace.RemoveRN()));
+
+
+                curEx = curEx.InnerException;
+            }
+            sb.AppendLine();
+            return sb.ToString();
+        }
+
+        internal static string GetLogString(string module, LogLevel level, string message)
+        {
+            return string.Join(blank, DateTime.Now.ToString("yyyyMMddHHmmss"), module,
+                LogLevelHelper.GetLevelString(level),
+                message.RemoveRN());
+        }
+
+        internal static string GetLogString(string module, LogLevel level, string message, string format, params object[] args)
+        {
+            return string.Join(blank, DateTime.Now.ToString("yyyyMMddHHmmss"), module,
+                LogLevelHelper.GetLevelString(level),
+                message.RemoveRN(),
+                args.Length > 0 ? string.Format(format, args).RemoveRN() : format.RemoveRN());
+        }
+
+        public void RegisterLogStream(ILogStreamProvider stream)
+        {
+            using (LogStreamsProviderLock.Write())
+            {
+                LogStreamsProvider[stream.StreamId] = stream;
+            }
+        }
+
+        public void RemoveLogStream(ILogStreamProvider stream)
+        {
+            using (LogStreamsProviderLock.Write())
+            {
+                if (LogStreamsProvider.ContainsKey(stream.StreamId))
+                    LogStreamsProvider.Remove(stream.StreamId);
+            }
+        }
+
+        public void Dispose()
+        {
+            LogStreamsProviderLock.Dispose();
+            LogStreamsProviderLock = null;
         }
     }
     internal static class StringEx
@@ -264,6 +324,154 @@ namespace LogImpl
                     return true;
                 return false;
             }
+        }
+    }
+
+    public class DefaultLogStream : ILogStreamProvider
+    {
+        public DefaultLogStream() { }
+        public DefaultLogStream(string logPath)
+        {
+            _logPath = LogPath;
+        }
+
+        public static string GetLogPath(string logFileName)
+        {
+            return Path.Combine(GetSystemLogFolder(), logFileName);
+        }
+
+        public static string GetSystemLogFolder()
+        {
+            string logFolder = CloudConfig.Instance.LogPath;
+            if (string.IsNullOrEmpty(logFolder))
+            {
+                logFolder = AppDomain.CurrentDomain.BaseDirectory;
+                logFolder = Path.Combine(logFolder, "Log");
+            }
+            if (!Directory.Exists(logFolder))
+            {
+                Directory.CreateDirectory(logFolder);
+            }
+            return logFolder;
+        }
+
+        private string _logPath;
+        protected virtual string LogPath
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_logPath))
+                {
+                    string logFolder = GetSystemLogFolder();
+                    var logPath = Path.Combine(logFolder, LogFileName);
+                    _logPath = logPath;
+
+                }
+                return _logPath;
+            }
+        }
+
+        protected virtual string LogFileName
+        {
+            get
+            {
+                return string.Format("{0}.txt", DateTime.Now.ToString("yyyyMMdd"));
+            }
+        }
+
+        private readonly Guid _streamKey = Guid.NewGuid();
+
+        private Stream LogStream
+        {
+            get
+            {
+                var val = LogThreadManager.Instance.GetStream(_streamKey);
+                if (val == null)
+                {
+                    val = new FileStream(LogPath, FileMode.Append, FileAccess.Write, FileShare.Read);
+                    LogThreadManager.Instance.AddStream(val, _streamKey);
+                }
+                val.Flush();
+                return val;
+            }
+        }
+
+        private object _syncObj = new object();
+        public object SyncObj
+        {
+            get
+            {
+                return LogThreadManager.Instance.SyncLockObj;
+            }
+        }
+
+        public Guid StreamId
+        {
+            get
+            {
+                return _streamKey;
+            }
+        }
+
+        public void Write(string information)
+        {
+            var writer = new StreamWriter(LogStream);
+            writer.Write(information);
+            writer.Flush();
+        }
+
+        public void WriteLine(string information)
+        {
+            var writer = new StreamWriter(LogStream);
+            writer.WriteLine(information);
+            writer.Flush();
+        }
+
+        public string GetTotalLog(DateTime date)
+        {
+            if (File.Exists(LogPath))
+                using (var stream = new FileStream(LogPath, FileMode.Open, FileAccess.Read))
+                {
+                    StreamReader reader = new StreamReader(stream);
+                    return reader.ReadToEnd();
+                }
+            return "Log file is not exist.";
+        }
+    }
+
+    public class DebugOutput : ILogStreamProvider
+    {
+        public Guid StreamId
+        {
+            get
+            {
+                return _id;
+            }
+        }
+
+        private Guid _id = Guid.NewGuid();
+        private object _syncObj = new object();
+        public object SyncObj
+        {
+            get
+            {
+                return _syncObj;
+            }
+        }
+
+        public string GetTotalLog(DateTime date)
+        {
+            return "";
+        }
+
+        public void Write(string information)
+        {
+            Debug.Write(information);
+        }
+
+        public void WriteLine(string information)
+        {
+            Debug.WriteLine(information);
         }
     }
 }

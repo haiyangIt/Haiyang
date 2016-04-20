@@ -92,6 +92,8 @@ namespace EwsFrame.Manager.Impl
 
         public void End()
         {
+            LogFactory.LogInstance.WriteLog(ManagerName, LogInterface.LogLevel.DEBUG, string.Format("Manager [{0}] ending.", ManagerName));
+
             BeforeEnd();
             Interlocked.Exchange(ref isExited, 1);
             endEvent.Set();
@@ -104,6 +106,8 @@ namespace EwsFrame.Manager.Impl
 
             endWaitingEvent.Dispose();
             AfterEnd();
+
+            LogFactory.LogInstance.WriteLog(ManagerName, LogInterface.LogLevel.DEBUG, string.Format("Manager [{0}] ended.", ManagerName));
         }
 
         protected virtual void BeforeStart() { }
@@ -111,11 +115,15 @@ namespace EwsFrame.Manager.Impl
 
         public void Start()
         {
+            LogFactory.LogInstance.WriteLog(ManagerName, LogInterface.LogLevel.DEBUG, string.Format("Manager [{0}] starting.", ManagerName));
+
             BeforeStart();
-            var internalRunning = JobFactoryServer.Instance.ThreadManager.StartThread(ManagerName);
+            var internalRunning = JobFactoryServer.Instance.ThreadManager.StartThread("Thread" + ManagerName);
             var jobManagerInternalJob = new ArcSystemJob(InternalThread, ManagerName + "Job");
             internalRunning.Run(jobManagerInternalJob);
             AfterStart();
+
+            LogFactory.LogInstance.WriteLog(ManagerName, LogInterface.LogLevel.DEBUG, string.Format("Manager [{0}] started.", ManagerName));
         }
     }
 }

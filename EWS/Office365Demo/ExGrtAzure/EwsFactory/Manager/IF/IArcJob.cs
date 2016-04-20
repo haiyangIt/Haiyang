@@ -28,6 +28,20 @@ namespace EwsFrame.Manager.IF
         bool EndJob();
         event EventHandler JobCanceledEvent;
         event EventHandler JobEndedEvent;
+        event EventHandler<JobStatusChangedEventArgs> JobStatusChangedEvent;
+    }
+
+    public class JobStatusChangedEventArgs : EventArgs
+    {
+        public ArcJobStatus OldStatus;
+        public ArcJobStatus NewStatus;
+        public IArcJob Job;
+        public JobStatusChangedEventArgs(IArcJob job, ArcJobStatus oldStatus, ArcJobStatus newStatus)
+        {
+            Job = job;
+            OldStatus = oldStatus;
+            NewStatus = newStatus;
+        }
     }
 
     public enum ArcJobStatus

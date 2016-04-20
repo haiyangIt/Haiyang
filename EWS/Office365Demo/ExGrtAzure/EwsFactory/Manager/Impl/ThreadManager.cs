@@ -1,4 +1,5 @@
 ﻿using EwsFrame.Manager.IF;
+using LogInterface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,10 +16,13 @@ namespace EwsFrame.Manager.Impl
         Dictionary<string, IThreadObj> _allThread = new Dictionary<string, IThreadObj>();
         // todo public int MaxThreadCount = 10;
 
-            public string ManagerName { get
+        public string ManagerName
+        {
+            get
             {
                 return "ThreadManager";
-            } }
+            }
+        }
 
         public void Start()
         {
@@ -26,8 +30,10 @@ namespace EwsFrame.Manager.Impl
 
         public void End()
         {
+            LogFactory.LogInstance.WriteLog(ManagerName, LogInterface.LogLevel.DEBUG, string.Format("Manager [{0}] ending.", ManagerName));
             if (_allThread.Count > 0)
             {
+                LogFactory.LogInstance.WriteLog(ManagerName, LogInterface.LogLevel.DEBUG, string.Format("Manager [{0}] ending after [{1}] thread ended.", ManagerName, _allThread.Count));
                 AutoResetEvent[] allAutoResultEvent = new AutoResetEvent[_allThread.Count];
                 int index = 0;
                 foreach (var thread in _allThread)
@@ -38,11 +44,12 @@ namespace EwsFrame.Manager.Impl
                     index++;
                 }
                 WaitHandle.WaitAll(allAutoResultEvent);
-                foreach(var e in allAutoResultEvent)
+                foreach (var e in allAutoResultEvent)
                 {
                     e.Dispose();
                 }
             }
+            LogFactory.LogInstance.WriteLog(ManagerName, LogInterface.LogLevel.DEBUG, string.Format("Manager [{0}] ended.", ManagerName));
         }
 
         public IThreadObj NewThread()
@@ -52,21 +59,27 @@ namespace EwsFrame.Manager.Impl
 
         public IThreadObj NewThread(string threadName)
         {
+
             // todo if any thread is idle, can return the thread.
             // now create new as a temp solution.
             lock (_allThread)
             {
+                LogFactory.LogInstance.WriteLog(ManagerName, LogInterface.LogLevel.DEBUG, string.Format("Manager [{0}] new thread with name [{1}].", ManagerName, threadName));
                 var obj = JobFactoryServer.Instance.NewThreadObj(threadName);
                 _allThread.Add(obj.ThreadName, obj);
+                LogFactory.LogInstance.WriteLog(ManagerName, LogInterface.LogLevel.DEBUG, string.Format("Manager [{0}] new thread finished with name [{1}].", ManagerName, obj.ThreadName));
                 return obj;
             }
+
         }
         public IThreadObj StartThread(string threadName)
         {
             lock (_allThread)
             {
+                LogFactory.LogInstance.WriteLog(ManagerName, LogInterface.LogLevel.DEBUG, string.Format("Manager [{0}] start thread with name [{1}].", ManagerName, threadName));
                 var obj = JobFactoryServer.Instance.NewThreadObj(threadName);
                 _allThread.Add(obj.ThreadName, obj);
+                LogFactory.LogInstance.WriteLog(ManagerName, LogInterface.LogLevel.DEBUG, string.Format("Manager [{0}] start thread finished with name [{1}].", ManagerName, obj.ThreadName));
                 return obj;
             }
         }
@@ -84,8 +97,6 @@ namespace EwsFrame.Manager.Impl
         private IArcJob _job;
         private string _threadId;
         public string ThreadName { get { return _threadId; } }
-
-        private int IsJobRunning = 0;
 
         private ArcThreadState _state;
         public ArcThreadState State
@@ -105,6 +116,7 @@ namespace EwsFrame.Manager.Impl
         {
             _events = new AutoResetEvent[2] { _runEvent, _endEvent };
             _thread = new Thread(InternalRun);
+
             _state = ArcThreadState.Idle;
             if (string.IsNullOrEmpty(threadName))
             {
@@ -112,6 +124,9 @@ namespace EwsFrame.Manager.Impl
             }
             else
                 _threadId = threadName;
+
+            _thread.Name = threadName;
+            _thread.Start();
 
         }
         public void CancelThread()
@@ -133,7 +148,16 @@ namespace EwsFrame.Manager.Impl
                 {
                     if (_state == ArcThreadState.Running)
                     {
-                        _job.Run();
+                        LogFactory.LogInstance.WriteLog(ThreadName, LogLevel.DEBUG, "thread job run.", "Job [{0}] in thread [{1}] run.", _job.JobId, ThreadName);
+                        try
+                        {
+                            _job.Run();
+                        }
+                        catch (Exception ex)
+                        {
+                            LogFactory.LogInstance.WriteException(ThreadName, LogLevel.ERR, string.Format("Job [{0}] in thread [{1}] run exception.", _job.JobId, ThreadName),
+                                ex, ex.Message);
+                        }
                         DoJob(_job, Operator.Finished);
                     }
                 }
@@ -164,6 +188,7 @@ namespace EwsFrame.Manager.Impl
         {
             lock (_sync)
             {
+                var oldStatus = _state;
                 switch (oper)
                 {
                     case Operator.Run:
@@ -174,54 +199,54 @@ namespace EwsFrame.Manager.Impl
                         _state = ArcThreadState.Running;
                         _job = job;
                         _runEvent.Set();
-                        return;
+                        break;
                     case Operator.Cancel:
                         switch (_state)
                         {
                             case ArcThreadState.Idle:
                                 _state = ArcThreadState.Idle;
-                                return;
+                                break;
                             case ArcThreadState.Canceling:
                                 _state = ArcThreadState.Canceling;
-                                return;
+                                break;
                             case ArcThreadState.Running:
                                 _state = ArcThreadState.Canceling;
                                 _job.CancelJob();
                                 _job.JobCanceledEvent += JobCanceledEvent;
-                                return;
+                                break;
                             case ArcThreadState.Ending:
                                 _state = ArcThreadState.Ending;
-                                return;
+                                break;
                             case ArcThreadState.Ended:
                                 throw new InvalidOperationException("the thread ended, can't cancel.");
                             default:
                                 throw new NotSupportedException("In cancel, not support state.");
                         }
-
+                        break;
                     case Operator.End:
                         switch (_state)
                         {
                             case ArcThreadState.Idle:
                                 _state = ArcThreadState.Ended;
                                 _endEvent.Set();
-                                return;
+                                break;
                             case ArcThreadState.Canceling:
                                 _state = ArcThreadState.Ending;
-                                return;
+                                break;
                             case ArcThreadState.Running:
                                 _state = ArcThreadState.Ending;
                                 _job.EndJob();
                                 _job.JobCanceledEvent += JobEndedEvent;
-                                return;
+                                break;
                             case ArcThreadState.Ending:
                                 _state = ArcThreadState.Ending;
-                                return;
+                                break;
                             case ArcThreadState.Ended:
                                 throw new InvalidOperationException("the thread ended, can't end.");
                             default:
                                 throw new NotSupportedException("In End, not support state.");
                         }
-
+                        break;
                     case Operator.Finished:
                         switch (_state)
                         {
@@ -229,22 +254,26 @@ namespace EwsFrame.Manager.Impl
                                 throw new InvalidOperationException("the thread idle, can't finish.");
                             case ArcThreadState.Canceling:
                                 _state = ArcThreadState.Idle;
-                                return;
+                                break;
                             case ArcThreadState.Running:
                                 _state = ArcThreadState.Idle;
-                                return;
+                                break;
                             case ArcThreadState.Ending:
                                 _state = ArcThreadState.Ended;
                                 _endEvent.Set();
-                                return;
+                                break;
                             case ArcThreadState.Ended:
                                 throw new InvalidOperationException("the thread ended, can't finish.");
                             default:
                                 throw new NotSupportedException("In Finished, not support state.");
                         }
+                        break;
                     default:
                         throw new NotSupportedException("Not support the operator.");
                 }
+
+                LogFactory.LogInstance.WriteLog(ThreadName, LogLevel.DEBUG, "thread job state changed.", "Job [{0}] in thread [{1}] state change from [{2}] to [{3}].", 
+                    _job.JobId, ThreadName, oldStatus, _state);
             }
         }
 
@@ -258,7 +287,7 @@ namespace EwsFrame.Manager.Impl
 
         }
 
-        
+
     }
 
     public enum Operator

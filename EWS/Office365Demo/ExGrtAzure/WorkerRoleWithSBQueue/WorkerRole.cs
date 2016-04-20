@@ -52,9 +52,15 @@ namespace WorkerRoleWithSBQueue
                     }
                     catch
                     {
-                        // todo log.
-                        receivedMessage.Abandon();
-                        // Handle any message processing specific exceptions here
+                        try {
+                            // todo log.
+                            receivedMessage.Abandon();
+                            // Handle any message processing specific exceptions here
+                        }
+                        catch
+                        {
+                            // todo log
+                        }
                     }
                 }, options);
 
@@ -63,29 +69,24 @@ namespace WorkerRoleWithSBQueue
 
         public override bool OnStart()
         {
+            // todo log start time.
             // Set the maximum number of concurrent connections 
             //ServicePointManager.DefaultConnectionLimit = 12;
 
             Client = AzureServiceBusHelper.GetQueueClient(CloudConfig.Instance.ServiceBusQueueName);
-            JobFactoryServer.Instance.ThreadManager.Start();
-            JobFactoryServer.Instance.JobManager.Start();
-            JobFactoryServer.Instance.ProgressManager.Start();
 
-            OrganizationProgressManager.Instance.Start();
+            JobFactoryServer.OnStart();
 
             return base.OnStart();
         }
 
         public override void OnStop()
         {
+            //todo log stop time. and if a message dealing, must wait. so need lock.
             // Close the connection to Service Bus Queue
             Client.Close();
 
-            OrganizationProgressManager.Instance.End();
-
-            JobFactoryServer.Instance.ProgressManager.End();
-            JobFactoryServer.Instance.JobManager.End();
-            JobFactoryServer.Instance.ThreadManager.End();
+            JobFactoryServer.OnStop();
 
             CompletedEvent.Set();
             

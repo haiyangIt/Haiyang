@@ -12,13 +12,29 @@ using System.Threading.Tasks;
 
 namespace LogImpl
 {
-    public class LogToBlob : ILog
+    public class LogToBlob : DefaultLog
     {
+        public LogToBlob()
+        {
+            RegisterLogStream(new LogBlobStreamProvider());
+        }
+    }
+
+    public class LogBlobStreamProvider : LogStreamProviderBase
+    {
+        public LogBlobStreamProvider() {
+
+            BlobNameFormat = "{0}-{1}{2}";
+        }
+
+        public LogBlobStreamProvider(string blobNameFormat)
+        {
+            BlobNameFormat = blobNameFormat;
+        }
+
         private static CloudStorageAccount StorageAccount = FactoryBase.GetStorageAccount();
 
         internal static CloudBlobClient BlobClient = StorageAccount.CreateCloudBlobClient();
-
-        private static object _lockObj = new object();
 
         private DateTime LastDateTime = DateTime.MinValue.Date;
         private CloudAppendBlob _appendBlob = null;
@@ -27,71 +43,12 @@ namespace LogImpl
         private const int MaxBlocks = 50000;
         private int _logFileIndex = 0;
 
-        protected virtual string BlobNameFormat
+        protected string BlobNameFormat
         {
-            get
-            {
-                return "{0}-{1}{2}";
-            }
+            get; set;
         }
 
-        private void WriteToAppendBlob(string msg)
-        {
-            var currentDay = DateTime.Now.Date;
-            if (currentDay != LastDateTime)
-            {
-                _appendBlob = null;
-            }
-
-            if (Interlocked.CompareExchange(ref _logCount, 0, MaxBlocks) != _logCount)
-            {
-                _appendBlob = null;
-            }
-
-            if (_appendBlob == null)
-            {
-                lock (_lockObj)
-                {
-                    if (_appendBlob == null)
-                    {
-                        CloudBlobContainer container = BlobClient.GetContainerReference("logs");
-                        container.CreateIfNotExists();
-                        LastDateTime = currentDay;
-                        CloudAppendBlob appBlob = container.GetAppendBlobReference(
-                            string.Format(BlobNameFormat, DateTime.Now.ToString("yyyyMMdd"), _logFileIndex++, ".log")
-                        );
-
-                        if (!appBlob.Exists())
-                        {
-                            appBlob.CreateOrReplace();
-                        }
-
-                        _appendBlob = appBlob;
-                    }
-                }
-            }
-
-            msg = msg + "\r\nArcserve";
-            _appendBlob.AppendText(msg);
-            Interlocked.Increment(ref _logCount);
-        }
-
-        public void WriteException(LogInterface.LogLevel level, string message, Exception exception, string exMsg)
-        {
-            WriteToAppendBlob(DefaultLog.GetExceptionString(level, message, exception, exMsg));
-        }
-
-        public void WriteLog(LogInterface.LogLevel level, string message)
-        {
-            WriteToAppendBlob(DefaultLog.GetLogString(level, message));
-        }
-
-        public void WriteLog(LogInterface.LogLevel level, string message, string format, params object[] args)
-        {
-            WriteToAppendBlob(DefaultLog.GetLogString(level, message, format, args));
-        }
-
-        public string GetTotalLog(DateTime date)
+        public override string GetTotalLog(DateTime date)
         {
             CloudBlobContainer container = BlobClient.GetContainerReference("logs");
             StringBuilder sb = new StringBuilder();
@@ -120,16 +77,64 @@ namespace LogImpl
                 sb.AppendLine("No log exists.");
             return sb.ToString();
         }
+
+        public override void Write(string information)
+        {
+            WriteToAppendBlob(information);
+        }
+
+        public override void WriteLine(string information)
+        {
+            WriteToAppendBlob(information);
+        }
+
+        private void WriteToAppendBlob(string msg)
+        {
+            var currentDay = DateTime.Now.Date;
+            if (currentDay != LastDateTime)
+            {
+                _appendBlob = null;
+            }
+
+            if (Interlocked.CompareExchange(ref _logCount, 0, MaxBlocks) != _logCount)
+            {
+                _appendBlob = null;
+            }
+
+            if (_appendBlob == null)
+            {
+                lock (SyncObj)
+                {
+                    if (_appendBlob == null)
+                    {
+                        CloudBlobContainer container = BlobClient.GetContainerReference("logs");
+                        container.CreateIfNotExists();
+                        LastDateTime = currentDay;
+                        CloudAppendBlob appBlob = container.GetAppendBlobReference(
+                            string.Format(BlobNameFormat, DateTime.Now.ToString("yyyyMMdd"), _logFileIndex++, ".log")
+                        );
+
+                        if (!appBlob.Exists())
+                        {
+                            appBlob.CreateOrReplace();
+                        }
+
+                        _appendBlob = appBlob;
+                    }
+                }
+            }
+
+            msg = msg + "\r\nArcserve";
+            _appendBlob.AppendText(msg);
+            Interlocked.Increment(ref _logCount);
+        }
     }
 
     public class LogToBlobEwsTrace : LogToBlob
     {
-        protected override string BlobNameFormat
+        public LogToBlobEwsTrace() : base()
         {
-            get
-            {
-                return "{0}EwsTrace-{1}{2}";
-            }
+            RegisterLogStream(new LogBlobStreamProvider("{0}EwsTrace-{1}{2}"));
         }
     }
 }

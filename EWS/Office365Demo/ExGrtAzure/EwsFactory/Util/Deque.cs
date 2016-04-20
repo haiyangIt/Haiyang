@@ -26,6 +26,8 @@ namespace EwsFrame.Util
         {
             lock (_lists)
             {
+                if (_lists.Count == 0)
+                    return default(T);
                 var result = _lists.Last;
                 _lists.RemoveLast();
                 return result.Value;

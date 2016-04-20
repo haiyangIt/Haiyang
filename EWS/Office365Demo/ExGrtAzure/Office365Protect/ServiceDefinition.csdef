@@ -30,7 +30,7 @@
       <Setting name="ServiceBusTopicName"/>
 
       <!--Storage Connection String-->
-      <Setting name="StorageConnectionString"  />
+      <!--<Setting name="StorageConnectionString"  />-->
       <Setting name="StorageConnectionStringRunning" />
       <!--Db Connection String-->
       <Setting name="DefaultConnection" />
@@ -66,7 +66,7 @@
       <Setting name="ServiceBusTopicName"/>
 
       <!--Storage Connection String-->
-      <Setting name="StorageConnectionString"  />
+      <!--<Setting name="StorageConnectionString"  />-->
       <Setting name="StorageConnectionStringRunning" />
       <!--Db Connection String-->
       <Setting name="DefaultConnection" />

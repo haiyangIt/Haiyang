@@ -10,7 +10,13 @@ using System.Threading.Tasks;
 
 namespace EwsFrame.Manager.Impl
 {
-    internal class JobManager : ManagerBase, IJobManager
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <remarks>
+    /// about job, please use a new class which is derived from ArcJobBase.
+    /// </remarks>
+    internal class JobManager : ManagerBase, IJobManager, IDisposable
     {
         protected override void BeforeStart()
         {
@@ -18,20 +24,31 @@ namespace EwsFrame.Manager.Impl
             base.BeforeStart();
         }
 
+
+
         public void AddJob(IArcJob job)
         {
+            LogFactory.LogInstance.WriteLog(ManagerName, LogInterface.LogLevel.DEBUG, string.Format("Manager [{0}] adding job [{1}] [{2}].", ManagerName, job.JobId, job.JobName));
+
             CheckOtherEventCanExecute();
 
-            lock (_JobBuffer)
+            using (_lockSlim.Write())
             {
                 _JobBuffer.Add(job.JobId, job);
-                arcJobQueue.Enqueue(job);
+            }
+
+            using(_JobBuffer.LockWhile(arcJobQueue.Enqueue, job))
+            {
+
             }
 
             TriggerOtherEvent(0);
+
+            LogFactory.LogInstance.WriteLog(ManagerName, LogInterface.LogLevel.DEBUG, string.Format("Manager [{0}] added job [{1}] [{2}].", ManagerName, job.JobId, job.JobName));
         }
 
         Dictionary<Guid, IArcJob> _JobBuffer = new Dictionary<Guid, IArcJob>();
+        ReaderWriterLockSlim _lockSlim = new ReaderWriterLockSlim();
         Deque<IArcJob> arcJobQueue = new Deque<IArcJob>();
 
         public override string ManagerName
@@ -44,7 +61,12 @@ namespace EwsFrame.Manager.Impl
 
         public IArcJob GetJob(Guid jobId)
         {
-            throw new NotImplementedException();
+            using (_lockSlim.Read())
+            {
+                IArcJob result = null;
+                _JobBuffer.TryGetValue(jobId, out result);
+                return result;
+            }
         }
 
         protected override void MethodWhenOtherEventTriggered(int eventIndex)
@@ -59,8 +81,10 @@ namespace EwsFrame.Manager.Impl
 
         private void AddJobInInternalThread()
         {
-            lock (_JobBuffer)
+            using (_JobBuffer.LockWhile(() =>
             {
+                if (arcJobQueue.Count <= 0)
+                    return;
                 var job = arcJobQueue.Dequeue();
                 if (job != null)
                 {
@@ -68,14 +92,24 @@ namespace EwsFrame.Manager.Impl
                     var threadObj = JobFactoryServer.Instance.ThreadManager.NewThread(threadName);
                     if (threadObj == null)
                     {
+                        LogFactory.LogInstance.WriteLog(ManagerName, LogInterface.LogLevel.DEBUG, string.Format("job [{0}] [{1}] can't get a thread. waiting.", job.JobId, job.JobName));
                         arcJobQueue.EnqueueLast(job);
                     }
                     else
                     {
+                        LogFactory.LogInstance.WriteLog(ManagerName, LogInterface.LogLevel.DEBUG, string.Format("job [{0}] [{1}] running.", job.JobId, job.JobName));
                         threadObj.Run(job);
                     }
                 }
+            }))
+            {
+
             }
+        }
+
+        public void Dispose()
+        {
+            _lockSlim.Dispose();
         }
     }
 

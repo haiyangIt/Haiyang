@@ -91,6 +91,7 @@ namespace WebRoleUI.Utils
         {
             var schedulerClient = new SchedulerClient(cloudServiceName, jobCollectionName, credentials);
             var jobAction = job.Action;
+            job.Action.ServiceBusQueueMessage.Authentication.Type = JobServiceBusAuthenticationType.SharedAccessKey;
             var jobRecurrence = job.Recurrence; 
             var jobCreateOrUpdateParameters = new JobCreateOrUpdateParameters()
             {
@@ -99,7 +100,7 @@ namespace WebRoleUI.Utils
                 StartTime = job.StartTime
             };
             var jobCreateResponse = schedulerClient.Jobs.CreateOrUpdate(job.Id, jobCreateOrUpdateParameters);
-            if (jobCreateResponse.StatusCode != System.Net.HttpStatusCode.OK)
+            if (jobCreateResponse.StatusCode != System.Net.HttpStatusCode.OK && jobCreateResponse.StatusCode != System.Net.HttpStatusCode.Created)
             {
                 throw new HttpException(string.Format("Create job [{0}] failed, status code: [{1}]."
                     , job.Id, jobCreateResponse.StatusCode));
@@ -118,8 +119,9 @@ namespace WebRoleUI.Utils
             serviceBusQueueMessage.Authentication = new JobServiceBusAuthentication();
             serviceBusQueueMessage.Authentication.SasKeyName = parser.SharedAccessKeyName;
             serviceBusQueueMessage.Authentication.SasKey = parser.SharedAccessKey;
+            serviceBusQueueMessage.Authentication.Type = JobServiceBusAuthenticationType.SharedAccessKey;
             serviceBusQueueMessage.TransportType = JobServiceBusTransportType.AMQP;
-            serviceBusQueueMessage.Namespace = CloudConfig.Instance.SubscriptionNameForAzure;
+            serviceBusQueueMessage.Namespace = CloudConfig.Instance.ServiceBusNameSpace;
             serviceBusQueueMessage.QueueName = CloudConfig.Instance.ServiceBusQueueName;
             serviceBusQueueMessage.Message = planModel.Name;
             var keyValue = new Dictionary<string, string>();
@@ -178,6 +180,7 @@ namespace WebRoleUI.Utils
                 IntrinsicSettings = jobCollectionIntrinsicSettings,
                 Label = jobCollectionName
             };
+            var result = schedulerMgmCli.RegisterResourceProvider();
             var jobCollectionCreateResponse = schedulerMgmCli.JobCollections.Create(cloudServiceName, jobCollectionName, jobCollectionCreateParameters);
             if (jobCollectionCreateResponse.HttpStatusCode != System.Net.HttpStatusCode.OK)
             {

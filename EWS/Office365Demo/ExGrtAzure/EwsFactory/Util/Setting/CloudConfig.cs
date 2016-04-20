@@ -14,18 +14,13 @@ namespace EwsFrame.Util.Setting
     public class CloudConfig
     {
 
-        public static CloudConfig Instance = IsRunningOnAzure() ? new CloudConfig() : new ConfigInAppconfigOrWebConfig();
-        
+        public static CloudConfig Instance = new CloudConfig();
+
         public virtual CloudStorageAccount StorageAccount
         {
             get
             {
-                if (!IsRunningOnAzure())
-                    return CloudStorageAccount.Parse(CloudConfigurationManager.GetSetting("StorageConnectionString"));
-                else
-                {
-                    return CloudStorageAccount.Parse(CloudConfigurationManager.GetSetting("StorageConnectionStringRunning"));
-                }
+                return CloudStorageAccount.Parse(CloudConfigurationManager.GetSetting("StorageConnectionStringRunning"));
             }
         }
 
@@ -45,7 +40,7 @@ namespace EwsFrame.Util.Setting
                 return CloudConfigurationManager.GetSetting("Organization");
             }
         }
-
+        
         public virtual string DbDefaultConnectString
         {
             get
@@ -91,7 +86,7 @@ namespace EwsFrame.Util.Setting
                 return CloudConfigurationManager.GetSetting("ServiceBusNameSpace");
             }
         }
-        
+
         public virtual string ServiceBusQueueName
         {
             get
@@ -151,120 +146,120 @@ namespace EwsFrame.Util.Setting
 
     }
 
-    internal class ConfigInAppconfigOrWebConfig : CloudConfig
-    {
-        internal ConfigInAppconfigOrWebConfig() { }
-        public override string DbConnectString
-        {
-            get
-            {
-                //using (StreamWriter writer = new StreamWriter("E:\\Log.txt", true))
-                //{
-                //    writer.Write(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-                //    writer.WriteLine(string.Format("ConnectString:{0}", ConfigurationManager.AppSettings["Organization"]));
-                //    writer.WriteLine(this.GetType().FullName);
-                //    writer.WriteLine(AppDomain.CurrentDomain.SetupInformation.ConfigurationFile);
-                //}
-                //throw new NotImplementedException();
-                return ConfigurationManager.AppSettings["Organization"];
-            }
-        }
+    //internal class ConfigInAppconfigOrWebConfig : CloudConfig
+    //{
+    //    internal ConfigInAppconfigOrWebConfig() { }
+    //    public override string DbConnectString
+    //    {
+    //        get
+    //        {
+    //            //using (StreamWriter writer = new StreamWriter("E:\\Log.txt", true))
+    //            //{
+    //            //    writer.Write(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+    //            //    writer.WriteLine(string.Format("ConnectString:{0}", ConfigurationManager.AppSettings["Organization"]));
+    //            //    writer.WriteLine(this.GetType().FullName);
+    //            //    writer.WriteLine(AppDomain.CurrentDomain.SetupInformation.ConfigurationFile);
+    //            //}
+    //            //throw new NotImplementedException();
+    //            return ConfigurationManager.AppSettings["Organization"];
+    //        }
+    //    }
 
-        public override string DbDefaultConnectString
-        {
-            get
-            {
-                //using (StreamWriter writer = new StreamWriter("E:\\Log.txt", true))
-                //{
-                //    writer.Write(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-                //    writer.WriteLine(string.Format("ConnectString:{0}", ConfigurationManager.AppSettings["DefaultConnection"]));
-                //    writer.WriteLine(this.GetType().FullName);
-                //    writer.WriteLine(AppDomain.CurrentDomain.SetupInformation.ConfigurationFile);
-                //}
-                //throw new NotImplementedException();
-                return ConfigurationManager.AppSettings["DefaultConnection"];
-            }
-        }
-        
+    //    public override string DbDefaultConnectString
+    //    {
+    //        get
+    //        {
+    //            //using (StreamWriter writer = new StreamWriter("E:\\Log.txt", true))
+    //            //{
+    //            //    writer.Write(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+    //            //    writer.WriteLine(string.Format("ConnectString:{0}", ConfigurationManager.AppSettings["DefaultConnection"]));
+    //            //    writer.WriteLine(this.GetType().FullName);
+    //            //    writer.WriteLine(AppDomain.CurrentDomain.SetupInformation.ConfigurationFile);
+    //            //}
+    //            //throw new NotImplementedException();
+    //            return ConfigurationManager.AppSettings["DefaultConnection"];
+    //        }
+    //    }
 
-        public override string LogPath
-        {
-            get
-            {
-                return ConfigurationManager.AppSettings["LogPath"];
-            }
-        }
 
-        public override string ServiceBusConnectionString
-        {
-            get
-            {
-                return ConfigurationManager.AppSettings["Microsoft.ServiceBus.ConnectionString"];
-            }
-        }
+    //    public override string LogPath
+    //    {
+    //        get
+    //        {
+    //            return ConfigurationManager.AppSettings["LogPath"];
+    //        }
+    //    }
 
-        public override string ServiceBusNameSpace
-        {
-            get
-            {
-                return ConfigurationManager.AppSettings["ServiceBusNameSpace"];
-            }
-        }
+    //    public override string ServiceBusConnectionString
+    //    {
+    //        get
+    //        {
+    //            return ConfigurationManager.AppSettings["Microsoft.ServiceBus.ConnectionString"];
+    //        }
+    //    }
 
-        public override string ServiceBusQueueName
-        {
-            get
-            {
-                return ConfigurationManager.AppSettings["ServiceBusQueueName"];
-            }
-        }
+    //    public override string ServiceBusNameSpace
+    //    {
+    //        get
+    //        {
+    //            return ConfigurationManager.AppSettings["ServiceBusNameSpace"];
+    //        }
+    //    }
 
-        public override int ServiceBusQueueMaxSize
-        {
-            get
-            {
-                return Convert.ToInt32(ConfigurationManager.AppSettings["ServiceBusQueueMaxSize"]);
-            }
-        }
+    //    public override string ServiceBusQueueName
+    //    {
+    //        get
+    //        {
+    //            return ConfigurationManager.AppSettings["ServiceBusQueueName"];
+    //        }
+    //    }
 
-        public override int ServiceBusQueueTTL
-        {
-            get
-            {
-                return Convert.ToInt32(ConfigurationManager.AppSettings["ServiceBusQueueTTL"]);
-            }
-        }
+    //    public override int ServiceBusQueueMaxSize
+    //    {
+    //        get
+    //        {
+    //            return Convert.ToInt32(ConfigurationManager.AppSettings["ServiceBusQueueMaxSize"]);
+    //        }
+    //    }
 
-        public override string ServiceBusTopicName
-        {
-            get
-            {
-                return ConfigurationManager.AppSettings["ServiceBusTopicName"];
-            }
-        }
+    //    public override int ServiceBusQueueTTL
+    //    {
+    //        get
+    //        {
+    //            return Convert.ToInt32(ConfigurationManager.AppSettings["ServiceBusQueueTTL"]);
+    //        }
+    //    }
 
-        public override int ServiceBusTopicMaxSize
-        {
-            get
-            {
-                return Convert.ToInt32(ConfigurationManager.AppSettings["ServiceBusTopicMaxSize"]);
-            }
-        }
+    //    public override string ServiceBusTopicName
+    //    {
+    //        get
+    //        {
+    //            return ConfigurationManager.AppSettings["ServiceBusTopicName"];
+    //        }
+    //    }
 
-        public override int ServiceBusTopicTTL
-        {
-            get
-            {
-                return Convert.ToInt32(ConfigurationManager.AppSettings["ServiceBusTopicTTL"]);
-            }
-        }
+    //    public override int ServiceBusTopicMaxSize
+    //    {
+    //        get
+    //        {
+    //            return Convert.ToInt32(ConfigurationManager.AppSettings["ServiceBusTopicMaxSize"]);
+    //        }
+    //    }
 
-        public override string SubscriptionNameForAzure
-        {
-            get
-            {
-                return ConfigurationManager.AppSettings["SubscriptionNameForScheduler"];
-            }
-        }
-    }
+    //    public override int ServiceBusTopicTTL
+    //    {
+    //        get
+    //        {
+    //            return Convert.ToInt32(ConfigurationManager.AppSettings["ServiceBusTopicTTL"]);
+    //        }
+    //    }
+
+    //    public override string SubscriptionNameForAzure
+    //    {
+    //        get
+    //        {
+    //            return ConfigurationManager.AppSettings["SubscriptionNameForScheduler"];
+    //        }
+    //    }
+    //}
 }

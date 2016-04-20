@@ -20,8 +20,23 @@ namespace WebRoleUI.Controllers
 
         public JsonResult CreatePlan(PlanModel planModel,PlanAzureInfo planAzureInfo)
         {
+            planModel = new PlanModel()
+            {
+                Name = DateTime.Now.ToString("MMddHHmmss"),
+                FirstStartTime = DateTime.Now,
+                Organization = "Arcserve",
+                PlanMailInfos = string.Empty
+
+            };
+
+            planAzureInfo = new PlanAzureInfo()
+            {
+                CloudService = "CloudServiceForJobCollection",
+                Name = "BackupTest",
+                JobCollectionName = "BackupJobCollection"
+            };
             var testJob = new Job();
-            testJob.StartTime = DateTime.Now;
+            testJob.StartTime = DateTime.Now.AddMinutes(3);
 
             // if has schedule time, uncomment the following code.
             //testJob.Recurrence = new JobRecurrence(); 

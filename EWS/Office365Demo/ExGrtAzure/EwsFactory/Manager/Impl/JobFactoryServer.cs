@@ -74,5 +74,23 @@ namespace EwsFrame.Manager.Impl
         {
             return JsonConvert.SerializeObject(progressInfo);
         }
+
+        public static void OnStart()
+        {
+            JobFactoryServer.Instance.ThreadManager.Start();
+            JobFactoryServer.Instance.JobManager.Start();
+            JobFactoryServer.Instance.ProgressManager.Start();
+
+            OrganizationProgressManager.Instance.Start();
+        }
+
+        public static void OnStop()
+        {
+            OrganizationProgressManager.Instance.End();
+
+            JobFactoryServer.Instance.ProgressManager.End();
+            JobFactoryServer.Instance.JobManager.End();
+            JobFactoryServer.Instance.ThreadManager.End();
+        }
     }
 }

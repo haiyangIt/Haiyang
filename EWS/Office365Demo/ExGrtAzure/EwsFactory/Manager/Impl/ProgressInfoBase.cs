@@ -9,6 +9,16 @@ namespace EwsFrame.Manager.Impl
 {
     public class ProgressInfoBase : IProgressInfo
     {
+
+        public ProgressInfoBase() { }
+
+        public ProgressInfoBase(IArcJob job, string organization, DateTime time)
+        {
+            Job = job;
+            Organization = organization;
+            Time = time;
+        }
+
         public IArcJob Job
         {
             get; set;

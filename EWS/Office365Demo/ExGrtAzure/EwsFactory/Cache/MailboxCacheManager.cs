@@ -1,6 +1,8 @@
-﻿using System;
+﻿using EwsFrame.Util;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Web;
 
 namespace EwsFrame.Cache
@@ -22,7 +24,7 @@ namespace EwsFrame.Cache
 
         public ICache NewCache(string mailboxAddress, string cacheName, Type cacheType)
         {
-            lock (CacheDic)
+            using (_CacheDicLock.Write())
             {
                 if (string.IsNullOrEmpty(_mailboxAddress))
                     _mailboxAddress = mailboxAddress;
@@ -47,7 +49,7 @@ namespace EwsFrame.Cache
 
         public ICache GetCache(string mailboxAddress, string cacheName)
         {
-            lock (CacheDic)
+            using (_CacheDicLock.Read())
             {
                 if (!string.IsNullOrEmpty(_mailboxAddress) && !mailboxAddress.Equals(_mailboxAddress))
                 {
@@ -65,12 +67,15 @@ namespace EwsFrame.Cache
 
         public void ReleaseCache(bool isSerialize = false)
         {
-            lock (CacheDic)
+            using (_CacheDicLock.Read())
             {
                 foreach (var keyValue in CacheDic)
                 {
                     keyValue.Value.Serialize();
                 }
+            }
+            using (_CacheDicLock.Write())
+            {
                 CacheDic.Clear();
             }
         }
@@ -78,5 +83,6 @@ namespace EwsFrame.Cache
 
         private string _mailboxAddress;
         private Dictionary<string, ICache> CacheDic = new Dictionary<string, ICache>();
+        private ReaderWriterLockSlim _CacheDicLock = new ReaderWriterLockSlim();
     }
 }

@@ -9,7 +9,12 @@ namespace LogImpl
 {
     public class DefaultEwsTraceLog : DefaultLog
     {
-        protected override string LogFileName
+        public DefaultEwsTraceLog()
+        {
+            RegisterLogStream(new DefaultLogStream(DefaultLogStream.GetLogPath(LogFileName)));
+        }
+
+        protected string LogFileName
         {
             get
             {

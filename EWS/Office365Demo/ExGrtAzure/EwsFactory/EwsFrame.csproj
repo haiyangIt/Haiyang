@@ -98,6 +98,7 @@
     <Compile Include="Cache\MailboxCacheManager.cs" />
     <Compile Include="Cache\OrganizationCacheManager.cs" />
     <Compile Include="CatalogFactory.cs" />
+    <Compile Include="Util\ReadWriteLockExtension.cs" />
     <Compile Include="Util\Setting\Config.cs" />
     <Compile Include="EF\CustomApplicationDbConfiguration.cs" />
     <Compile Include="FactoryBase.cs" />

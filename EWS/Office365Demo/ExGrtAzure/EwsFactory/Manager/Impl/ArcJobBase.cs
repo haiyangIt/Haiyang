@@ -1,4 +1,5 @@
 ﻿using EwsFrame.Manager.IF;
+using LogInterface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +20,10 @@ namespace EwsFrame.Manager.Impl
 
         public ArcJobBase(string jobName) : this()
         {
-            JobName = jobName;
+            if (string.IsNullOrEmpty(jobName))
+                JobName = JobId.ToString();
+            else
+                JobName = jobName;
         }
 
         public Guid JobId { get; private set; }
@@ -42,6 +46,7 @@ namespace EwsFrame.Manager.Impl
 
         public event EventHandler JobCanceledEvent;
         public event EventHandler JobEndedEvent;
+        public event EventHandler<JobStatusChangedEventArgs> JobStatusChangedEvent;
 
         public bool CancelJob()
         {
@@ -59,10 +64,15 @@ namespace EwsFrame.Manager.Impl
 
         public void Run()
         {
+
             ChangeOperator(Operator.Run);
             try
             {
                 InternalRun(); //todo catch exception.
+            }
+            catch (Exception e)
+            {
+                LogFactory.LogInstance.WriteException(JobName, LogLevel.ERR, "run exception", e, e.Message);
             }
             finally
             {
@@ -78,6 +88,8 @@ namespace EwsFrame.Manager.Impl
         {
             lock (SyncObj)
             {
+                var oldStatus = Status;
+                LogFactory.LogInstance.WriteLog(JobName, LogLevel.DEBUG, "ChangeOperator start", "Old Status:{0}, operator:{1}.", Status, oper);
                 switch (oper)
                 {
                     case Operator.Run:
@@ -86,22 +98,22 @@ namespace EwsFrame.Manager.Impl
                             throw new InvalidProgramException("State must be Waiting.");
                         }
                         Status = ArcJobStatus.Running;
-                        return;
+                        break;
                     case Operator.Cancel:
                         switch (Status)
                         {
                             case ArcJobStatus.Waiting:
                                 Status = ArcJobStatus.Waiting;
-                                return;
+                                break;
                             case ArcJobStatus.Canceling:
                                 Status = ArcJobStatus.Canceling;
-                                return;
+                                break;
                             case ArcJobStatus.Running:
                                 Status = ArcJobStatus.Canceling;
-                                return;
+                                break;
                             case ArcJobStatus.Ending:
                                 Status = ArcJobStatus.Ending;
-                                return;
+                                break;
                             case ArcJobStatus.Ended:
                             case ArcJobStatus.Canceled:
                             case ArcJobStatus.Success:
@@ -109,22 +121,22 @@ namespace EwsFrame.Manager.Impl
                             default:
                                 throw new NotSupportedException("when cancel, not support state.");
                         }
-
+                        break;
                     case Operator.End:
                         switch (Status)
                         {
                             case ArcJobStatus.Waiting:
                                 Status = ArcJobStatus.Ended;
-                                return;
+                                break;
                             case ArcJobStatus.Canceling:
                                 Status = ArcJobStatus.Ending;
-                                return;
+                                break;
                             case ArcJobStatus.Running:
                                 Status = ArcJobStatus.Ending;
-                                return;
+                                break;
                             case ArcJobStatus.Ending:
                                 Status = ArcJobStatus.Ending;
-                                return;
+                                break;
                             case ArcJobStatus.Ended:
                             case ArcJobStatus.Canceled:
                             case ArcJobStatus.Success:
@@ -132,7 +144,7 @@ namespace EwsFrame.Manager.Impl
                             default:
                                 throw new NotSupportedException("when end, not support state.");
                         }
-
+                        break;
                     case Operator.Finished:
                         switch (Status)
                         {
@@ -146,15 +158,19 @@ namespace EwsFrame.Manager.Impl
                                     {
                                         JobCanceledEvent.Invoke(this, null); // todo catch exception.
                                     }
+                                    catch (Exception ex)
+                                    {
+                                        LogFactory.LogInstance.WriteException(JobName, LogLevel.ERR, "cancel event exception", ex, ex.Message);
+                                    }
                                     finally
                                     {
 
                                     }
                                 }
-                                return;
+                                break;
                             case ArcJobStatus.Running:
                                 Status = ArcJobStatus.Success;
-                                return;
+                                break;
                             case ArcJobStatus.Ending:
                                 Status = ArcJobStatus.Ended;
                                 if (JobEndedEvent != null)
@@ -163,12 +179,16 @@ namespace EwsFrame.Manager.Impl
                                     {
                                         JobEndedEvent.Invoke(this, null); // todo catch exception.
                                     }
+                                    catch (Exception ex)
+                                    {
+                                        LogFactory.LogInstance.WriteException(JobName, LogLevel.ERR, "end event exception", ex, ex.Message);
+                                    }
                                     finally
                                     {
 
                                     }
                                 }
-                                return;
+                                break;
                             case ArcJobStatus.Ended:
                             case ArcJobStatus.Canceled:
                             case ArcJobStatus.Success:
@@ -176,9 +196,27 @@ namespace EwsFrame.Manager.Impl
                             default:
                                 throw new NotSupportedException("when finished, not support state.");
                         }
+                        break;
                     default:
                         throw new NotSupportedException("Not support the operator.");
                 }
+                if (oldStatus != Status && JobStatusChangedEvent != null)
+                {
+                    try
+                    {
+                        JobStatusChangedEvent.Invoke(this, new JobStatusChangedEventArgs(this, oldStatus, Status));
+                    }
+                    catch (Exception ex)
+                    {
+                        LogFactory.LogInstance.WriteException(JobName, LogLevel.ERR, "status changed exception", ex, ex.Message);
+                    }
+                    finally
+                    {
+
+                    }
+                }
+
+                LogFactory.LogInstance.WriteLog(JobName, LogLevel.DEBUG, "ChangeOperator end", "Old Status:{0}, New Status:{1}, operator:{2}.",oldStatus, Status, oper);
             }
         }
     }
