@@ -15,6 +15,11 @@ namespace SqlDbImpl
         {
         }
 
+        public List<IPlanData> GetAllPlans()
+        {
+            throw new NotImplementedException();
+        }
+
         public int GetJobCountInCollection(string cloudService, string jobCollectionName)
         {
             return QueryData<IPlanData>((context) =>

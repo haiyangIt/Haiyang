@@ -13,10 +13,11 @@ namespace DataProtectInterface
         bool IsFilterFolder(IFolderData currentFolder, IMailboxData mailbox, Stack<IFolderData> folders);
         bool IsFilterItem(IItemData item, IMailboxData mailbox, Stack<IFolderData> folders);
     }
-
+    
     public interface IFilterItemWithMailbox : IFilterItem
     {
         List<IMailboxData> GetAllMailbox();
+
         int GetFolderCount();
     }
 }

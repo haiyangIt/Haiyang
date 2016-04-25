@@ -10,6 +10,8 @@ using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Security;
 using DataProtectInterface.Event;
+using EwsFrame.Manager.Impl;
+using EwsFrame.Manager.IF;
 
 namespace DataProtectImpl
 {
@@ -17,43 +19,47 @@ namespace DataProtectImpl
     /// If we need generate catalog concurrently, we need control the granularity to mailbox level.
     /// And we need use the database to record the current generate catalog job information.
     /// </summary>
-    public class CatalogService : ICatalogService, ICatalogJob
+    public class CatalogService : ArcJobBase, ICatalogService, ICatalogJob, IDisposable
     {
-        //public DateTime LastCatalogTime { get; set; }
-
-        public DateTime StartTime { get; set; }
-
-        private string _catalogJobName;
-        public string CatalogJobName
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_catalogJobName))
-                {
-                    _catalogJobName = string.Format("{0} Catalog Job {1}", AdminInfo.OrganizationName, StartTime.ToString("yyyyMMddHHmmss"));
-                }
-                return _catalogJobName;
-            }
-            set
-            {
-                _catalogJobName = value;
-            }
-        }
-
         public string Organization { get { return AdminInfo.OrganizationName; } }
-        
+
         private IFilterItem Filter { get; set; }
 
-        private IServiceContext _serviceContext;
-        public IServiceContext ServiceContext
+        public CatalogService(string adminUserName, string adminPassword, string domainName, string organizationName)
         {
-            get
-            {
-                return _serviceContext.CurrentContext;
-            }
+            if (string.IsNullOrEmpty(adminUserName))
+                throw new ArgumentException("user name is null", "adminUserName");
+            if (string.IsNullOrEmpty(adminPassword))
+                throw new ArgumentException("password is null", "adminPassword");
+
+            LatestStatus = new CatalogProgressArgs(CatalogProgressType.Init);
+
+            AdminInfo = new OrganizationAdminInfo();
+            AdminInfo.UserName = adminUserName;
+            AdminInfo.UserPassword = adminPassword;
+            AdminInfo.UserDomain = domainName;
+            AdminInfo.OrganizationName = organizationName;
+
+            _serviceContext = EwsFrame.ServiceContext.NewServiceContext(AdminInfo.UserName, AdminInfo.UserPassword, AdminInfo.UserDomain, AdminInfo.OrganizationName, TaskType.Catalog);
         }
 
-        public OrganizationAdminInfo AdminInfo { get; private set; }
+        private int GetFolderCount()
+        {
+            if (Filter is IFilterItemWithMailbox)
+            {
+                return ((IFilterItemWithMailbox)Filter).GetFolderCount();
+            }
+            throw new NotSupportedException("Cannot get folders count.");
+        }
+
+        private Process MailboxProgress = null;
+        private Process FolderProgress = null;
+        private Process ItemProgress = null;
+        /// <summary>
+        /// 
+        /// </summary>
+
+        #region IItemBase
 
         public string Id
         {
@@ -64,7 +70,7 @@ namespace DataProtectImpl
 
             set
             {
-                
+
             }
         }
 
@@ -90,28 +96,50 @@ namespace DataProtectImpl
 
             set
             {
-                
+
+            }
+        }
+        #endregion
+
+        #region ICatalogServiceEvent
+        public event EventHandler<CatalogProgressArgs> ProgressChanged;
+
+        public event EventHandler<EventExceptionArgs> ExceptionThrowed;
+        #endregion
+
+        #region ICatalogService
+        public CatalogProgressArgs LatestStatus { get; private set; }
+        public DateTime StartTime { get; set; }
+
+        private void InitCatalogJobName()
+        {
+            if(string.IsNullOrEmpty(_catalogJobName))
+                _catalogJobName = string.Format("{0} Catalog Job {1}", AdminInfo.OrganizationName, StartTime.ToString("yyyyMMddHHmmss"));
+        }
+        private string _catalogJobName;
+        public string CatalogJobName
+        {
+            get
+            {
+                return _catalogJobName;
+            }
+            set
+            {
+                _catalogJobName = value;
             }
         }
 
-        public CatalogService(string adminUserName, string adminPassword, string domainName, string organizationName)
+        private IServiceContext _serviceContext;
+        public IServiceContext ServiceContext
         {
-            if (string.IsNullOrEmpty(adminUserName))
-                throw new ArgumentException("user name is null", "adminUserName");
-            if (string.IsNullOrEmpty(adminPassword))
-                throw new ArgumentException("password is null", "adminPassword");
-
-            LatestStatus = new CatalogProgressArgs(CatalogProgressType.Init);
-
-            AdminInfo = new OrganizationAdminInfo();
-            AdminInfo.UserName = adminUserName;
-            AdminInfo.UserPassword = adminPassword;
-            AdminInfo.UserDomain = domainName;
-            AdminInfo.OrganizationName = organizationName;
-
-            _serviceContext = EwsFrame.ServiceContext.NewServiceContext(AdminInfo.UserName, AdminInfo.UserPassword, AdminInfo.UserDomain, AdminInfo.OrganizationName, TaskType.Catalog);
-
+            get
+            {
+                return _serviceContext;
+            }
         }
+
+        public OrganizationAdminInfo AdminInfo { get; private set; }
+
 
         public List<IMailboxData> GetAllUserMailbox()
         {
@@ -167,32 +195,63 @@ namespace DataProtectImpl
 
         private List<IMailboxData> GetAllUserMailboxFromFilter()
         {
-            if(Filter is IFilterItemWithMailbox)
+            if (Filter is IFilterItemWithMailbox)
             {
                 return ((IFilterItemWithMailbox)Filter).GetAllMailbox();
             }
             return GetAllUserMailbox();
         }
 
-        private int GetFolderCount()
+        public List<IFolderData> GetFolder(string mailbox, string parentId, bool containRootFolder)
         {
-            if (Filter is IFilterItemWithMailbox)
+            ServiceContext.CurrentMailbox = mailbox;
+            IMailbox obj = CatalogFactory.Instance.NewMailboxOperatorImpl();
+            obj.ConnectMailbox(ServiceContext.Argument, mailbox);
+            IFolder folderOper = CatalogFactory.Instance.NewFolderOperatorImpl(obj.CurrentExchangeService);
+            List<Folder> folders = null;
+            if (string.IsNullOrEmpty(parentId) || parentId == "0")
             {
-                return ((IFilterItemWithMailbox)Filter).GetFolderCount();
+                var rootFolder = folderOper.GetRootFolder();
+                if (containRootFolder)
+                {
+                    folders = new List<Folder>() { rootFolder };
+                }
+                else
+                {
+                    folders = folderOper.GetChildFolder(rootFolder);
+                }
             }
-            throw new NotSupportedException("Cannot get folders count.");
+            else
+            {
+                folders = folderOper.GetChildFolder(parentId);
+            }
+
+            List<IFolderData> folderdatas = new List<IFolderData>(folders.Count);
+            IDataConvert dataConvert = CatalogFactory.Instance.NewDataConvert();
+            dataConvert.OrganizationName = AdminInfo.OrganizationName;
+            dataConvert.StartTime = DateTime.Now;
+
+            foreach (var folder in folders)
+            {
+                if (folderOper.IsFolderNeedGenerateCatalog(folder))
+                {
+                    IFolderData folderData = dataConvert.Convert(folder, mailbox);
+                    folderdatas.Add(folderData);
+                }
+            }
+            return folderdatas;
         }
 
-        private Process MailboxProgress = null;
-        private Process FolderProgress = null;
-        private Process ItemProgress = null;
-        /// <summary>
-        /// 
-        /// </summary>
+        public void GenerateCatalog(IFilterItem filter)
+        {
+            Filter = filter;
+            GenerateCatalog();
+        }
+
         public void GenerateCatalog()
         {
             StartTime = DateTime.Now;
-            if(Filter == null)
+            if (Filter == null)
             {
                 Filter = new NoFilter();
             }
@@ -217,6 +276,9 @@ namespace DataProtectImpl
                     mailboxIndex++;
                     MailboxProgress = new Process(mailboxIndex, allUserMailbox.Count);
 
+                    if (IsJobNeedCanceledOrEnded())
+                        break;
+
                     if (Filter.IsFilterMailbox(userMailbox))
                     {
                         OnProgressChanged(CatalogMailboxProgressType.SkipMailbox, MailboxProgress, userMailbox);
@@ -229,11 +291,14 @@ namespace DataProtectImpl
                     try
                     {
                         IMailbox mailboxOperator = NewMailboxOperatorInstance();
-                        
+
                         OnProgressChanged(CatalogMailboxProgressType.ConnectMailboxStart, MailboxProgress, userMailbox);
-                        ServiceContext.CurrentContext.CurrentMailbox = userMailbox.MailAddress;
+                        _serviceContext.CurrentMailbox = userMailbox.MailAddress;
                         mailboxOperator.ConnectMailbox(ServiceContext.Argument, userMailbox.MailAddress);
                         OnProgressChanged(CatalogMailboxProgressType.ConnectMailboxEnd, MailboxProgress, userMailbox);
+
+                        if (IsJobNeedCanceledOrEnded())
+                            break;
 
                         IFolder folderOperator = CatalogFactory.Instance.NewFolderOperatorImpl(mailboxOperator.CurrentExchangeService);
 
@@ -241,6 +306,9 @@ namespace DataProtectImpl
                         Folder rootFolder = folderOperator.GetRootFolder();
 
                         OnProgressChanged(CatalogMailboxProgressType.GetRootFolderEnd, MailboxProgress, userMailbox);
+
+                        if (IsJobNeedCanceledOrEnded())
+                            break;
 
                         userMailbox.RootFolderId = rootFolder.Id.UniqueId;
                         IMailboxData mailboxData = dataConvert.Convert(userMailbox);
@@ -277,7 +345,7 @@ namespace DataProtectImpl
                 dataAccess.SaveCatalogJob(job);
                 isFinished = true;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 OnExceptionThrowed(e);
                 throw new CatalogException("Catalog Failure, please view inner Exception.", e);
@@ -399,9 +467,9 @@ namespace DataProtectImpl
                             OnProgressChanged(CatalogFolderProgressType.ChildFolderSkip, MailboxProgress, mailboxData, FolderProgress, folderData);
                             continue;
                         }
-                        
+
                         folderStack.Push(childFolderData);
-                        GenerateEachFolderCatalog(mailboxData, childFolderData, childFolder, 
+                        GenerateEachFolderCatalog(mailboxData, childFolderData, childFolder,
                             folderOperator, itemOperator, dataAccess, dataConvert, totalFolderCount, currentFolderIndex + 1,
                             folderStack, level + 1);
                         //FolderProgress = new Process(currentFolderIndex, totalFolderCount);
@@ -426,25 +494,20 @@ namespace DataProtectImpl
                 GenerateFolderEnd(folderStack, mailboxData, folderData, hasError);
             }
         }
+        #endregion
 
-        public event EventHandler<CatalogProgressArgs> ProgressChanged;
-        //public event EventHandler<CatalogMailboxArgs> MailboxProgressChanged;
-        //public event EventHandler<CatalogFolderArgs> FolderProgressChanged;
-        //public event EventHandler<CatalogItemArgs> ItemProgressChanged;
-        public event EventHandler<EventExceptionArgs> ExceptionThrowed;
-
-        public CatalogProgressArgs LatestStatus { get; private set; }
-
+        #region Progress
         private void OnProgressChanged(CatalogMailboxProgressType type, Process mailboxProcess, IMailboxData mailbox)
         {
-            if(ProgressChanged != null)
+            if (ProgressChanged != null)
             {
-                try {
+                try
+                {
                     //OnMailboxProgressChanged(type, mailbox);
                     LatestStatus = new CatalogProgressArgs(type, mailboxProcess, mailbox);
                     ProgressChanged(this, LatestStatus);
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     OnExceptionThrowed(e);
                 }
@@ -467,7 +530,7 @@ namespace DataProtectImpl
             }
         }
 
-        private void OnProgressChanged(CatalogFolderProgressType type, Process mailboxProcess , IMailboxData mailbox , 
+        private void OnProgressChanged(CatalogFolderProgressType type, Process mailboxProcess, IMailboxData mailbox,
             Process folderProcess, IFolderData folder)
         {
             if (ProgressChanged != null)
@@ -502,66 +565,15 @@ namespace DataProtectImpl
             }
         }
 
-        //private void OnMailboxProgressChanged(CatalogMailboxProgressType type, IMailboxData mailbox = null)
-        //{
-        //    if(MailboxProgressChanged != null)
-        //    {
-        //        try
-        //        {
-        //            MailboxProgressChanged(this, new CatalogMailboxArgs(type, mailbox));
-        //        }
-        //        catch(Exception e)
-        //        {
-        //            OnExceptionThrowed(e);
-        //        }
-        //    }
-        //}
-
-        //private void OnFolderProgressChanged(CatalogFolderProgressType type,
-        //    IMailboxData currentMailbox,
-        //    Stack<IFolderData> folderStack = null,
-        //    IFolderData currentFolder = null,
-        //    Process itemProcess = null,
-        //    IItemData currentItem = null,
-        //    Process childFolderProcess = null)
-        //{
-        //    if (FolderProgressChanged != null)
-        //    {
-        //        try
-        //        {
-        //            FolderProgressChanged(this, new CatalogFolderArgs(type, currentMailbox, folderStack, currentFolder, itemProcess, currentItem, childFolderProcess));
-        //        }
-        //        catch (Exception e)
-        //        {
-        //            OnExceptionThrowed(e);
-        //        }
-        //    }
-        //}
-
-        //private void OnItemProgressChanged(CatalogItemProgressType type, IMailboxData mailbox, Stack<IFolderData> folderStack, IFolderData folder, IItemData currentItem = null)
-        //{
-        //    if (ItemProgressChanged != null)
-        //    {
-        //        try
-        //        {
-        //            ItemProgressChanged(this, new CatalogItemArgs(type, mailbox, folderStack, folder,  currentItem));
-        //        }
-        //        catch (Exception e)
-        //        {
-        //            OnExceptionThrowed(e);
-        //        }
-        //    }
-        //}
-
         private void OnExceptionThrowed(Exception e)
         {
-            if(ExceptionThrowed != null)
+            if (ExceptionThrowed != null)
             {
                 try
                 {
                     ExceptionThrowed(this, new EventExceptionArgs(e));
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
 
                 }
@@ -570,7 +582,7 @@ namespace DataProtectImpl
 
         public void MailboxGenerateStart(IMailboxData mailbox)
         {
-           // OnProgressChanged(CatalogProgressType.GRTForMailboxStart,  mailbox);
+            // OnProgressChanged(CatalogProgressType.GRTForMailboxStart,  mailbox);
             OnProgressChanged(CatalogMailboxProgressType.Start, MailboxProgress, mailbox);
 
             _serviceContext.CurrentMailbox = mailbox.MailAddress;
@@ -601,20 +613,20 @@ namespace DataProtectImpl
         public void GenerateCatalogEnd(bool isFinished)
         {
             ServiceContext.DataAccessObj.EndTransaction(isFinished);
-            if(isFinished)
+            if (isFinished)
                 OnProgressChanged(CatalogProgressType.EndWithNoError);
             else
                 OnProgressChanged(CatalogProgressType.EndWithError);
         }
 
-        private void GenerateItemEnd(IItemData item,IMailboxData mailboxData,Stack<IFolderData> folderStack,IFolderData folderData, bool itemHasError)
+        private void GenerateItemEnd(IItemData item, IMailboxData mailboxData, Stack<IFolderData> folderStack, IFolderData folderData, bool itemHasError)
         {
             if (itemHasError)
                 OnProgressChanged(CatalogItemProgressType.EndWithError, MailboxProgress, mailboxData, FolderProgress, folderData, ItemProgress, item);
             //OnItemProgressChanged(CatalogItemProgressType.EndWithError,mailboxData,folderStack,folderData, item);
             else
                 OnProgressChanged(CatalogItemProgressType.EndWithNoError, MailboxProgress, mailboxData, FolderProgress, folderData, ItemProgress, item);
-           // OnItemProgressChanged(CatalogItemProgressType.EndWithNoError, mailboxData, folderStack, folderData, item);
+            // OnItemProgressChanged(CatalogItemProgressType.EndWithNoError, mailboxData, folderStack, folderData, item);
         }
 
         private void GenerateItemStart(IItemData item, IMailboxData mailboxData, Stack<IFolderData> folderStack, IFolderData folderData)
@@ -635,7 +647,36 @@ namespace DataProtectImpl
         {
             OnProgressChanged(CatalogFolderProgressType.Start, MailboxProgress, mailboxData, FolderProgress, folderData);
         }
+        #endregion
 
+        #region IArcJob
+        protected override void InternalRun()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ArcJobType JobType
+        {
+            get
+            {
+                return ArcJobType.Backup;
+            }
+        }
+
+        public override string JobName
+        {
+            get
+            {
+
+                return _catalogJobName;
+            }
+
+            set
+            {
+                _catalogJobName = value;
+            }
+        }
+        #endregion
 
         private static SecureString StringToSecureString(string str)
         {
@@ -666,50 +707,9 @@ namespace DataProtectImpl
             return result;
         }
 
-        public List<IFolderData> GetFolder(string mailbox, string parentId, bool containRootFolder)
+        public void Dispose()
         {
-            ServiceContext.CurrentMailbox = mailbox;
-            IMailbox obj = CatalogFactory.Instance.NewMailboxOperatorImpl();
-            obj.ConnectMailbox(ServiceContext.Argument, mailbox);
-            IFolder folderOper = CatalogFactory.Instance.NewFolderOperatorImpl(obj.CurrentExchangeService);
-            List<Folder> folders = null;
-            if (string.IsNullOrEmpty(parentId) || parentId == "0")
-            {
-                var rootFolder = folderOper.GetRootFolder();
-                if (containRootFolder)
-                {
-                    folders = new List<Folder>() { rootFolder };
-                }
-                else
-                {
-                    folders = folderOper.GetChildFolder(rootFolder);
-                }
-            }
-            else
-            {
-                folders = folderOper.GetChildFolder(parentId);
-            }
-
-            List<IFolderData> folderdatas = new List<IFolderData>(folders.Count);
-            IDataConvert dataConvert = CatalogFactory.Instance.NewDataConvert();
-            dataConvert.OrganizationName = AdminInfo.OrganizationName;
-            dataConvert.StartTime = DateTime.Now;
-            
-            foreach(var folder in folders)
-            {
-                if (folderOper.IsFolderNeedGenerateCatalog(folder))
-                {
-                    IFolderData folderData = dataConvert.Convert(folder, mailbox);
-                    folderdatas.Add(folderData);
-                }
-            }
-            return folderdatas;
-        }
-
-        public void GenerateCatalog(IFilterItem filter)
-        {
-            Filter = filter;
-            GenerateCatalog();
+            throw new NotImplementedException();
         }
 
         class MailboxInfo : IMailboxData
@@ -769,7 +769,7 @@ namespace DataProtectImpl
             {
                 get; set;
             }
-            
+
             public IMailboxData Clone()
             {
                 return new MailboxInfo(DisplayName, MailAddress)
@@ -802,6 +802,6 @@ namespace DataProtectImpl
         {
             return false;
         }
-        
+
     }
 }

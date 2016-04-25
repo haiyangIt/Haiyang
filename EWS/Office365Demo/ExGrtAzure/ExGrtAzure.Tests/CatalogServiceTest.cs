@@ -24,9 +24,10 @@ namespace ExGrtAzure.Tests
             _service = GetCatalogService();
 
             var mailboxOper = _factory.NewMailboxOperatorImpl();
-            ServiceContext.ContextInstance.CurrentMailbox = "haiyang.ling@arcserve.com";
-            mailboxOper.ConnectMailbox(ServiceContext.ContextInstance.Argument, "haiyang.ling@arcserve.com");
-            _ewsContext = mailboxOper.CurrentExchangeService;
+            throw new NotImplementedException();
+            //ServiceContext.ContextInstance.CurrentMailbox = "haiyang.ling@arcserve.com";
+            //mailboxOper.ConnectMailbox(ServiceContext.ContextInstance.Argument, "haiyang.ling@arcserve.com");
+            //_ewsContext = mailboxOper.CurrentExchangeService;
         }
 
         public static CatalogFactory GetCatalogFactory()
@@ -70,7 +71,8 @@ namespace ExGrtAzure.Tests
             Folder rootFolder = folder.GetRootFolder();
             IDataConvert dataConvert = _factory.NewDataConvert();
             dataConvert.StartTime = DateTime.Now;
-            dataConvert.OrganizationName = ServiceContext.ContextInstance.AdminInfo.OrganizationName;
+            throw new NotImplementedException();
+            //dataConvert.OrganizationName = ServiceContext.ContextInstance.AdminInfo.OrganizationName;
 
             GetChildFolder(dataConvert, folder, rootFolder, "haiyang.ling@arcserve.com", 1);
         }
@@ -111,7 +113,8 @@ namespace ExGrtAzure.Tests
 
             IDataConvert dataConvert = _factory.NewDataConvert();
             dataConvert.StartTime = DateTime.Now;
-            dataConvert.OrganizationName = ServiceContext.ContextInstance.AdminInfo.OrganizationName;
+            throw new NotImplementedException();
+            //todo dataConvert.OrganizationName = ServiceContext.ContextInstance.AdminInfo.OrganizationName;
 
             foreach (var item in items)
             {
@@ -121,7 +124,8 @@ namespace ExGrtAzure.Tests
             var path = string.Format("{0}.bin", DateTime.Now.ToString("yyyyMMddHHmmss"));
             using (StreamWriter write = new StreamWriter(path))
             {
-                itemOper.ExportItem(items[0], write.BaseStream, ServiceContext.ContextInstance.Argument);
+                //todo itemOper.ExportItem(items[0], write.BaseStream, ServiceContext.ContextInstance.Argument);
+                throw new NotImplementedException();
             }
 
             IFolder folderOper = _factory.NewFolderOperatorImpl(_ewsContext);
@@ -134,7 +138,8 @@ namespace ExGrtAzure.Tests
             FolderId testFolderId = folderOper.CreateChildFolder(new FolderDataBaseDefault() { DisplayName = "Test" }, inboxFolder.Id);
             using (StreamReader reader = new StreamReader(path))
             {
-                itemOper.ImportItem(testFolderId, reader.BaseStream, ServiceContext.ContextInstance.Argument);
+                throw new NotImplementedException();
+                //todo itemOper.ImportItem(testFolderId, reader.BaseStream, ServiceContext.ContextInstance.Argument);
             }
         }
 

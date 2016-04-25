@@ -48,6 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AsyncBackup.cs" />
     <Compile Include="CatalogService.cs" />
     <Compile Include="FilterBySelectedTree.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -123,7 +123,7 @@ namespace SqlDbImpl
 
         internal static CloudBlobClient BlobClient = StorageAccount.CreateCloudBlobClient();
 
-        public readonly BlobDataAccess BlobDataAccessObj = new BlobDataAccess(BlobClient);
+        public static readonly BlobDataAccess BlobDataAccessObj = new BlobDataAccess(BlobClient);
 
         [Obsolete("Please use GetItemContent(IItemData, ExportType)")]
         public IItemData GetItemContent(IItemData itemData)

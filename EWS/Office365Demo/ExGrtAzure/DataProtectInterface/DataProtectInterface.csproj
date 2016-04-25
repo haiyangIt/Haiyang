@@ -112,7 +112,9 @@
     <Compile Include="IRestoreService.cs" />
     <Compile Include="IServiceContext.cs" />
     <Compile Include="ItemKindEx.cs" />
+    <Compile Include="ArcJob\IJobBaseInfo.cs" />
     <Compile Include="OrganizationAdminInfo.cs" />
+    <Compile Include="Plan\IEwsSyncStatus.cs" />
     <Compile Include="Plan\IPlanData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SelectedItem.cs" />

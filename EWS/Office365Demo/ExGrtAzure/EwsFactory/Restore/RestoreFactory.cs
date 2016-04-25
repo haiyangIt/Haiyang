@@ -102,10 +102,10 @@ namespace EwsFrame
             return (IQueryCatalogDataAccess)CreateType<IQueryCatalogDataAccess>(EwsDataImplAssembly);
         }
 
-        public IServiceContext GetServiceContext()
-        {
-            return ServiceContext.ContextInstance;
-        }
+        //public IServiceContext GetServiceContext()
+        //{
+        //    return ServiceContext.ContextInstance;
+        //}
 
         public IDataConvertFromDb NewDataConvert()
         {

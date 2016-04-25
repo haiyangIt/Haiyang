@@ -1,4 +1,8 @@
-﻿using Microsoft.WindowsAzure.Management.Scheduler.Models;
+﻿using DataProtectInterface;
+using EwsFrame;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.Owin;
+using Microsoft.WindowsAzure.Management.Scheduler.Models;
 using Microsoft.WindowsAzure.Scheduler.Models;
 using SqlDbImpl.Model;
 using System;
@@ -6,16 +10,53 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using WebRoleUI.Models;
+using WebRoleUI.Models.Setting;
 using WebRoleUI.Utils;
 
 namespace WebRoleUI.Controllers
 {
+    [CustomErrorHandler]
     public class PlanController : Controller
     {
+        [Authorize]
         // GET: Plan
         public ActionResult Index()
         {
-            return View();
+            var currentUserId = User.Identity.GetUserId();
+            ApplicationUser user = HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>().FindById(currentUserId);
+
+            var dataAccess = PlanFactory.Instance.NewPlanDataAccess(user.Organization);
+            var plans = dataAccess.GetAllPlans();
+
+            return View(plans);
+        }
+
+        [Authorize]
+        public ActionResult CreatePlan()
+        {
+            var currentUserId = User.Identity.GetUserId();
+            ApplicationUser user = HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>().FindById(currentUserId);
+            SettingModel settingModel = null;
+            using (ApplicationDbContext context = new ApplicationDbContext())
+            {
+                settingModel = context.Settings.Where(s => s.UserMail == user.Email).FirstOrDefault();
+            }
+            OrganizationAdminInfo adminInfo = null;
+            if (settingModel != null)
+            {
+                adminInfo.UserName = settingModel.AdminUserName;
+                adminInfo.UserPassword = settingModel.AdminPassword;
+            }
+
+            var planModel = new PlanViewModel()
+            {
+                AdminInfo = adminInfo,
+                SyncDatas = null,
+                Organization = user.Organization
+            };
+
+            return View(planModel);
         }
 
         public JsonResult CreatePlan(PlanModel planModel,PlanAzureInfo planAzureInfo)

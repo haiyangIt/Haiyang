@@ -86,11 +86,6 @@ namespace EwsFrame
             return (IDataConvert)CreateType<IDataConvert>(EwsDataImplAssembly);
         }
 
-        public IServiceContext GetServiceContext()
-        {
-            return ServiceContext.ContextInstance;
-        }
-
         public IFilterItem NewFilterItemBySelectTree(LoadedTreeItem orgSelectItem)
         {
             return (IFilterItem)CreateType<IFilterItem>(DataProtectImplAssembly, orgSelectItem);

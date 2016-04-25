@@ -40,15 +40,19 @@ namespace SqlDbImpl.Storage
         }
 
         
-
-        public void ResetAllBlob(string organization, bool isResetAll = false)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="organization"></param>
+        /// <param name="mailboxPrefix">if null or empty, reset all blob. else reset specific mailbox.</param>
+        public void ResetAllBlob(string organization, string mailboxPrefix)
         {
-            string prefix = CatalogFactory.Instance.GetServiceContext().GetOrganizationPrefix();
+            var isResetAll = string.IsNullOrEmpty(mailboxPrefix);
             IEnumerable<CloudBlobContainer> containers = null;
             if (isResetAll)
                 containers = _blobClient.ListContainers();
             else
-                containers = _blobClient.ListContainers(prefix);
+                containers = _blobClient.ListContainers(mailboxPrefix);
             foreach (var container in containers)
             {
                 container.Delete();

@@ -66,7 +66,7 @@ namespace SqlDbImpl
         {
             get
             {
-                if(_cacheKeyNameDic == null)
+                if (_cacheKeyNameDic == null)
                 {
                     _cacheKeyNameDic = new Dictionary<Type, string>();
                     _cacheKeyNameDic.Add(typeof(MailboxModel), "SaveMailboxList");
@@ -114,12 +114,12 @@ namespace SqlDbImpl
         {
             Item itemInEws = item.Data as Item;
 
-            if(isCheckExist)
+            if (isCheckExist)
             {
                 if (isExist)
                     return;
             }
-            else if(IsItemContentExist(item.ItemId))
+            else if (IsItemContentExist(item.ItemId))
                 return;
 
             string containerName = string.Empty;
@@ -149,7 +149,7 @@ namespace SqlDbImpl
                 var emlLocation = new ExportItemSizeInfo() { Type = ExportType.Eml, Size = (int)emlStream.Length };
                 mailLocation.AddLocation(emlLocation);
 
-                var location = ItemLocationModel.GetLocation(item);
+                var location = ItemLocationModel.GetLocation(item, _argument.CurrentMailbox);
                 mailLocation.Path = location;
 
                 string blobNamePrefix = MailLocation.GetBlobNamePrefix(item.ItemId);
@@ -161,7 +161,7 @@ namespace SqlDbImpl
             }
             finally
             {
-                if(binStream != null)
+                if (binStream != null)
                 {
                     binStream.Close();
                     binStream.Dispose();
@@ -189,7 +189,7 @@ namespace SqlDbImpl
                              where m.ItemId == itemId
                              select m;
                 var itemContent = result.FirstOrDefault();
-                if(itemContent == default(ItemLocationModel))
+                if (itemContent == default(ItemLocationModel))
                 {
                     return false;
                 }

@@ -38,6 +38,14 @@ namespace EwsServiceInterface
         public bool SetXAnchorMailbox;
         public string XAnchorMailbox;
 
+        public string CurrentMailbox
+        {
+            get
+            {
+                return ServiceEmailAddress.Address;
+            }
+        }
+
         public EwsServiceArgument()
         {
             RequestedExchangeVersion = ExchangeVersion.Exchange2013_SP1;

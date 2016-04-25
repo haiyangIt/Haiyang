@@ -19,14 +19,14 @@ namespace SqlDbImpl
         public void ResetAllStorage(string organization)
         {
             SqlDbResetHelper helper = new SqlDbResetHelper();
-            helper.ResetBlobData(organization);
+            helper.ResetBlobData(organization, string.Empty);
             helper.DeleteDatabase(organization);
         }
 
         public void ResetAllStorage()
         {
             SqlDbResetHelper helper = new SqlDbResetHelper();
-            helper.ResetBlobData(string.Empty, true);
+            helper.ResetBlobData(string.Empty, string.Empty);
         }
     }
 

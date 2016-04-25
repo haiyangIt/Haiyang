@@ -21,8 +21,9 @@ namespace ExGrtAzure.Tests
             _service = GetRestoreService();
 
             var mailboxOper = _factory.NewMailboxOperatorImpl();
-            ServiceContext.ContextInstance.CurrentMailbox = "haiyang.ling@arcserve.com";
-            mailboxOper.ConnectMailbox(ServiceContext.ContextInstance.Argument, "haiyang.ling@arcserve.com");
+            throw new NotImplementedException();
+            // todo ServiceContext.ContextInstance.CurrentMailbox = "haiyang.ling@arcserve.com";
+            // todo mailboxOper.ConnectMailbox(ServiceContext.ContextInstance.Argument, "haiyang.ling@arcserve.com");
             _ewsContext = mailboxOper.CurrentExchangeService;
         }
 
@@ -50,12 +51,13 @@ namespace ExGrtAzure.Tests
             {
                 service.Destination = destination;
                 destination.InitOtherInformation("haiyang.ling@arcserve.com", "Restore1");
-
-                IQueryCatalogDataAccess dataAccess = (IQueryCatalogDataAccess)ServiceContext.GetDataAccessInstance(TaskType.Restore, service.ServiceContext.Argument, "Arcserve");
-                var allJob = dataAccess.GetAllCatalogJob();
-                dataAccess.CatalogJob = allJob[0];
-                service.CurrentRestoreCatalogJob = allJob[0];
-                service.RestoreMailbox("haiyang.ling@arcserve.com");
+                throw new NotImplementedException();
+                // todo 
+                //IQueryCatalogDataAccess dataAccess = (IQueryCatalogDataAccess)ServiceContext.GetDataAccessInstance(TaskType.Restore, service.ServiceContext.Argument, "Arcserve");
+                //var allJob = dataAccess.GetAllCatalogJob();
+                //dataAccess.CatalogJob = allJob[0];
+                //service.CurrentRestoreCatalogJob = allJob[0];
+                //service.RestoreMailbox("haiyang.ling@arcserve.com");
             }
         }
 

@@ -21,13 +21,13 @@ namespace EwsFrame.Manager.Impl
         public ArcJobBase(string jobName) : this()
         {
             if (string.IsNullOrEmpty(jobName))
-                JobName = JobId.ToString();
-            else
-                JobName = jobName;
+                throw new ArgumentNullException("jobName");
+
+            JobName = jobName;
         }
 
         public Guid JobId { get; private set; }
-        public string JobName { get; set; }
+        public virtual string JobName { get; set; }
 
         protected object SyncObj = new object();
 
@@ -216,8 +216,13 @@ namespace EwsFrame.Manager.Impl
                     }
                 }
 
-                LogFactory.LogInstance.WriteLog(JobName, LogLevel.DEBUG, "ChangeOperator end", "Old Status:{0}, New Status:{1}, operator:{2}.",oldStatus, Status, oper);
+                LogFactory.LogInstance.WriteLog(JobName, LogLevel.DEBUG, "ChangeOperator end", "Old Status:{0}, New Status:{1}, operator:{2}.", oldStatus, Status, oper);
             }
+        }
+
+        protected bool IsJobNeedCanceledOrEnded()
+        {
+            return Status == ArcJobStatus.Canceling || Status == ArcJobStatus.Ending;
         }
     }
 

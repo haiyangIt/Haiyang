@@ -97,7 +97,8 @@
     <Compile Include="Cache\ICache.cs" />
     <Compile Include="Cache\MailboxCacheManager.cs" />
     <Compile Include="Cache\OrganizationCacheManager.cs" />
-    <Compile Include="CatalogFactory.cs" />
+    <Compile Include="Backup\CatalogFactory.cs" />
+    <Compile Include="Context\ServiceContextManager.cs" />
     <Compile Include="Util\ReadWriteLockExtension.cs" />
     <Compile Include="Util\Setting\Config.cs" />
     <Compile Include="EF\CustomApplicationDbConfiguration.cs" />
@@ -133,9 +134,9 @@
     <Compile Include="Util\MD5Utility.cs" />
     <Compile Include="PlanFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RestoreFactory.cs" />
+    <Compile Include="Restore\RestoreFactory.cs" />
     <Compile Include="ServiceBus\Relay\ILogSolver.cs" />
-    <Compile Include="ServiceContext.cs" />
+    <Compile Include="Context\ServiceContext.cs" />
     <Compile Include="ServiceBus\AzureServiceBusHelper.cs" />
     <Compile Include="Util\Deque.cs" />
     <Compile Include="Util\PlanUtil.cs" />

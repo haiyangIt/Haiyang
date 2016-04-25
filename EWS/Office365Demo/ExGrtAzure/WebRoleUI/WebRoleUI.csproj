@@ -335,6 +335,7 @@
     <Compile Include="Models\BackupModel.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
+    <Compile Include="Models\PlanViewModel.cs" />
     <Compile Include="Models\Restore\CatalogJobParameter.cs" />
     <Compile Include="Models\Restore\Item.cs" />
     <Compile Include="Models\Restore\RestoreAdminUserInfo.cs" />
@@ -498,6 +499,7 @@
     <Content Include="Scripts\jquery-ui-1.11.4.min.js" />
     <Content Include="Scripts\jquery.bootstrap.wizard.js" />
     <Content Include="Scripts\jquery.bootstrap.wizard.min.js" />
+    <Content Include="Scripts\jquery.formatDateTime.js" />
     <Content Include="Scripts\jquery.tristate.js" />
     <Content Include="Scripts\jquery.unobtrusive-ajax.js" />
     <Content Include="Scripts\jquery.unobtrusive-ajax.min.js" />
@@ -559,10 +561,11 @@
     <Content Include="Views\Backup\Index.cshtml" />
     <Content Include="Views\Setting\Index.cshtml" />
     <Content Include="Views\Test\Index.cshtml" />
+    <Content Include="Views\Plan\Index.cshtml" />
+    <Content Include="Views\Plan\CreatePlan.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Views\Plan\" />
     <Folder Include="Views\Progress\" />
   </ItemGroup>
   <ItemGroup>

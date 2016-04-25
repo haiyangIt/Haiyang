@@ -12,64 +12,34 @@ namespace EwsFrame
     {
         public OrganizationAdminInfo AdminInfo { get; private set; }
 
-        [ThreadStatic]
-        private static IServiceContext _ContextInstance;
+        //public static IDataAccess GetDataAccessInstance(TaskType taskType, EwsServiceArgument argument, string organization)
+        //{
+        //    if (_dataAccessObj == null)
+        //        CreateDataAccess(taskType, argument, organization);
+        //    return _dataAccessObj;
+        //}
 
-        public static IServiceContext ContextInstance
-        {
-            get
-            {
-                if (_ContextInstance == null)
-                {
-                    throw new NullReferenceException();
-                }
-                return _ContextInstance;
-            }
-        }
-
-        public IServiceContext CurrentContext
-        {
-            get
-            {
-                return ContextInstance;
-            }
-        }
-
-        [ThreadStatic]
-        private static IDataAccess _dataAccessObj;
-
-        public static IDataAccess GetDataAccessInstance(TaskType taskType, EwsServiceArgument argument, string organization)
-        {
-            if (_dataAccessObj == null)
-                CreateDataAccess(taskType, argument, organization);
-            return _dataAccessObj;
-        }
-
+        private IDataAccess _dataAccessObj;
         public IDataAccess DataAccessObj
         {
             get
             {
-                if (_dataAccessObj == null)
-                {
-                    CreateDataAccess(TaskType, Argument, AdminInfo.OrganizationName);
-                }
                 return _dataAccessObj;
             }
         }
 
-        private static void CreateDataAccess(TaskType taskType, EwsServiceArgument argument, string organization)
+        private static IDataAccess CreateDataAccess(TaskType taskType, EwsServiceArgument argument, string organization)
         {
-            if (_dataAccessObj == null)
+            IDataAccess result;
+            if (taskType == TaskType.Catalog)
             {
-                if (taskType == TaskType.Catalog)
-                {
-                    _dataAccessObj = CatalogFactory.Instance.NewCatalogDataAccessInternal(argument, organization);
-                }
-                else
-                {
-                    _dataAccessObj = RestoreFactory.Instance.NewCatalogDataAccessInternal();
-                }
+                result = CatalogFactory.Instance.NewCatalogDataAccessInternal(argument, organization);
             }
+            else
+            {
+                result = RestoreFactory.Instance.NewCatalogDataAccessInternal();
+            }
+            return result;
         }
 
         public TaskType TaskType { get; private set; }
@@ -137,21 +107,25 @@ namespace EwsFrame
 
         public static IServiceContext NewServiceContext(string userName, string password, string domainName, string organization, TaskType taskType)
         {
-            //if (_ContextInstance == null)
-            _ContextInstance = new ServiceContext(userName, password, domainName, organization, taskType);
-            return ContextInstance;
+            var result = new ServiceContext(userName, password, domainName, organization, taskType);
+            return result;
         }
 
         public ServiceContext()
         {
-            if (ContextInstance == null)
-                throw new NullReferenceException("Context not initialize.");
+            //if (ContextInstance == null)
+            //    throw new NullReferenceException("Context not initialize.");
         }
 
         public string GetOrganizationPrefix()
         {
-            int atIndex = CurrentMailbox.IndexOf("@");
-            string domain = CurrentMailbox.Substring(atIndex + 1, CurrentMailbox.Length - atIndex - 1).Replace(".", "-").ToLower();
+            return GetOrganizationPrefix(CurrentMailbox);
+        }
+
+        public static string GetOrganizationPrefix(string mailbox)
+        {
+            int atIndex = mailbox.IndexOf("@");
+            string domain = mailbox.Substring(atIndex + 1, mailbox.Length - atIndex - 1).Replace(".", "-").ToLower();
             return domain;
         }
     }

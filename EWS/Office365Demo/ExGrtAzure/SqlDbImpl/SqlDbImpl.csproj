@@ -150,6 +150,7 @@
     <Compile Include="Model\FolderModel.cs" />
     <Compile Include="Model\ItemLocationModel.cs" />
     <Compile Include="Model\ItemModel.cs" />
+    <Compile Include="Model\JobBaseInfoModel.cs" />
     <Compile Include="Model\MailboxModel.cs" />
     <Compile Include="Model\OrganizationData.cs" />
     <Compile Include="Model\PlanModel.cs" />

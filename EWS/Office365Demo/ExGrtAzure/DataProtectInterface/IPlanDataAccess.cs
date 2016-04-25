@@ -15,5 +15,6 @@ namespace DataProtectInterface
         int GetJobCountInCollection(string cloudService, string jobCollectionName);
         void InsertPlanModel(IPlanData planModel);
         void InsertPlanAzureInfo(IPlanAzureInfo planAzureInfo);
+        List<IPlanData> GetAllPlans();
     }
 }

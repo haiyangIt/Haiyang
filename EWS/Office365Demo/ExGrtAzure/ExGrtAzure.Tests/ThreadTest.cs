@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace ExGrtAzure.Tests
 {
@@ -56,7 +57,7 @@ namespace ExGrtAzure.Tests
                 string temp = string.Empty;
                 lock (data)
                 {
-                    while(data.Count > 0)
+                    while (data.Count > 0)
                     {
                         temp = data.Dequeue();
                         d.Add(temp);
@@ -80,6 +81,58 @@ namespace ExGrtAzure.Tests
             {
                 quitEvent.Set();
             }
+        }
+
+        private async Task<int> DelayAndReturnAsync(int val)
+        {
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Restart();
+            await Task.Delay(TimeSpan.FromSeconds(val));
+            stopWatch.Stop();
+            Debug.WriteLine(string.Format("ThreadName:{0}:{1}", Thread.CurrentThread.ManagedThreadId, stopWatch.ElapsedMilliseconds));
+            return val;
+        }
+
+        [TestMethod]
+        public async Task TaskTest()
+        {
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Restart();
+            Task<int> taskA = DelayAndReturnAsync(4);
+            Task<int> taskB = DelayAndReturnAsync(2);
+            Task<int> taskC = DelayAndReturnAsync(3);
+            var tasks = new Task<int>[] { taskA, taskB, taskC };
+            foreach (var task in tasks)
+            {
+                var result = await task;
+                Debug.WriteLine(result);
+            }
+            stopWatch.Stop();
+            Debug.WriteLine("write");
+            
+            Debug.WriteLine(string.Format("Main ThreadName:{0}:{1}", Thread.CurrentThread.ManagedThreadId, stopWatch.ElapsedMilliseconds));
+            stopWatch.Restart();
+            taskA = DelayAndReturnAsync(4);
+            taskB = DelayAndReturnAsync(2);
+            taskC = DelayAndReturnAsync(3);
+            tasks = new Task<int>[] { taskA, taskB, taskC };
+            var resultW = await Task.WhenAll(tasks);
+            stopWatch.Stop();
+            Debug.WriteLine(string.Format("result ,{0},{1},{2}", resultW[0], resultW[1], resultW[2]));
+            Debug.WriteLine(string.Format("Main ThreadName:{0}:{1}", Thread.CurrentThread.ManagedThreadId, stopWatch.ElapsedMilliseconds));
+
+            Debug.WriteLine("");
+            stopWatch.Restart();
+            Task<int>[] taskArray = new Task<int>[10];
+            for(int i = 0; i < 10; i++)
+            {
+                taskArray[i] = DelayAndReturnAsync(i);
+            }
+            var resultaa = await Task.WhenAll(taskArray);
+            stopWatch.Stop();
+            Debug.WriteLine(string.Format("result ,{0},{1},{2}", resultaa[0], resultaa[1], resultaa[2]));
+            Debug.WriteLine(string.Format("Main ThreadName:{0}:{1}", Thread.CurrentThread.ManagedThreadId, stopWatch.ElapsedMilliseconds));
+
         }
     }
 }

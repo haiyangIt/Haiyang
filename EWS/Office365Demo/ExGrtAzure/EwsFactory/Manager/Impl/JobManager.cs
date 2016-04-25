@@ -24,8 +24,6 @@ namespace EwsFrame.Manager.Impl
             base.BeforeStart();
         }
 
-
-
         public void AddJob(IArcJob job)
         {
             LogFactory.LogInstance.WriteLog(ManagerName, LogInterface.LogLevel.DEBUG, string.Format("Manager [{0}] adding job [{1}] [{2}].", ManagerName, job.JobId, job.JobName));
