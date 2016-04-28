@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EwsServiceInterface.Sync
+namespace Arcserve.Office365.Exchange.EwsApi.Increment
 {
     public interface IEwsServiceAdapter<ProgressType> : ITaskSyncContext<ProgressType>
     {

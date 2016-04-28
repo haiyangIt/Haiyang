@@ -87,19 +87,12 @@
   <ItemGroup>
     <Compile Include="INotify.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Sync\IBackupQueryAsync.cs" />
-    <Compile Include="Sync\IFilterItemWithFolderAsync.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\EwsServiceInterface\EwsServiceInterface.csproj">
-      <Project>{ec82b108-4a69-4517-966b-328cf90ed3b5}</Project>
-      <Name>EwsServiceInterface</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Sync\" />
     <Folder Include="Util\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

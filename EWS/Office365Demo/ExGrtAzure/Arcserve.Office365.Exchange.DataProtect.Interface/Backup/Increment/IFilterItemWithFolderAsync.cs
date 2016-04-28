@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataProtectInterface.Sync
+namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
 {
     public interface IFilterItemWithFolderAsync<ProgressType> : IFilterItemWithMailboxAsync<ProgressType>
     {

@@ -1,12 +1,13 @@
-﻿using EwsDataInterface;
-using EwsDataInterface.Sync;
+﻿using Arcserve.Office365.Exchange.Data;
+using Arcserve.Office365.Exchange.Data.Increment;
+using Arcserve.Office365.Exchange.Thread;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataProtectInterface.Sync
+namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
 {
     public interface IBackupQueryAsync<ProgressType> : ITaskSyncContext<ProgressType>
     {

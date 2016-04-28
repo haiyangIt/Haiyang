@@ -2,15 +2,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Management.Automation;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Security;
-using System.Management.Automation.Runspaces;
-using EwsDataInterface;
+using DataProtectImpl.Backup;
+using Arcserve.Office365.Exchange.Thread;
+using Arcserve.Office365.Exchange.Data.Account;
+using Arcserve.Office365.Exchange.Data.Increment;
 
-namespace DataProtectImpl.Backup
+namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
 {
     public class SyncBackup : BackupFlowTemplate, ITaskSyncContext<JobProgress>
     {

@@ -49,20 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Backup\AsyncBackup.cs" />
-    <Compile Include="Backup\BackupFlowTemplate.cs" />
-    <Compile Include="Backup\SyncBackup.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\DataProtectInterface\DataProtectInterface.csproj">
-      <Project>{f8783799-5d60-441f-a3b6-ffdaae476a12}</Project>
-      <Name>DataProtectInterface</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\EwsServiceInterface\EwsServiceInterface.csproj">
-      <Project>{ec82b108-4a69-4517-966b-328cf90ed3b5}</Project>
-      <Name>EwsServiceInterface</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

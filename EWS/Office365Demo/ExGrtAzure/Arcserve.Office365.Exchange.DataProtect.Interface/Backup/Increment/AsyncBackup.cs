@@ -1,6 +1,4 @@
-﻿using DataProtectInterface;
-using EwsDataInterface;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,9 +7,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using EwsWSData = Microsoft.Exchange.WebServices.Data;
 using EwsWS = Microsoft.Exchange.WebServices;
-using DataProtectImpl.Backup;
+using Arcserve.Office365.Exchange.Thread;
+using Arcserve.Office365.Exchange.Data.Account;
+using Arcserve.Office365.Exchange.EwsApi.Increment;
+using Arcserve.Office365.Exchange.Data.Increment;
 
-namespace DataProtectImpl
+namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
 {
     public class AsyncBackup : ITaskSyncContext<JobProgress>
     {
@@ -21,7 +22,7 @@ namespace DataProtectImpl
         public CancellationToken CancelToken { get; set; }
         public OrganizationAdminInfo AdminInfo { get; set; }
         public string Organization { get; }
-        public IBackupQuerySync<JobProgress> BackupQuery { get; }
+        public IBackupQueryAsync<JobProgress> BackupQuery { get; }
         public IEwsServiceAdapter<JobProgress> EwsServiceAdapter { get; set; }
         public DateTime JobStartTime { get; }
         public async System.Threading.Tasks.Task Run()

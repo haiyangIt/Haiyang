@@ -1,6 +1,4 @@
-﻿using DataProtectInterface;
-using EwsDataInterface;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,9 +6,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using EwsWSData = Microsoft.Exchange.WebServices.Data;
-using EwsDataInterface.Sync;
+using Arcserve.Office365.Exchange.Data.Increment;
 
-namespace DataProtectImpl.Backup
+namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
 {
     public abstract class BackupFlowTemplate
     {
