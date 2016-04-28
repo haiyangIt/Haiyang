@@ -1,13 +1,13 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.ServiceBus.Messaging;
-using EwsFrame.Util.Setting;
 using System.Threading;
 using System.Threading.Tasks;
 using System.IO;
 using System.Text;
 using Newtonsoft.Json;
 using System.Diagnostics;
+using Arcserve.Office365.Exchange.Util.Setting;
 
 namespace ExGrtAzure.Tests
 {

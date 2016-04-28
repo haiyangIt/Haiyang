@@ -1,8 +1,8 @@
-﻿using DataProtectInterface;
+﻿using Arcserve.Office365.Exchange.Data;
+using Arcserve.Office365.Exchange.Data.Mail;
+using Arcserve.Office365.Exchange.DataProtect.Interface;
 using Demo.Models.Restore;
-using EwsDataInterface;
 using EwsFrame;
-using EwsFrame.Util;
 using LoginTest.Models;
 using LoginTest.Models.Restore;
 using LoginTest.Utils;

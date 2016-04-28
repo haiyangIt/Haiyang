@@ -9,8 +9,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>LogImpl</RootNamespace>
     <AssemblyName>LogImpl</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -69,19 +70,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DefaultLog.cs" />
-    <Compile Include="DefaultEwsTraceLog.cs" />
-    <Compile Include="LogToBlob.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EwsFactory\EwsFrame.csproj">
       <Project>{16a3fa6c-9796-4072-b4fa-ca7dc33bac00}</Project>
       <Name>EwsFrame</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\LogInterface\LogInterface.csproj">
-      <Project>{ed66d5c0-8d87-4dd6-9e6c-7d21b5bb8585}</Project>
-      <Name>LogInterface</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

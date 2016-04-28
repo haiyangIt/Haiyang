@@ -11,13 +11,13 @@ using Microsoft.WindowsAzure.Management.Scheduler.Models;
 using Microsoft.WindowsAzure.Scheduler.Models;
 using System.Xml.Linq;
 using System.IO;
-using SqlDbImpl.Model;
 using EwsFrame;
-using DataProtectInterface.Plan;
 using Microsoft.ServiceBus;
-using EwsFrame.Util;
-using EwsFrame.ServiceBus;
-using EwsFrame.Util.Setting;
+using Arcserve.Office365.Exchange.Data.Impl.Mail;
+using Arcserve.Office365.Exchange.Util.Setting;
+using Arcserve.Office365.Exchange.DataProtect.Interface;
+using Arcserve.Office365.Exchange.Data.Plan;
+using Arcserve.Office365.Exchange.ServiceBus;
 
 namespace WebRoleUI.Utils
 {

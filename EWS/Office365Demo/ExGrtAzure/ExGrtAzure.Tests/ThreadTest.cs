@@ -4,6 +4,8 @@ using System.Threading;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
+using System.Threading.Tasks.Dataflow;
 
 namespace ExGrtAzure.Tests
 {
@@ -133,6 +135,118 @@ namespace ExGrtAzure.Tests
             Debug.WriteLine(string.Format("result ,{0},{1},{2}", resultaa[0], resultaa[1], resultaa[2]));
             Debug.WriteLine(string.Format("Main ThreadName:{0}:{1}", Thread.CurrentThread.ManagedThreadId, stopWatch.ElapsedMilliseconds));
 
+        }
+
+        [TestMethod]
+        public async Task TaskLearn()
+        {
+            Stopwatch dTime = new Stopwatch();
+            dTime.Start();
+            List<Task> allTasks = new List<Task>();
+            for(int i = 0;i < LoopCount; i++)
+            {
+                var task = CreateTask(i);
+                task.Start();
+                await task.ConfigureAwait(false);
+                await task;
+                allTasks.Add(task);
+            }
+            
+            await Task.WhenAll(allTasks);
+            dTime.Stop();
+            Debug.WriteLine(string.Format("Time:{0}", dTime.ElapsedMilliseconds));
+            OutputThread();
+        }
+
+        private void OutputThread()
+        {
+            Debug.WriteLine("Thread:");
+            foreach (var value in dic.Keys)
+            {
+                Debug.Write(value);
+                Debug.Write(" ");
+            }
+            Debug.WriteLine("");
+            Debug.WriteLine(string.Format("ThreadName:{0}", Thread.CurrentThread.ManagedThreadId));
+        }
+
+        private Task CreateTask(int index)
+        {
+            return new Task(() =>
+            {
+                Thread.Sleep(2000);
+                //Debug.WriteLine(string.Format("{1},ThreadName:{0}", Thread.CurrentThread.ManagedThreadId, index));
+                dic[Thread.CurrentThread.ManagedThreadId] = true;
+            });
+        }
+
+        ConcurrentDictionary<int, bool> dic = new ConcurrentDictionary<int, bool>();
+        private const int LoopCount = 10;
+
+        [TestMethod]
+        public void TaskLearnParallel()
+        {
+            Stopwatch dTime = new Stopwatch();
+            dTime.Start();
+            var ints = new List<int>();
+
+            for(int i = 0; i < LoopCount; i++)
+            {
+                ints.Add(i);
+            }
+
+            Parallel.ForEach<int>(ints, (index) =>
+            {
+                Thread.Sleep(2000);
+                //Debug.WriteLine(string.Format("{1},ThreadName:{0}", Thread.CurrentThread.ManagedThreadId, index));
+                dic[Thread.CurrentThread.ManagedThreadId] = true;
+            });
+            dTime.Stop();
+            Debug.WriteLine(string.Format("Time:{0}", dTime.ElapsedMilliseconds));
+            OutputThread();
+        }
+
+        [TestMethod]
+        public async Task TaskLearnParallelAsync()
+        {
+            dic.Clear();
+            Stopwatch dTime = new Stopwatch();
+
+            dTime.Start();
+            var ints = new List<int>();
+
+            for (int i = 0; i < LoopCount; i++)
+            {
+                ints.Add(i);
+            }
+
+            var t = Task.Run(() =>
+            {
+                Parallel.ForEach<int>(ints, (index) =>
+                {
+                    Thread.Sleep(2000);
+                    //Debug.WriteLine(string.Format("{1},ThreadName:{0}", Thread.CurrentThread.ManagedThreadId, index));
+                    dic[Thread.CurrentThread.ManagedThreadId] = true;
+                });
+            }).ConfigureAwait(false);
+
+            Debug.WriteLine("test1");
+            await t;
+           
+            dTime.Stop();
+            Debug.WriteLine(string.Format("Time:{0}", dTime.ElapsedMilliseconds));
+            OutputThread();
+        }
+
+        private string[] GetMails()
+        {
+            throw new NotImplementedException();
+        }
+
+        [TestMethod]
+        public void TestTplDataFlow()
+        {
+            
         }
     }
 }

@@ -15,7 +15,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>LoginTest</RootNamespace>
     <AssemblyName>LoginTest</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>true</UseIISExpress>
     <IISExpressSSLPort />
@@ -25,6 +25,7 @@
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -91,6 +92,7 @@
     <Reference Include="System.Data">
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Drawing">
       <Private>True</Private>
     </Reference>
@@ -116,19 +118,8 @@
     <Reference Include="System.ComponentModel.DataAnnotations">
       <Private>True</Private>
     </Reference>
-    <Reference Include="System.Core">
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.Data.DataSetExtensions">
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.Xml.Linq">
-      <Private>True</Private>
-    </Reference>
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Web">
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.Web.Extensions">
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Web.Abstractions">
@@ -187,6 +178,7 @@
       <Private>True</Private>
       <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
     </Reference>
+    <Reference Include="System.Xml.Linq" />
     <Reference Include="WebGrease">
       <Private>True</Private>
       <HintPath>..\packages\WebGrease.1.5.2\lib\WebGrease.dll</HintPath>
@@ -540,55 +532,50 @@
     <Content Include="Scripts\jquery-1.10.2.min.map" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\ParseItemFromEWSExportFunction\FastTransferUtil\FastTransferUtil.csproj">
+    <ProjectReference Include="..\..\..\ParseItemFromEWSExportFunction\FastTransferUtil\Arcserve.Exchange.FastTransferUtil.csproj">
       <Project>{724571a8-bf45-4efe-ab1e-bb065201513b}</Project>
-      <Name>FastTransferUtil</Name>
+      <Name>Arcserve.Exchange.FastTransferUtil</Name>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\DataProtectImpl\DataProtectImpl.csproj">
-      <Project>{6e5dda9f-569b-46c9-9920-ab0166517421}</Project>
-      <Name>DataProtectImpl</Name>
-      <Private>True</Private>
+    <ProjectReference Include="..\Arcserve.Office365.Exchange.Data.Impl\Arcserve.Office365.Exchange.Data.Impl.csproj">
+      <Project>{ab28d2e3-0def-4767-aa00-38129d147aa9}</Project>
+      <Name>Arcserve.Office365.Exchange.Data.Impl</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DataProtectInterface\DataProtectInterface.csproj">
-      <Project>{f8783799-5d60-441f-a3b6-ffdaae476a12}</Project>
-      <Name>DataProtectInterface</Name>
-      <Private>True</Private>
+    <ProjectReference Include="..\Arcserve.Office365.Exchange.DataProtect.Impl\Arcserve.Office365.Exchange.DataProtect.Impl.csproj">
+      <Project>{fd9aa43b-8db4-413c-bc80-fbeec07d5237}</Project>
+      <Name>Arcserve.Office365.Exchange.DataProtect.Impl</Name>
     </ProjectReference>
-    <ProjectReference Include="..\EwsDataInterface\EwsDataInterface.csproj">
-      <Project>{943fa512-7de9-47d2-9f9a-5e1dc1628f8e}</Project>
-      <Name>EwsDataInterface</Name>
-      <Private>True</Private>
+    <ProjectReference Include="..\Arcserve.Office365.Exchange.DataProtect.Interface\Arcserve.Office365.Exchange.DataProtect.Interface.csproj">
+      <Project>{3537b177-88f3-440b-b114-5bcf98ca2220}</Project>
+      <Name>Arcserve.Office365.Exchange.DataProtect.Interface</Name>
     </ProjectReference>
-    <ProjectReference Include="..\EwsFactory\EwsFrame.csproj">
-      <Project>{16a3fa6c-9796-4072-b4fa-ca7dc33bac00}</Project>
-      <Name>EwsFrame</Name>
-      <Private>True</Private>
+    <ProjectReference Include="..\Arcserve.Office365.Exchange.Data\Arcserve.Office365.Exchange.Data.csproj">
+      <Project>{177b7df7-ecaf-4bcc-9f26-77276893ba9f}</Project>
+      <Name>Arcserve.Office365.Exchange.Data</Name>
     </ProjectReference>
-    <ProjectReference Include="..\EwsServiceInterface\EwsServiceInterface.csproj">
-      <Project>{EC82B108-4A69-4517-966B-328CF90ED3B5}</Project>
-      <Name>EwsServiceInterface</Name>
-      <Private>True</Private>
+    <ProjectReference Include="..\Arcserve.Office365.Exchange.EwsApi.Impl\Arcserve.Office365.Exchange.EwsApi.Impl.csproj">
+      <Project>{be1ace64-73d6-4ce2-a848-efb204c958f8}</Project>
+      <Name>Arcserve.Office365.Exchange.EwsApi.Impl</Name>
     </ProjectReference>
-    <ProjectReference Include="..\EwsService\EwsService.csproj">
-      <Project>{7737cc80-0266-4ed8-b265-628a9b0dfbcb}</Project>
-      <Name>EwsService</Name>
-      <Private>True</Private>
+    <ProjectReference Include="..\Arcserve.Office365.Exchange.EwsApi\Arcserve.Office365.Exchange.EwsApi.csproj">
+      <Project>{0ddbd2b6-de8b-43bf-87ef-d93428a74948}</Project>
+      <Name>Arcserve.Office365.Exchange.EwsApi</Name>
     </ProjectReference>
-    <ProjectReference Include="..\LogImpl\LogImpl.csproj">
-      <Project>{37af831f-ce50-4c6c-b211-e86b6e3138e8}</Project>
-      <Name>LogImpl</Name>
-      <Private>True</Private>
+    <ProjectReference Include="..\Arcserve.Office365.Exchange.Log.Impl\Arcserve.Office365.Exchange.Log.Impl.csproj">
+      <Project>{42ee52e2-03b8-49ca-979c-e7055f7f3008}</Project>
+      <Name>Arcserve.Office365.Exchange.Log.Impl</Name>
     </ProjectReference>
-    <ProjectReference Include="..\LogInterface\LogInterface.csproj">
-      <Project>{ed66d5c0-8d87-4dd6-9e6c-7d21b5bb8585}</Project>
-      <Name>LogInterface</Name>
-      <Private>True</Private>
+    <ProjectReference Include="..\Arcserve.Office365.Exchange.StorageAccess.Azure\Arcserve.Office365.Exchange.StorageAccess.Azure.csproj">
+      <Project>{38448010-96fd-4312-8dc8-ffd12e56f053}</Project>
+      <Name>Arcserve.Office365.Exchange.StorageAccess.Azure</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SqlDbImpl\SqlDbImpl.csproj">
-      <Project>{f2a93db3-b506-49c0-a576-70836dde9e86}</Project>
-      <Name>SqlDbImpl</Name>
-      <Private>True</Private>
+    <ProjectReference Include="..\Arcserve.Office365.Exchange.StorageAccess.Interface\Arcserve.Office365.Exchange.StorageAccess.Interface.csproj">
+      <Project>{b5778470-0cb3-425a-8368-74ff0866e8c0}</Project>
+      <Name>Arcserve.Office365.Exchange.StorageAccess.Interface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Arcserve.Office365.Exchange\Arcserve.Office365.Exchange.csproj">
+      <Project>{9d0c2e9c-7582-4d61-bd19-39ae85684f7e}</Project>
+      <Name>Arcserve.Office365.Exchange</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

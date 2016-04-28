@@ -1,9 +1,8 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using EwsFrame;
-using DataProtectInterface;
 using Microsoft.Exchange.WebServices.Data;
 using System.IO;
+using Arcserve.Office365.Exchange.DataProtect.Interface;
 
 namespace ExGrtAzure.Tests
 {

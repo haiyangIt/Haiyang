@@ -1,5 +1,5 @@
-﻿using EwsFrame;
-using EwsServiceInterface;
+﻿using Arcserve.Office365.Exchange.DataProtect.Interface;
+using Arcserve.Office365.Exchange.EwsApi;
 using LoginTest.Models;
 using LoginTest.Models.Setting;
 using LoginTest.Utils;

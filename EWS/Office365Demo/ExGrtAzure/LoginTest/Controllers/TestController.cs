@@ -1,5 +1,6 @@
-﻿using EwsFrame;
-using EwsFrame.Util.Setting;
+﻿using Arcserve.Office365.Exchange.DataProtect.Interface;
+using Arcserve.Office365.Exchange.Log;
+using Arcserve.Office365.Exchange.Util.Setting;
 using LoginTest.Utils;
 using System;
 using System.Collections.Generic;
@@ -73,8 +74,8 @@ namespace LoginTest.Controllers
         public JsonResult TestAppendLog()
         {
             var log = LogFactory.LogInstance;
-            log.WriteLog(LogInterface.LogLevel.INFO, "Test");
-            log.WriteLog(LogInterface.LogLevel.ERR, "Test Error");
+            log.WriteLog(LogLevel.INFO, "Test");
+            log.WriteLog(LogLevel.ERR, "Test Error");
             return Json("");
         }
 

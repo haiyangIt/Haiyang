@@ -9,8 +9,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>EwsFrame</RootNamespace>
     <AssemblyName>EwsFrame</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -94,83 +95,26 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Cache\ICache.cs" />
-    <Compile Include="Cache\MailboxCacheManager.cs" />
-    <Compile Include="Cache\OrganizationCacheManager.cs" />
-    <Compile Include="Backup\CatalogFactory.cs" />
-    <Compile Include="Context\ServiceContextManager.cs" />
-    <Compile Include="Util\ReadWriteLockExtension.cs" />
-    <Compile Include="Util\Setting\Config.cs" />
-    <Compile Include="EF\CustomApplicationDbConfiguration.cs" />
-    <Compile Include="FactoryBase.cs" />
-    <Compile Include="LogFactory.cs" />
-    <Compile Include="Util\Setting\MailConfig.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>MailConfig.resx</DependentUpon>
-    </Compile>
-    <Compile Include="Manager\Data\ProtectProgressInfo.cs" />
-    <Compile Include="Manager\IF\IArcJob.cs" />
-    <Compile Include="Manager\IF\IJobManager.cs" />
-    <Compile Include="Manager\IF\IManager.cs" />
-    <Compile Include="Manager\IF\IProgressInfo.cs" />
-    <Compile Include="Manager\IF\IProgressManager.cs" />
-    <Compile Include="Manager\IF\ISubScriptionManager.cs" />
-    <Compile Include="Manager\IF\IThreadManager.cs" />
-    <Compile Include="Manager\Impl\ArcJobBase.cs" />
-    <Compile Include="Manager\Impl\JobFactoryClient.cs" />
-    <Compile Include="Manager\Impl\JobFactoryServer.cs" />
-    <Compile Include="Manager\Impl\JobManager.cs" />
-    <Compile Include="Manager\Impl\ManagerBase.cs" />
-    <Compile Include="Manager\Data\ProgressArgs.cs" />
-    <Compile Include="Manager\Impl\ProgressInfoBase.cs" />
-    <Compile Include="Manager\Impl\ProgressManager.cs" />
-    <Compile Include="Manager\Impl\SubScriptionManager.cs" />
-    <Compile Include="ServiceBus\Relay\LogSolver.cs" />
-    <Compile Include="ServiceBus\Relay\ServiceClientHelper.cs" />
-    <Compile Include="ServiceBus\Relay\ServiceHostManager.cs" />
-    <Compile Include="Manager\Impl\ThreadManager.cs" />
-    <Compile Include="ServiceBus\TopicHelper.cs" />
-    <Compile Include="Util\MD5Utility.cs" />
-    <Compile Include="PlanFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Restore\RestoreFactory.cs" />
-    <Compile Include="ServiceBus\Relay\ILogSolver.cs" />
-    <Compile Include="Context\ServiceContext.cs" />
-    <Compile Include="ServiceBus\AzureServiceBusHelper.cs" />
-    <Compile Include="Util\Deque.cs" />
-    <Compile Include="Util\PlanUtil.cs" />
-    <Compile Include="Util\SendMailHelper.cs" />
-    <Compile Include="Util\Setting\CloudConfig.cs" />
-    <Compile Include="Util\TreeNode.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DataProtectInterface\DataProtectInterface.csproj">
       <Project>{f8783799-5d60-441f-a3b6-ffdaae476a12}</Project>
       <Name>DataProtectInterface</Name>
     </ProjectReference>
-    <ProjectReference Include="..\EwsDataInterface\EwsDataInterface.csproj">
-      <Project>{943fa512-7de9-47d2-9f9a-5e1dc1628f8e}</Project>
-      <Name>EwsDataInterface</Name>
-    </ProjectReference>
     <ProjectReference Include="..\EwsServiceInterface\EwsServiceInterface.csproj">
       <Project>{ec82b108-4a69-4517-966b-328cf90ed3b5}</Project>
       <Name>EwsServiceInterface</Name>
     </ProjectReference>
-    <ProjectReference Include="..\LogInterface\LogInterface.csproj">
-      <Project>{ed66d5c0-8d87-4dd6-9e6c-7d21b5bb8585}</Project>
-      <Name>LogInterface</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Util\Setting\MailConfig.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>MailConfig.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Backup\" />
+    <Folder Include="EF\" />
+    <Folder Include="Restore\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

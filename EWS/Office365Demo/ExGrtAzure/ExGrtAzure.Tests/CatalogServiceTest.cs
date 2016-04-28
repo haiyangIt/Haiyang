@@ -1,12 +1,13 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using EwsFrame;
-using DataProtectInterface;
 using System.IO;
 using Microsoft.Exchange.WebServices.Data;
-using EwsServiceInterface;
 using System.Diagnostics;
-using EwsDataInterface;
+using Arcserve.Office365.Exchange.DataProtect.Interface;
+using Arcserve.Office365.Exchange.EwsApi;
+using Arcserve.Office365.Exchange.Data.Mail;
+using Arcserve.Office365.Exchange.Data;
 
 namespace ExGrtAzure.Tests
 {

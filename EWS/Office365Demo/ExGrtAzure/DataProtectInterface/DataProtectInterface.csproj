@@ -9,8 +9,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DataProtectInterface</RootNamespace>
     <AssemblyName>DataProtectInterface</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -84,48 +85,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CatalogException.cs" />
-    <Compile Include="Event\CatalogProgressType.cs" />
-    <Compile Include="Event\EventExceptionArgs.cs" />
-    <Compile Include="Event\CatalogFolderArgs.cs" />
-    <Compile Include="Event\CatalogItemArgs.cs" />
-    <Compile Include="Event\CatalogMailboxArgs.cs" />
-    <Compile Include="Event\CatalogProgressArgs.cs" />
-    <Compile Include="Event\CatalogFolderProgressType.cs" />
-    <Compile Include="Event\ICatalogServiceEvent.cs" />
-    <Compile Include="Event\CatalogItemProgressType.cs" />
-    <Compile Include="Event\CatalogMailboxProgressType.cs" />
-    <Compile Include="Event\RestoreFolderArgs.cs" />
-    <Compile Include="Event\RestoreItemArgs.cs" />
-    <Compile Include="Event\RestoreMailboxArgs.cs" />
-    <Compile Include="Event\RestoreProgressArgs.cs" />
-    <Compile Include="ICatalogService.cs" />
-    <Compile Include="ICatalogDataAccess.cs" />
-    <Compile Include="IDataAccess.cs" />
-    <Compile Include="IFilterItem.cs" />
     <Compile Include="INotify.cs" />
-    <Compile Include="IPlanDataAccess.cs" />
-    <Compile Include="IQueryCatalogAdvanced.cs" />
-    <Compile Include="IQueryCatalogDataAccess.cs" />
-    <Compile Include="IRestoreDestination.cs" />
-    <Compile Include="Event\IRestoreEvent.cs" />
-    <Compile Include="IRestoreService.cs" />
-    <Compile Include="IServiceContext.cs" />
-    <Compile Include="ItemKindEx.cs" />
-    <Compile Include="ArcJob\IJobBaseInfo.cs" />
-    <Compile Include="OrganizationAdminInfo.cs" />
-    <Compile Include="Plan\IEwsSyncStatus.cs" />
-    <Compile Include="Plan\IPlanData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SelectedItem.cs" />
-    <Compile Include="TaskType.cs" />
-    <Compile Include="Util\ItemClassUtil.cs" />
+    <Compile Include="Sync\IBackupQueryAsync.cs" />
+    <Compile Include="Sync\IFilterItemWithFolderAsync.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\EwsDataInterface\EwsDataInterface.csproj">
-      <Project>{943fa512-7de9-47d2-9f9a-5e1dc1628f8e}</Project>
-      <Name>EwsDataInterface</Name>
-    </ProjectReference>
     <ProjectReference Include="..\EwsServiceInterface\EwsServiceInterface.csproj">
       <Project>{ec82b108-4a69-4517-966b-328cf90ed3b5}</Project>
       <Name>EwsServiceInterface</Name>
@@ -133,6 +98,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Util\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" />

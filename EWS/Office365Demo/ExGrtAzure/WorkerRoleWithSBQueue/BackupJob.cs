@@ -1,19 +1,17 @@
-﻿using DataProtectInterface;
-using DataProtectInterface.Plan;
-using EwsFrame;
-using EwsFrame.Util;
+﻿using EwsFrame;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using EwsDataInterface;
 using Newtonsoft.Json;
-using DataProtectInterface.Event;
-using EwsFrame.Manager.Impl;
-using EwsFrame.Manager.IF;
-using EwsFrame.ServiceBus;
-using EwsFrame.Manager.Data;
+using Arcserve.Office365.Exchange.Manager.Impl;
+using Arcserve.Office365.Exchange.Data.Plan;
+using Arcserve.Office365.Exchange.Manager.IF;
+using Arcserve.Office365.Exchange.DataProtect.Interface;
+using Arcserve.Office365.Exchange.Data;
+using Arcserve.Office365.Exchange.Data.Event;
+using Arcserve.Office365.Exchange.Data.Mail;
 
 namespace WorkerRoleWithSBQueue
 {
@@ -72,7 +70,7 @@ namespace WorkerRoleWithSBQueue
             _backupService.GenerateCatalog(filterObj);
         }
 
-        private void Service_ProgressChanged(object sender, DataProtectInterface.Event.CatalogProgressArgs e)
+        private void Service_ProgressChanged(object sender, CatalogProgressArgs e)
         {
             var progressInfo = new BackupProgressInfo(e, this);
             JobFactoryServer.Instance.ProgressManager.AddProgress(progressInfo);

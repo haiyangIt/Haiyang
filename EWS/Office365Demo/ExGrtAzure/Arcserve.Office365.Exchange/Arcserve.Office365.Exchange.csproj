@@ -1,0 +1,151 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{9D0C2E9C-7582-4D61-BD19-39AE85684F7E}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Arcserve.Office365.Exchange</RootNamespace>
+    <AssemblyName>Arcserve.Office365.Exchange</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Azure.KeyVault.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Azure.KeyVault.Core.1.0.0\lib\net40\Microsoft.Azure.KeyVault.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Data.Edm, Version=5.6.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Data.Edm.5.6.4\lib\net40\Microsoft.Data.Edm.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Data.OData, Version=5.6.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Data.OData.5.6.4\lib\net40\Microsoft.Data.OData.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Data.Services.Client, Version=5.6.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Data.Services.Client.5.6.4\lib\net40\Microsoft.Data.Services.Client.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.ServiceBus, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\WindowsAzure.ServiceBus.3.1.7\lib\net45-full\Microsoft.ServiceBus.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAzure.Configuration, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.WindowsAzure.ConfigurationManager.3.2.1\lib\net40\Microsoft.WindowsAzure.Configuration.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAzure.Storage, Version=7.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\WindowsAzure.Storage.7.0.0\lib\net40\Microsoft.WindowsAzure.Storage.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Spatial, Version=5.6.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Spatial.5.6.4\lib\net40\System.Spatial.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ArcJob\IJobBaseInfo.cs" />
+    <Compile Include="ArcJob\TaskType.cs" />
+    <Compile Include="Azure\BlobDataAccess.cs" />
+    <Compile Include="Azure\TableDataAccess.cs" />
+    <Compile Include="Cache\ICache.cs" />
+    <Compile Include="Cache\MailboxCacheManager.cs" />
+    <Compile Include="Cache\OrganizationCacheManager.cs" />
+    <Compile Include="FactoryBase.cs" />
+    <Compile Include="Log\LogFactory.cs" />
+    <Compile Include="Log\ILog.cs" />
+    <Compile Include="Log\LogLevel.cs" />
+    <Compile Include="Manager\Data\ProgressArgs.cs" />
+    <Compile Include="Manager\Data\ProtectProgressInfo.cs" />
+    <Compile Include="Manager\IF\IArcJob.cs" />
+    <Compile Include="Manager\IF\IJobManager.cs" />
+    <Compile Include="Manager\IF\IManager.cs" />
+    <Compile Include="Manager\IF\IProgressInfo.cs" />
+    <Compile Include="Manager\IF\IProgressManager.cs" />
+    <Compile Include="Manager\IF\ISubScriptionManager.cs" />
+    <Compile Include="Manager\IF\IThreadManager.cs" />
+    <Compile Include="Manager\Impl\ArcJobBase.cs" />
+    <Compile Include="Manager\Impl\JobFactoryClient.cs" />
+    <Compile Include="Manager\Impl\JobFactoryServer.cs" />
+    <Compile Include="Manager\Impl\JobManager.cs" />
+    <Compile Include="Manager\Impl\ManagerBase.cs" />
+    <Compile Include="Manager\Impl\ProgressInfoBase.cs" />
+    <Compile Include="Manager\Impl\ProgressManager.cs" />
+    <Compile Include="Manager\Impl\SubScriptionManager.cs" />
+    <Compile Include="Manager\Impl\ThreadManager.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ServiceBus\AzureServiceBusHelper.cs" />
+    <Compile Include="ServiceBus\Relay\ILogSolver.cs" />
+    <Compile Include="ServiceBus\Relay\LogSolver.cs" />
+    <Compile Include="ServiceBus\Relay\ServiceClientHelper.cs" />
+    <Compile Include="ServiceBus\Relay\ServiceHostManager.cs" />
+    <Compile Include="ServiceBus\TopicHelper.cs" />
+    <Compile Include="Thread\ITaskSyncContext.cs" />
+    <Compile Include="Thread\JobProgress.cs" />
+    <Compile Include="Util\Deque.cs" />
+    <Compile Include="Util\MD5Utility.cs" />
+    <Compile Include="Util\ReadWriteLockExtension.cs" />
+    <Compile Include="Util\SendMailHelper.cs" />
+    <Compile Include="Util\Setting\AssemblyConfig.cs" />
+    <Compile Include="Util\Setting\CloudConfig.cs" />
+    <Compile Include="Util\Setting\Config.cs" />
+    <Compile Include="Util\Setting\MailConfig.Designer.cs">
+      <DependentUpon>MailConfig.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Util\Setting\MailConfig.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>MailConfig.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

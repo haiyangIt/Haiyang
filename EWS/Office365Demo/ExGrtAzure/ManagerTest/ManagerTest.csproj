@@ -9,9 +9,10 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ManagerTest</RootNamespace>
     <AssemblyName>ManagerTest</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -33,6 +34,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Exchange.WebServices, Version=15.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Microsoft\Exchange\Web Services\2.2\Microsoft.Exchange.WebServices.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -66,7 +75,9 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -81,9 +92,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\ParseItemFromEWSExportFunction\FastTransferUtil\FastTransferUtil.csproj">
+    <ProjectReference Include="..\..\..\ParseItemFromEWSExportFunction\FastTransferUtil\Arcserve.Exchange.FastTransferUtil.csproj">
       <Project>{724571a8-bf45-4efe-ab1e-bb065201513b}</Project>
-      <Name>FastTransferUtil</Name>
+      <Name>Arcserve.Exchange.FastTransferUtil</Name>
     </ProjectReference>
     <ProjectReference Include="..\DataProtectImpl\DataProtectImpl.csproj">
       <Project>{6e5dda9f-569b-46c9-9920-ab0166517421}</Project>
@@ -93,29 +104,9 @@
       <Project>{f8783799-5d60-441f-a3b6-ffdaae476a12}</Project>
       <Name>DataProtectInterface</Name>
     </ProjectReference>
-    <ProjectReference Include="..\EwsDataInterface\EwsDataInterface.csproj">
-      <Project>{943fa512-7de9-47d2-9f9a-5e1dc1628f8e}</Project>
-      <Name>EwsDataInterface</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\EwsFactory\EwsFrame.csproj">
-      <Project>{16a3fa6c-9796-4072-b4fa-ca7dc33bac00}</Project>
-      <Name>EwsFrame</Name>
-    </ProjectReference>
     <ProjectReference Include="..\EwsServiceInterface\EwsServiceInterface.csproj">
       <Project>{ec82b108-4a69-4517-966b-328cf90ed3b5}</Project>
       <Name>EwsServiceInterface</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\EwsService\EwsService.csproj">
-      <Project>{7737cc80-0266-4ed8-b265-628a9b0dfbcb}</Project>
-      <Name>EwsService</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\LogImpl\LogImpl.csproj">
-      <Project>{37af831f-ce50-4c6c-b211-e86b6e3138e8}</Project>
-      <Name>LogImpl</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\LogInterface\LogInterface.csproj">
-      <Project>{ED66D5C0-8D87-4DD6-9E6C-7D21B5BB8585}</Project>
-      <Name>LogInterface</Name>
     </ProjectReference>
     <ProjectReference Include="..\SqlDbImpl\SqlDbImpl.csproj">
       <Project>{f2a93db3-b506-49c0-a576-70836dde9e86}</Project>

@@ -1,5 +1,4 @@
-﻿using DataProtectInterface;
-using EwsFrame;
+﻿using EwsFrame;
 using WebRoleUI.Models;
 using System;
 using System.Collections.Generic;
@@ -11,11 +10,13 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using Demo.Models.Restore;
-using EwsDataInterface;
-using EwsServiceInterface;
 using System.Web.Script.Serialization;
 using WebRoleUI.Models.Setting;
 using WebRoleUI.Utils;
+using Arcserve.Office365.Exchange.DataProtect.Interface;
+using Arcserve.Office365.Exchange.Data.Mail;
+using Arcserve.Office365.Exchange.Data;
+using Arcserve.Office365.Exchange.EwsApi;
 
 namespace WebRoleUI.Controllers
 {

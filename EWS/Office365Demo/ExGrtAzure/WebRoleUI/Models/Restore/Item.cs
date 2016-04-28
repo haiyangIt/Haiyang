@@ -1,10 +1,8 @@
-﻿using EwsDataInterface;
+﻿using Arcserve.Office365.Exchange.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-using EwsFrame.Util;
-using DataProtectInterface;
 
 namespace Demo.Models.Restore
 {

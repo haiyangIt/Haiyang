@@ -3,17 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using EwsFrame.ServiceBus.Relay;
 using Microsoft.AspNet.Identity;
 using WebRoleUI.Models;
 using Microsoft.AspNet.Identity.Owin;
-using EwsFrame.Manager.Impl;
-using EwsFrame.Manager.Data;
-using EwsFrame.ServiceBus;
 using Microsoft.Azure;
 using System.Threading;
 using Microsoft.ServiceBus.Messaging;
-using EwsFrame.Manager.IF;
+using Arcserve.Office365.Exchange.ServiceBus.Relay;
+using Arcserve.Office365.Exchange.Manager.Data;
+using Arcserve.Office365.Exchange.Manager.IF;
+using Arcserve.Office365.Exchange.Manager.Impl;
+using Arcserve.Office365.Exchange.Data.Event;
+using Arcserve.Office365.Exchange.ServiceBus;
 
 namespace WebRoleUI.Controllers
 {
@@ -36,12 +37,12 @@ namespace WebRoleUI.Controllers
             var info = JobFactoryServer.Convert<ProtectProgressInfo>(progress);
             switch (info.Job.JobType)
             {
-                case EwsFrame.Manager.IF.ArcJobType.Backup:
+                case ArcJobType.Backup:
                     var backupInfo = JobFactoryServer.Convert<BackupProgressInfo>(progress); // todo not only for backup, but also for restore and other jobs.
                     this.ViewData["LatestProgress"] = backupInfo.ProgressInfo.GetUIString();
                     this.ViewData["JobId"] = backupInfo.Job.JobId;
                     break;
-                case EwsFrame.Manager.IF.ArcJobType.Restore:
+                case ArcJobType.Restore:
                     throw new NotImplementedException();
                 default:
                     throw new NotSupportedException();

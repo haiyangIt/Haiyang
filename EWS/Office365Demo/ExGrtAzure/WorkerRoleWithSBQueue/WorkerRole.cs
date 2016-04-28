@@ -4,9 +4,9 @@ using System.Threading;
 using Microsoft.ServiceBus.Messaging;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.ServiceRuntime;
-using EwsFrame.ServiceBus;
-using EwsFrame.Manager.Impl;
-using EwsFrame.Util.Setting;
+using Arcserve.Office365.Exchange.ServiceBus;
+using Arcserve.Office365.Exchange.Manager.Impl;
+using Arcserve.Office365.Exchange.Util.Setting;
 
 namespace WorkerRoleWithSBQueue
 {

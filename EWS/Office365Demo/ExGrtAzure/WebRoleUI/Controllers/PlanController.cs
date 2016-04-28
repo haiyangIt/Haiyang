@@ -1,10 +1,10 @@
-﻿using DataProtectInterface;
-using EwsFrame;
+﻿using Arcserve.Office365.Exchange.Data.Account;
+using Arcserve.Office365.Exchange.Data.Impl.Mail;
+using Arcserve.Office365.Exchange.DataProtect.Interface;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.WindowsAzure.Management.Scheduler.Models;
 using Microsoft.WindowsAzure.Scheduler.Models;
-using SqlDbImpl.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;

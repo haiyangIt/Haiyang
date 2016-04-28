@@ -7,72 +7,25 @@ using System.Text;
 using EwsFrame;
 using System.Threading;
 using System.Reflection;
-using DataProtectImpl;
-using EwsDataInterface;
-using EwsFrame.Util;
 using System.Diagnostics;
-using DataProtectInterface;
-using SqlDbImpl;
 using System.IO.Compression;
 using System.Net.Mail;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Microsoft.WindowsAzure.Storage;
+using Arcserve.Office365.Exchange.Log;
+using Arcserve.Office365.Exchange.Util;
+using Arcserve.Office365.Exchange.DataProtect.Interface;
+using Arcserve.Office365.Exchange.DataProtect.Impl.Context;
+using Arcserve.Office365.Exchange;
+using Arcserve.Office365.Exchange.Util.Setting;
+using Arcserve.Office365.Exchange.Data.Mail;
+using Arcserve.Office365.Exchange.Data;
 
 namespace ExGrtAzure.Tests
 {
     [TestClass]
     public class UnitTest1
     {
-        //[TestMethod]
-        //public void TestFolderContainerMappingSerialize()
-        //{
-        //    List<FolderContainerMapping> list = new List<FolderContainerMapping>(2);
-
-        //    FolderContainerMapping map1 = new FolderContainerMapping();
-        //    map1.ContainerInfo = new ContainerCount();
-        //    map1.ContainerInfo.ContainerName = "container1";
-        //    map1.ContainerInfo.UsedCount = 1;
-        //    map1.FolderId = "1234567";
-        //    list.Add(map1);
-
-        //    map1 = new FolderContainerMapping();
-        //    map1.ContainerInfo = new ContainerCount();
-        //    map1.ContainerInfo.ContainerName = "container2";
-        //    map1.ContainerInfo.UsedCount = 1;
-        //    map1.FolderId = "8765432";
-        //    list.Add(map1);
-
-        //    byte[] buffer;
-        //    using (MemoryStream stream = new MemoryStream())
-        //    {
-        //        FolderContainerMapping.SerializeList(list, stream);
-        //        buffer = new byte[stream.Length];
-        //        stream.Seek(0, SeekOrigin.Begin);
-        //        int readCount = stream.Read(buffer, 0, (int)stream.Length);
-
-        //    }
-
-        //    List<FolderContainerMapping> result1 = null;
-        //    using (MemoryStream readStream = new MemoryStream(buffer))
-        //    {
-        //        result1 = FolderContainerMapping.DeSerializeList(readStream);
-        //    }
-
-
-        //}
-
-        //[TestMethod]
-        //public void TestGetBlobCount()
-        //{
-        //    int size11 = 10 * 4 * 1024 * 1024 + 1;
-        //    int size10 = 10 * 4 * 1024 * 1024 - 1;
-        //    int size = BlobDataAccess.GetBlobCount(size11);
-        //    Assert.AreEqual(size, 11);
-        //    size = BlobDataAccess.GetBlobCount(size10);
-        //    Assert.AreEqual(size, 10);
-        //}
-
-
         [TestMethod]
         public void ExportLog()
         {

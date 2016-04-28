@@ -1,7 +1,4 @@
-﻿using EwsFrame;
-using EwsFrame.Cache;
-using SqlDbImpl.Model;
-using SqlDbImpl.Storage;
+﻿using SqlDbImpl.Storage;
 using System;
 using System.Collections.Generic;
 using System.IO;

@@ -1,6 +1,4 @@
-﻿using EwsFrame;
-using EwsServiceInterface;
-using WebRoleUI.Models;
+﻿using WebRoleUI.Models;
 using WebRoleUI.Models.Setting;
 using WebRoleUI.Utils;
 using Microsoft.AspNet.Identity;
@@ -10,6 +8,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using Arcserve.Office365.Exchange.EwsApi;
+using Arcserve.Office365.Exchange.DataProtect.Interface;
 
 namespace WebRoleUI.Controllers
 {

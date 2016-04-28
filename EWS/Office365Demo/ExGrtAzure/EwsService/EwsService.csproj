@@ -9,8 +9,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>EwsService</RootNamespace>
     <AssemblyName>EwsService</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -45,32 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Common\ActiveDirectoryHelper.cs" />
-    <Compile Include="Common\CertificateValidationHelper.cs" />
-    <Compile Include="Common\EwsProxyFactory.cs" />
-    <Compile Include="Common\EwsTraceListener.cs" />
-    <Compile Include="Common\ExchangeServiceExtensions.cs" />
-    <Compile Include="Common\ExportUploadHelper.cs" />
-    <Compile Include="Common\FileHelper.cs" />
-    <Compile Include="Common\ValidationCallbackHelper.cs" />
-    <Compile Include="Impl\AutodiscoveryUrlCache.cs" />
-    <Compile Include="Impl\FolderOperatorImpl.cs" />
-    <Compile Include="Impl\ItemOperatorImpl.cs" />
-    <Compile Include="Impl\MailboxOperatorImpl.cs" />
-    <Compile Include="Impl\RestoreDestinationExImpl.cs" />
-    <Compile Include="Impl\RestoreDestinationImpl.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Resource\TemplateEwsRequests.Designer.cs">
-      <DependentUpon>TemplateEwsRequests.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resource\TemplateEwsRequests.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>TemplateEwsRequests.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DataProtectInterface\DataProtectInterface.csproj">
@@ -88,10 +64,6 @@
     <ProjectReference Include="..\EwsServiceInterface\EwsServiceInterface.csproj">
       <Project>{ec82b108-4a69-4517-966b-328cf90ed3b5}</Project>
       <Name>EwsServiceInterface</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\LogInterface\LogInterface.csproj">
-      <Project>{ed66d5c0-8d87-4dd6-9e6c-7d21b5bb8585}</Project>
-      <Name>LogInterface</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

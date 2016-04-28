@@ -33,9 +33,11 @@
             this.BtnAddJob = new System.Windows.Forms.Button();
             this.BtnCancelJob = new System.Windows.Forms.Button();
             this.AddLine = new System.Windows.Forms.Button();
-            this.button6 = new System.Windows.Forms.Button();
+            this.TestAsync = new System.Windows.Forms.Button();
             this.JobList = new System.Windows.Forms.ListBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
+            this.TestParallel = new System.Windows.Forms.Button();
+            this.Init = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // BtnStart
@@ -88,14 +90,15 @@
             this.AddLine.UseVisualStyleBackColor = true;
             this.AddLine.Click += new System.EventHandler(this.AddLine_Click);
             // 
-            // button6
+            // TestAsync
             // 
-            this.button6.Location = new System.Drawing.Point(431, 104);
-            this.button6.Name = "button6";
-            this.button6.Size = new System.Drawing.Size(75, 23);
-            this.button6.TabIndex = 5;
-            this.button6.Text = "button6";
-            this.button6.UseVisualStyleBackColor = true;
+            this.TestAsync.Location = new System.Drawing.Point(632, 57);
+            this.TestAsync.Name = "TestAsync";
+            this.TestAsync.Size = new System.Drawing.Size(75, 23);
+            this.TestAsync.TabIndex = 5;
+            this.TestAsync.Text = "TestAsync";
+            this.TestAsync.UseVisualStyleBackColor = true;
+            this.TestAsync.Click += new System.EventHandler(this.TestAsync_Click);
             // 
             // JobList
             // 
@@ -115,6 +118,26 @@
             this.textBox1.TabIndex = 7;
             this.textBox1.WordWrap = false;
             // 
+            // TestParallel
+            // 
+            this.TestParallel.Location = new System.Drawing.Point(757, 57);
+            this.TestParallel.Name = "TestParallel";
+            this.TestParallel.Size = new System.Drawing.Size(75, 23);
+            this.TestParallel.TabIndex = 5;
+            this.TestParallel.Text = "TestParallel";
+            this.TestParallel.UseVisualStyleBackColor = true;
+            this.TestParallel.Click += new System.EventHandler(this.TestParallel_Click);
+            // 
+            // Init
+            // 
+            this.Init.Location = new System.Drawing.Point(527, 57);
+            this.Init.Name = "Init";
+            this.Init.Size = new System.Drawing.Size(75, 23);
+            this.Init.TabIndex = 5;
+            this.Init.Text = "Init";
+            this.Init.UseVisualStyleBackColor = true;
+            this.Init.Click += new System.EventHandler(this.Init_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -122,7 +145,9 @@
             this.ClientSize = new System.Drawing.Size(1482, 824);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.JobList);
-            this.Controls.Add(this.button6);
+            this.Controls.Add(this.TestParallel);
+            this.Controls.Add(this.Init);
+            this.Controls.Add(this.TestAsync);
             this.Controls.Add(this.AddLine);
             this.Controls.Add(this.BtnCancelJob);
             this.Controls.Add(this.BtnAddJob);
@@ -130,6 +155,7 @@
             this.Controls.Add(this.BtnStart);
             this.Name = "Form1";
             this.Text = "Form1";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -142,9 +168,11 @@
         private System.Windows.Forms.Button BtnAddJob;
         private System.Windows.Forms.Button BtnCancelJob;
         private System.Windows.Forms.Button AddLine;
-        private System.Windows.Forms.Button button6;
+        private System.Windows.Forms.Button TestAsync;
         private System.Windows.Forms.ListBox JobList;
         private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.Button TestParallel;
+        private System.Windows.Forms.Button Init;
     }
 }
 

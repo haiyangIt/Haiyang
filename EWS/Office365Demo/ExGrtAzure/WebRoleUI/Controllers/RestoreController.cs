@@ -1,8 +1,4 @@
-﻿using DataProtectInterface;
-using Demo.Models.Restore;
-using EwsDataInterface;
-using EwsFrame;
-using EwsFrame.Util;
+﻿using Demo.Models.Restore;
 using WebRoleUI.Models;
 using WebRoleUI.Models.Restore;
 using WebRoleUI.Utils;
@@ -13,6 +9,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using Arcserve.Office365.Exchange.DataProtect.Interface;
+using Arcserve.Office365.Exchange.Data;
+using Arcserve.Office365.Exchange.Data.Mail;
 
 namespace WebRoleUI.Controllers
 {

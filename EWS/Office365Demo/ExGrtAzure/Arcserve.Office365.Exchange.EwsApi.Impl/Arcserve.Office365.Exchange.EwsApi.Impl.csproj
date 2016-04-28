@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{BE1ACE64-73D6-4CE2-A848-EFB204C958F8}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Arcserve.Office365.Exchange.EwsApi.Impl</RootNamespace>
+    <AssemblyName>Arcserve.Office365.Exchange.EwsApi.Impl</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Exchange.WebServices, Version=15.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Microsoft\Exchange\Web Services\2.2\Microsoft.Exchange.WebServices.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.DirectoryServices" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Common\ActiveDirectoryHelper.cs" />
+    <Compile Include="Common\CertificateValidationHelper.cs" />
+    <Compile Include="Common\EwsProxyFactory.cs" />
+    <Compile Include="Common\EwsTraceListener.cs" />
+    <Compile Include="Common\ExchangeServiceExtensions.cs" />
+    <Compile Include="Common\ExportUploadHelper.cs" />
+    <Compile Include="Common\FileHelper.cs" />
+    <Compile Include="Common\ValidationCallbackHelper.cs" />
+    <Compile Include="Impl\AutodiscoveryUrlCache.cs" />
+    <Compile Include="Impl\FolderOperatorImpl.cs" />
+    <Compile Include="Impl\ItemOperatorImpl.cs" />
+    <Compile Include="Impl\MailboxOperatorImpl.cs" />
+    <Compile Include="Impl\RestoreDestinationExImpl.cs" />
+    <Compile Include="Impl\RestoreDestinationImpl.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Resource\TemplateEwsRequests.Designer.cs">
+      <DependentUpon>TemplateEwsRequests.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resource\TemplateEwsRequests.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>TemplateEwsRequests.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Arcserve.Office365.Exchange.DataProtect.Interface\Arcserve.Office365.Exchange.DataProtect.Interface.csproj">
+      <Project>{3537b177-88f3-440b-b114-5bcf98ca2220}</Project>
+      <Name>Arcserve.Office365.Exchange.DataProtect.Interface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Arcserve.Office365.Exchange.Data\Arcserve.Office365.Exchange.Data.csproj">
+      <Project>{177b7df7-ecaf-4bcc-9f26-77276893ba9f}</Project>
+      <Name>Arcserve.Office365.Exchange.Data</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Arcserve.Office365.Exchange.EwsApi\Arcserve.Office365.Exchange.EwsApi.csproj">
+      <Project>{0ddbd2b6-de8b-43bf-87ef-d93428a74948}</Project>
+      <Name>Arcserve.Office365.Exchange.EwsApi</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Arcserve.Office365.Exchange.StorageAccess.Interface\Arcserve.Office365.Exchange.StorageAccess.Interface.csproj">
+      <Project>{b5778470-0cb3-425a-8368-74ff0866e8c0}</Project>
+      <Name>Arcserve.Office365.Exchange.StorageAccess.Interface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Arcserve.Office365.Exchange\Arcserve.Office365.Exchange.csproj">
+      <Project>{9d0c2e9c-7582-4d61-bd19-39ae85684f7e}</Project>
+      <Name>Arcserve.Office365.Exchange</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

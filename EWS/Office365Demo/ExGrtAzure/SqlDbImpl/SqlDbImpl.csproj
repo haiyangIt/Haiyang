@@ -9,8 +9,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SqlDbImpl</RootNamespace>
     <AssemblyName>SqlDbImpl</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -131,12 +132,6 @@
   <ItemGroup>
     <Compile Include="Cache\ExistItemCache.cs" />
     <Compile Include="Cache\FolderContainerMapCache.cs" />
-    <Compile Include="CatalogDataAccess.cs" />
-    <Compile Include="CatalogDbContext.cs" />
-    <Compile Include="DataAccessBase.cs" />
-    <Compile Include="DataConvert.cs" />
-    <Compile Include="DataConvertFromDb.cs" />
-    <Compile Include="LocationUtil.cs" />
     <Compile Include="Migrations\201601060503412_InitDatabase.cs" />
     <Compile Include="Migrations\201601060503412_InitDatabase.Designer.cs">
       <DependentUpon>201601060503412_InitDatabase.cs</DependentUpon>
@@ -146,48 +141,22 @@
       <DependentUpon>201604180922010_AddPlanModel.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
-    <Compile Include="Model\CatalogInfoModel.cs" />
-    <Compile Include="Model\FolderModel.cs" />
-    <Compile Include="Model\ItemLocationModel.cs" />
-    <Compile Include="Model\ItemModel.cs" />
-    <Compile Include="Model\JobBaseInfoModel.cs" />
-    <Compile Include="Model\MailboxModel.cs" />
-    <Compile Include="Model\OrganizationData.cs" />
-    <Compile Include="Model\PlanModel.cs" />
-    <Compile Include="PlanDataAccess.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="QueryCatalogDataAccess.cs" />
-    <Compile Include="RestoreToAzure.cs" />
-    <Compile Include="SqlDbResetHelper.cs" />
     <Compile Include="SqlServerTypes\Loader.cs" />
-    <Compile Include="Storage\BlobDataAccess.cs" />
     <Compile Include="Storage\BlobDataAccessWithSizeLimitation.cs" />
-    <Compile Include="Storage\TableDataAccess.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\ParseItemFromEWSExportFunction\FastTransferUtil\FastTransferUtil.csproj">
+    <ProjectReference Include="..\..\..\ParseItemFromEWSExportFunction\FastTransferUtil\Arcserve.Exchange.FastTransferUtil.csproj">
       <Project>{724571a8-bf45-4efe-ab1e-bb065201513b}</Project>
-      <Name>FastTransferUtil</Name>
+      <Name>Arcserve.Exchange.FastTransferUtil</Name>
     </ProjectReference>
     <ProjectReference Include="..\DataProtectInterface\DataProtectInterface.csproj">
       <Project>{f8783799-5d60-441f-a3b6-ffdaae476a12}</Project>
       <Name>DataProtectInterface</Name>
     </ProjectReference>
-    <ProjectReference Include="..\EwsDataInterface\EwsDataInterface.csproj">
-      <Project>{943fa512-7de9-47d2-9f9a-5e1dc1628f8e}</Project>
-      <Name>EwsDataInterface</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\EwsFactory\EwsFrame.csproj">
-      <Project>{16a3fa6c-9796-4072-b4fa-ca7dc33bac00}</Project>
-      <Name>EwsFrame</Name>
-    </ProjectReference>
     <ProjectReference Include="..\EwsServiceInterface\EwsServiceInterface.csproj">
       <Project>{ec82b108-4a69-4517-966b-328cf90ed3b5}</Project>
       <Name>EwsServiceInterface</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\LogInterface\LogInterface.csproj">
-      <Project>{ED66D5C0-8D87-4DD6-9E6C-7D21B5BB8585}</Project>
-      <Name>LogInterface</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -220,6 +189,9 @@
     <EmbeddedResource Include="Migrations\201604180922010_AddPlanModel.resx">
       <DependentUpon>201604180922010_AddPlanModel.cs</DependentUpon>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Model\Sync\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
