@@ -44,10 +44,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Backup\Increment\AsyncBackup.cs" />
+    <Compile Include="Backup\Increment\BackupFlowTemplate.cs" />
+    <Compile Include="Backup\Increment\IBackupQueryAsync.cs" />
+    <Compile Include="Backup\Increment\IFilterItemWithFolderAsync.cs" />
     <Compile Include="CatalogException.cs" />
-    <Compile Include="CatalogFactory.cs" />
-    <Compile Include="ICatalogService.cs" />
-    <Compile Include="IDataConvert.cs" />
+    <Compile Include="Backup\Full\CatalogFactory.cs" />
+    <Compile Include="Backup\Full\ICatalogService.cs" />
+    <Compile Include="Backup\Full\IDataConvert.cs" />
     <Compile Include="IDataConvertFromDb.cs" />
     <Compile Include="IFilterItem.cs" />
     <Compile Include="IRestoreDestination.cs" />

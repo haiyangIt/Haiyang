@@ -10,6 +10,7 @@ using DataProtectImpl.Backup;
 using Arcserve.Office365.Exchange.Thread;
 using Arcserve.Office365.Exchange.Data.Account;
 using Arcserve.Office365.Exchange.Data.Increment;
+using Arcserve.Office365.Exchange.EwsApi.Increment;
 
 namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
 {
@@ -37,7 +38,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
 
         public OrganizationAdminInfo AdminInfo { get; set; }
         public string Organization { get; }
-        public IBackupQuerySync<JobProgress> BackupQuery { get; }
+        public IBackupQueryAsync<JobProgress> BackupQuery { get; }
         public IEwsServiceAdapter<JobProgress> EwsServiceAdapter { get; set; }
         public DateTime JobStartTime { get; }
 

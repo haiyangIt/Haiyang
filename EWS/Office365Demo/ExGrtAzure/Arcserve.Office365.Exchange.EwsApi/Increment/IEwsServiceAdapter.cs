@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Arcserve.Office365.Exchange.Data.Account;
+using Arcserve.Office365.Exchange.Thread;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;

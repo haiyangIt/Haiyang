@@ -49,12 +49,17 @@
     <Compile Include="IFolder.cs" />
     <Compile Include="IItem.cs" />
     <Compile Include="IMailbox.cs" />
+    <Compile Include="Increment\IEwsServiceAdapter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Arcserve.Office365.Exchange.Data\Arcserve.Office365.Exchange.Data.csproj">
       <Project>{177b7df7-ecaf-4bcc-9f26-77276893ba9f}</Project>
       <Name>Arcserve.Office365.Exchange.Data</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Arcserve.Office365.Exchange\Arcserve.Office365.Exchange.csproj">
+      <Project>{9d0c2e9c-7582-4d61-bd19-39ae85684f7e}</Project>
+      <Name>Arcserve.Office365.Exchange</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

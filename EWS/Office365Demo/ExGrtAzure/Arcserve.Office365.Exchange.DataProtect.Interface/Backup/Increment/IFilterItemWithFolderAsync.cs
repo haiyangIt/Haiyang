@@ -1,4 +1,5 @@
-﻿using EwsDataInterface.Sync;
+﻿using Arcserve.Office365.Exchange.Data.Increment;
+using Arcserve.Office365.Exchange.Thread;
 using System;
 using System.Collections.Generic;
 using System.Linq;

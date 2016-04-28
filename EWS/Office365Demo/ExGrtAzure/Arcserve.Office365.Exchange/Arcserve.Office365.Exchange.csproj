@@ -129,6 +129,7 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Include="Util\Setting\ProtectConfig.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Util\Setting\MailConfig.resx">

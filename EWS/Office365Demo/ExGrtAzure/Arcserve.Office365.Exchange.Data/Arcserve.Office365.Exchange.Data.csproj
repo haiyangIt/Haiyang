@@ -113,14 +113,14 @@
     <Compile Include="Event\RestoreItemArgs.cs" />
     <Compile Include="Event\RestoreMailboxArgs.cs" />
     <Compile Include="Event\RestoreProgressArgs.cs" />
-    <Compile Include="ICatalogInfo.cs" />
-    <Compile Include="ICatalogJob.cs" />
+    <Compile Include="Org\ICatalogInfo.cs" />
+    <Compile Include="Org\ICatalogJob.cs" />
     <Compile Include="LoadedTreeItem.cs" />
     <Compile Include="Mail\IFolderData.cs" />
     <Compile Include="IItemBase.cs" />
     <Compile Include="Mail\IItemData.cs" />
     <Compile Include="Mail\IMailboxData.cs" />
-    <Compile Include="IOrganizationData.cs" />
+    <Compile Include="Org\IOrganizationData.cs" />
     <Compile Include="Account\OrganizationAdminInfo.cs" />
     <Compile Include="Mail\ItemClass.cs" />
     <Compile Include="Mail\ItemClassUtil.cs" />
@@ -132,7 +132,6 @@
     <Compile Include="Increment\IFolderDataSync.cs" />
     <Compile Include="Increment\IItemDataSync.cs" />
     <Compile Include="Increment\IMailboxDataSync.cs" />
-    <Compile Include="Increment\ProtectConfig.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

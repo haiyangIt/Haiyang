@@ -96,22 +96,6 @@
       <Project>{724571a8-bf45-4efe-ab1e-bb065201513b}</Project>
       <Name>Arcserve.Exchange.FastTransferUtil</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DataProtectImpl\DataProtectImpl.csproj">
-      <Project>{6e5dda9f-569b-46c9-9920-ab0166517421}</Project>
-      <Name>DataProtectImpl</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\DataProtectInterface\DataProtectInterface.csproj">
-      <Project>{f8783799-5d60-441f-a3b6-ffdaae476a12}</Project>
-      <Name>DataProtectInterface</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\EwsServiceInterface\EwsServiceInterface.csproj">
-      <Project>{ec82b108-4a69-4517-966b-328cf90ed3b5}</Project>
-      <Name>EwsServiceInterface</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\SqlDbImpl\SqlDbImpl.csproj">
-      <Project>{f2a93db3-b506-49c0-a576-70836dde9e86}</Project>
-      <Name>SqlDbImpl</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

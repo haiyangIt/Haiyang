@@ -48,6 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Backup\Increment\SyncBackup.cs" />
     <Compile Include="CatalogService.cs" />
     <Compile Include="Context\ServiceContext.cs" />
     <Compile Include="Context\ServiceContextManager.cs" />
