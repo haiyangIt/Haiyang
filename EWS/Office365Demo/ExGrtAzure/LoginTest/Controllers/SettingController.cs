@@ -54,11 +54,12 @@ namespace LoginTest.Controllers
             {
                 using (ApplicationDbContext context = new ApplicationDbContext())
                 {
+                    EwsServiceArgument argument = new EwsServiceArgument();
                     if (model.IsExist)
                     {
                         SettingModel saveModel = context.Settings.Where(s => s.UserMail == model.UserMail).FirstOrDefault();
                         saveModel.UserMail = model.UserMail;
-                        saveModel.AdminPassword = model.AdminPassword;
+                        saveModel.AdminPassword = model.EncryptPassword;
                         saveModel.AdminUserName = model.AdminUserName;
                         saveModel.EwsConnectUrl = model.EwsConnectUrl;
                     }
@@ -67,7 +68,7 @@ namespace LoginTest.Controllers
                         SettingModel saveModel = new SettingModel()
                         {
                             UserMail = model.UserMail,
-                            AdminPassword = model.AdminPassword,
+                            AdminPassword = model.EncryptPassword,
                             AdminUserName = model.AdminUserName,
                             EwsConnectUrl = model.EwsConnectUrl
                         };
@@ -87,7 +88,8 @@ namespace LoginTest.Controllers
             {
                 IMailbox mailboxOper = CatalogFactory.Instance.NewMailboxOperatorImpl();
                 EwsServiceArgument argument = new EwsServiceArgument();
-                argument.ServiceCredential = new System.Net.NetworkCredential(model.AdminUserName, model.AdminPassword);
+                var password = RSAUtil.AsymmetricDecrypt(model.EncryptPassword);
+                argument.ServiceCredential = new System.Net.NetworkCredential(model.AdminUserName, password);
                 argument.UseDefaultCredentials = false;
                 argument.SetConnectMailbox(model.AdminUserName);
                 try {

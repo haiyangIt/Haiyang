@@ -105,7 +105,7 @@ namespace EwsFrame
             {
                 get
                 {
-                    return "arcserve1!";
+                    return "JackyMao1!";
                 }
             }
 
@@ -118,6 +118,7 @@ namespace EwsFrame
                     Credentials = new NetworkCredential(this.CredentialUserName, this.CredentialPassword, string.Empty)
                 };
             }
+            
         }
     }
 

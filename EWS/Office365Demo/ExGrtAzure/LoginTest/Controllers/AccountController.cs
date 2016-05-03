@@ -9,6 +9,8 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using LoginTest.Models;
+using LoginTest.Utils;
+using System.Text;
 
 namespace LoginTest.Controllers
 {
@@ -72,6 +74,8 @@ namespace LoginTest.Controllers
             {
                 return View(model);
             }
+            
+            model.Password = RSAUtil.AsymmetricDecrypt(model.Password);
 
             // This doesn't count login failures towards account lockout
             // To enable password failures to trigger account lockout, change to shouldLockout: true
@@ -152,6 +156,7 @@ namespace LoginTest.Controllers
             if (ModelState.IsValid)
             {
                 var user = new ApplicationUser { UserName = model.Email, Email = model.Email, Organization = model.Organization };
+                model.Password = RSAUtil.AsymmetricDecrypt(model.Password);
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {

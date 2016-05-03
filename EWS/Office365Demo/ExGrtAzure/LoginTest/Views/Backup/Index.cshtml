@@ -111,15 +111,16 @@
     @Scripts.Render("~/bundles/three-status-select")
     @Scripts.Render("~/bundles/three-status-select-nav")
     @Scripts.Render("~/bundles/customerPaginator")
+@Scripts.Render("~/bundles/md5")
 
     <script>
         $(document).ready(function () {
             var wizard = $('#rootwizard');
             var self = this;
             var adminMailbox = "";
-            var adminPassword = "";
             var organization = "";
             var index = 0;
+            var oldPassword = "";
 
             var selectCacheKey = "Backup_Setting_Select_Cache";
             var mailboxNav = $("#mail-list").mailboxnav({ cacheKey: selectCacheKey });
@@ -130,13 +131,46 @@
             var isFinished = false;
             var form = $("#BackupForm");
 
+            var isExistAdmin = "@Model.IsAdminUseExist";
+            var password = "";
+            if (isExistAdmin) {
+                password = "@Model.BackupUserPassword";
+            }
+
+            function getAdminPassword() {
+                var adminPassword = $("#BackupUserPassword").val();
+                if (isExistAdmin && adminPassword == password) {
+                    adminPassword = password;
+                }
+                else {
+                    adminPassword = encryptByRsa(adminPassword);
+                }
+                return adminPassword;
+            }
+
+            function getFormData() {
+                return {
+                    BackupUserMailAddress: $("#BackupUserMailAddress").val(),
+                    BackupUserPassword: $("#BackupUserPassword").val(),
+                    BackupUserOrganization: $("#BackupUserOrganization").val(),
+                    BackupSelectItems: $("#BackupSelectItems").val(),
+                    Index: $("#Index").val(),
+                    IsAdminUseExist: "@Model.IsAdminUseExist"
+                };
+            }
+
             wizard.bootstrapWizard({
                 onNext: function (tab, navigation, index) {
-                    
+
                     if (!form.valid()) {
                         return false;
                     }
 
+                    var formData = getFormData();
+                    formData.EncryptPassword = getAdminPassword();
+                    oldPassword = formData.BackupUserPassword;
+                    formData.BackupUserPassword = "";
+                    //$("#BackupUserPassword").val(CryptoJS.MD5($("#BackupUserPassword").val()));
                     Arcserve.DataProtect.Util.Ajax.loading("Validation");
                     if (index == parseInt("@ViewBag.SummaryStepNumber")) {
                         var rootSelectItem = Restore.Item.GetRootItem(selectCacheKey);
@@ -150,7 +184,7 @@
                     }
                     wizard.bootstrapWizard('show', index - 1);
 
-                    Arcserve.DataProtect.Util.Post(form.serialize(), form.attr("action"), SubmitFormSuccess, function () {
+                    Arcserve.DataProtect.Util.Post(formData, form.attr("action"), SubmitFormSuccess, function () {
                         Arcserve.DataProtect.Util.Ajax.close();
                     })
 
@@ -166,7 +200,12 @@
                         isFinished = true;
                         Arcserve.DataProtect.Util.Ajax.loading("Processing");
 
-                        Arcserve.DataProtect.Util.Post(form.serialize(), form.attr("action"), SubmitFormSuccess, function () {
+                        var formData = getFormData();
+                        formData.EncryptPassword = getAdminPassword();
+
+                        formData.BackupUserPassword = "";
+
+                        Arcserve.DataProtect.Util.Post(formData, form.attr("action"), SubmitFormSuccess, function () {
                             Arcserve.DataProtect.Util.Ajax.close();
                             isFinished = false;
                         })
@@ -196,7 +235,7 @@
 
             _InitMailboxNav = function (data) {
                 var mailbox = adminMailbox;
-                var password = adminPassword;
+                var password = getAdminPassword();
                 var org = organization;
                 //var data = { mailbox: mailbox, password: password, organization: org };
                 var url = "@Url.Action("GetAllMailbox")";
@@ -207,9 +246,8 @@
             var currentSelectMailbox = "";
             mailboxNav.on("onSelect", function (e, item) {
                 currentSelectMailbox = item.Id;
-
                 var mailbox = adminMailbox;
-                var password = adminPassword;
+                var password = getAdminPassword();
                 var org = organization;
                 folderNav.foldernavForSteped("setRootFolderId", item.Id);
 
@@ -222,7 +260,7 @@
             folderNav.on("onOpenAndGetChildData", function (e, data) {
                 var parentId = data.item.Id;
                 var mailbox = adminMailbox;
-                var password = adminPassword;
+                var password = getAdminPassword();
                 var org = organization;
 
                 var data = {
@@ -260,6 +298,10 @@
                     return;
                 }
 
+                if (data.Index == parseInt("@ViewBag.MailboxAndFolderStepNumber")) {
+                    $("#BackupUserPassword").val(oldPassword)
+                }
+
                 @*if (data.Index == parseInt("@ViewBag.MailboxAndFolderStepNumber")) {
                     if (typeof (data.IsSuccess) != "undefined") {
                         if (!data.IsSuccess) {
@@ -279,13 +321,13 @@
                 }*@
 
                 adminMailbox = data.BackupUserMailAddress;
-                adminPassword = data.BackupUserPassword;
                 organization = data.BackupUserOrganization;
                 index = data.Index;
 
                 $("input#Index").val(index);
 
                 if (index == parseInt("@ViewBag.MailboxAndFolderStepNumber") && !isMailboxInit) {
+
                     isMailboxInit = true;
                     _InitMailboxNav(data);
                 }

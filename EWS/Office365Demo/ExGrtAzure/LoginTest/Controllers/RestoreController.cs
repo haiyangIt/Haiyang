@@ -5,6 +5,7 @@ using EwsFrame;
 using EwsFrame.Util;
 using LoginTest.Models;
 using LoginTest.Models.Restore;
+using LoginTest.Models.Setting;
 using LoginTest.Utils;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
@@ -31,7 +32,20 @@ namespace LoginTest.Controllers
         {
             var currentUserId = User.Identity.GetUserId();
             ApplicationUser user = HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>().FindById(currentUserId);
-            RestoreUserInfo restoreUser = new RestoreUserInfo() { Name = user.UserName, Organization = user.Organization, Id = user.Id };
+            RestoreUserInfo restoreUser = null;
+            using (ApplicationDbContext context = new ApplicationDbContext())
+            {
+                SettingModel model = context.Settings.Where(s => s.UserMail == user.Email).FirstOrDefault();
+                if(model == null)
+                {
+                    restoreUser = new RestoreUserInfo() { Name = user.UserName, Organization = user.Organization, Id = user.Id, IsExistSetting = false };
+                }
+                else
+                {
+                    restoreUser = new RestoreUserInfo() { Name = user.UserName, Organization = user.Organization, Id = user.Id ,IsExistSetting = true, AdminPassword = model.AdminPassword, AdminUserName = model.AdminUserName};
+                }
+            }
+
             return View(restoreUser);
         }
 
@@ -189,7 +203,8 @@ namespace LoginTest.Controllers
             RestoreDestination destination,
             LoadedTreeItem selectedItem)
         {
-            IRestoreServiceEx restore = RestoreFactory.Instance.NewRestoreServiceEx(restoreAdminUserInfo.UserAddress, restoreAdminUserInfo.Password, string.Empty, restoreAdminUserInfo.Organization);
+            var password = RSAUtil.AsymmetricDecrypt(restoreAdminUserInfo.Password);
+            IRestoreServiceEx restore = RestoreFactory.Instance.NewRestoreServiceEx(restoreAdminUserInfo.UserAddress, password, string.Empty, restoreAdminUserInfo.Organization);
             restore.CurrentRestoreCatalogJob = catalog;
             restore.Destination = RestoreFactory.Instance.NewRestoreDestinationEx(restore.ServiceContext.Argument, restore.ServiceContext.DataAccessObj);
             restore.Destination.SetOtherInformation(destination.MailboxAddress, destination.FolderPath);
@@ -203,7 +218,8 @@ namespace LoginTest.Controllers
             RestoreDestination destination,
             LoadedTreeItem selectedItem)
         {
-            IRestoreServiceEx restore = RestoreFactory.Instance.NewRestoreServiceEx(restoreAdminUserInfo.UserAddress, restoreAdminUserInfo.Password, string.Empty, restoreAdminUserInfo.Organization);
+            var password = RSAUtil.AsymmetricDecrypt(restoreAdminUserInfo.Password);
+            IRestoreServiceEx restore = RestoreFactory.Instance.NewRestoreServiceEx(restoreAdminUserInfo.UserAddress, password, string.Empty, restoreAdminUserInfo.Organization);
             restore.CurrentRestoreCatalogJob = catalog;
             restore.Destination = RestoreFactory.Instance.NewRestoreDestinationOrgEx(restore.ServiceContext.Argument, restore.ServiceContext.DataAccessObj);
             restore.Destination.SetOtherInformation(destination.FolderPath);
@@ -218,7 +234,8 @@ namespace LoginTest.Controllers
             string notificationAddress,
             ExportType exportType)
         {
-            IRestoreServiceEx restore = RestoreFactory.Instance.NewRestoreServiceEx(restoreAdminUserInfo.UserAddress, restoreAdminUserInfo.Password, string.Empty, restoreAdminUserInfo.Organization);
+            var password = RSAUtil.AsymmetricDecrypt(restoreAdminUserInfo.Password);
+            IRestoreServiceEx restore = RestoreFactory.Instance.NewRestoreServiceEx(restoreAdminUserInfo.UserAddress, password, string.Empty, restoreAdminUserInfo.Organization);
             
             restore.CurrentRestoreCatalogJob = catalog;
             restore.Destination = RestoreFactory.Instance.NewDumpDestination();

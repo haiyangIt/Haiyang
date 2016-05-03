@@ -44,6 +44,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ManagedOpenSsl, Version=0.6.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\ManagedOpenSsl.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Azure.KeyVault.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Azure.KeyVault.Core.1.0.0\lib\net40\Microsoft.Azure.KeyVault.Core.dll</HintPath>
       <Private>True</Private>
@@ -290,6 +294,10 @@
     <Compile Include="Migrations\201601271019369_RemoveAutodiscoveryUrlInSetting.Designer.cs">
       <DependentUpon>201601271019369_RemoveAutodiscoveryUrlInSetting.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201605030835087_ModifySettingPasswordLength.cs" />
+    <Compile Include="Migrations\201605030835087_ModifySettingPasswordLength.Designer.cs">
+      <DependentUpon>201605030835087_ModifySettingPasswordLength.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\BackupModel.cs" />
@@ -307,6 +315,7 @@
     <Compile Include="SqlServerTypes\Loader.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="Utils\CustomErrorHandler.cs" />
+    <Compile Include="Utils\RSAUtil.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\packages\Microsoft.SqlServer.Types.11.0.2\nativeBinaries\x64\msvcr100.dll">
@@ -324,6 +333,12 @@
     <Content Include="..\packages\Microsoft.SqlServer.Types.11.0.2\nativeBinaries\x86\SqlServerSpatial110.dll">
       <Link>SqlServerTypes\x86\SqlServerSpatial110.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+	<Content Include="..\bin\libeay32.dll">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+	<Content Include="..\bin\ssleay32.dll">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\bootstrap-dialog.css" />
     <Content Include="Content\bootstrap-select.css" />
@@ -475,8 +490,32 @@
     <Content Include="Scripts\Restore\jquery-ui-customer-maildetail.js" />
     <Content Include="Scripts\Restore\jquery-ui-customer-restore-nav.js" />
     <Content Include="Scripts\Restore\jquery_data_protect_util.js" />
+    <Content Include="Scripts\Restore\jsencrypt.min.js" />
+    <Content Include="Scripts\Restore\publicKey.js" />
     <Content Include="Scripts\Restore\restore-selection.js" />
     <Content Include="Scripts\Restore\restore-tristate.js" />
+    <Content Include="Scripts\Restore\rollups\aes.js" />
+    <Content Include="Scripts\Restore\rollups\hmac-md5.js" />
+    <Content Include="Scripts\Restore\rollups\hmac-ripemd160.js" />
+    <Content Include="Scripts\Restore\rollups\hmac-sha1.js" />
+    <Content Include="Scripts\Restore\rollups\hmac-sha224.js" />
+    <Content Include="Scripts\Restore\rollups\hmac-sha256.js" />
+    <Content Include="Scripts\Restore\rollups\hmac-sha3.js" />
+    <Content Include="Scripts\Restore\rollups\hmac-sha384.js" />
+    <Content Include="Scripts\Restore\rollups\hmac-sha512.js" />
+    <Content Include="Scripts\Restore\rollups\md5.js" />
+    <Content Include="Scripts\Restore\rollups\pbkdf2.js" />
+    <Content Include="Scripts\Restore\rollups\rabbit-legacy.js" />
+    <Content Include="Scripts\Restore\rollups\rabbit.js" />
+    <Content Include="Scripts\Restore\rollups\rc4.js" />
+    <Content Include="Scripts\Restore\rollups\ripemd160.js" />
+    <Content Include="Scripts\Restore\rollups\sha1.js" />
+    <Content Include="Scripts\Restore\rollups\sha224.js" />
+    <Content Include="Scripts\Restore\rollups\sha256.js" />
+    <Content Include="Scripts\Restore\rollups\sha3.js" />
+    <Content Include="Scripts\Restore\rollups\sha384.js" />
+    <Content Include="Scripts\Restore\rollups\sha512.js" />
+    <Content Include="Scripts\Restore\rollups\tripledes.js" />
     <Content Include="Scripts\_references.js" />
     <Content Include="SqlServerTypes\readme.htm" />
     <Content Include="Web.config">
@@ -603,6 +642,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201601271019369_RemoveAutodiscoveryUrlInSetting.resx">
       <DependentUpon>201601271019369_RemoveAutodiscoveryUrlInSetting.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201605030835087_ModifySettingPasswordLength.resx">
+      <DependentUpon>201605030835087_ModifySettingPasswordLength.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

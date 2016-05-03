@@ -10,5 +10,8 @@ namespace LoginTest.Models.Restore
         public string Id { get; set; }
         public string Name { get; set; }
         public string Organization { get; set; }
+        public string AdminPassword { get; set; }
+        public string AdminUserName { get; set; }
+        public bool IsExistSetting { get; set; }
     }
 }

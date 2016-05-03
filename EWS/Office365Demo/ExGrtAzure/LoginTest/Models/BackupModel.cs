@@ -14,7 +14,6 @@ namespace LoginTest.Models
         [Display(Name = "Backup Admin Account")]
         public string BackupUserMailAddress { get; set; }
 
-        [Required]
         [Display(Name = "Backup Admin Password")]
         [DataType(DataType.Password)]
         public string BackupUserPassword { get; set; }
@@ -30,5 +29,7 @@ namespace LoginTest.Models
 
         //[Required]
         public string BackupJobName { get; set; }
+        public bool IsAdminUseExist { get; set; }
+        public string EncryptPassword { get; set; }
     }
 }

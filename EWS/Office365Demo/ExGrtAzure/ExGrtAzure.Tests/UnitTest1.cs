@@ -76,7 +76,7 @@ namespace ExGrtAzure.Tests
         public void ExportLog()
         {
             DateTime time = DateTime.Now;
-            var yesterday0413 = time.AddDays(-1).Date;
+            var yesterday0413 = time.AddDays(0).Date;
             var str = LogFactory.LogInstance.GetTotalLog(yesterday0413);
             using (StreamWriter writer = new StreamWriter(time.ToString("yyyyMMddHHmmssfff") + "log.txt"))
             {
@@ -516,5 +516,13 @@ namespace ExGrtAzure.Tests
         {
             return _archive.CreateEntry(_directory + "/" + entry, compressionLevel);
         }
+
+
+        [TestMethod]
+        public void TestRSA()
+        {
+        }
     }
+
+    
 }

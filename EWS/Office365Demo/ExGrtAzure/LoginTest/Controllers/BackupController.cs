@@ -43,6 +43,7 @@ namespace LoginTest.Controllers
                         BackupUserMailAddress = model.AdminUserName,// todo  user.Email,
                         BackupUserOrganization = user.Organization,
                         BackupUserPassword = model.AdminPassword,
+                        IsAdminUseExist = true,
                         Index = 0
                     };
                     return View(backupModel);
@@ -53,7 +54,6 @@ namespace LoginTest.Controllers
 
         [Authorize]
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public ActionResult Index(BackupModel model)
         {
             if (ModelState.IsValid)
@@ -67,7 +67,8 @@ namespace LoginTest.Controllers
                 {
                     IMailbox mailboxOper = CatalogFactory.Instance.NewMailboxOperatorImpl();
                     EwsServiceArgument argument = new EwsServiceArgument();
-                    argument.ServiceCredential = new System.Net.NetworkCredential(model.BackupUserMailAddress, model.BackupUserPassword);
+                    var password = RSAUtil.AsymmetricDecrypt(model.EncryptPassword);
+                    argument.ServiceCredential = new System.Net.NetworkCredential(model.BackupUserMailAddress, password);
                     argument.UseDefaultCredentials = false;
                     argument.SetConnectMailbox(model.BackupUserMailAddress);
                     mailboxOper.ConnectMailbox(argument, model.BackupUserMailAddress);
@@ -83,7 +84,7 @@ namespace LoginTest.Controllers
         public ActionResult GetAllMailbox(BackupModel model)
         {
             var mailbox = model.BackupUserMailAddress;
-            var password = model.BackupUserPassword;
+            var password = RSAUtil.AsymmetricDecrypt(model.EncryptPassword);
             var organization = model.BackupUserOrganization;
             ICatalogService service = CatalogFactory.Instance.NewCatalogService(mailbox, password, null, organization);
             var allMailboxes = service.GetAllUserMailbox();
@@ -151,6 +152,7 @@ namespace LoginTest.Controllers
 
         public ActionResult GetFolderInMailbox(string adminMailbox, string password, string organization, string mailbox, string parentFolderId)
         {
+            password = RSAUtil.AsymmetricDecrypt(password);
             ICatalogService service = CatalogFactory.Instance.NewCatalogService(adminMailbox, password, null, organization);
 
             var allFolder = service.GetFolder(mailbox, parentFolderId, false);
@@ -172,7 +174,6 @@ namespace LoginTest.Controllers
 
         [Authorize]
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public ActionResult Run(BackupModel model)
         {
             if (ModelState.IsValid)
@@ -182,7 +183,8 @@ namespace LoginTest.Controllers
 
                 //return View(model);
                 // todo need use job table to save job status.
-                var service = CatalogFactory.Instance.NewCatalogService(model.BackupUserMailAddress, model.BackupUserPassword, null, model.BackupUserOrganization);
+                var password = RSAUtil.AsymmetricDecrypt(model.EncryptPassword);
+                var service = CatalogFactory.Instance.NewCatalogService(model.BackupUserMailAddress, password, null, model.BackupUserOrganization);
                 service.CatalogJobName = model.BackupJobName;
                 IFilterItem filterObj = CatalogFactory.Instance.NewFilterItemBySelectTree(selectedItem);
                 service.GenerateCatalog(filterObj);

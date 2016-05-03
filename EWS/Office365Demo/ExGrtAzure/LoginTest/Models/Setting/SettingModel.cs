@@ -19,7 +19,7 @@ namespace LoginTest.Models.Setting
         public string AdminUserName { get; set; }
 
         [Required]
-        [MaxLength(64)]
+        [MaxLength(1024)]
         [DataType(DataType.Password)]
         public string AdminPassword { get; set; }
 

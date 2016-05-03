@@ -5,7 +5,7 @@
 
 <h2>@ViewBag.Title.</h2>
 
-@using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+@using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = "form-horizontal", role = "form", id="registerForm" }))
 {
     @Html.AntiForgeryToken()
     <h4>Create a new account.</h4>
@@ -44,7 +44,7 @@
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
-
+@Scripts.Render("~/bundles/md5")
     <script>
         ;$(document).ready(function () {
             $("#Email").keyup(function () {
@@ -52,15 +52,14 @@
                 var atIndex = val.indexOf("@@");
                 if (atIndex >= 0) {
                     var org = val.split("@@");
-                    if(org.length > 1){
+                    if (org.length > 1) {
                         org = org[1];
                         var dotIndex = org.indexOf(".");
-                        if(dotIndex > 0)
-                        {
+                        if (dotIndex > 0) {
                             org = org.split(".");
                             org = org[0];
                         }
-                        else if(dotIndex < 0){
+                        else if (dotIndex < 0) {
                             org = org;
                         }
                         else {
@@ -69,9 +68,17 @@
 
                         $("#Organization").val(org);
                     }
-                   
+
                 }
-            })
+            });
+
+            $("#registerForm").submit(function (e) {
+                if ($("#registerForm").valid()) {
+                    var password = encryptByRsa($("#ConfirmPassword").val());
+                    $("#ConfirmPassword").val(password);
+                    $("#Password").val(password);
+                }
+            });
         });
     </script>
 }

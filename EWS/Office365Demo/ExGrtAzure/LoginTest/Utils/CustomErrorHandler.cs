@@ -67,7 +67,7 @@ namespace LoginTest.Utils
             string message = string.Format("{0}/{1} has error.", currentController, currentActionName);
 
             // todo after test remove comment.
-            //LogFactory.LogInstance.WriteException(LogInterface.LogLevel.ERR, message, filterContext.Exception, filterContext.Exception.Message);
+            LogFactory.LogInstance.WriteException(LogInterface.LogLevel.ERR, message, filterContext.Exception, filterContext.Exception.Message);
         }
     }
 }

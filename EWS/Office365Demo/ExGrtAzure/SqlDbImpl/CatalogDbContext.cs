@@ -1,4 +1,5 @@
-﻿using EwsFrame.EF;
+﻿using EwsFrame;
+using EwsFrame.EF;
 using SqlDbImpl.Model;
 using System;
 using System.Collections.Generic;

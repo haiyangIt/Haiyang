@@ -76,16 +76,30 @@
 @Scripts.Render("~/bundles/jqueryval")
 @Scripts.Render("~/bundles/bootstrapdialog")
 @Scripts.Render("~/bundles/arcserveutil")
+@Scripts.Render("~/bundles/md5")
     <script>
          
 
         $(document).ready(function () {
             var form = $("#SettingForm");
+            var password = null;
+            var isExist = "@Model.IsExist";
+            if (isExist) {
+                password = "@Model.AdminPassword";
+            }
             $("#SaveBtn").click(function () {
                 if ($("#SettingForm").valid()) {
+                    oldPassword = $("#AdminPassword").val();
                     Arcserve.DataProtect.Util.Ajax.loading("Saving");
-
-                    Arcserve.DataProtect.Util.Post(form.serialize(), form.attr("action"), SubmitFormSuccess, function () {
+                    var data = getFormData();;
+                    if (isExist && data.AdminPassword == password) {
+                        data.EncryptPassword = password;
+                    }
+                    else 
+                        data.EncryptPassword = encryptByRsa(data.AdminPassword);
+                    data.AdminPassword = "";
+                    data.ConfirmPassword = "";
+                    Arcserve.DataProtect.Util.Post(data, form.attr("action"), SubmitFormSuccess, function () {
                         Arcserve.DataProtect.Util.Ajax.close();
                     });
                 }
@@ -111,16 +125,41 @@
                 window.location.href = url;
             });
 
+            function getFormData(){
+                return {
+                    UserMail: $("#UserMail").val(),
+                    AdminUserName: $("#AdminUserName").val(),
+                    AdminPassword: $("#AdminPassword").val(),
+                    ConfirmPassword: $("#ConfirmPassword").val(),
+                    EwsConnectUrl: $("#EwsConnectUrl").val(),
+                    IsExist: "@Model.IsExist"
+                };
+            }
+
             $("#TestBtn").click(function () {
                 if ($("#SettingForm").valid()) {
+                    
                     Arcserve.DataProtect.Util.Ajax.loading("Testing" );
+                    
 
-                    var formData = $("#SettingForm").serialize();
+                    var formData = getFormData();
+                    if (isExist && formData.AdminPassword == password) {
+                        formData.EncryptPassword = password;
+                    }
+                    else
+                        formData.EncryptPassword = encryptByRsa(formData.AdminPassword);
+
+                    var oldPassword = formData.AdminPassword;
+                    formData.AdminPassword = "";
+                    formData.ConfirmPassword = "";
+                    
                     Arcserve.DataProtect.Util.Post(formData, "@Url.Action("TestConnect","Setting")", function (data) {
                         if (data.Success === "undefined") {
 
                         }
                         if (data.Success) {
+                            $("#AdminPassword").val(oldPassword);
+                            $("#ConfirmPassword").val(oldPassword);
                             if (!data.IsChangeUrl)
                                 Arcserve.DataProtect.Util.Alert({
                                     type: BootstrapDialog.TYPE_INFO,

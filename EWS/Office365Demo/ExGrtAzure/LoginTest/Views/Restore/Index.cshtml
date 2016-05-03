@@ -148,6 +148,7 @@
     @Scripts.Render("~/bundles/three-status-select-nav")
     @Scripts.Render("~/bundles/customerPaginator")
     @Scripts.Render("~/bundles/customerMailbox")
+@Scripts.Render("~/bundles/md5")
 
 
     <script id="maildetailTemplate" type="text/html">
@@ -180,6 +181,23 @@
             //Arcserve.DataProtect.Util.Alert({ message: "No item selected." });
             //return;
             (function ($) {
+                var password = "";
+                var userName = "";
+                if ("@Model.IsExistSetting") {
+                    password = "@Model.AdminPassword";
+                    userName = "@Model.AdminUserName";
+                }
+
+                function getAdminPassword() {
+                    if ("@Model.IsExistSetting") {
+                        if (password == $("#RestoreAdminPassword").val()) {
+                            return password;
+                        }
+                        else
+                            return encryptByRsa($("#RestoreAdminPassword").val());
+                    }
+                }
+
                 var catalogYearMonthInfoHash = [];
                 var organization = "@Model.Organization";
 
@@ -367,6 +385,10 @@
                             }
                         ],
                         onshown: function (selfDialog) {
+                            debugger;
+                            $("#RestoreAdminUser").val(userName);
+                            $("#RestoreAdminPassword").val(password);
+
                             formValidator = $("#restore_destination_form").validate({
                                 excluded: ':disabled',
                                 rules: {
@@ -441,10 +463,11 @@
 
                     var restoreType = $("[name='RestoreType']:checked").val();
                     var adminUserName = $("#RestoreAdminUser").val();
-                    var adminPassword = $("#RestoreAdminPassword").val();
+                    var adminPassword = getAdminPassword();
+
                     var adminUser = { UserAddress: adminUserName, Password: adminPassword, Organization: organization };
                     var exportType = $("[name='ExportType']:checked").val();
-                    
+
                     if (restoreType == "@ViewBag.Alter") {
                         var date = new Date();
                         var folderName = $("#RestoreAlterFolder").val();
