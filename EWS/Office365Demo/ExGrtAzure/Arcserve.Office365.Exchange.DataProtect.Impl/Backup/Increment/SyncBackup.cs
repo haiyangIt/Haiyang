@@ -1,16 +1,18 @@
-﻿using DataProtectInterface;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Security;
-using DataProtectImpl.Backup;
 using Arcserve.Office365.Exchange.Thread;
 using Arcserve.Office365.Exchange.Data.Account;
 using Arcserve.Office365.Exchange.Data.Increment;
 using Arcserve.Office365.Exchange.EwsApi.Increment;
+using Arcserve.Office365.Exchange.Data;
+using System.Management.Automation;
+using System.Management.Automation.Runspaces;
+using Arcserve.Office365.Exchange.Data.Mail;
 
 namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
 {
@@ -247,13 +249,18 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
                 }
             }
 
-            public IMailboxData Clone()
+            public IMailboxDataSync Clone()
             {
                 return new MailboxInfo(DisplayName, MailAddress)
                 {
                     Location = Location,
                     RootFolderId = RootFolderId
                 };
+            }
+
+            IMailboxData IMailboxData.Clone()
+            {
+                return Clone();
             }
         }
     }
