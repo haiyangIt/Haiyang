@@ -31,9 +31,9 @@
 
                _updateContent: function () {
                    if (this.mailbox && this.mailbox != null) {
-                       this.displayNameElement.text(this.mailbox.OtherInformation.DisplayName);
-                       this.addressElement.text(this.mailbox.OtherInformation.MailAddress);
-                       this.openBtn.attr("itemid", this.mailbox.OtherInformation.RootFolderId);
+                       this.displayNameElement.text(this.mailbox.ItemData.OtherInformation.DisplayName);
+                       this.addressElement.text(this.mailbox.ItemData.OtherInformation.MailAddress);
+                       this.openBtn.attr("itemid", this.mailbox.ItemData.OtherInformation.RootFolderId);
                    }
                    else {
                        this.clear();

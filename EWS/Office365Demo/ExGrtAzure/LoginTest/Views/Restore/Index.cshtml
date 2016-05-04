@@ -299,7 +299,7 @@
                     folderNav.foldernav("update");
                     mailItemDetail.maildetail("update");
 
-                    var folderUpdateData = { url: getFolderUrl, data: { catalogJob: catalogInfo, mailAddress: item.OtherInformation.MailAddress } };
+                    var folderUpdateData = { url: getFolderUrl, data: { catalogJob: catalogInfo, mailAddress: item.ItemData.OtherInformation.MailAddress } };
                     folderNav.foldernav("setRootFolderId", item.Id);
                     folderNav.foldernav("update", folderUpdateData);
                 });
@@ -314,7 +314,27 @@
                 folderNav.on("onSelect", function (e, item) {
                     var mailItemUpdateData = { url: getMailItemUrl, data: { catalogJob: catalogInfo, folderId: item.Id } };
                     mailItemDetail.maildetail("update", mailItemUpdateData);
-                })
+                });
+
+                @*folderNav.on("onOpenAndGetChildData", function (e, data) {
+                    var parentId = data.item.Id;
+                    var mailbox = adminMailbox;
+                    var password = getAdminPassword();
+                    var org = organization;
+
+                    var data = {
+                        adminMailbox: mailbox,
+                        password: password,
+                        organization: org,
+                        mailbox: currentSelectMailbox,
+                        parentFolderId: data.item.Id
+                    };
+
+                    Arcserve.DataProtect.Util.Post(data, "@Url.Action("GetFolderInMailbox")", function (data) {
+                        //debugger;
+                        folderNav.foldernavForSteped("updateChildContainer", parentId, data.Details);
+                    })
+                });*@
 
 
                 Restore.Item.Clear(restoreCacheKey);

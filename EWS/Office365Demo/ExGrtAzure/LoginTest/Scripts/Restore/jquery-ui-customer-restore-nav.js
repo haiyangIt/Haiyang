@@ -253,7 +253,7 @@ $.widget("custom.restorenav",
                        li.toggleClass("active");
 
                        if ($target.is("span.open-children")) {
-                           if (item.Container && item.Container.length) {
+                           if (item.ItemData.Container && item.ItemData.Container.length) {
                                $target.toggleClass("glyphicon-chevron-right").toggleClass("glyphicon-chevron-down");
                                $("ul.nav-children:first", $target.parent().parent()).toggleClass("hidden");
                            }

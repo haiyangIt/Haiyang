@@ -71,7 +71,7 @@ namespace LoginTest
             bundles.Add(new StyleBundle("~/bundles/bootstrapdialogcss").Include("~/Content/bootstrap-dialog.css"));
             bundles.Add(new ScriptBundle("~/bundles/bootstrapdialog").Include("~/Scripts/bootstrap-dialog.js"));
 
-            bundles.Add(new ScriptBundle("~/bundles/md5").IncludeDirectory("~/Scripts/Restore/rollups", "*.js").
+            bundles.Add(new ScriptBundle("~/bundles/md5").Include("~/Scripts/Restore/rollups/md5.js").
                 Include("~/Scripts/Restore/jsencrypt.min.js")
                 .Include("~/Scripts/Restore/publicKey.js"));
         }

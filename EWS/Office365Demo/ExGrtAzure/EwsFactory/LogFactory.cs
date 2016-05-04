@@ -73,28 +73,28 @@ namespace EwsFrame
         private ILog CreateLogInstance()
         {
             ILog result;
-            //if (!IsRunningOnAzure())
-            //{
-            //    result = (ILog)(CreateTypeWithName<ILog>(LogImplAssembly, "LogImpl.DefaultLog"));
-            //}
-            //else
-            //{
+            if (!IsRunningOnAzure())
+            {
+                result = (ILog)(CreateTypeWithName<ILog>(LogImplAssembly, "LogImpl.DefaultLog"));
+            }
+            else
+            {
                 result = (ILog)(CreateTypeWithName<ILog>(LogImplAssembly, "LogImpl.LogToBlob"));
-            //}
+            }
             return result;
         }
 
         private ILog CreateEWSLogInstance()
         {
             ILog result;
-            //if (!IsRunningOnAzure())
-            //{
-            //    result = (ILog)(CreateTypeWithName<ILog>(LogImplAssembly, "LogImpl.DefaultEwsTraceLog"));
-            //}
-            //else
-            //{
+            if (!IsRunningOnAzure())
+            {
+                result = (ILog)(CreateTypeWithName<ILog>(LogImplAssembly, "LogImpl.DefaultEwsTraceLog"));
+            }
+            else
+            {
                 result = (ILog)(CreateTypeWithName<ILog>(LogImplAssembly, "LogImpl.LogToBlobEwsTrace"));
-            //}
+            }
 
             return result;
         }
