@@ -9,5 +9,6 @@ namespace Arcserve.Office365.Exchange.Data.Increment
 {
     public interface IMailboxDataSync : IMailboxData, IDataSync
     {
+
     }
 }

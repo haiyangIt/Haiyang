@@ -17,46 +17,9 @@ using Arcserve.Office365.Exchange.Data.Mail;
 
 namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
 {
-    public abstract class EwsServiceAdapterBase : IEwsServiceAdapter<IJobProgress>
+    public abstract class EwsServiceAdapterBase : TaskSyncContextBase, IEwsServiceAdapter<IJobProgress>
     {
-        public CancellationToken CancelToken
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
 
-            set
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        public IJobProgress Progress
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-
-            set
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        public TaskScheduler Scheduler
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-
-            set
-            {
-                throw new NotImplementedException();
-            }
-        }
 
         protected void CheckIsCanceled()
         {
@@ -65,20 +28,20 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
                 throw new OperationCanceledException();
             }
         }
-
-        protected void RetryCalled()
-        {
-
-        }
-
-
+        
 
         public ICollection<IMailboxDataSync> GetAllMailboxes(string adminUserName, string adminPassword)
         {
             CheckIsCanceled();
+            WaitForPerformanceLimit();
             Progress.Report("Getting all mailboxes in exchange.");
-            var result = DoGetAllMailboxes(adminUserName, adminPassword);
+            var result = RetryFunc(new Topaz.RetryContext("Getting all mailbox", Topaz.OperationType.Others),
+                () =>
+                {
+                    return DoGetAllMailboxes(adminUserName, adminPassword);
+                });
             Progress.Report("Getting all mailboxes in exchange completed.total {0} mailboxes.", result.Count);
+            return result;
         }
 
         public Task<ICollection<IMailboxDataSync>> GetAllMailboxesAsync(string adminUserName, string adminPassword)
@@ -110,7 +73,7 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
                     Command CommandSelect = new Command("Select-Object");
                     CommandSelect.Parameters.Add("Property", props);
                     pipe.Commands.Add(CommandSelect);
-                    
+
                     runspace.Open();
 
                     var information = pipe.Invoke();

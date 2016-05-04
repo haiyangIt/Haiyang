@@ -42,32 +42,96 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
         public string Organization { get; }
         public IBackupQueryAsync<IJobProgress> BackupQuery { get; }
         public IEwsServiceAdapter<IJobProgress> EwsServiceAdapter { get; set; }
+        public IDataFromClient<IJobProgress> DataFromClient { get; set; }
         public DateTime JobStartTime { get; }
 
-        public override Action<IList<IMailboxDataSync>> AddMailboxToCurrentCatalog
+        public override Action<ICollection<IMailboxDataSync>> AddMailboxToCurrentCatalog
         {
             get
             {
                 throw new NotImplementedException();
+            }
+        }
+
+        public override Func<ICollection<IMailboxDataSync>> FuncGetAllMailboxFromExchange
+        {
+            get
+            {
+                return () =>
+                {
+                    return EwsServiceAdapter.GetAllMailboxes(AdminInfo.UserName, AdminInfo.UserPassword);
+                };
+            }
+        }
+
+        public override Func<ICatalogJob> FuncGetLatestCatalogJob
+        {
+            get
+            {
+                return () =>
+                {
+                    return DataFromClient.GetLatestCatalogJob();
+                };
             }
         }
         
-        public override Func<IList<IMailboxDataSync>> FuncGetAllMailboxFromExchange
+
+        public override Func<ICatalogJob, ICollection<IMailboxDataSync>> FuncGetAllMailboxFromLastCatalog
         {
             get
             {
-                return GetAllMailboxesFromExchange;
+                return (latestCatalogJob) =>
+                {
+                    return BackupQuery.GetMailboxes(latestCatalogJob);
+                };
             }
         }
 
-        private IList<IMailboxDataSync> GetAllMailboxesFromExchange()
+        public override Func<ICollection<IMailboxDataSync>> FuncGetAllMailboxFromPlan
         {
-            
+            get
+            {
+                return () =>
+                {
+                    return DataFromClient.GetAllMailboxes();
+                };
+            }
         }
 
-        
+        public override Func<ICollection<IMailboxDataSync>, ICollection<IMailboxDataSync>, ICollection<IMailboxDataSync>> FuncGetValidMailbox
+        {
+            get
+            {
+                return (mailboxInExchange, mailboxInPlan) =>
+                {
+                    var result = new List<IMailboxDataSync>(mailboxInExchange.Count);
 
-        public override Func<IList<IMailboxDataSync>> FuncGetAllMailboxFromLastCatalog
+                    var dicExchange = new Dictionary<string, IMailboxDataSync>();
+                    foreach(var item in mailboxInExchange)
+                    {
+                        dicExchange.Add(item.Id, item);
+                    }
+
+                    var dicPlan = new Dictionary<string, IMailboxDataSync>();
+                    foreach (var item in mailboxInPlan)
+                    {
+                        dicPlan.Add(item.Id, item);
+                    }
+
+                    foreach(var key in dicExchange.Keys)
+                    {
+                        if (dicPlan.ContainsKey(key))
+                        {
+                            result.Add(dicPlan[key]);
+                        }
+                    }
+
+                    return result;
+                };
+            }
+        }
+
+        public override Func<ICollection<IMailboxDataSync>, ICollection<IMailboxDataSync>, ICollection<IMailboxDataSync>[]> FuncGetMailboxCatalog
         {
             get
             {
@@ -75,29 +139,6 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
             }
         }
 
-        public override Func<IList<IMailboxDataSync>> FuncGetAllMailboxFromPlan
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        public override Func<IList<IMailboxDataSync>, IList<IMailboxDataSync>, IList<IMailboxDataSync>> FuncGetMailboxCatalog
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        public override Func<IList<IMailboxDataSync>, IList<IMailboxDataSync>, IList<IMailboxDataSync>> FuncGetValidMailbox
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
 
         public override BackupMailboxFlowTemplate MailboxTemplate
         {
@@ -107,7 +148,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
             }
         }
 
-        public override void ForEachLoop(IList<IMailboxDataSync> items, Action<IMailboxDataSync> DoEachMailbox)
+        public override void ForEachLoop(ICollection<IMailboxDataSync> items, Action<IMailboxDataSync> DoEachMailbox)
         {
             throw new NotImplementedException();
         }
@@ -119,6 +160,6 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
         }
 
 
-       
+
     }
 }
