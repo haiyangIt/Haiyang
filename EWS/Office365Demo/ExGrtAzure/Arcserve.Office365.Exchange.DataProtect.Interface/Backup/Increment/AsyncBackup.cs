@@ -14,34 +14,34 @@ using Arcserve.Office365.Exchange.Data.Increment;
 
 namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
 {
-    public class AsyncBackup : ITaskSyncContext<JobProgress>
+    public class AsyncBackup : ITaskSyncContext<IJobProgress>
     {
-        public IFilterItemWithFolderAsync<JobProgress> Filters { get; set; }
-        public JobProgress Progress { get; set; }
+        public IFilterItemWithFolderAsync<IJobProgress> Filters { get; set; }
+        public IJobProgress Progress { get; set; }
         public TaskScheduler Scheduler { get; set; }
         public CancellationToken CancelToken { get; set; }
         public OrganizationAdminInfo AdminInfo { get; set; }
         public string Organization { get; }
-        public IBackupQueryAsync<JobProgress> BackupQuery { get; }
-        public IEwsServiceAdapter<JobProgress> EwsServiceAdapter { get; set; }
+        public IBackupQueryAsync<IJobProgress> BackupQuery { get; }
+        public IEwsServiceAdapter<IJobProgress> EwsServiceAdapter { get; set; }
         public DateTime JobStartTime { get; }
         public async System.Threading.Tasks.Task Run()
         {
-            var allMailboxFromPlan = Filters.GetAllMailboxAsync();
-            var lastMailboxSyncFromDb = BackupQuery.GetMailboxSync(JobStartTime);
-            await System.Threading.Tasks.Task.WhenAll(allMailboxFromPlan, lastMailboxSyncFromDb).ConfigureAwait(false);
+            //var allMailboxFromPlan = Filters.GetAllMailboxAsync();
+            //var lastMailboxSyncFromDb = BackupQuery.GetMailboxSync(JobStartTime);
+            //await System.Threading.Tasks.Task.WhenAll(allMailboxFromPlan, lastMailboxSyncFromDb).ConfigureAwait(false);
             throw new NotImplementedException();
         }
 
-        public void InitTaskSyncContext(ITaskSyncContext<JobProgress> mainContext)
+        public void InitTaskSyncContext(ITaskSyncContext<IJobProgress> mainContext)
         {
             this.CloneSyncContext(mainContext);
         }
     }
 
-    public abstract class AsyncBackupFlowTemplate : ITaskSyncContext<JobProgress>
+    public abstract class AsyncBackupFlowTemplate : ITaskSyncContext<IJobProgress>
     {
-        public abstract JobProgress Progress
+        public abstract IJobProgress Progress
         {
             get; set;
         }
@@ -145,7 +145,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
             throw new NotImplementedException();
         }
 
-        public void InitTaskSyncContext(ITaskSyncContext<JobProgress> mainContext)
+        public void InitTaskSyncContext(ITaskSyncContext<IJobProgress> mainContext)
         {
             throw new NotImplementedException();
         }

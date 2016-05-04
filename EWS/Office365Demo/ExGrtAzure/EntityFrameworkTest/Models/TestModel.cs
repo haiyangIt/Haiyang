@@ -1,4 +1,4 @@
-﻿using EwsFrame.Util.Setting;
+﻿using Arcserve.Office365.Exchange.Util.Setting;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;

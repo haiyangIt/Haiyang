@@ -20,6 +20,7 @@ using Arcserve.Office365.Exchange;
 using Arcserve.Office365.Exchange.Util.Setting;
 using Arcserve.Office365.Exchange.Data.Mail;
 using Arcserve.Office365.Exchange.Data;
+using Arcserve.Office365.Exchange.ArcJob;
 
 namespace ExGrtAzure.Tests
 {
@@ -30,7 +31,7 @@ namespace ExGrtAzure.Tests
         public void ExportLog()
         {
             DateTime time = DateTime.Now;
-            var yesterday0413 = time.AddDays(-1).Date;
+            var yesterday0413 = time.AddDays(0).Date;
             var str = LogFactory.LogInstance.GetTotalLog(yesterday0413);
             using (StreamWriter writer = new StreamWriter(time.ToString("yyyyMMddHHmmssfff") + "log.txt"))
             {
@@ -86,7 +87,7 @@ namespace ExGrtAzure.Tests
             var directory = AppDomain.CurrentDomain.BaseDirectory;
             directory = Path.Combine(directory, "..\\..\\..\\lib");
             CatalogFactory.LibPath = directory;
-            IServiceContext context = ServiceContext.NewServiceContext("haiyang.ling@arcserve.com", "", "", "Arcserve", DataProtectInterface.TaskType.Catalog);
+            IServiceContext context = ServiceContext.NewServiceContext("haiyang.ling@arcserve.com", "", "", "Arcserve", TaskType.Catalog);
             throw new NotImplementedException();
             // todo context.CurrentContext.CurrentMailbox = "haiyang.ling@arcserve.com";
             //var dataAccess = ServiceContext.GetDataAccessInstance(TaskType.Catalog, context.Argument, "Arcserve");

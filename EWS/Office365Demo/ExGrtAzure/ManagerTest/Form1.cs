@@ -1,9 +1,9 @@
-﻿using EwsFrame;
-using EwsFrame.Manager.IF;
-using EwsFrame.Manager.Impl;
-using EwsService.Common;
-using EwsServiceInterface;
-using LogInterface;
+﻿using Arcserve.Office365.Exchange.EwsApi;
+using Arcserve.Office365.Exchange.EwsApi.Impl.Common;
+using Arcserve.Office365.Exchange.Log;
+using Arcserve.Office365.Exchange.Manager.Data;
+using Arcserve.Office365.Exchange.Manager.IF;
+using Arcserve.Office365.Exchange.Manager.Impl;
 using Microsoft.Exchange.WebServices.Data;
 using Newtonsoft.Json;
 using System;
@@ -56,7 +56,7 @@ namespace ManagerTest
 
         private List<TestJob> _allJobs = new List<TestJob>();
 
-        private void ProgressManager_NewProgressEvent(object sender, EwsFrame.Manager.Data.ProgressArgs e)
+        private void ProgressManager_NewProgressEvent(object sender, ProgressArgs e)
         {
             UpdateListbox();
             TestProgressInfo info = e.ProgressInfo as TestProgressInfo;

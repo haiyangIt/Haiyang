@@ -11,10 +11,10 @@ namespace Arcserve.Office365.Exchange.EwsApi.Increment
 {
     public interface IEwsServiceAdapter<ProgressType> : ITaskSyncContext<ProgressType>
     {
-        Task<Microsoft.Exchange.WebServices.Data.ExchangeService> GetExchangeServiceSync(string mailbox, OrganizationAdminInfo adminInfo);
+        Task<Microsoft.Exchange.WebServices.Data.ExchangeService> GetExchangeServiceAsync(string mailbox, OrganizationAdminInfo adminInfo);
         Microsoft.Exchange.WebServices.Data.ExchangeService GetExchangeService(string mailbox, OrganizationAdminInfo adminInfo);
 
-        Task<ICollection<IMailboxDataSync>> GetAllMailboxesSync(string adminUserName, string adminPassword);
+        Task<ICollection<IMailboxDataSync>> GetAllMailboxesAsync(string adminUserName, string adminPassword);
         ICollection<IMailboxDataSync> GetAllMailboxes(string adminUserName, string adminPassword);
 
 

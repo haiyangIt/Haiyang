@@ -12,7 +12,7 @@ using System.Threading;
 
 namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
 {
-    public class EwsServiceAdapter : IEwsServiceAdapter<JobProgress>
+    public class EwsServiceAdapter : IEwsServiceAdapter<IJobProgress>
     {
         public CancellationToken CancelToken
         {
@@ -27,7 +27,7 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
             }
         }
 
-        public JobProgress Progress
+        public IJobProgress Progress
         {
             get
             {
@@ -55,12 +55,19 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
 
         public ICollection<IMailboxDataSync> GetAllMailboxes(string adminUserName, string adminPassword)
         {
-            System.Threading.Tasks.Task t = new System.Threading.Tasks.Task();
+            var result = DoGetAllMailboxes(adminUserName, adminPassword);
+            Progress.Report("Getting all mailboxes in exchange completed, total {0} mailboxes.", result.Count);
+            return result;
         }
 
-        public async Task<ICollection<IMailboxDataSync>> GetAllMailboxesSync(string adminUserName, string adminPassword)
+        public async Task<ICollection<IMailboxDataSync>> GetAllMailboxesAsync(string adminUserName, string adminPassword)
         {
             throw new NotImplementedException();
+        }
+
+        private ICollection<IMailboxDataSync> DoGetAllMailboxes(string adminUserName, string adminPassword)
+        {
+
         }
 
         public ExchangeService GetExchangeService(string mailbox, OrganizationAdminInfo adminInfo)
@@ -68,12 +75,12 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
             throw new NotImplementedException();
         }
 
-        public Task<ExchangeService> GetExchangeServiceSync(string mailbox, OrganizationAdminInfo adminInfo)
+        public Task<ExchangeService> GetExchangeServiceAsync(string mailbox, OrganizationAdminInfo adminInfo)
         {
             throw new NotImplementedException();
         }
 
-        public void InitTaskSyncContext(ITaskSyncContext<JobProgress> mainContext)
+        public void InitTaskSyncContext(ITaskSyncContext<IJobProgress> mainContext)
         {
             throw new NotImplementedException();
         }

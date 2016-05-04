@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 
 namespace Arcserve.Office365.Exchange.Thread
 {
-    public interface JobProgress : IProgress<double>
+    public interface IJobProgress : IProgress<double>
     {
         void Report(double val, string message);
         void Report(string message);
+
+        void Report(string format, params object[] args);
     }
 }

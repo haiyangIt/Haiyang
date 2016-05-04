@@ -1,11 +1,11 @@
-﻿using EwsFrame.Manager.Impl;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using EwsFrame.Manager.IF;
 using System.Threading;
+using Arcserve.Office365.Exchange.Manager.Impl;
+using Arcserve.Office365.Exchange.Manager.IF;
 
 namespace ManagerTest
 {

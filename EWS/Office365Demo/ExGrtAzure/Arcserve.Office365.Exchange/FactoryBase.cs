@@ -73,7 +73,7 @@ namespace Arcserve.Office365.Exchange
 
         private static bool IsDllExist(string directory)
         {
-            var result = Directory.EnumerateFiles(directory, "*EwsDataInterface.dll*");
+            var result = Directory.EnumerateFiles(directory, AssemblyConfig.Instance.BinaryExchangeEwsApi);
             return result.Count() > 0;
         }
 

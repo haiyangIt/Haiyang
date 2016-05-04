@@ -96,6 +96,30 @@
       <Project>{724571a8-bf45-4efe-ab1e-bb065201513b}</Project>
       <Name>Arcserve.Exchange.FastTransferUtil</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Arcserve.Office365.Exchange.DataProtect.Interface\Arcserve.Office365.Exchange.DataProtect.Interface.csproj">
+      <Project>{3537b177-88f3-440b-b114-5bcf98ca2220}</Project>
+      <Name>Arcserve.Office365.Exchange.DataProtect.Interface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Arcserve.Office365.Exchange.Data\Arcserve.Office365.Exchange.Data.csproj">
+      <Project>{177b7df7-ecaf-4bcc-9f26-77276893ba9f}</Project>
+      <Name>Arcserve.Office365.Exchange.Data</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Arcserve.Office365.Exchange.EwsApi.Impl\Arcserve.Office365.Exchange.EwsApi.Impl.csproj">
+      <Project>{be1ace64-73d6-4ce2-a848-efb204c958f8}</Project>
+      <Name>Arcserve.Office365.Exchange.EwsApi.Impl</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Arcserve.Office365.Exchange.EwsApi\Arcserve.Office365.Exchange.EwsApi.csproj">
+      <Project>{0ddbd2b6-de8b-43bf-87ef-d93428a74948}</Project>
+      <Name>Arcserve.Office365.Exchange.EwsApi</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Arcserve.Office365.Exchange.StorageAccess.Interface\Arcserve.Office365.Exchange.StorageAccess.Interface.csproj">
+      <Project>{b5778470-0cb3-425a-8368-74ff0866e8c0}</Project>
+      <Name>Arcserve.Office365.Exchange.StorageAccess.Interface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Arcserve.Office365.Exchange\Arcserve.Office365.Exchange.csproj">
+      <Project>{9d0c2e9c-7582-4d61-bd19-39ae85684f7e}</Project>
+      <Name>Arcserve.Office365.Exchange</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
