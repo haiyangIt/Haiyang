@@ -11,12 +11,30 @@ using FTStreamUtil;
 using FTStreamUtil.Item;
 using FTStreamUtil.Item.PropValue;
 using FastTransferUtil.CompoundFile.MsgStruct;
+using System.Threading;
 
 namespace FastTransferUtil.CompoundFile
 {
     public class CompoundFileUtil
     {
-        public static CompoundFileUtil Instance = new CompoundFileUtil();
+
+        private static object _lock = new object();
+        private static CompoundFileUtil _instance = null;
+        public static CompoundFileUtil Instance
+        {
+            get
+            {
+                if (_instance == null)
+                    lock (_lock)
+                    {
+                        if (_instance == null)
+                        {
+                            _instance = new CompoundFileUtil();
+                        }
+                    }
+                return _instance;
+            }
+        }
 
         #region CompoundFileInMemory
         public IStorage CreateStorageInMemory(out ILockBytes lockBytes)
@@ -42,7 +60,8 @@ namespace FastTransferUtil.CompoundFile
         public byte[] ConvertBinToMsg(byte[] binBytes)
         {
             ILockBytes memory = null;
-            try {
+            try
+            {
                 using (MemoryStream reader = new MemoryStream(binBytes))
                 {
                     BuildMsgInMemoryWithBin(reader, out memory);

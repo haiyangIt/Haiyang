@@ -9,6 +9,7 @@ using System.Text;
 using System.Runtime.InteropServices.ComTypes;
 using System.IO;
 using System.Diagnostics;
+using System.Threading;
 
 namespace FastTransferUtil.CompoundFile.MsgStruct.Helper
 {
@@ -22,7 +23,24 @@ namespace FastTransferUtil.CompoundFile.MsgStruct.Helper
 
     internal class SpecialPropertyUtil
     {
-        public static SpecialPropertyUtil Instance = new SpecialPropertyUtil();
+
+        private static object _lock = new object();
+        private static SpecialPropertyUtil _instance = null;
+        public static SpecialPropertyUtil Instance
+        {
+            get
+            {
+                if (_instance == null)
+                    lock (_lock)
+                    {
+                        if (_instance == null)
+                        {
+                            _instance = new SpecialPropertyUtil();
+                        }
+                    }
+                return _instance;
+            }
+        }
 
         public ISpecialValue CreateNewPropValue(int propertyTag, Int64 value)
         {

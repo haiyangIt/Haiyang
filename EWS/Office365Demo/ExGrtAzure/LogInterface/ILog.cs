@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace LogInterface
 {
-    public interface ILog
+    public interface ILog : IDisposable
     {
         void WriteLog(LogLevel level, string message);
         void WriteException(LogLevel level, string message, Exception exception, string exMsg);

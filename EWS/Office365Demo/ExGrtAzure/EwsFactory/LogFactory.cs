@@ -5,25 +5,41 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Web;
 
 namespace EwsFrame
 {
     public class LogFactory : FactoryBase
     {
+
+        private static object _lock = new object();
         private static LogFactory _instance = null;
         private static LogFactory Instance
         {
             get
             {
-                if(_instance == null)
-                {
-                    _instance = new LogFactory();
-                    string logImplAssemblyPath = Path.Combine(LibPath, "LogImpl.dll");
-                    _instance.LogImplAssembly = Assembly.LoadFrom(logImplAssemblyPath);
-                }
+                if (_instance == null)
+                    lock (_lock)
+                    {
+                        if (_instance == null)
+                        {
+                            _instance = CreateFactory();
+                        }
+                    }
                 return _instance;
             }
+        }
+
+        private static LogFactory CreateFactory()
+        {
+            var result = new LogFactory();
+            string logImplAssemblyPath = Path.Combine(LibPath, "LogImpl.dll");
+            result.LogImplAssembly = Assembly.LoadFrom(logImplAssemblyPath);
+
+            result._logInstance = result.CreateLogInstance();
+            result._ewsTraceLogInstance = result.CreateEWSLogInstance();
+            return result;
         }
         
 
@@ -32,10 +48,6 @@ namespace EwsFrame
         {
             get
             {
-                if(Instance._logInstance == null)
-                {
-                    Instance.InitLog();
-                }
                 return Instance._logInstance;
             }
         }
@@ -45,10 +57,6 @@ namespace EwsFrame
         {
             get
             {
-                if(Instance._ewsTraceLogInstance == null)
-                {
-                    Instance.InitLog();
-                }
                 return Instance._ewsTraceLogInstance;
             }
         }
@@ -60,19 +68,35 @@ namespace EwsFrame
                 throw new NotSupportedException();
             }
         }
+        
 
-        private void InitLog()
+        private ILog CreateLogInstance()
         {
-            if (!IsRunningOnAzure())
-            {
-                _logInstance = (ILog)(CreateTypeWithName<ILog>(LogImplAssembly, "LogImpl.DefaultLog"));
-                _ewsTraceLogInstance = (ILog)(CreateTypeWithName<ILog>(LogImplAssembly, "LogImpl.DefaultEwsTraceLog"));
-            }
-            else
-            {
-                _logInstance = (ILog)(CreateTypeWithName<ILog>(LogImplAssembly, "LogImpl.LogToBlob"));
-                _ewsTraceLogInstance = (ILog)(CreateTypeWithName<ILog>(LogImplAssembly, "LogImpl.LogToBlobEwsTrace"));
-            }
+            ILog result;
+            //if (!IsRunningOnAzure())
+            //{
+            //    result = (ILog)(CreateTypeWithName<ILog>(LogImplAssembly, "LogImpl.DefaultLog"));
+            //}
+            //else
+            //{
+                result = (ILog)(CreateTypeWithName<ILog>(LogImplAssembly, "LogImpl.LogToBlob"));
+            //}
+            return result;
+        }
+
+        private ILog CreateEWSLogInstance()
+        {
+            ILog result;
+            //if (!IsRunningOnAzure())
+            //{
+            //    result = (ILog)(CreateTypeWithName<ILog>(LogImplAssembly, "LogImpl.DefaultEwsTraceLog"));
+            //}
+            //else
+            //{
+                result = (ILog)(CreateTypeWithName<ILog>(LogImplAssembly, "LogImpl.LogToBlobEwsTrace"));
+            //}
+
+            return result;
         }
     }
 }

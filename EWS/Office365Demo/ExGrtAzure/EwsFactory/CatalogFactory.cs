@@ -9,51 +9,61 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EwsFrame
 {
     public class CatalogFactory : FactoryBase
     {
-        private static CatalogFactory _instance;
+        private static object _lock = new object();
+        private static CatalogFactory _instance = null;
         public static CatalogFactory Instance
         {
             get
             {
                 if (_instance == null)
-                {
-                    _instance = new CatalogFactory();
-                    var sqlDbImplPath = Path.Combine(LibPath, "SqlDbImpl.dll");
-                    var ewsServicePath = Path.Combine(LibPath, "EwsService.dll");
-                    var dataProtectPath = Path.Combine(LibPath, "DataProtectImpl.dll");
-
-                    _instance.EwsDataImplAssembly = Assembly.LoadFrom(sqlDbImplPath);
-                    _instance.EwsServiceImplAssembly = Assembly.LoadFrom(ewsServicePath);
-                    _instance.DataProtectImplAssembly = Assembly.LoadFrom(dataProtectPath);
-                }
+                    lock (_lock)
+                    {
+                        if (_instance == null)
+                        {
+                            _instance = CreateFactory();
+                        }
+                    }
                 return _instance;
             }
         }
 
+        private static CatalogFactory CreateFactory()
+        {
+            var result = new CatalogFactory();
+            var sqlDbImplPath = Path.Combine(LibPath, "SqlDbImpl.dll");
+            var ewsServicePath = Path.Combine(LibPath, "EwsService.dll");
+            var dataProtectPath = Path.Combine(LibPath, "DataProtectImpl.dll");
 
-        private static Dictionary<Type, string> _interfaceImplTypeNameDic = null;
+            result.EwsDataImplAssembly = Assembly.LoadFrom(sqlDbImplPath);
+            result.EwsServiceImplAssembly = Assembly.LoadFrom(ewsServicePath);
+            result.DataProtectImplAssembly = Assembly.LoadFrom(dataProtectPath);
+
+            result._interfaceImplTypeNameDic = new Dictionary<Type, string>();
+            result._interfaceImplTypeNameDic.Add(typeof(ICatalogDataAccess), "SqlDbImpl.CatalogDataAccess");
+            result._interfaceImplTypeNameDic.Add(typeof(IDataConvert), "SqlDbImpl.DataConvert");
+
+            result._interfaceImplTypeNameDic.Add(typeof(IMailbox), "EwsService.Impl.MailboxOperatorImpl");
+            result._interfaceImplTypeNameDic.Add(typeof(IFolder), "EwsService.Impl.FolderOperatorImpl");
+            result._interfaceImplTypeNameDic.Add(typeof(IItem), "EwsService.Impl.ItemOperatorImpl");
+
+            result._interfaceImplTypeNameDic.Add(typeof(ICatalogService), "DataProtectImpl.CatalogService");
+            result._interfaceImplTypeNameDic.Add(typeof(IFilterItem), "DataProtectImpl.FilterBySelectedTree");
+            return result;
+        }
+
+
+        private Dictionary<Type, string> _interfaceImplTypeNameDic = null;
         protected override Dictionary<Type, string> InterfaceImplTypeNameDic
         {
             get
             {
-                if (_interfaceImplTypeNameDic == null)
-                {
-                    _interfaceImplTypeNameDic = new Dictionary<Type, string>();
-                    _interfaceImplTypeNameDic.Add(typeof(ICatalogDataAccess), "SqlDbImpl.CatalogDataAccess");
-                    _interfaceImplTypeNameDic.Add(typeof(IDataConvert), "SqlDbImpl.DataConvert");
-
-                    _interfaceImplTypeNameDic.Add(typeof(IMailbox), "EwsService.Impl.MailboxOperatorImpl");
-                    _interfaceImplTypeNameDic.Add(typeof(IFolder), "EwsService.Impl.FolderOperatorImpl");
-                    _interfaceImplTypeNameDic.Add(typeof(IItem), "EwsService.Impl.ItemOperatorImpl");
-
-                    _interfaceImplTypeNameDic.Add(typeof(ICatalogService), "DataProtectImpl.CatalogService");
-                    _interfaceImplTypeNameDic.Add(typeof(IFilterItem), "DataProtectImpl.FilterBySelectedTree");
-                }
                 return _interfaceImplTypeNameDic;
             }
         }

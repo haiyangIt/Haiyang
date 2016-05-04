@@ -76,7 +76,7 @@ namespace ExGrtAzure.Tests
         public void ExportLog()
         {
             DateTime time = DateTime.Now;
-            var yesterday0413 = time.AddDays(-1).Date;
+            var yesterday0413 = time.AddDays(0).Date;
             var str = LogFactory.LogInstance.GetTotalLog(yesterday0413);
             using (StreamWriter writer = new StreamWriter(time.ToString("yyyyMMddHHmmssfff") + "log.txt"))
             {
@@ -89,6 +89,18 @@ namespace ExGrtAzure.Tests
                 writer.Write(str);
             }
 
+        }
+
+        [TestMethod]
+        public void TestStream()
+        {
+            using(FileStream stream = new FileStream("a.txt", FileMode.Append))
+            {
+                using (StreamWriter writer = new StreamWriter(stream))
+                {
+                    writer.WriteLine("aaa");
+                }
+            }
         }
 
         [TestMethod]

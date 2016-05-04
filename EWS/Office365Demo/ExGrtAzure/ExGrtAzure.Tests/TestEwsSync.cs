@@ -4,6 +4,8 @@ using EwsService.Common;
 using EwsServiceInterface;
 using Microsoft.Exchange.WebServices.Data;
 using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ExGrtAzure.Tests
 {
@@ -91,6 +93,58 @@ namespace ExGrtAzure.Tests
 
             // 2. Backup Strategy 
             // 2.1 For each mail, we need 
+        }
+
+        [TestMethod]
+        public void TestInterlock()
+        {
+            _otherObj = new TestEwsSync();
+            Parallel.For(0, 100, (i) =>
+            {
+                TestEwsSync.Instance.DoSomething();
+            });
+
+            Debug.WriteLine(counter);
+        }
+
+        public void DoSomething()
+        {
+            Thread.Sleep(20);
+        }
+
+        private static TestEwsSync _otherObj = null;
+        private static TestEwsSync _instance = null;
+        private static TestEwsSync Instance
+        {
+            get
+            {
+                //if (_instance == null)
+                //{
+                //    lock (_otherObj)
+                //    {
+                //        if (_instance == null)
+                //            _instance = CreateInstance();
+                //    }
+                //}
+
+                //return _instance;
+
+                if (_instance == null)
+                    Interlocked.CompareExchange(ref _instance, CreateInstance(), null);
+
+                //var value = Interlocked.CompareExchange(ref _instance, _otherObj, null);
+                //if (value == null)
+                //    Interlocked.Increment(ref counter);
+                return _instance;
+            }
+        }
+
+        private static int counter = 1;
+        private static TestEwsSync CreateInstance()
+        {
+            Interlocked.Increment(ref counter);
+            Thread.Sleep(10);
+            return new TestEwsSync();
         }
     }
 }

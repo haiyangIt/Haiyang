@@ -1,13 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Web;
 
 namespace EwsServiceInterface
 {
     public class EWSSetting
     {
-        public static EWSSetting Instance = new EWSSetting();
+
+        private static object _lock = new object();
+        private static EWSSetting _instance = null;
+        public static EWSSetting Instance
+        {
+            get
+            {
+                if (_instance == null)
+                    lock (_lock)
+                    {
+                        if (_instance == null)
+                        {
+                            _instance = new EWSSetting();
+                        }
+                    }
+                return _instance;
+            }
+        }
 
         protected EWSSetting()
         {

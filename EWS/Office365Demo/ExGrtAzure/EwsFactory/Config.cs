@@ -4,15 +4,64 @@ using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EwsFrame
 {
     public class Config
     {
-        public readonly static Config Instance = new Config();
-        public readonly static RestoreConfig RestoreCfgInstance = new RestoreConfig();
-        public readonly static MailConfig MailConfigInstance = new MailConfig();
+
+        private static object _lock = new object();
+        private static Config _instance = null;
+        public static Config Instance
+        {
+            get
+            {
+                if (_instance == null)
+                    lock (_lock)
+                    {
+                        if (_instance == null)
+                        {
+                            _instance = new Config();
+                        }
+                    }
+                return _instance;
+            }
+        }
+
+        public static RestoreConfig _RestoreCfgInstance;
+        public  static RestoreConfig RestoreCfgInstance
+        {
+            get
+            {
+                if (_RestoreCfgInstance == null)
+                    lock (_lock)
+                    {
+                        if (_RestoreCfgInstance == null)
+                        {
+                            _RestoreCfgInstance = new RestoreConfig();
+                        }
+                    }
+                return _RestoreCfgInstance;
+            }
+        } 
+        public static MailConfig _MailConfigInstance;
+        public  static MailConfig MailConfigInstance
+        {
+            get
+            {
+                if (_MailConfigInstance == null)
+                    lock (_lock)
+                    {
+                        if (_MailConfigInstance == null)
+                        {
+                            _MailConfigInstance = new MailConfig();
+                        }
+                    }
+                return _MailConfigInstance;
+            }
+        } 
         private Config() { }
 
 
