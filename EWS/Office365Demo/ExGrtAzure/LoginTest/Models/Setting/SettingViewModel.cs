@@ -20,9 +20,9 @@ namespace LoginTest.Models.Setting
         [DataType(DataType.Password)]
         public string AdminPassword { get; set; }
 
-        [DataType(DataType.Password)]
-        [Display(Name = "Confirm password")]
-        public string ConfirmPassword { get; set; }
+        //[DataType(DataType.Password)]
+        //[Display(Name = "Confirm password")]
+        //public string ConfirmPassword { get; set; }
 
         [Required]
         [Display(Name = "Exchange Connect Url")]

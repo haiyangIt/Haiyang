@@ -37,7 +37,7 @@ namespace LoginTest.Controllers
                     {
                         AdminUserName = model.AdminUserName,
                         AdminPassword = model.AdminPassword,
-                        ConfirmPassword = model.AdminPassword,
+                        //ConfirmPassword = model.AdminPassword,
                         EwsConnectUrl = model.EwsConnectUrl,
                         UserMail = user.Email,
                         IsExist = true

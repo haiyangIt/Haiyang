@@ -95,8 +95,8 @@ $.widget("custom.restorenav",
                            self.catalogTime = data.CatalogTime;
                            self.navDatas = data.Details;
 
-                           self.navDatasId2Item = [];
-                           self._createDic(self.navDatas, self.navDatasId2Item);
+                           //self.navDatasId2Item = [];
+                           //self._createDic(self.navDatas, self.navDatasId2Item);
 
                            if (self.isPage)
                                self._updatePage();
@@ -235,7 +235,7 @@ $.widget("custom.restorenav",
 
                    if (li.length) {
                        var id = li.attr("itemid");
-                       var item = self.navDatasId2Item[id];
+                       var item = Restore.Item.GetItem(id, self.options.cacheKey); // self.navDatasId2Item[id];
 
                        if (id != self._selectedId) {
                            self._selectedId = id;
@@ -495,6 +495,7 @@ $.widget("custom.foldernavForSteped", $.custom.foldernav, {
     },
 
     updateChildContainer: function (parentId, childContainerData) {
+        var self = this;
         var parentLi = $("li[itemid='" + parentId + "']", this.element);
         // 1. check the childContainerData has any data, if no data, set the parent Item has no child and remove the right chevron
         if (typeof (childContainerData) === "undefined" || childContainerData == null || childContainerData.length == 0) {
@@ -510,7 +511,7 @@ $.widget("custom.foldernavForSteped", $.custom.foldernav, {
             this._updateNavChildren(childContainerData, childList, false, 0); // todo
             this._addToTree(parentId, childContainerData.length, childContainerData);
 
-            var parentItem = this.navDatasId2Item[parentId];
+            var parentItem = Restore.Item.GetItem(parentId, self.options.cacheKey); // this.navDatasId2Item[parentId];
             parentItem.Container = childContainerData;
             parentItem.ChildCount = childContainerData.length;
 

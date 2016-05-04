@@ -40,13 +40,13 @@
             </div>
         </div>
 
-        <div class="form-group">
+        @*<div class="form-group">
             @Html.LabelFor(model => model.ConfirmPassword, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
                 @Html.EditorFor(model => model.ConfirmPassword, new { htmlAttributes = new { @class = "form-control" } })
                 @Html.ValidationMessageFor(model => model.ConfirmPassword, "", new { @class = "text-danger" })
             </div>
-        </div>
+        </div>*@
 
         <div class="form-group">
             @Html.LabelFor(model => model.EwsConnectUrl, htmlAttributes: new { @class = "control-label col-md-2" })
@@ -130,7 +130,7 @@
                     UserMail: $("#UserMail").val(),
                     AdminUserName: $("#AdminUserName").val(),
                     AdminPassword: $("#AdminPassword").val(),
-                    ConfirmPassword: $("#ConfirmPassword").val(),
+                    //ConfirmPassword: $("#ConfirmPassword").val(),
                     EwsConnectUrl: $("#EwsConnectUrl").val(),
                     IsExist: "@Model.IsExist"
                 };
@@ -159,7 +159,7 @@
                         }
                         if (data.Success) {
                             $("#AdminPassword").val(oldPassword);
-                            $("#ConfirmPassword").val(oldPassword);
+                            //$("#ConfirmPassword").val(oldPassword);
                             if (!data.IsChangeUrl)
                                 Arcserve.DataProtect.Util.Alert({
                                     type: BootstrapDialog.TYPE_INFO,

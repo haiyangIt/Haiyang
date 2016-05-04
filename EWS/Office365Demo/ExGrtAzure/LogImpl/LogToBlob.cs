@@ -5,6 +5,7 @@ using Microsoft.WindowsAzure.Storage.Blob;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -72,7 +73,13 @@ namespace LogImpl
             }
 
             msg = msg + "\r\nArcserve";
-            _appendBlob.AppendText(msg);
+            using(MemoryStream stream = new MemoryStream())
+            {
+                StreamWriter writer = new StreamWriter(stream);
+                writer.Write(msg);
+                stream.Seek(0, SeekOrigin.Begin);
+                _appendBlob.AppendBlock(stream);
+            }
             Interlocked.Increment(ref _logCount);
         }
 
