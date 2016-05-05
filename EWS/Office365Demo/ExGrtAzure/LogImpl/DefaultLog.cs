@@ -14,12 +14,12 @@ namespace LogImpl
 {
     public class DefaultLog : ILog
     {
-        private string _logPath;
-        protected virtual string LogPath
+        private string _logFolder;
+        protected virtual string LogFolder
         {
             get
             {
-                if (string.IsNullOrEmpty(_logPath))
+                if (string.IsNullOrEmpty(_logFolder))
                 {
                     string logFolder = ConfigurationManager.AppSettings["LogPath"];
                     if (string.IsNullOrEmpty(logFolder))
@@ -31,19 +31,28 @@ namespace LogImpl
                     {
                         Directory.CreateDirectory(logFolder);
                     }
-                    var logPath = Path.Combine(logFolder, LogFileName);
-                    _logPath = logPath;
+                    _logFolder = logFolder;
+                    //var logPath = Path.Combine(logFolder, LogFileNameFormat);
+                    //_logPath = logPath;
 
                 }
-                return _logPath;
+                return _logFolder;
             }
         }
 
-        protected virtual string LogFileName
+        public virtual int LogMaxRecordCount
         {
             get
             {
-                return string.Format("{0}.txt", DateTime.Now.ToString("yyyyMMdd"));
+                return 500;
+            }
+        }
+
+        protected virtual string LogFileNameFormat
+        {
+            get
+            {
+                return "{0}_{1}.txt";
             }
         }
 
@@ -65,14 +74,14 @@ namespace LogImpl
                     {
                         if (_instance == null)
                         {
-                            _instance = new LogToStreamManage(LogPath);
+                            _instance = new LogToStreamManage(LogFolder, LogFileNameFormat, LogMaxRecordCount);
                         }
                     }
                 return _instance;
             }
         }
 
-        private void WriteLog(string msg)
+        protected virtual void WriteLog(string msg)
         {
             Instance.WriteToLog(msg);
         }
@@ -129,8 +138,8 @@ namespace LogImpl
 
         public string GetTotalLog(DateTime date)
         {
-            if (File.Exists(LogPath))
-                using (var stream = new FileStream(LogPath, FileMode.Open, FileAccess.Read))
+            if (File.Exists(LogFolder))
+                using (var stream = new FileStream(LogFolder, FileMode.Open, FileAccess.Read))
                 {
                     StreamReader reader = new StreamReader(stream);
                     return reader.ReadToEnd();
@@ -157,32 +166,46 @@ namespace LogImpl
     {
 
         private static object _lock = new object();
-        private string _logPath;
+        private int LogCount = 0;
+        private int _MaxLogCount = 500;
+        private int FileIndex = 0;
+        private string _logFolder;
+        private string _fileNameFormat;
         private FileStream _fileStream = null;
         private StreamWriter _writer = null;
         private StreamWriter writer
         {
             get
             {
-                if (_writer == null)
+                if (_writer == null || LogCount > _MaxLogCount)
                     lock (_lock)
                     {
+                        if(LogCount > _MaxLogCount)
+                        {
+                            DoDispose();
+                            LogCount = 0;
+                        }
+
                         if (_writer == null)
                         {
-                            _fileStream = new FileStream(_logPath, FileMode.Append, FileAccess.Write, FileShare.Read);
+                            var filePath = Path.Combine(_logFolder, string.Format(_fileNameFormat, DateTime.Now.ToString("yyyyMMdd"), FileIndex++));
+                            _fileStream = new FileStream(filePath, FileMode.Append, FileAccess.Write, FileShare.Read);
                             _writer = new StreamWriter(_fileStream);
                         }
                     }
                 return _writer;
             }
         }
-        public LogToStreamManage(string logPath) : base("LogToStream" + logPath)
+        public LogToStreamManage(string logFolder, string fileNameFormat, int fileMaxCount = 500) : base("LogToStream" + fileNameFormat)
         {
-            _logPath = logPath;
+            _logFolder = logFolder;
+            _fileNameFormat = fileNameFormat;
+            _MaxLogCount = fileMaxCount;
         }
 
         protected override void DoWriteLog(string msg)
         {
+            Interlocked.Increment(ref LogCount);
             writer.WriteLine(msg);
             writer.Flush();
             _fileStream.Flush();
@@ -190,15 +213,18 @@ namespace LogImpl
 
         protected override void DoDispose()
         {
-            if (writer != null)
+            if (_writer != null)
             {
-                writer.Dispose();
+                _writer.Dispose();
                 Debug.WriteLine("writer Disposed");
+                _writer = null;
+
             }
             if (_fileStream != null)
             {
                 _fileStream.Dispose();
                 Debug.WriteLine("_fileStream Disposed");
+                _fileStream = null;
             }
         }
     }
