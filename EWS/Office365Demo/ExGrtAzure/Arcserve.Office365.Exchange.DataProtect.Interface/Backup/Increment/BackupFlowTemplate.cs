@@ -39,7 +39,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
             
 
             AddMailboxToCurrentCatalog(mailboxChangedInCurrentCatalog[0]);
-            RemoveMailboxToCurrentCatalog(needRemoveMailboxInCurrentCatalog[1]);
+            RemoveMailboxToCurrentCatalog(mailboxChangedInCurrentCatalog[1]);
             // todo test case: if a mailbox delete and a new mailbox whose name is same as deleted mailbox create. how to generate catalog.
 
             ForEachLoop(mailboxesValid, MailboxTemplate.BackupSync);
@@ -49,6 +49,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
     public abstract class BackupMailboxFlowTemplate
     {
         public EwsWSData.ExchangeService CurrentExchangeService { get; protected set; }
+        public IMailboxDataSync MailboxInfo { get; set; }
         public abstract Func<EwsWSData.ExchangeService> FuncGetExchangeService { get; }
 
         public abstract Func<string, EwsWSData.ChangeCollection<EwsWSData.FolderChange>> FuncGetChangedFolders { get; }
@@ -61,6 +62,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
 
         public void BackupSync(IMailboxDataSync mailbox)
         {
+            MailboxInfo = mailbox;
             CurrentExchangeService = FuncGetExchangeService();
 
             FolderTemplate.CurrentExchangeService = CurrentExchangeService;
@@ -78,7 +80,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
                     break;
 
                 List<EwsWSData.FolderChange> validFolders = new List<Microsoft.Exchange.WebServices.Data.FolderChange>(folderChanges.Count);
-                foreach (var folderChange in folderChanges)
+                foreach (var folderChange in folderChanges) // todo create folder hierechy. convert to IFolderDataSync.
                 {
                     if (FuncIsFolderInPlan(folderChange))
                         validFolders.Add(folderChange);

@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Backup\Increment\SyncBackup.cs" />
+    <Compile Include="Backup\Increment\SyncBackupMailbox.cs" />
     <Compile Include="CatalogService.cs" />
     <Compile Include="Context\ServiceContext.cs" />
     <Compile Include="Context\ServiceContextManager.cs" />

@@ -45,14 +45,6 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
         public IDataFromClient<IJobProgress> DataFromClient { get; set; }
         public DateTime JobStartTime { get; }
 
-        public override Action<ICollection<IMailboxDataSync>> AddMailboxToCurrentCatalog
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-
         public override Func<ICollection<IMailboxDataSync>> FuncGetAllMailboxFromExchange
         {
             get
@@ -74,7 +66,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
                 };
             }
         }
-        
+
 
         public override Func<ICatalogJob, ICollection<IMailboxDataSync>> FuncGetAllMailboxFromLastCatalog
         {
@@ -107,7 +99,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
                     var result = new List<IMailboxDataSync>(mailboxInExchange.Count);
 
                     var dicExchange = new Dictionary<string, IMailboxDataSync>();
-                    foreach(var item in mailboxInExchange)
+                    foreach (var item in mailboxInExchange)
                     {
                         dicExchange.Add(item.Id, item);
                     }
@@ -118,7 +110,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
                         dicPlan.Add(item.Id, item);
                     }
 
-                    foreach(var key in dicExchange.Keys)
+                    foreach (var key in dicExchange.Keys)
                     {
                         if (dicPlan.ContainsKey(key))
                         {
@@ -135,7 +127,60 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
         {
             get
             {
-                throw new NotImplementedException();
+                return (mailboxValid, mailboxInLastCatalog) =>
+                {
+                    var result = new ICollection<IMailboxDataSync>[2];
+
+                    var dicValid = new Dictionary<string, IMailboxDataSync>();
+                    foreach (var item in mailboxValid)
+                    {
+                        dicValid.Add(item.Id, item);
+                    }
+
+                    var dicCatalog = new Dictionary<string, IMailboxDataSync>();
+                    foreach (var item in mailboxInLastCatalog)
+                    {
+                        dicCatalog.Add(item.Id, item);
+                    }
+
+                    HashSet<string> ids = new HashSet<string>();
+                    
+                    foreach (var key in dicValid.Keys)
+                    {
+                        if (dicCatalog.ContainsKey(key))
+                        {
+                            ids.Add(key);
+                        }
+                    }
+
+                    result[0] = (from keyValue in dicValid where !ids.Contains(keyValue.Key) select keyValue.Value).ToList();
+                    result[1] = (from keyValue in dicCatalog where !ids.Contains(keyValue.Key) select keyValue.Value).ToList();
+
+                    return result;
+                };
+            }
+        }
+
+        public override Action<ICollection<IMailboxDataSync>> AddMailboxToCurrentCatalog
+        {
+            get
+            {
+                return (mailboxes) =>
+                {
+                    BackupQuery.AddMailboxes(mailboxes);
+                };
+            }
+        }
+
+
+        public override Action<ICollection<IMailboxDataSync>> RemoveMailboxToCurrentCatalog
+        {
+            get
+            {
+                return (mailboxes) =>
+                {
+                    BackupQuery.DeleteMailboxes(mailboxes);
+                };
             }
         }
 
@@ -150,16 +195,15 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
 
         public override void ForEachLoop(ICollection<IMailboxDataSync> items, Action<IMailboxDataSync> DoEachMailbox)
         {
-            throw new NotImplementedException();
+            foreach(var mailbox in items)
+            {
+                DoEachMailbox(mailbox);
+            }
         }
 
         public void InitTaskSyncContext(ITaskSyncContext<IJobProgress> mainContext)
         {
-            throw new NotImplementedException();
-
+            this.CloneSyncContext(mainContext);
         }
-
-
-
     }
 }

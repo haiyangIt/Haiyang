@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Exchange.WebServices.Data;
 
 namespace Arcserve.Office365.Exchange.EwsApi.Increment
 {
@@ -17,6 +18,7 @@ namespace Arcserve.Office365.Exchange.EwsApi.Increment
         Task<ICollection<IMailboxDataSync>> GetAllMailboxesAsync(string adminUserName, string adminPassword);
         ICollection<IMailboxDataSync> GetAllMailboxes(string adminUserName, string adminPassword);
 
-
+        ChangeCollection<FolderChange> SyncFolders(string lastSyncStatus);
+        Task<ChangeCollection<FolderChange>> SyncFoldersAsync(string lastSyncStatus);
     }
 }

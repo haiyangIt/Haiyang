@@ -20,5 +20,11 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
         ICollection<IMailboxDataSync> GetMailboxes(DateTime currentJobStartTime);
 
         bool IsItemContentExist(string itemId);
+
+        void AddMailboxes(ICollection<IMailboxDataSync> mailboxes);
+        Task AddMailboxesAsync(ICollection<IMailboxDataSync> mailboxes);
+
+        void DeleteMailboxes(ICollection<IMailboxDataSync> mailboxes);
+        Task DeleteMailboxesAsync(ICollection<IMailboxDataSync> mailboxes);
     }
 }
