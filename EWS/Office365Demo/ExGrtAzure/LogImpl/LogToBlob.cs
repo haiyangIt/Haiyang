@@ -52,7 +52,7 @@ namespace LogImpl
 
 
         private static object _lock = new object();
-        private void WriteToAppendBlob(string msg)
+        protected virtual void WriteToAppendBlob(string msg)
         {
             Instance.WriteToLog(msg);
             //var currentDay = DateTime.Now.Date;
@@ -153,8 +153,6 @@ namespace LogImpl
             }
         }
 
-        
-
         class LogToBlobThread : ManageBase
         {
             public string BlobNameFormat;
@@ -230,6 +228,25 @@ namespace LogImpl
             get
             {
                 return "{0}EwsTrace-{1}{2}";
+            }
+        }
+
+
+        private int _logCount = 0;
+        private bool IsWriteLog = true;
+
+        protected override void WriteToAppendBlob(string msg)
+        {
+            Interlocked.Increment(ref _logCount);
+            if (_logCount > 20)
+            {
+                IsWriteLog = ConfigurationManager.AppSettings["WriteEWSTrace"] == "1";
+                Interlocked.Exchange(ref _logCount, 0);
+            }
+
+            if (IsWriteLog)
+            {
+                base.WriteToAppendBlob(msg);
             }
         }
     }

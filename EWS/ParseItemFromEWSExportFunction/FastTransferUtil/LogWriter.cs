@@ -10,7 +10,6 @@ namespace FTStreamUtil
 {
     public class LogWriter : IDisposable
     {
-        [ThreadStatic]
         private static LogWriter _instance = null;
 
         public static LogWriter Instance

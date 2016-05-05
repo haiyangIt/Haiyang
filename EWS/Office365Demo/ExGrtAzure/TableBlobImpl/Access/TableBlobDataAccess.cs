@@ -95,7 +95,7 @@ namespace TableBlobImpl.Access
                 item.DisplayName, tableName, tableResult.Etag, tableResult.HttpStatusCode);
         }
 
-        public void SaveItemContent(IItemData item, DateTime startTime, bool isCheckExist = false, bool isExist = false)
+        public void SaveItemContent(IItemData item, string mailboxAddress, DateTime startTime, bool isCheckExist = false, bool isExist = false)
         {
             // todo undo the comment.
             //Item itemInEws = item.Data as Item;
@@ -175,17 +175,32 @@ namespace TableBlobImpl.Access
             throw new NotImplementedException();
         }
 
-        public void ResetAllStorage(string organization)
+        public void ResetAllStorage(string mailboxAddress, string organization)
         {
             throw new NotImplementedException();
         }
 
-        public void ResetAllStorage()
+        public void ResetAllStorage(string mailboxAddress)
         {
             throw new NotImplementedException();
         }
 
         public bool IsItemContentExist(string itemId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UpdateFolderChildFolderItemCount(IFolderData folderData, DateTime startTime)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UpdateMailboxChildFolderCount(IMailboxData mailboxData, DateTime startTime)
         {
             throw new NotImplementedException();
         }

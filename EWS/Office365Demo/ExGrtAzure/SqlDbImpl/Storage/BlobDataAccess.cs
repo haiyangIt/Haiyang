@@ -41,9 +41,9 @@ namespace SqlDbImpl.Storage
 
         
 
-        public void ResetAllBlob(string organization, bool isResetAll = false)
+        public void ResetAllBlob(string mailboxAddress, string organization, bool isResetAll = false)
         {
-            string prefix = CatalogFactory.Instance.GetServiceContext().GetOrganizationPrefix();
+            string prefix = ServiceContext.GetOrganizationPrefix(mailboxAddress);
             IEnumerable<CloudBlobContainer> containers = null;
             if (isResetAll)
                 containers = _blobClient.ListContainers();

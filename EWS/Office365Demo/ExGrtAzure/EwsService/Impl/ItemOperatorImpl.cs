@@ -21,6 +21,42 @@ namespace EwsService.Impl
             _dataAccess = dataAccess;
         }
 
+        private PropertyDefinition[] _itemProperties;
+        private PropertyDefinition[] ItemProperties
+        {
+            get
+            {
+
+                if (_itemProperties == null)
+                {
+                    _itemProperties = new PropertyDefinition[]
+                    {
+                        ItemSchema.Subject,
+                        ItemSchema.DateTimeCreated,
+                        ItemSchema.ParentFolderId,
+                        ItemSchema.ItemClass,
+                        ItemSchema.Size
+                    };
+                }
+                return _itemProperties;
+
+            }
+        }
+
+        private PropertySet _itemPropertySet;
+        private PropertySet ItemPropertySet
+        {
+            get
+            {
+                if (_itemPropertySet == null)
+                {
+                    _itemPropertySet = new PropertySet(ItemProperties);
+                }
+                return _itemPropertySet;
+            }
+        }
+        
+
         private readonly IDataAccess _dataAccess;
 
         public ExchangeService CurrentExchangeService
@@ -49,9 +85,11 @@ namespace EwsService.Impl
             int offset = 0;
             bool moreItems = true;
             List<Item> result = new List<Item>(folder.TotalCount);
+            ItemView oView = new ItemView(pageSize, offset, OffsetBasePoint.Beginning);
+            oView.PropertySet = ItemPropertySet;
             while (moreItems)
             {
-                ItemView oView = new ItemView(pageSize, offset, OffsetBasePoint.Beginning);
+                oView.Offset = offset;
                 FindItemsResults<Item> findResult = folder.FindItems(oView);
                 result.AddRange(findResult.Items);
                 if (!findResult.MoreAvailable)

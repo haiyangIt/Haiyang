@@ -18,10 +18,12 @@ namespace DataProtectInterface
 
         void SaveItem(IItemData item, IMailboxData mailboxData, IFolderData parentFolderData);
 
-        void SaveItemContent(IItemData item, DateTime startTime, bool isCheckExist = false, bool isExist = false);
+        void SaveItemContent(IItemData item, string mailboxAddress, DateTime startTime, bool isCheckExist = false, bool isExist = false);
 
         ICatalogJob GetLastCatalogJob(DateTime thisJobStartTime);
 
         bool IsItemContentExist(string itemId);
+        void UpdateFolderChildFolderItemCount(IFolderData folderData, DateTime startTime);
+        void UpdateMailboxChildFolderCount(IMailboxData mailboxData, DateTime startTime);
     }
 }

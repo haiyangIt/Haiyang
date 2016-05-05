@@ -35,6 +35,7 @@
       <HintPath>C:\Program Files\Microsoft\Exchange\Web Services\2.2\Microsoft.Exchange.WebServices.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Management.Automation, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -74,6 +75,10 @@
     <ProjectReference Include="..\EwsService\EwsService.csproj">
       <Project>{7737cc80-0266-4ed8-b265-628a9b0dfbcb}</Project>
       <Name>EwsService</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\LogInterface\LogInterface.csproj">
+      <Project>{ED66D5C0-8D87-4DD6-9E6C-7D21B5BB8585}</Project>
+      <Name>LogInterface</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

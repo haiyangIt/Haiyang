@@ -366,6 +366,7 @@ namespace DataProtectImpl
         private void RestoreEnd()
         {
             Destination.RestoreComplete(true, this, null);
+            ServiceContext.DataAccessObj.Dispose();
         }
 
         private void RestoreStart()

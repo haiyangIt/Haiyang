@@ -96,22 +96,21 @@ namespace SqlDbImpl.Model
             set { }
         }
 
-        internal static string GetItemContainerName(string folderIdMd5Str, int index)
+        internal static string GetItemContainerName(string mailboxAddress, string folderIdMd5Str, int index)
         {
-            var context = CatalogFactory.Instance.GetServiceContext();
-            return string.Format("{0}{3}{1}{3}{2}", context.GetOrganizationPrefix(), folderIdMd5Str, index, BlobDataAccess.DashChar);
+            return string.Format("{0}{3}{1}{3}{2}", ServiceContext.GetOrganizationPrefix(mailboxAddress), folderIdMd5Str, index, BlobDataAccess.DashChar);
         }
 
-        internal static string GetItemContainerName(IItemData itemData)
+        internal static string GetItemContainerName(string mailboxAddress, IItemData itemData)
         {
-            return GetItemContainerName(MD5Utility.ConvertToMd5(itemData.ParentFolderId), 0);
+            return GetItemContainerName(mailboxAddress, MD5Utility.ConvertToMd5(itemData.ParentFolderId), 0);
         }
 
-        internal static string GetItemNextContainerName(string containerName)
+        internal static string GetItemNextContainerName(string mailboxAddress, string containerName)
         {
             string[] array = containerName.Split(BlobDataAccess.DashCharArray, StringSplitOptions.RemoveEmptyEntries);
             int index = Convert.ToInt32(array[1]);
-            return GetItemContainerName(array[0], index + 1);
+            return GetItemContainerName(mailboxAddress, array[0], index + 1);
         }
 
         internal static string GetFolderContainerMappingBlobName(string name)
@@ -120,9 +119,9 @@ namespace SqlDbImpl.Model
         }
 
 
-        public static string GetLocation(IItemData item)
+        public static string GetLocation(string mailboxAddress, IItemData item)
         {
-            return GetItemContainerName(item);
+            return GetItemContainerName(mailboxAddress, item);
         }
 
         /// <summary>
@@ -133,41 +132,40 @@ namespace SqlDbImpl.Model
         /// <param name="actualSize"></param>
         /// <param name="thisCatalogTime"></param>
         /// <returns></returns>
-        [Obsolete("This method is for size limitation.")]
-        public static string GetLocation(IItemData item, int actualSize, DateTime thisCatalogTime)
-        {
-            BlobDataAccess dataAccess = new BlobDataAccess(CatalogDataAccess.BlobClient);
-            var context = CatalogFactory.Instance.GetServiceContext();
-            ICache cache = MailboxCacheManager.CacheManager.GetCache(context.CurrentMailbox, FolderContainerMapCache.CacheName);
-            if (cache == null)
-            {
-                cache = MailboxCacheManager.CacheManager.NewCache(context.CurrentMailbox, FolderContainerMapCache.CacheName, typeof(FolderContainerMapCache));
-            }
+        //[Obsolete("This method is for size limitation.")]
+        //public static string GetLocation(IItemData item, string mailboxAddress, int actualSize, DateTime thisCatalogTime)
+        //{
+        //    BlobDataAccess dataAccess = new BlobDataAccess(CatalogDataAccess.BlobClient);
+        //    ICache cache = MailboxCacheManager.CacheManager.GetCache(mailboxAddress, FolderContainerMapCache.CacheName);
+        //    if (cache == null)
+        //    {
+        //        cache = MailboxCacheManager.CacheManager.NewCache(mailboxAddress, FolderContainerMapCache.CacheName, typeof(FolderContainerMapCache));
+        //    }
 
-            StringCacheKey itemKey = new StringCacheKey(item.ParentFolderId);
-            object outObj = null;
-            FolderContainerMapping folderCountInfo = null;
-            if (!cache.TryGetValue(itemKey, out outObj))
-            {
-                outObj = FolderContainerMapping.NewInstance(item.ParentFolderId);
-                cache.AddKeyValue(itemKey, outObj);
-            }
+        //    StringCacheKey itemKey = new StringCacheKey(item.ParentFolderId);
+        //    object outObj = null;
+        //    FolderContainerMapping folderCountInfo = null;
+        //    if (!cache.TryGetValue(itemKey, out outObj))
+        //    {
+        //        outObj = FolderContainerMapping.NewInstance(mailboxAddress, item.ParentFolderId);
+        //        cache.AddKeyValue(itemKey, outObj);
+        //    }
 
-            folderCountInfo = outObj as FolderContainerMapping;
+        //    folderCountInfo = outObj as FolderContainerMapping;
 
-            if (BlobDataAccess.IsNotOutOfBlobCountRange(folderCountInfo.ContainerInfo.UsedCount, actualSize))
-            {
-                folderCountInfo.ContainerInfo.AddUsedCount(actualSize);
-            }
-            else
-            {
-                folderCountInfo = FolderContainerMapping.NewNextContainer(folderCountInfo);
-                folderCountInfo.ContainerInfo.AddUsedCount(actualSize);
-                cache.SetKeyValue(itemKey, folderCountInfo);
-            }
+        //    if (BlobDataAccess.IsNotOutOfBlobCountRange(folderCountInfo.ContainerInfo.UsedCount, actualSize))
+        //    {
+        //        folderCountInfo.ContainerInfo.AddUsedCount(actualSize);
+        //    }
+        //    else
+        //    {
+        //        folderCountInfo = FolderContainerMapping.NewNextContainer(mailboxAddress, folderCountInfo);
+        //        folderCountInfo.ContainerInfo.AddUsedCount(actualSize);
+        //        cache.SetKeyValue(itemKey, folderCountInfo);
+        //    }
 
-            return folderCountInfo.ContainerInfo.ContainerName;
-        }
+        //    return folderCountInfo.ContainerInfo.ContainerName;
+        //}
 
         public IItemData Clone()
         {
@@ -189,17 +187,17 @@ namespace SqlDbImpl.Model
         public string FolderId { get; set; }
         public ContainerCount ContainerInfo { get; set; }
 
-        public static FolderContainerMapping NewInstance(string folderId)
+        public static FolderContainerMapping NewInstance(string mailboxAddress, string folderId)
         {
             var result = new FolderContainerMapping();
             result.FolderId = folderId;
-            result.ContainerInfo = ContainerCount.NewInstance(folderId, 0);
+            result.ContainerInfo = ContainerCount.NewInstance(mailboxAddress, folderId, 0);
             return result;
         }
 
-        public static FolderContainerMapping NewNextContainer(FolderContainerMapping currentMapping)
+        public static FolderContainerMapping NewNextContainer(string mailboxAddress, FolderContainerMapping currentMapping)
         {
-            currentMapping.ContainerInfo = ContainerCount.NewInstanceByPrevContainerName(currentMapping.ContainerInfo.ContainerName);
+            currentMapping.ContainerInfo = ContainerCount.NewInstanceByPrevContainerName(mailboxAddress, currentMapping.ContainerInfo.ContainerName);
             return currentMapping;
         }
 
@@ -250,15 +248,15 @@ namespace SqlDbImpl.Model
 
         private static MD5 _md5Hash = MD5.Create();
 
-        public static ContainerCount NewInstance(string parentFolderId, int index = 0)
+        public static ContainerCount NewInstance(string mailboxAddress, string parentFolderId, int index = 0)
         {
-            return new ContainerCount(parentFolderId, index, 0);
+            return new ContainerCount(mailboxAddress, parentFolderId, index, 0);
         }
 
-        public static ContainerCount NewInstanceByPrevContainerName(string prevContainerName, int usedCount = 0)
+        public static ContainerCount NewInstanceByPrevContainerName(string mailboxAddress, string prevContainerName, int usedCount = 0)
         {
             var result = new ContainerCount();
-            result.ContainerName = ItemLocationModel.GetItemNextContainerName(prevContainerName);
+            result.ContainerName = ItemLocationModel.GetItemNextContainerName(mailboxAddress, prevContainerName);
             result.UsedCount = usedCount;
             return result;
         }
@@ -276,10 +274,10 @@ namespace SqlDbImpl.Model
 
         }
 
-        private ContainerCount(string parentFolderId, int index, int usedCount)
+        private ContainerCount(string mailboxAddress, string parentFolderId, int index, int usedCount)
         {
             ContainerName = GetFolderIdContainerName(parentFolderId);
-            ContainerName = ItemLocationModel.GetItemContainerName(ContainerName, index);
+            ContainerName = ItemLocationModel.GetItemContainerName(mailboxAddress, ContainerName, index);
             UsedCount = usedCount;
         }
 

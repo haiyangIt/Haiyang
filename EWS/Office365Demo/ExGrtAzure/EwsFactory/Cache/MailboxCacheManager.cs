@@ -7,7 +7,6 @@ namespace EwsFrame.Cache
 {
     public class MailboxCacheManager : ICacheManager
     {
-        [ThreadStatic]
         private static MailboxCacheManager _CacheManager;
 
         public static MailboxCacheManager CacheManager

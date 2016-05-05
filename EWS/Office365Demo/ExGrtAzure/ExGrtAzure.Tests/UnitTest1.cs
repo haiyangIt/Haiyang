@@ -76,7 +76,7 @@ namespace ExGrtAzure.Tests
         public void ExportLog()
         {
             DateTime time = DateTime.Now;
-            var yesterday0413 = time.AddDays(0).Date;
+            var yesterday0413 = time.AddDays(-1).Date;
             var str = LogFactory.LogInstance.GetTotalLog(yesterday0413);
             using (StreamWriter writer = new StreamWriter(time.ToString("yyyyMMddHHmmssfff") + "log.txt"))
             {
@@ -141,14 +141,14 @@ namespace ExGrtAzure.Tests
         [TestMethod]
         public void ResetBlobData()
         {
-            var directory = AppDomain.CurrentDomain.BaseDirectory;
-            directory = Path.Combine(directory, "..\\..\\..\\lib");
-            CatalogFactory.LibPath = directory;
-            IServiceContext context = ServiceContext.NewServiceContext("haiyang.ling@arcserve.com", "", "", "Arcserve", DataProtectInterface.TaskType.Catalog);
-            context.CurrentContext.CurrentMailbox = "haiyang.ling@arcserve.com";
-            var dataAccess = ServiceContext.GetDataAccessInstance(TaskType.Catalog, context.Argument, "Arcserve");
-            dataAccess.ResetAllStorage();
-            dataAccess.ResetAllStorage("Arcserve");
+            //var directory = AppDomain.CurrentDomain.BaseDirectory;
+            //directory = Path.Combine(directory, "..\\..\\..\\lib");
+            //CatalogFactory.LibPath = directory;
+            //IServiceContext context = ServiceContext.NewServiceContext("haiyang.ling@arcserve.com", "", "", "Arcserve", DataProtectInterface.TaskType.Catalog);
+            //context.CurrentContext.CurrentMailbox = "haiyang.ling@arcserve.com";
+            //var dataAccess = ServiceContext.GetDataAccessInstance(TaskType.Catalog, context.Argument, "Arcserve");
+            //dataAccess.ResetAllStorage();
+            //dataAccess.ResetAllStorage("Arcserve");
         }
 
         [TestMethod]

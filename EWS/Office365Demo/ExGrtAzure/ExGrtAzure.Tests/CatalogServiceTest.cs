@@ -24,9 +24,9 @@ namespace ExGrtAzure.Tests
             _service = GetCatalogService();
 
             var mailboxOper = _factory.NewMailboxOperatorImpl();
-            ServiceContext.ContextInstance.CurrentMailbox = "haiyang.ling@arcserve.com";
-            mailboxOper.ConnectMailbox(ServiceContext.ContextInstance.Argument, "haiyang.ling@arcserve.com");
-            _ewsContext = mailboxOper.CurrentExchangeService;
+            //ServiceContext.ContextInstance.CurrentMailbox = "haiyang.ling@arcserve.com";
+            //mailboxOper.ConnectMailbox(ServiceContext.ContextInstance.Argument, "haiyang.ling@arcserve.com");
+            //_ewsContext = mailboxOper.CurrentExchangeService;
         }
 
         public static CatalogFactory GetCatalogFactory()
@@ -70,8 +70,8 @@ namespace ExGrtAzure.Tests
             Folder rootFolder = folder.GetRootFolder();
             IDataConvert dataConvert = _factory.NewDataConvert();
             dataConvert.StartTime = DateTime.Now;
-            dataConvert.OrganizationName = ServiceContext.ContextInstance.AdminInfo.OrganizationName;
-            GetChildFolder(dataConvert, folder, rootFolder, "haiyang.ling@arcserve.com", 1);
+            //dataConvert.OrganizationName = ServiceContext.ContextInstance.AdminInfo.OrganizationName;
+            //GetChildFolder(dataConvert, folder, rootFolder, "haiyang.ling@arcserve.com", 1);
         }
 
         private void GetChildFolder(IDataConvert dataConvert, IFolder folder, Folder parentFolder, string mailbox, int level)
@@ -104,37 +104,37 @@ namespace ExGrtAzure.Tests
         [Description("Test Item Operation")]
         public void TestItemOperator()
         {
-            IItem itemOper = _factory.NewItemOperatorImpl(_ewsContext, null);
-            Folder inboxFolder = Folder.Bind(_ewsContext, WellKnownFolderName.SentItems);
-            var items = itemOper.GetFolderItems(inboxFolder);
+            //IItem itemOper = _factory.NewItemOperatorImpl(_ewsContext, null);
+            //Folder inboxFolder = Folder.Bind(_ewsContext, WellKnownFolderName.SentItems);
+            //var items = itemOper.GetFolderItems(inboxFolder);
 
-            IDataConvert dataConvert = _factory.NewDataConvert();
-            dataConvert.StartTime = DateTime.Now;
-            dataConvert.OrganizationName = ServiceContext.ContextInstance.AdminInfo.OrganizationName;
+            //IDataConvert dataConvert = _factory.NewDataConvert();
+            //dataConvert.StartTime = DateTime.Now;
+            //dataConvert.OrganizationName = ServiceContext.ContextInstance.AdminInfo.OrganizationName;
 
-            foreach (var item in items)
-            {
-                var itemData = dataConvert.Convert(item);
-            }
+            //foreach (var item in items)
+            //{
+            //    var itemData = dataConvert.Convert(item);
+            //}
 
-            var path = string.Format("{0}.bin", DateTime.Now.ToString("yyyyMMddHHmmss"));
-            using (StreamWriter write = new StreamWriter(path))
-            {
-                itemOper.ExportItem(items[0], write.BaseStream, ServiceContext.ContextInstance.Argument);
-            }
+            //var path = string.Format("{0}.bin", DateTime.Now.ToString("yyyyMMddHHmmss"));
+            //using (StreamWriter write = new StreamWriter(path))
+            //{
+            //    itemOper.ExportItem(items[0], write.BaseStream, ServiceContext.ContextInstance.Argument);
+            //}
 
-            IFolder folderOper = _factory.NewFolderOperatorImpl(_ewsContext);
-            var findFolderId = folderOper.FindFolder(new FolderDataBaseDefault() { DisplayName = "Test" }, inboxFolder.Id);
-            if (findFolderId != null)
-            {
-                folderOper.DeleteFolder(findFolderId);
-            }
+            //IFolder folderOper = _factory.NewFolderOperatorImpl(_ewsContext);
+            //var findFolderId = folderOper.FindFolder(new FolderDataBaseDefault() { DisplayName = "Test" }, inboxFolder.Id);
+            //if (findFolderId != null)
+            //{
+            //    folderOper.DeleteFolder(findFolderId);
+            //}
 
-            FolderId testFolderId = folderOper.CreateChildFolder(new FolderDataBaseDefault() { DisplayName = "Test" }, inboxFolder.Id);
-            using (StreamReader reader = new StreamReader(path))
-            {
-                itemOper.ImportItem(testFolderId, reader.BaseStream, ServiceContext.ContextInstance.Argument);
-            }
+            //FolderId testFolderId = folderOper.CreateChildFolder(new FolderDataBaseDefault() { DisplayName = "Test" }, inboxFolder.Id);
+            //using (StreamReader reader = new StreamReader(path))
+            //{
+            //    itemOper.ImportItem(testFolderId, reader.BaseStream, ServiceContext.ContextInstance.Argument);
+            //}
         }
 
         [TestMethod]

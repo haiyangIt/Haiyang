@@ -10,6 +10,8 @@ namespace SqlDbImpl.Cache
 {
     public class ExistItemCache : ICache
     {
+
+
         public static string CacheName = "ExistItemCache";
 
         public void AddKeyValue(ICacheKey cacheKey, object cacheValue)
@@ -29,7 +31,6 @@ namespace SqlDbImpl.Cache
 
         public void DeSerialize()
         {
-            var dataAccess = (CatalogDataAccess)ServiceContext.ContextInstance.DataAccessObj;
             
         }
 

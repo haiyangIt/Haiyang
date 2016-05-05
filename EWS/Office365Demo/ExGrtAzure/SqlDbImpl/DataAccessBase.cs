@@ -13,17 +13,19 @@ namespace SqlDbImpl
 
         public abstract void EndTransaction(bool isCommit);
 
-        public void ResetAllStorage(string organization)
+        public void ResetAllStorage(string mailboxAddress, string organization)
         {
             SqlDbResetHelper helper = new SqlDbResetHelper();
-            helper.ResetBlobData(organization);
+            helper.ResetBlobData(mailboxAddress, organization);
             helper.DeleteDatabase(organization);
         }
 
-        public void ResetAllStorage()
+        public void ResetAllStorage(string mailboxAddress)
         {
             SqlDbResetHelper helper = new SqlDbResetHelper();
-            helper.ResetBlobData(string.Empty, true);
+            helper.ResetBlobData(mailboxAddress, string.Empty, true);
         }
+
+        public abstract void Dispose();
     }
 }

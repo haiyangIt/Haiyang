@@ -14,13 +14,13 @@ namespace SqlDbImpl
 {
     public class SqlDbResetHelper
     {
-        public void ResetBlobData(string organization, bool isResetAll = false)
+        public void ResetBlobData(string mailboxAddress, string organization, bool isResetAll = false)
         {
             CloudStorageAccount StorageAccount = FactoryBase.GetStorageAccount();
 
             CloudBlobClient BlobClient = StorageAccount.CreateCloudBlobClient();
             BlobDataAccess blobDataAccess = new BlobDataAccess(BlobClient);
-            blobDataAccess.ResetAllBlob(organization, isResetAll);
+            blobDataAccess.ResetAllBlob(mailboxAddress, organization, isResetAll);
         }
 
         public void DeleteDatabase(string organization)

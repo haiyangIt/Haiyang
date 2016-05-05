@@ -19,10 +19,11 @@ using System.Data.SqlClient;
 using System.Data.Entity.Core.EntityClient;
 using System.Transactions;
 using EwsServiceInterface;
+using System.Threading;
 
 namespace SqlDbImpl
 {
-    public class CatalogDataAccess : DataAccessBase, ICatalogDataAccess
+    public class CatalogDataAccess : DataAccessBase, ICatalogDataAccess , IDisposable
     {
         public CatalogDataAccess(EwsServiceArgument argument, string organization)
         {
@@ -52,7 +53,8 @@ namespace SqlDbImpl
             CatalogInfoModel information = catalogJob as CatalogInfoModel;
             if (information == null)
                 throw new ArgumentException("argument type is not right or argument is null", "catalogJob");
-            using (var context = new CatalogDbContext(new OrganizationModel() { Name = _organization }, SqlConn, false))
+            //using (var context = new CatalogDbContext(new OrganizationModel() { Name = _organization }, SqlConn, false))
+            using (var context = new CatalogDbContext(new OrganizationModel() { Name = _organization }))
             {
                 context.Catalogs.Add(information);
                 context.SaveChanges();
@@ -69,7 +71,7 @@ namespace SqlDbImpl
         {
             get
             {
-                if(_cacheKeyNameDic == null)
+                if (_cacheKeyNameDic == null)
                 {
                     _cacheKeyNameDic = new Dictionary<Type, string>();
                     _cacheKeyNameDic.Add(typeof(MailboxModel), "SaveMailboxList");
@@ -113,16 +115,16 @@ namespace SqlDbImpl
         internal static CloudBlobClient BlobClient = StorageAccount.CreateCloudBlobClient();
 
         public readonly BlobDataAccess BlobDataAccessObj = new BlobDataAccess(BlobClient);
-        public void SaveItemContent(IItemData item, DateTime startTime, bool isCheckExist = false, bool isExist = false)
+        public void SaveItemContent(IItemData item, string mailboxAddress, DateTime startTime, bool isCheckExist = false, bool isExist = false)
         {
             Item itemInEws = item.Data as Item;
 
-            if(isCheckExist)
+            if (isCheckExist)
             {
                 if (isExist)
                     return;
             }
-            else if(IsItemContentExist(item.ItemId))
+            else if (IsItemContentExist(item.ItemId))
                 return;
 
             string containerName = string.Empty;
@@ -152,7 +154,7 @@ namespace SqlDbImpl
                 var emlLocation = new ExportItemSizeInfo() { Type = ExportType.Eml, Size = (int)emlStream.Length };
                 mailLocation.AddLocation(emlLocation);
 
-                var location = ItemLocationModel.GetLocation(item);
+                var location = ItemLocationModel.GetLocation(mailboxAddress, item);
                 mailLocation.Path = location;
 
                 string blobNamePrefix = MailLocation.GetBlobNamePrefix(item.ItemId);
@@ -164,7 +166,7 @@ namespace SqlDbImpl
             }
             finally
             {
-                if(binStream != null)
+                if (binStream != null)
                 {
                     binStream.Close();
                     binStream.Dispose();
@@ -192,7 +194,7 @@ namespace SqlDbImpl
                              where m.ItemId == itemId
                              select m;
                 var itemContent = result.FirstOrDefault();
-                if(itemContent == default(ItemLocationModel))
+                if (itemContent == default(ItemLocationModel))
                 {
                     return false;
                 }
@@ -210,23 +212,38 @@ namespace SqlDbImpl
             if (data == null)
             {
                 throw new ArgumentException("argument type is not right or argument is null", "folder");
-            } 
+            }
 
             TImpl model = (TImpl)data;
             SaveModelCache(model, false, keyName, pageCount, delegateFunc, isInTransaction);
         }
-
-        [ThreadStatic]
+        
         private Dictionary<string, object> _otherInformation;
         private Dictionary<string, object> OtherInformation
         {
             get
             {
-                if(_otherInformation == null)
+                if (_otherInformation == null)
                 {
                     _otherInformation = new Dictionary<string, object>();
                 }
                 return _otherInformation;
+            }
+        }
+
+        class ConcurrentSave<T> : IDisposable
+        {
+            public ReaderWriterLockSlim LockSlim = new ReaderWriterLockSlim();
+            public List<T> Datas;
+
+            public ConcurrentSave(int capacity)
+            {
+                Datas = new List<T>(capacity);
+            }
+
+            public void Dispose()
+            {
+                LockSlim.Dispose();
             }
         }
 
@@ -244,99 +261,139 @@ namespace SqlDbImpl
             object modelListObject;
             if (!OtherInformation.TryGetValue(keyName, out modelListObject))
             {
-                modelListObject = new List<T>(pageCount);
+                modelListObject = new ConcurrentSave<T>(pageCount);
                 OtherInformation.Add(keyName, modelListObject);
             }
-            List<T> modelList = modelListObject as List<T>;
-            
+            var readWriteLock = ((ConcurrentSave<T>)modelListObject).LockSlim;
+            List<T> modelList = ((ConcurrentSave<T>)modelListObject).Datas as List<T>;
 
-            if (modelData != null)
-                modelList.Add(modelData);
-
-            if (modelList.Count >= pageCount || isEnd)
+            readWriteLock.EnterReadLock();
+            try
             {
-                HashSet<string> ids = new HashSet<string>();
-                bool isMultiItem = false;
-                foreach (var item in modelList)
+                if (modelData != null)
+                    modelList.Add(modelData);
+            }
+            finally
+            {
+                readWriteLock.ExitReadLock();
+            }
+
+            readWriteLock.EnterWriteLock();
+            try
+            {
+                if (modelList.Count >= pageCount || isEnd)
                 {
-                    IItemData temp = item as IItemData;
-                    if(temp != null){
-                        if (ids.Contains(temp.Id))
+                    if (isInTransaction)
+                    {
+                        using (var context = new CatalogDbContext(new OrganizationModel() { Name = _organization }))
+                        //using (var context = new CatalogDbContext(new OrganizationModel() { Name = _organization }, SqlConn, false))
                         {
-                            isMultiItem = true;
+                            delegateFunc(context, modelList);
+                            context.SaveChanges();
                         }
-                        else
-                            ids.Add(temp.Id);
                     }
-                }
-
-
-                if (isInTransaction)
-                {
-                    using (var context = new CatalogDbContext(new OrganizationModel() { Name = _organization }, SqlConn, false))
+                    else
                     {
-                        delegateFunc(context, modelList);
-                        context.SaveChanges();
+                        using (var context = new CatalogDbContext(new OrganizationModel() { Name = _organization }))
+                        {
+                            delegateFunc(context, modelList);
+                            context.SaveChanges();
+                        }
                     }
+                    modelList.Clear();
                 }
-                else
-                {
-                    using (var context = new CatalogDbContext(new OrganizationModel() { Name = _organization }))
-                    {
-                        delegateFunc(context, modelList);
-                        context.SaveChanges();
-                    }
-                }
-                modelList.Clear();
+            }
+            finally
+            {
+                readWriteLock.ExitWriteLock();
             }
         }
 
-        private SqlConnection _sqlConn;
-        /// <summary>
-        /// Get sql connect and start transaction.
-        /// </summary>
-        SqlConnection SqlConn
-        {
-            get
-            {
-                if(_sqlConn == null)
-                {
-                    _sqlConn = new SqlConnection(CatalogDbContext.GetConnectString(_organization));
-                    _sqlConn.Open();
-                    var scope = TransactionScope;
-                }
-                return _sqlConn;
-            }
-        }
+        //private SqlConnection _sqlConn;
+        ///// <summary>
+        ///// Get sql connect and start transaction.
+        ///// </summary>
+        //SqlConnection SqlConn
+        //{
+        //    get
+        //    {
+        //        if(_sqlConn == null)
+        //        {
+        //            _sqlConn = new SqlConnection(CatalogDbContext.GetConnectString(_organization));
+        //            _sqlConn.Open();
+        //            //var scope = TransactionScope;
+        //        }
+        //        return _sqlConn;
+        //    }
+        //}
 
-        private TransactionScope _transactionScope;
-        private TransactionScope TransactionScope
-        {
-            get
-            {
-                if(_transactionScope == null)
-                {
-                    _transactionScope = new TransactionScope();
-                }
-                return _transactionScope;
-            }
-        }
+        //private TransactionScope _transactionScope;
+        //private TransactionScope TransactionScope
+        //{
+        //    get
+        //    {
+        //        if(_transactionScope == null)
+        //        {
+        //            _transactionScope = new TransactionScope();
+        //        }
+        //        return _transactionScope;
+        //    }
+        //}
 
         public override void BeginTransaction()
         {
-            
+
         }
 
         public override void EndTransaction(bool isCommit)
         {
-            if (_transactionScope != null) {
-                if (isCommit)
-                    TransactionScope.Complete();
+            //if (_transactionScope != null) {
+            //    if (isCommit)
+            //        TransactionScope.Complete();
 
-                TransactionScope.Dispose();
-                SqlConn.Dispose();
+            //    TransactionScope.Dispose();
+            //    SqlConn.Dispose();
+            //}
+
+        }
+
+        public override void Dispose()
+        {
+            foreach(var keyValue in OtherInformation)
+            {
+                IDisposable obj = keyValue.Value as IDisposable;
+                if(obj != null)
+                {
+                    obj.Dispose();
+                    obj = null;
+                }
+            }
+            
+        }
+
+        public void UpdateFolderChildFolderItemCount(IFolderData folderData, DateTime startTime)
+        {
+            using (var context = new CatalogDbContext(new OrganizationModel() { Name = _organization }))
+            {
+                var folderDataOld = (from f in context.Folders where f.StartTime == startTime && f.FolderId == folderData.FolderId select f).FirstOrDefault();
+                if (folderDataOld == null)
+                    throw new NullReferenceException("can't find the folder, please add first.");
+                folderDataOld.ChildFolderCount = folderData.ChildFolderCount;
+                folderDataOld.ChildItemCount = folderData.ChildItemCount;
+                context.SaveChanges();
             }
         }
-        
+
+        public void UpdateMailboxChildFolderCount(IMailboxData mailboxData, DateTime startTime)
+        {
+            using (var context = new CatalogDbContext(new OrganizationModel() { Name = _organization }))
+            {
+                var mailboxDataOld = (from f in context.Mailboxes where f.StartTime == startTime && f.RootFolderId == mailboxData.RootFolderId select f).FirstOrDefault();
+                if (mailboxDataOld == null)
+                    throw new NullReferenceException("can't find the mailbox, please add first.");
+                mailboxDataOld.ChildFolderCount = mailboxData.ChildFolderCount;
+                context.SaveChanges();
+            }
+        }
     }
 }

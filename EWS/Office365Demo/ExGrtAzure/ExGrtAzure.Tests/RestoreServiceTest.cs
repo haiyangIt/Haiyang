@@ -17,13 +17,13 @@ namespace ExGrtAzure.Tests
         [ClassInitialize]
         public static void TestInit(TestContext context)
         {
-            _factory = GetCatalogFactory();
-            _service = GetRestoreService();
+            //_factory = GetCatalogFactory();
+            //_service = GetRestoreService();
 
-            var mailboxOper = _factory.NewMailboxOperatorImpl();
-            ServiceContext.ContextInstance.CurrentMailbox = "haiyang.ling@arcserve.com";
-            mailboxOper.ConnectMailbox(ServiceContext.ContextInstance.Argument, "haiyang.ling@arcserve.com");
-            _ewsContext = mailboxOper.CurrentExchangeService;
+            //var mailboxOper = _factory.NewMailboxOperatorImpl();
+            //ServiceContext.ContextInstance.CurrentMailbox = "haiyang.ling@arcserve.com";
+            //mailboxOper.ConnectMailbox(ServiceContext.ContextInstance.Argument, "haiyang.ling@arcserve.com");
+            //_ewsContext = mailboxOper.CurrentExchangeService;
         }
 
         public static RestoreFactory GetCatalogFactory()
@@ -45,18 +45,18 @@ namespace ExGrtAzure.Tests
         [TestMethod]
         public void TestRestoreMailbox()
         {
-            IRestoreService service = GetRestoreService();
-            using (IRestoreDestination destination = _factory.NewRestoreDestination(service.ServiceContext.Argument, _service.ServiceContext.DataAccessObj))
-            {
-                service.Destination = destination;
-                destination.InitOtherInformation("haiyang.ling@arcserve.com", "Restore1");
+            //IRestoreService service = GetRestoreService();
+            //using (IRestoreDestination destination = _factory.NewRestoreDestination(service.ServiceContext.Argument, _service.ServiceContext.DataAccessObj))
+            //{
+            //    service.Destination = destination;
+            //    destination.InitOtherInformation("haiyang.ling@arcserve.com", "Restore1");
 
-                IQueryCatalogDataAccess dataAccess = (IQueryCatalogDataAccess)ServiceContext.GetDataAccessInstance(TaskType.Restore, service.ServiceContext.Argument, "Arcserve");
-                var allJob = dataAccess.GetAllCatalogJob();
-                dataAccess.CatalogJob = allJob[0];
-                service.CurrentRestoreCatalogJob = allJob[0];
-                service.RestoreMailbox("haiyang.ling@arcserve.com");
-            }
+            //    IQueryCatalogDataAccess dataAccess = (IQueryCatalogDataAccess)ServiceContext.GetDataAccessInstance(TaskType.Restore, service.ServiceContext.Argument, "Arcserve");
+            //    var allJob = dataAccess.GetAllCatalogJob();
+            //    dataAccess.CatalogJob = allJob[0];
+            //    service.CurrentRestoreCatalogJob = allJob[0];
+            //    service.RestoreMailbox("haiyang.ling@arcserve.com");
+            //}
         }
 
         public void TestRestoreFolder()

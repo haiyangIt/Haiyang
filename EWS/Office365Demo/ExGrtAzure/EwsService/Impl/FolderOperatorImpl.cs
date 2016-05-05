@@ -13,6 +13,41 @@ namespace EwsService.Impl
 {
     public class FolderOperatorImpl : IFolder
     {
+        private PropertyDefinition[] _folderProperties;
+        private PropertyDefinition[] FolderProperties
+        {
+            get
+            {
+
+                if (_folderProperties == null)
+                {
+                    _folderProperties = new PropertyDefinition[]
+                    {
+                        FolderSchema.DisplayName,
+                        FolderSchema.ParentFolderId,
+                        FolderSchema.ChildFolderCount,
+                        FolderSchema.FolderClass,
+                        FolderSchema.TotalCount
+                    };
+                }
+                return _folderProperties;
+
+            }
+        }
+
+        private PropertySet _folderPropertySet;
+        private PropertySet FolderPropertySet
+        {
+            get
+            {
+                if(_folderPropertySet == null)
+                {
+                    _folderPropertySet = new PropertySet(FolderProperties);
+                }
+                return _folderPropertySet;
+            }
+        }
+
         public FolderOperatorImpl(ExchangeService service)
         {
             CurrentExchangeService = service;
@@ -33,6 +68,7 @@ namespace EwsService.Impl
             while (moreItems)
             {
                 FolderView oView = new FolderView(pageSize, offset, OffsetBasePoint.Beginning);
+                oView.PropertySet = FolderPropertySet;
                 FindFoldersResults findResult = parentFolder.FindFolders(oView);
                 result.AddRange(findResult.Folders);
                 if (!findResult.MoreAvailable)
@@ -51,10 +87,10 @@ namespace EwsService.Impl
 
         public Folder GetRootFolder()
         {
-            return Folder.Bind(CurrentExchangeService, WellKnownFolderName.MsgFolderRoot);
+            return Folder.Bind(CurrentExchangeService, WellKnownFolderName.MsgFolderRoot, FolderPropertySet);
         }
 
-        
+
         public bool IsFolderNeedGenerateCatalog(Folder folder)
         {
             return FolderClassUtil.IsFolderValid(folder.FolderClass);
@@ -114,10 +150,11 @@ namespace EwsService.Impl
             List<Folder> result = new List<Folder>();
             var parentFolder = new FolderId(parentFolderId);
             //var parentFolderObj = Folder.Bind(CurrentExchangeService, parentFolder);
-           // return GetChildFolder(parentFolderObj);
+            // return GetChildFolder(parentFolderObj);
             while (moreItems)
             {
                 FolderView oView = new FolderView(pageSize, offset, OffsetBasePoint.Beginning);
+                oView.PropertySet = FolderPropertySet;
                 FindFoldersResults findResult = CurrentExchangeService.FindFolders(parentFolder, oView);
                 result.AddRange(findResult.Folders);
                 if (!findResult.MoreAvailable)

@@ -96,10 +96,10 @@ namespace EwsFrame
             return (IDataConvert)CreateType<IDataConvert>(EwsDataImplAssembly);
         }
 
-        public IServiceContext GetServiceContext()
-        {
-            return ServiceContext.ContextInstance;
-        }
+        //public IServiceContext GetServiceContext()
+        //{
+        //    return ServiceContext.ContextInstance;
+        //}
 
         public IFilterItem NewFilterItemBySelectTree(LoadedTreeItem orgSelectItem)
         {

@@ -10,7 +10,7 @@ namespace DataProtectInterface
     {
         OrganizationAdminInfo AdminInfo { get; }
         string CurrentMailbox { get; set; }
-        IServiceContext CurrentContext { get; }
+        
         EwsServiceArgument Argument { get; }
 
         IDataAccess DataAccessObj { get; }
@@ -18,7 +18,6 @@ namespace DataProtectInterface
         TaskType TaskType { get; }
 
         Exception LastException { get; set; }
-
-        string GetOrganizationPrefix();
+        
     }
 }

@@ -159,7 +159,7 @@ namespace SqlDbImpl
 
         internal static CloudBlobClient BlobClient = StorageAccount.CreateCloudBlobClient();
 
-        public readonly BlobDataAccess BlobDataAccessObj = new BlobDataAccess(BlobClient);
+        public readonly static BlobDataAccess BlobDataAccessObj = new BlobDataAccess(BlobClient);
 
         [Obsolete("Please use GetItemContent(IItemData, ExportType)")]
         public IItemData GetItemContent(IItemData itemData)
@@ -326,6 +326,11 @@ namespace SqlDbImpl
 
             IItemData model = DataConvert.Convert(result, data);
             return model;
+        }
+
+        public override void Dispose()
+        {
+            
         }
     }
 }

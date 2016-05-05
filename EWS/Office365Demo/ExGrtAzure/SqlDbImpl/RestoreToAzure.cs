@@ -145,7 +145,7 @@ namespace SqlDbImpl
 
             if (success)
             {
-                List<string> urls = ((QueryCatalogDataAccess)(restoreService.ServiceContext.DataAccessObj)).BlobDataAccessObj.GetBlobShareUris(_instance.ContainerName, _instance.BlobNames);
+                List<string> urls = QueryCatalogDataAccess.BlobDataAccessObj.GetBlobShareUris(_instance.ContainerName, _instance.BlobNames);
                 string subject = string.Format("Restore {0} Finished", restoreService.RestoreJobName);
                 SendMailHelper sendMailHelper = new SendMailHelper();
                 sendMailHelper.AddDownloadUrls(urls);
@@ -235,7 +235,7 @@ namespace SqlDbImpl
             _blobIndex++;
             _blobName = string.Format("{0}.zip", _blobIndex);
             BlobNames.Add(_blobName);
-            _blob = ((QueryCatalogDataAccess)(ServiceContext.ContextInstance.DataAccessObj)).BlobDataAccessObj.GetBlockBlobObj(ContainerName, _blobName);
+            _blob = QueryCatalogDataAccess.BlobDataAccessObj.GetBlockBlobObj(ContainerName, _blobName);
         }
 
         public void Dispose()

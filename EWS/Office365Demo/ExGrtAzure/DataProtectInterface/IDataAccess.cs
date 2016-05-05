@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace DataProtectInterface
 {
-    public interface IDataAccess
+    public interface IDataAccess: IDisposable
     {
         void BeginTransaction();
         void EndTransaction(bool isCommit);
 
-        void ResetAllStorage(string organization);
+        void ResetAllStorage(string mailboxAddress, string organization);
 
-        void ResetAllStorage();
+        void ResetAllStorage(string mailboxAddress);
     }
 }

@@ -44,6 +44,7 @@ namespace DataProtectImpl
         protected override void RestoreEnd(bool isFinished)
         {
             ServiceContext.DataAccessObj.EndTransaction(isFinished);
+            ServiceContext.DataAccessObj.Dispose();
         }
 
         public override void RestoreItem(string mailbox, IRestoreItemInformation item)

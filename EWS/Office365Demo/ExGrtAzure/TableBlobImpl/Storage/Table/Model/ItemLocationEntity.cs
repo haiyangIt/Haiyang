@@ -61,44 +61,44 @@ namespace TableBlobImpl.Storage.Table.Model
             return HttpUtility.UrlEncode(name);
         }
 
-        public static string GetLocation(Item item, DateTime thisCatalogTime, bool isNew)
-        {
-            BlobDataAccess dataAccess = new BlobDataAccess(TableBlobDataAccess.BlobClient);
+        //public static string GetLocation(Item item, DateTime thisCatalogTime, bool isNew)
+        //{
+        //    BlobDataAccess dataAccess = new BlobDataAccess(TableBlobDataAccess.BlobClient);
             
-            if (dataAccess == null)
-                throw new ArgumentNullException("dependencyInfo");
+        //    if (dataAccess == null)
+        //        throw new ArgumentNullException("dependencyInfo");
 
-            ICache cache = MailboxCacheManager.CacheManager.GetCache(item.ParentFolderId.Mailbox.Address, FolderContainerMapCache.CacheName);
-            if (cache == null)
-            {
-                cache = MailboxCacheManager.CacheManager.NewCache(item.ParentFolderId.Mailbox.Address, FolderContainerMapCache.CacheName, typeof(FolderContainerMapCache));
+        //    ICache cache = MailboxCacheManager.CacheManager.GetCache(item.ParentFolderId.Mailbox.Address, FolderContainerMapCache.CacheName);
+        //    if (cache == null)
+        //    {
+        //        cache = MailboxCacheManager.CacheManager.NewCache(item.ParentFolderId.Mailbox.Address, FolderContainerMapCache.CacheName, typeof(FolderContainerMapCache));
 
-            }
+        //    }
 
-            StringCacheKey itemKey = new StringCacheKey(item.ParentFolderId.UniqueId);
-            object outObj = null;
-            FolderContainerMapping folderCountInfo = null;
-            if (!cache.TryGetValue(itemKey, out outObj))
-            {
-                outObj = FolderContainerMapping.NewInstance(item.ParentFolderId.UniqueId);
-                cache.AddKeyValue(itemKey, folderCountInfo);
-            }
+        //    StringCacheKey itemKey = new StringCacheKey(item.ParentFolderId.UniqueId);
+        //    object outObj = null;
+        //    FolderContainerMapping folderCountInfo = null;
+        //    if (!cache.TryGetValue(itemKey, out outObj))
+        //    {
+        //        outObj = FolderContainerMapping.NewInstance(item.ParentFolderId.UniqueId);
+        //        cache.AddKeyValue(itemKey, folderCountInfo);
+        //    }
 
-            folderCountInfo = outObj as FolderContainerMapping;
+        //    folderCountInfo = outObj as FolderContainerMapping;
 
-            if (BlobDataAccess.IsOutOfBlobCountRange(folderCountInfo.ContainerInfo.UsedCount, item.Size))
-            {
-                folderCountInfo.ContainerInfo.UsedCount += BlobDataAccess.GetBlobCount(item.Size);
-            }
-            else
-            {
-                folderCountInfo = FolderContainerMapping.NewNextContainer(folderCountInfo);
-                folderCountInfo.ContainerInfo.UsedCount += BlobDataAccess.GetBlobCount(item.Size);
-                cache.SetKeyValue(itemKey, folderCountInfo);
-            }
+        //    if (BlobDataAccess.IsOutOfBlobCountRange(folderCountInfo.ContainerInfo.UsedCount, item.Size))
+        //    {
+        //        folderCountInfo.ContainerInfo.UsedCount += BlobDataAccess.GetBlobCount(item.Size);
+        //    }
+        //    else
+        //    {
+        //        folderCountInfo = FolderContainerMapping.NewNextContainer(folderCountInfo);
+        //        folderCountInfo.ContainerInfo.UsedCount += BlobDataAccess.GetBlobCount(item.Size);
+        //        cache.SetKeyValue(itemKey, folderCountInfo);
+        //    }
 
-            return folderCountInfo.ContainerInfo.ContainerName;
-        }
+        //    return folderCountInfo.ContainerInfo.ContainerName;
+        //}
     }
 
 
