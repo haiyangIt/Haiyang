@@ -11,6 +11,7 @@ using EwsDataInterface;
 using TableBlobImpl.Storage.Table.Model;
 using TableBlobImpl.Access.Table;
 using EwsFrame;
+using System.Data.Entity;
 
 namespace TableBlobImpl.Access
 {
@@ -36,7 +37,15 @@ namespace TableBlobImpl.Access
         internal static CloudBlobClient BlobClient = StorageAccount.CreateCloudBlobClient();
 
         public readonly BlobDataAccess BlobDataAccessObj = new BlobDataAccess(BlobClient);
-        
+
+        public DbContext DbContext
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         public void SaveMailbox(IMailboxData mailboxAddress)
         {
             MailboxEntity entity = mailboxAddress as MailboxEntity;
@@ -201,6 +210,11 @@ namespace TableBlobImpl.Access
         }
 
         public void UpdateMailboxChildFolderCount(IMailboxData mailboxData, DateTime startTime)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SaveChanges()
         {
             throw new NotImplementedException();
         }

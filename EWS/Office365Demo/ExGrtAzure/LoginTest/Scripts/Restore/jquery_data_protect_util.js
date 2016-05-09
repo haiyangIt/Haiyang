@@ -56,8 +56,8 @@ Arcserve.DataProtect.Util.AjaxClass.prototype.Ajax = function () {
         error: function (jqXhr, textStatus, errorThrown) {
             self.FailureCallback(jqXhr, textStatus, errorThrown);
         },
-        success: function (data, textStatus, jqXhr) {
-            self.SuccessCallback(data, textStatus, jqXhr);
+        success: function (returnData, textStatus, jqXhr) {
+            self.SuccessCallback(returnData, textStatus, jqXhr);
         },
         complete: function (jqXhr, textStatus) {
             self.CompleteCallback(jqXhr, textStatus);
@@ -73,16 +73,30 @@ Arcserve.DataProtect.Util.AjaxClass.prototype.SuccessCallback = function (data, 
 
 Arcserve.DataProtect.Util.AjaxClass.prototype.FailureCallback = function (jqXhr, textStatus, errorThrown) {
 
-    var data = $.parseJSON(jqXhr.responseText);
-    Arcserve.DataProtect.Util.Alert({
-        type: BootstrapDialog.TYPE_DANGER,
-        title: "Error",
-        message: data.Exception,
-        btnYesText: "Ok",
-        callbackForYes: function (dialogWarning) {
-            dialogWarning.close();
-        }
-    });
+    try {
+        var data = $.parseJSON(jqXhr.responseText);
+        Arcserve.DataProtect.Util.Alert({
+            type: BootstrapDialog.TYPE_DANGER,
+            title: "Error",
+            message: data.Exception,
+            btnYesText: "Ok",
+            callbackForYes: function (dialogWarning) {
+                dialogWarning.close();
+            }
+        });
+    }
+    catch (e) {
+        Arcserve.DataProtect.Util.Alert({
+            type: BootstrapDialog.TYPE_DANGER,
+            title: "Error",
+            message: "jqXhr.responseText:" + jqXhr.responseText + " \r\n textStatus:" + textStatus + " \r\n errorThrow:" + errorThrown,
+            btnYesText: "Ok",
+            callbackForYes: function (dialogWarning) {
+                dialogWarning.close();
+            }
+        });
+    }
+
     this.ResetLoading();
     this.setting.error(jqXhr, textStatus, errorThrown);
 }

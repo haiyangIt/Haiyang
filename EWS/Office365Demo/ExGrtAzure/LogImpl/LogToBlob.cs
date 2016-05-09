@@ -52,9 +52,27 @@ namespace LogImpl
 
 
         private static object _lock = new object();
+
+        public event EventHandler<string> WriteLogMsgEvent;
+        private void TriggerEvent(string msg)
+        {
+            try
+            {
+                if (WriteLogMsgEvent != null)
+                {
+                    WriteLogMsgEvent.Invoke(null, msg);
+                }
+            }
+            catch (Exception e)
+            {
+
+            }
+        }
+
         protected virtual void WriteToAppendBlob(string msg)
         {
             Instance.WriteToLog(msg);
+            TriggerEvent(msg);
             //var currentDay = DateTime.Now.Date;
             //if (currentDay != LastDateTime)
             //{

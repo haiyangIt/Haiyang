@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DataProtectInterface
 {
-    public interface IServiceContext
+    public interface IServiceContext : IDisposable
     {
         OrganizationAdminInfo AdminInfo { get; }
         string CurrentMailbox { get; set; }

@@ -142,5 +142,14 @@ namespace EwsFrame
             string domain = mailbox.Substring(atIndex + 1, mailbox.Length - atIndex - 1).Replace(".", "-").ToLower();
             return domain;
         }
+
+        public void Dispose()
+        {
+            if(_dataAccessObj != null)
+            {
+                _dataAccessObj.Dispose();
+                _dataAccessObj = null;
+            }
+        }
     }
 }

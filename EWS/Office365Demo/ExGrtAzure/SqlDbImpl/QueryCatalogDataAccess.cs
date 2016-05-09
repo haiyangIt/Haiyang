@@ -49,40 +49,66 @@ namespace SqlDbImpl
             }
         }
 
+        private DbContext _dbContext;
+        private object _lockObj = new object();
+        public override DbContext DbContext
+        {
+            get
+            {
+                if (_dbContext == null)
+                {
+                    lock (_lockObj)
+                    {
+                        if (_dbContext == null)
+                            _dbContext = new CatalogDbContext(new OrganizationModel() { Name = Organization });
+                    }
+                }
+                return _dbContext;
+            }
+        }
+
+        public CatalogDbContext CatalogContext
+        {
+            get
+            {
+                return DbContext as CatalogDbContext;
+            }
+        }
+
         private List<T> QueryDatas<T>(QueryFunc<T> funcObj)
         {
-            using (var context = new CatalogDbContext(new OrganizationModel() { Name = Organization }))
-            {
-                IQueryable<T> query = funcObj(context);
+            //using (var context = new CatalogDbContext(new OrganizationModel() { Name = Organization }))
+            //{
+                IQueryable<T> query = funcObj(CatalogContext);
                 return query.ToList();
-            }
+            //}
         }
 
         private T QueryData<T>(QueryFunc<T> funcObj)
         {
-            using (var context = new CatalogDbContext(new OrganizationModel() { Name = Organization }))
-            {
-                IQueryable<T> query = funcObj(context);
+            //using (var context = new CatalogDbContext(new OrganizationModel() { Name = Organization }))
+            //{
+                IQueryable<T> query = funcObj(CatalogContext);
                 return query.FirstOrDefault();
-            }
+            //}
         }
 
         private int QueryData<T>(QueryCountFunc<T> funcObj)
         {
-            using (var context = new CatalogDbContext(new OrganizationModel() { Name = Organization }))
-            {
-                return funcObj(context);
-            }
+            //using (var context = new CatalogDbContext(new OrganizationModel() { Name = Organization }))
+            //{
+                return funcObj(CatalogContext);
+            //}
         }
 
         private List<T> QueryData<T>(QueryFunc<T> funcObj, int pageIndex, int pageCount)
         {
-            using (var context = new CatalogDbContext(new OrganizationModel() { Name = Organization }))
-            {
+            //using (var context = new CatalogDbContext(new OrganizationModel() { Name = Organization }))
+            //{
                 var skip = pageCount * pageIndex;
-                IQueryable<T> query = funcObj(context).Skip(skip).Take(pageCount);
+                IQueryable<T> query = funcObj(CatalogContext).Skip(skip).Take(pageCount);
                 return query.ToList();
-            }
+            //}
         }
 
         public List<IFolderData> GetAllChildFolder(IFolderData parentFolder)
@@ -330,7 +356,11 @@ namespace SqlDbImpl
 
         public override void Dispose()
         {
-            
+            if (_dbContext != null)
+            {
+                _dbContext.Dispose();
+                _dbContext = null;
+            }
         }
     }
 }

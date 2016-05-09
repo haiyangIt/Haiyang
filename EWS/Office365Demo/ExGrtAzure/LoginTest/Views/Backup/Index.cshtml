@@ -15,7 +15,7 @@
 @Styles.Render("~/bundles/bootstrapselectcss")
 @Styles.Render("~/bundles/bootstrapdialogcss")
 
-@using (Ajax.BeginForm("Index", "Backup", new AjaxOptions { OnSuccess = "SubmitFormSuccess", OnFailure="SubmitFailure", OnComplete = "SubmitComplete" }, new { @class = "form-horizontal", role = "form", id = "BackupForm" }))
+@using (Ajax.BeginForm("Index", "Backup", new AjaxOptions { OnSuccess = "SubmitFormSuccess", OnFailure = "SubmitFailure", OnComplete = "SubmitComplete" }, new { @class = "form-horizontal", role = "form", id = "BackupForm" }))
 {
     @Html.AntiForgeryToken()
     <hr />
@@ -111,7 +111,7 @@
     @Scripts.Render("~/bundles/three-status-select")
     @Scripts.Render("~/bundles/three-status-select-nav")
     @Scripts.Render("~/bundles/customerPaginator")
-@Scripts.Render("~/bundles/md5")
+    @Scripts.Render("~/bundles/md5")
 
     <script>
         $(document).ready(function () {
@@ -204,7 +204,6 @@
                         formData.EncryptPassword = getAdminPassword();
 
                         formData.BackupUserPassword = "";
-
                         Arcserve.DataProtect.Util.Post(formData, form.attr("action"), SubmitFormSuccess, function () {
                             Arcserve.DataProtect.Util.Ajax.close();
                             isFinished = false;
@@ -280,16 +279,22 @@
             SubmitFormSuccess = function (data) {
                 if (data.Index == parseInt("@ViewBag.TotalStepCount")) {
                     isFinished = false;
+                    var msg = "Generate Catalog running.";
+                    if (data.HasError) {
+                        msg = data.Msg;
+                    }
 
                     Arcserve.DataProtect.Util.Alert({
                         type: BootstrapDialog.TYPE_INFO,
                         title: "Info",
-                        message: "Generate Catalog successful.",
+                        message: msg,
                         callbackForYes: function (dialog) {
                             Arcserve.DataProtect.Util.Ajax.close();
                             dialog.close();
-                            var url = "@Url.Action("Index","Home")";
-                            window.location.href = url;
+                            if (!data.HasError) {
+                                var url = "@Url.Action("Index","Progress")" + "?ServiceId=" + data.ServiceId;
+                                window.location.href = url;
+                            }
                         }
                     });
 

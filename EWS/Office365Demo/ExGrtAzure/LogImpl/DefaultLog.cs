@@ -84,6 +84,7 @@ namespace LogImpl
         protected virtual void WriteLog(string msg)
         {
             Instance.WriteToLog(msg);
+            TriggerEvent(msg);
         }
 
         public void WriteException(LogLevel level, string message, Exception exception, string exMsg)
@@ -92,22 +93,62 @@ namespace LogImpl
         }
         const string blank = "\t";
 
-        internal static string GetExceptionString(LogLevel level, string message, Exception exception, string exMsg)
+        public event EventHandler<string> WriteLogMsgEvent;
+
+        private void TriggerEvent(string msg)
+        {
+            try
+            {
+                if(WriteLogMsgEvent != null)
+                {
+                    WriteLogMsgEvent.Invoke(null, msg);
+                }
+            }
+            catch(Exception e)
+            {
+
+            }
+        }
+
+        private static string TimeFormat = "yyyy-MM-dd HH:mm:ss";
+
+        public static string GetExceptionString(LogLevel level, string message, Exception exception, string exMsg)
         {
             StringBuilder sb = new StringBuilder();
             var curEx = exception;
             while (curEx != null)
             {
-                sb.AppendLine(string.Join(blank, DateTime.Now.ToString("yyyyMMddHHmmss"),
-                    LogLevelHelper.GetLevelString(level),
-                    message.RemoveRN(),
-                    curEx.Message.RemoveRN(),
-                    curEx.StackTrace.RemoveRN()));
+                if (curEx is AggregateException)
+                {
+                    sb.AppendLine(GetAggrateException(level, message, curEx as AggregateException, exMsg));
+                }
+                else {
+                    sb.AppendLine(string.Join(blank, DateTime.Now.ToString(TimeFormat),
+                        LogLevelHelper.GetLevelString(level),
+                        message.RemoveRN(),
+                        curEx.Message.RemoveRN(),
+                        curEx.StackTrace.RemoveRN()));
 
-
-                curEx = curEx.InnerException;
+                    curEx = curEx.InnerException;
+                }
             }
             sb.AppendLine();
+            return sb.ToString();
+        }
+
+        internal static string GetAggrateException(LogLevel level, string message, AggregateException ex, string exMsg)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine(string.Join(blank, DateTime.Now.ToString(TimeFormat),
+                    LogLevelHelper.GetLevelString(level),
+                    message.RemoveRN(),
+                    ex.Message.RemoveRN(),
+                    ex.StackTrace.RemoveRN()));
+
+            foreach (var innerEx in ex.Flatten().InnerExceptions)
+            {
+                sb.AppendLine(GetExceptionString(level, message, ex, exMsg));
+            }
             return sb.ToString();
         }
 
@@ -118,7 +159,7 @@ namespace LogImpl
 
         internal static string GetLogString(LogLevel level, string message)
         {
-            return string.Join(blank, DateTime.Now.ToString("yyyyMMddHHmmss"),
+            return string.Join(blank, DateTime.Now.ToString(TimeFormat),
                 LogLevelHelper.GetLevelString(level),
                 message.RemoveRN());
         }
@@ -130,7 +171,7 @@ namespace LogImpl
 
         internal static string GetLogString(LogLevel level, string message, string format, params object[] args)
         {
-            return string.Join(blank, DateTime.Now.ToString("yyyyMMddHHmmss"),
+            return string.Join(blank, DateTime.Now.ToString(TimeFormat),
                 LogLevelHelper.GetLevelString(level),
                 message.RemoveRN(),
                 args.Length > 0 ? string.Format(format, args).RemoveRN() : format.RemoveRN());
@@ -180,7 +221,7 @@ namespace LogImpl
                 if (_writer == null || LogCount > _MaxLogCount)
                     lock (_lock)
                     {
-                        if(LogCount > _MaxLogCount)
+                        if (LogCount > _MaxLogCount)
                         {
                             DoDispose();
                             LogCount = 0;
@@ -261,6 +302,9 @@ namespace LogImpl
                 {
                     case WaitHandle.WaitTimeout:
                     case 0:
+                    case 1:
+                        if (result == 1)
+                            Thread.Sleep(5000);
                         while (true)
                         {
                             try
@@ -279,11 +323,13 @@ namespace LogImpl
                                 Debug.WriteLine(e.Message);
                             }
                         }
-                        break;
-                    case 1:
-                        isBreak = true;
-                        break;
 
+                        if (result == 1)
+                        {
+                            DoWriteLog("Log end.");
+                            isBreak = true;
+                        }
+                        break;
                 }
                 if (isBreak)
                     break;

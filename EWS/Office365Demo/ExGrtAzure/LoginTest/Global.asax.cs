@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Optimization;
@@ -35,10 +36,40 @@ namespace LoginTest
 
         protected void Application_End()
         {
+            HttpRuntime runtime = (HttpRuntime)typeof(System.Web.HttpRuntime).InvokeMember("_theRuntime",
+                                                                                    BindingFlags.NonPublic
+                                                                                    | BindingFlags.Static
+                                                                                    | BindingFlags.GetField,
+                                                                                    null,
+                                                                                    null,
+                                                                                    null);
+
+            if (runtime != null)
+            {
+
+                string shutDownMessage = (string)runtime.GetType().InvokeMember("_shutDownMessage",
+                                                                                 BindingFlags.NonPublic
+                                                                                 | BindingFlags.Instance
+                                                                                 | BindingFlags.GetField,
+                                                                                 null,
+                                                                                 runtime,
+                                                                                 null);
+
+                string shutDownStack = (string)runtime.GetType().InvokeMember("_shutDownStack",
+                                                                               BindingFlags.NonPublic
+                                                                               | BindingFlags.Instance
+                                                                               | BindingFlags.GetField,
+                                                                               null,
+                                                                               runtime,
+                                                                               null);
+
+
+                LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.ERR, "Application_End", "_shutDownMessage={0} _shutDownStack={1}", shutDownMessage, shutDownStack);
+            }
             LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.INFO, "Application_End");
             LogFactory.LogInstance.Dispose();
             LogFactory.EwsTraceLogInstance.Dispose();
-            
+
         }
     }
 }

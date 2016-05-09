@@ -111,10 +111,12 @@ namespace EwsService.Common
         public static string WriteDataToTempXML(string data)
         {
             string tempFile = Path.GetTempFileName().Replace(".tmp", ".xml");
-            
-            StreamWriter sw = File.CreateText(tempFile);
-            sw.WriteLine(data);
-            sw.Close();
+
+            using (StreamWriter sw = File.CreateText(tempFile))
+            {
+                sw.WriteLine(data);
+                sw.Close();
+            }
 
             return tempFile;
         }
@@ -127,21 +129,27 @@ namespace EwsService.Common
         public static string WriteDataToTempHTML(string data)
         {
             string tempFile = Path.GetTempFileName().Replace(".tmp", ".html");
-            StreamWriter sw = File.CreateText(tempFile);
-            sw.WriteLine(data);
-            sw.Close();
-            return tempFile;
+            using (StreamWriter sw = File.CreateText(tempFile))
+            {
+                sw.WriteLine(data);
+                sw.Close();
+                return tempFile;
+            }
         }
 
         // Reads Binary file and turns it into a base64 string.
         public static string GetBinaryFileAsBase64(string sFile)
         {
 
-            FileStream oFileStream = new FileStream(sFile, FileMode.Open, FileAccess.Read);
-            BinaryReader oBinaryReader = new BinaryReader(oFileStream);
-            byte[] arrByte = oBinaryReader.ReadBytes((int)oFileStream.Length);
-            string sData = Convert.ToBase64String(arrByte);
-            return sData;
+            using (FileStream oFileStream = new FileStream(sFile, FileMode.Open, FileAccess.Read))
+            {
+                using (BinaryReader oBinaryReader = new BinaryReader(oFileStream))
+                {
+                    byte[] arrByte = oBinaryReader.ReadBytes((int)oFileStream.Length);
+                    string sData = Convert.ToBase64String(arrByte);
+                    return sData;
+                }
+            }
         }
 
         public static string GetBinaryFileAsBase64(Stream stream)

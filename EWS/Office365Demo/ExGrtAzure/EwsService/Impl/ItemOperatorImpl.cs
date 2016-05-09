@@ -55,7 +55,7 @@ namespace EwsService.Impl
                 return _itemPropertySet;
             }
         }
-        
+
 
         private readonly IDataAccess _dataAccess;
 
@@ -76,7 +76,7 @@ namespace EwsService.Impl
 
         public void ExportItem(Item item, Stream stream, EwsServiceArgument argument)
         {
-            ExportUploadHelper.ExportItemPost(Enum.GetName(typeof(ExchangeVersion), item.Service.RequestedServerVersion), item.Id.UniqueId, stream, argument);
+            ExportUploadHelper.ExportItemPost(Enum.GetName(typeof(ExchangeVersion), item.Service.RequestedServerVersion), item.Id.UniqueId,  stream, argument);
         }
 
         public List<Item> GetFolderItems(Folder folder)
@@ -104,11 +104,11 @@ namespace EwsService.Impl
         public void ImportItem(FolderId parentFolderId, Stream stream, EwsServiceArgument argument)
         {
             ExportUploadHelper.UploadItemPost(Enum.GetName(typeof(ExchangeVersion),
-                CurrentExchangeService.RequestedServerVersion), 
-                parentFolderId, 
-                CreateActionType.CreateNew, 
-                string.Empty, 
-                stream, 
+                CurrentExchangeService.RequestedServerVersion),
+                parentFolderId,
+                CreateActionType.CreateNew,
+                string.Empty,
+                stream,
                 argument);
         }
 

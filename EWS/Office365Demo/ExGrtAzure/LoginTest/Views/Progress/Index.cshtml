@@ -1,0 +1,185 @@
+﻿@model LoginTest.Models.ProgressModel
+
+@{
+    ViewBag.Title = "Progress Information";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2></h2>
+
+@using (Ajax.BeginForm("Refresh", "Progress", new AjaxOptions() { LoadingElementId = "ProgressForm", InsertionMode = InsertionMode.Replace }, new { @class = "form-horizontal", role = "form", id = "ProgressForm" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <h4>Progress Information</h4>
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.StartTime, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.StartTime, new { htmlAttributes = new { @class = "form-control input_progress" } })
+                @*@Html.ValidationMessageFor(model => model.CurrentMailbox, "", new { @class = "text-danger" })*@
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.CurrentMailbox, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.CurrentMailbox, new { htmlAttributes = new { @class = "form-control input_progress" } })
+                @*@Html.ValidationMessageFor(model => model.CurrentMailbox, "", new { @class = "text-danger" })*@
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.MailboxPercent, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.MailboxPercent, new { htmlAttributes = new { @class = "form-control input_progress" } })
+                @*@Html.ValidationMessageFor(model => model.MailboxPercent, "", new { @class = "text-danger" })*@
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.CurrentFolder, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.CurrentFolder, new { htmlAttributes = new { @class = "form-control input_progress" } })
+                @*@Html.ValidationMessageFor(model => model.CurrentFolder, "", new { @class = "text-danger" })*@
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.FolderPercent, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.FolderPercent, new { htmlAttributes = new { @class = "form-control input_progress" } })
+                @*@Html.ValidationMessageFor(model => model.FolderPercent, "", new { @class = "text-danger" })*@
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.CurrentItem, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.CurrentItem, new { htmlAttributes = new { @class = "form-control input_progress" } })
+                @*@Html.ValidationMessageFor(model => model.CurrentItem, "", new { @class = "text-danger" })*@
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.ItemPercent, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.ItemPercent, new { htmlAttributes = new { @class = "form-control input_progress" } })
+                @*@Html.ValidationMessageFor(model => model.ItemPercent, "", new { @class = "text-danger" })*@
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.LatestInfo, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.TextAreaFor(model => model.LatestInfo, 20, 300, new { @class = "form-control textarea_latestInfo" })
+                @*@Html.ValidationMessageFor(model => model.LatestInfo, "", new { @class = "text-danger" })*@
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-10">
+                @Html.HiddenFor(model => model.ServiceId, new { htmlAttributes = new { @class = "form-control" } })
+                @*@Html.ValidationMessageFor(model => model.ServiceId, "", new { @class = "text-danger" })*@
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.EndTime, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.EndTime, new { htmlAttributes = new { @class = "form-control input_progress" } })
+                @*@Html.ValidationMessageFor(model => model.CurrentMailbox, "", new { @class = "text-danger" })*@
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input id="submitBtn" type="button" value="Refresh" class="btn btn-default" />
+                <span style="margin-left:10px;">Refresh Interval:</span><input type="number" style="margin-left:10px; width:40px;" id="refreshInterval" value="10" /><span>s</span>
+                <input type="text" style="width:150px; margin-left:10px;" id="lastRefreshTime" />
+                <input type="text" style="width:100px; margin-left:10px;" id="RefreshCount" />
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index", "Home")
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/bootstrapdialog")
+    @Scripts.Render("~/bundles/arcserveutil")
+
+    <script>
+        ;
+        $(document).ready(function () {
+            var refreshCount = 0;
+
+            refreshUi = function (data) {
+                $("#CurrentMailbox").val(data.CurrentMailbox);
+                $("#MailboxPercent").val(data.MailboxPercent);
+                $("#CurrentFolder").val(data.CurrentFolder);
+                $("#FolderPercent").val(data.FolderPercent);
+                $("#CurrentItem").val(data.CurrentItem);
+                $("#ItemPercent").val(data.ItemPercent);
+                $("#LatestInfo").val(data.LatestInfo);
+                $("#ServiceId").val(data.ServiceId);
+                $("#StartTime").val(data.StartTime);
+                $("#EndTime").val(data.EndTime);
+
+                var dateTime = new Date();
+                $("#lastRefreshTime").val(dateTime.getFullYear() + "-" +
+                    (dateTime.getMonth() + 1) + "-" +
+                    dateTime.getDate() + " " +
+                    dateTime.getHours() + ":" +
+                    dateTime.getMinutes() + ":" +
+                    dateTime.getSeconds() + "." +
+                    dateTime.getMilliseconds());
+
+                $("#RefreshCount").val(refreshCount++);
+
+                if (data.EndTime) {
+                    clearInterval(timer);
+                }
+            };
+
+            getFormData = function () {
+                return {
+                    ServiceId: $("#ServiceId").val()
+                };
+            };
+
+            getInterval = function () {
+                var val = parseInt($("#refreshInterval").val());
+                if (val < 5 || val > 5 * 60) {
+                    val = 10;
+                }
+                return val * 1000;
+            }
+
+            var form = $("#ProgressForm");
+            $("#submitBtn").click(function () {
+                Arcserve.DataProtect.Util.Post(getFormData(), form.attr("action"), function (data) {
+                    refreshUi(data);
+                });
+            });
+
+
+            function long_polling() {
+                Arcserve.DataProtect.Util.Post(getFormData(), form.attr("action"), function (data) {
+                    refreshUi(data);
+
+                    var time = setTimeout(function () {
+                        clearTimeout(time);
+                        long_polling();
+                    }, getInterval());
+                });
+            }
+            long_polling();
+
+        });
+    </script>
+}

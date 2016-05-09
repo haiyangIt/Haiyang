@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,5 +15,8 @@ namespace DataProtectInterface
         void ResetAllStorage(string mailboxAddress, string organization);
 
         void ResetAllStorage(string mailboxAddress);
+
+        DbContext DbContext { get; }
+        void SaveChanges();
     }
 }

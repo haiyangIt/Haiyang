@@ -15,7 +15,6 @@ namespace ExGrtAzure.Tests
     {
         private static CatalogFactory _factory;
         private static ICatalogService _service;
-        private static ExchangeService _ewsContext;
 
         [ClassInitialize]
         public static void TestInit(TestContext context)
@@ -59,17 +58,16 @@ namespace ExGrtAzure.Tests
         [Description("Test ConnectMailbox")]
         public void TestConnectMailbox()
         {
-            Assert.AreNotEqual(_ewsContext, null);
         }
 
         [TestMethod]
         [Description("Test folder operation include GetChildFolder GetRootFolder.")]
         public void TestFolderOperator()
         {
-            var folder = _factory.NewFolderOperatorImpl(_ewsContext);
-            Folder rootFolder = folder.GetRootFolder();
-            IDataConvert dataConvert = _factory.NewDataConvert();
-            dataConvert.StartTime = DateTime.Now;
+            //var folder = _factory.NewFolderOperatorImpl(_ewsContext);
+            //Folder rootFolder = folder.GetRootFolder();
+            //IDataConvert dataConvert = _factory.NewDataConvert();
+            //dataConvert.StartTime = DateTime.Now;
             //dataConvert.OrganizationName = ServiceContext.ContextInstance.AdminInfo.OrganizationName;
             //GetChildFolder(dataConvert, folder, rootFolder, "haiyang.ling@arcserve.com", 1);
         }
@@ -142,12 +140,7 @@ namespace ExGrtAzure.Tests
         {
             //_service.GenerateCatalog("haiyang.ling@arcserve.com","Test");
         }
-
-        [TestMethod]
-        public void TestClearBlobData()
-        {
-
-        }
+        
 
         
     }

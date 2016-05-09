@@ -16,6 +16,7 @@ using EwsServiceInterface;
 using System.Web.Script.Serialization;
 using LoginTest.Models.Setting;
 using LoginTest.Utils;
+using System.Threading;
 
 namespace LoginTest.Controllers
 {
@@ -61,7 +62,7 @@ namespace LoginTest.Controllers
 
                 model.Index++;
                 if (model.Index == 3)
-                    Run(model);
+                    return Run(model);
 
                 if (model.Index == 1)
                 {
@@ -86,42 +87,44 @@ namespace LoginTest.Controllers
             var mailbox = model.BackupUserMailAddress;
             var password = RSAUtil.AsymmetricDecrypt(model.EncryptPassword);
             var organization = model.BackupUserOrganization;
-            ICatalogService service = CatalogFactory.Instance.NewCatalogService(mailbox, password, null, organization);
-            var allMailboxes = service.GetAllUserMailbox();
-
-            List<Item> infos = new List<Item>(allMailboxes.Count);
-            IMailboxData loginMailbox = null;
-            IMailboxData adminMailbox = null;
-            var loginUserName = User.Identity.GetUserName().ToLower();
-            var adminMailAddress = mailbox.ToLower();
-            foreach (var data in allMailboxes)
+            using (ICatalogService service = CatalogFactory.Instance.NewCatalogService(mailbox, password, null, organization))
             {
-                var temp = data.MailAddress.ToLower();
-                if (temp == loginUserName)
-                {
-                    loginMailbox = data;
-                }
-                else if (temp == adminMailAddress)
-                {
-                    adminMailbox = data;
-                }
-                else
-                {
-                    AddToResult(data, infos);
-                }
-            }
+                var allMailboxes = service.GetAllUserMailbox();
 
-            if (adminMailbox != null)
-            {
-                AddToResult(adminMailbox, infos, 0);
-            }
+                List<Item> infos = new List<Item>(allMailboxes.Count);
+                IMailboxData loginMailbox = null;
+                IMailboxData adminMailbox = null;
+                var loginUserName = User.Identity.GetUserName().ToLower();
+                var adminMailAddress = mailbox.ToLower();
+                foreach (var data in allMailboxes)
+                {
+                    var temp = data.MailAddress.ToLower();
+                    if (temp == loginUserName)
+                    {
+                        loginMailbox = data;
+                    }
+                    else if (temp == adminMailAddress)
+                    {
+                        adminMailbox = data;
+                    }
+                    else
+                    {
+                        AddToResult(data, infos);
+                    }
+                }
 
-            if (loginMailbox != null)
-            {
-                AddToResult(loginMailbox, infos, 0);
-            }
+                if (adminMailbox != null)
+                {
+                    AddToResult(adminMailbox, infos, 0);
+                }
 
-            return Json(new { Details = infos });
+                if (loginMailbox != null)
+                {
+                    AddToResult(loginMailbox, infos, 0);
+                }
+
+                return Json(new { Details = infos });
+            }
         }
 
         private void AddToResult(IMailboxData data, List<Item> infos, int position = -1)
@@ -153,31 +156,34 @@ namespace LoginTest.Controllers
         public ActionResult GetFolderInMailbox(string adminMailbox, string password, string organization, string mailbox, string parentFolderId)
         {
             password = RSAUtil.AsymmetricDecrypt(password);
-            ICatalogService service = CatalogFactory.Instance.NewCatalogService(adminMailbox, password, null, organization);
-
-            var allFolder = service.GetFolder(mailbox, parentFolderId, false);
-            var result = new List<Item>();
-            foreach (var folder in allFolder)
+            using (ICatalogService service = CatalogFactory.Instance.NewCatalogService(adminMailbox, password, null, organization))
             {
-                var item = new Item()
+                var allFolder = service.GetFolder(mailbox, parentFolderId, false);
+                var result = new List<Item>();
+                foreach (var folder in allFolder)
                 {
-                    Id = folder.FolderId,
-                    DisplayName = ((IItemBase)folder).DisplayName,
-                    ChildCount = int.MaxValue,
-                    ItemType = ItemTypeStr.Folder
-                };
-                result.Add(item);
-            }
+                    var item = new Item()
+                    {
+                        Id = folder.FolderId,
+                        DisplayName = ((IItemBase)folder).DisplayName,
+                        ChildCount = int.MaxValue,
+                        ItemType = ItemTypeStr.Folder
+                    };
+                    result.Add(item);
+                }
 
-            return Json(new { Details = result });
+                return Json(new { Details = result });
+            }
         }
 
         [Authorize]
-        [HttpPost]
-        public ActionResult Run(BackupModel model)
+        public JsonResult Run(BackupModel model)
         {
             if (ModelState.IsValid)
             {
+                if (JobProgressManager.Instance.Count > 1)
+                    return Json(new { HasError = true, Msg = "Can't start Job." , Index = model.Index});
+
                 JavaScriptSerializer js = new JavaScriptSerializer();
                 LoadedTreeItem selectedItem = js.Deserialize<LoadedTreeItem>(model.BackupSelectItems);
 
@@ -185,12 +191,36 @@ namespace LoginTest.Controllers
                 // todo need use job table to save job status.
                 var password = RSAUtil.AsymmetricDecrypt(model.EncryptPassword);
                 var service = CatalogFactory.Instance.NewCatalogService(model.BackupUserMailAddress, password, null, model.BackupUserOrganization);
+
                 service.CatalogJobName = model.BackupJobName;
                 IFilterItem filterObj = CatalogFactory.Instance.NewFilterItemBySelectTree(selectedItem);
-                service.GenerateCatalog(filterObj);
+                var serviceId = Guid.NewGuid();
+                JobProgressManager.Instance[serviceId] = (IDataProtectProgress)service;
+                ThreadPool.QueueUserWorkItem(ThreadBackup, new CatalogArgs() { Service = service, FilterItem = filterObj });
+                return Json(new { HasError = false, ServiceId = serviceId.ToString(), Index = model.Index });
             }
 
-            return View(model);
+            return Json(new {  HasError = true, Msg = "Can't start job"});
+        }
+
+        private static void ThreadBackup(object arg)
+        {
+            var argument = arg as CatalogArgs;
+            try
+            {
+                using (argument.Service)
+                    argument.Service.GenerateCatalog(argument.FilterItem);
+            }
+            catch (Exception e)
+            {
+                LogFactory.LogInstance.WriteException(LogInterface.LogLevel.ERR, "Backup job failed.", e, e.Message);
+            }
+        }
+
+        class CatalogArgs
+        {
+            public ICatalogService Service;
+            public IFilterItem FilterItem;
         }
     }
 }

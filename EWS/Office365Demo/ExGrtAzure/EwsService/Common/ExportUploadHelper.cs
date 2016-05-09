@@ -10,6 +10,8 @@ using EwsFrame;
 using LogInterface;
 using EwsService.Resource;
 using System.Collections.Generic;
+using System.Threading;
+using System.Configuration;
 
 namespace EwsService.Common
 {
@@ -93,21 +95,76 @@ namespace EwsService.Common
         //    return bSuccess;
         //}
 
-
         public static bool ExportItemPost(string ServerVersion, string sItemId, Stream writer, EwsServiceArgument argument)
+        {
+            int retryCount = 0;
+            Exception lastException = null;
+            while (retryCount < 3)
+            {
+                if (retryCount > 0)
+                {
+                    const int sleepCount = 10 * 1000;
+                    LogFactory.LogInstance.WriteLog(LogLevel.WARN, "retry export", "after sleeping  {0} seconde ,will try the [{1}]th export.", sleepCount, retryCount);
+                    Thread.Sleep(sleepCount);
+                }
+                try
+                {
+                    var result = DoExportItemPost(ServerVersion, sItemId, writer, argument);
+                    return result;
+                }
+                catch (Exception e)
+                {
+                    LogFactory.LogInstance.WriteException(LogLevel.ERR, "Export error", e, e.Message);
+                    lastException = e;
+                    retryCount++;
+                }
+            }
+            if (lastException != null)
+                throw new ApplicationException("Export failure", lastException);
+            return false;
+        }
+
+        private static object _lockObj = new object();
+        private static int _MaxSupportItemSize = 0;
+        private static int MaxSupportItemSize
+        {
+            get
+            {
+                if(_MaxSupportItemSize == 0)
+                {
+                    lock(_lockObj)
+                    {
+                        if (_MaxSupportItemSize == 0)
+                        {
+                            var result = 0;
+                            if (!int.TryParse(ConfigurationManager.AppSettings["SupportMaxSizeItem"], out result))
+                            {
+                                result = 15;
+                            }
+                            LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.INFO, string.Format("max item size is {0}M", result));
+                            _MaxSupportItemSize = result * 1024 * 1024;
+                        }
+                    }
+                }
+                return _MaxSupportItemSize;
+            }
+        }
+
+        public static bool DoExportItemPost(string ServerVersion, string sItemId, Stream writer, EwsServiceArgument argument)
         {
             bool bSuccess = false;
             string sResponseText = string.Empty;
             System.Net.HttpWebRequest oHttpWebRequest = null;
-            EwsProxyFactory.CreateHttpWebRequest(ref oHttpWebRequest, argument);
+            StreamReader oStreadReader = null;
+            HttpWebResponse oHttpWebResponse = null;
 
             // Build request body...
-            string EwsRequest = GetExportSOAPXml(argument, ref oHttpWebRequest);
-            EwsRequest = EwsRequest.Replace("##RequestServerVersion##", ServerVersion);
-            EwsRequest = EwsRequest.Replace("##ItemId##", sItemId);
             try
             {
-
+                EwsProxyFactory.CreateHttpWebRequest(ref oHttpWebRequest, argument);
+                string EwsRequest = GetExportSOAPXml(argument, ref oHttpWebRequest);
+                EwsRequest = EwsRequest.Replace("##RequestServerVersion##", ServerVersion);
+                EwsRequest = EwsRequest.Replace("##ItemId##", sItemId);
                 // Use request to do POST to EWS so we get back the data for the item to export.
                 byte[] bytes = Encoding.UTF8.GetBytes(EwsRequest);
                 oHttpWebRequest.ContentLength = bytes.Length;
@@ -119,18 +176,21 @@ namespace EwsService.Common
                 }
 
                 // Get response
-                HttpWebResponse oHttpWebResponse = (HttpWebResponse)oHttpWebRequest.GetResponse();
+                oHttpWebResponse = (HttpWebResponse)oHttpWebRequest.GetResponse();
 
-                StreamReader oStreadReader = new StreamReader(oHttpWebResponse.GetResponseStream());
+                oStreadReader = new StreamReader(oHttpWebResponse.GetResponseStream());
                 sResponseText = oStreadReader.ReadToEnd();
-
+                if (sResponseText.Length > MaxSupportItemSize)
+                {
+                    LogFactory.LogInstance.WriteLog(LogLevel.WARN, string.Format("{0} is too much. not support now.", sItemId));
+                    return false;
+                }
 
                 // OK?
                 if (oHttpWebResponse.StatusCode == HttpStatusCode.OK)
                 {
                     int BUFFER_SIZE = 1024;
                     int iReadBytes = 0;
-
                     XmlDocument oDoc = new XmlDocument();
                     XmlNamespaceManager namespaces = new XmlNamespaceManager(oDoc.NameTable);
                     namespaces.AddNamespace("m", "http://schemas.microsoft.com/exchange/services/2006/messages");
@@ -139,22 +199,24 @@ namespace EwsService.Common
 
                     // Write base 64 encoded text Data XML string into a binary base 64 text/XML file
                     //BinaryWriter oBinaryWriter = new BinaryWriter(File.Open(sFile, FileMode.Create));
-                    StringReader oStringReader = new StringReader(oData.OuterXml);
-                    XmlTextReader oXmlTextReader = new XmlTextReader(oStringReader);
-                    oXmlTextReader.MoveToContent();
-                    byte[] buffer = new byte[BUFFER_SIZE];
-                    do
+                    using (StringReader oStringReader = new StringReader(oData.OuterXml))
                     {
-                        iReadBytes = oXmlTextReader.ReadBase64(buffer, 0, BUFFER_SIZE);
-                        //oBinaryWriter.Write(buffer, 0, iReadBytes);
-                        writer.Write(buffer, 0, iReadBytes);
+                        using (XmlTextReader oXmlTextReader = new XmlTextReader(oStringReader))
+                        {
+
+                            oXmlTextReader.MoveToContent();
+                            byte[] buffer = new byte[BUFFER_SIZE];
+                            do
+                            {
+                                iReadBytes = oXmlTextReader.ReadBase64(buffer, 0, BUFFER_SIZE);
+                                //oBinaryWriter.Write(buffer, 0, iReadBytes);
+                                writer.Write(buffer, 0, iReadBytes);
+                            }
+                            while (iReadBytes >= BUFFER_SIZE);
+
+                            oXmlTextReader.Close();
+                        }
                     }
-                    while (iReadBytes >= BUFFER_SIZE);
-
-                    oXmlTextReader.Close();
-
-                    // oBinaryWriter.Flush();
-                    //oBinaryWriter.Close();
 
                     bSuccess = true;
                 }
@@ -163,8 +225,16 @@ namespace EwsService.Common
             }
             finally
             {
-
-
+                if (oStreadReader != null)
+                {
+                    oStreadReader.Dispose();
+                    oStreadReader = null;
+                }
+                if (oHttpWebResponse != null)
+                {
+                    oHttpWebResponse.Dispose();
+                    oHttpWebResponse = null;
+                }
             }
 
             return bSuccess;
@@ -173,13 +243,12 @@ namespace EwsService.Common
         public static bool ExportItemPost(string ServerVersion, string sItemId, string sFile, EwsServiceArgument argument)
         {
             // Write base 64 encoded text Data XML string into a binary base 64 text/XML file
-            FileStream stream = File.Open(sFile, FileMode.Create);
-            var result = ExportItemPost(ServerVersion, sItemId, stream, argument);
-
-            stream.Flush();
-            stream.Close();
-
-            return result;
+            using (FileStream stream = File.Open(sFile, FileMode.Create))
+            {
+                var result = ExportItemPost(ServerVersion, sItemId, stream, argument);
+                stream.Flush();
+                return result;
+            }
         }
 
 
@@ -187,13 +256,13 @@ namespace EwsService.Common
         private static string GetExportSOAPXml(EwsServiceArgument argument, ref HttpWebRequest webRequest)
         {
             string result;
-            if(argument.UserToImpersonate == null)
+            if (argument.UserToImpersonate == null)
             {
                 result = TemplateEwsRequests.ExportItems;
             }
             else
             {
-                switch(argument.UserToImpersonate.IdType)
+                switch (argument.UserToImpersonate.IdType)
                 {
                     case ConnectingIdType.PrincipalName:
                         result = TemplateEwsRequests.ExportItemsWithImpersonatePrincipleName;
@@ -334,31 +403,35 @@ namespace EwsService.Common
                 }
 
                 // Get response
-                HttpWebResponse oHttpWebResponse = (HttpWebResponse)oHttpWebRequest.GetResponse();
-
-                StreamReader oStreadReader = new StreamReader(oHttpWebResponse.GetResponseStream());
-                sResponseText = oStreadReader.ReadToEnd();
-
-                if (oHttpWebResponse.StatusCode == HttpStatusCode.OK)
+                using (HttpWebResponse oHttpWebResponse = (HttpWebResponse)oHttpWebRequest.GetResponse())
                 {
-                    string responseCode = GetFirstResponseCode(sResponseText);
 
-                    if (responseCode != "NoError")
+                    using (StreamReader oStreadReader = new StreamReader(oHttpWebResponse.GetResponseStream()))
                     {
-                        string messageText = GetFirstMessageText(sResponseText);
-                        LogFactory.LogInstance.WriteLog(LogLevel.ERR, "Import Failed", "Import ftstream failed with error stream, the detail of response is:{0}.", sResponseText);
-                        return messageText;
-                    }
-                    else
-                    {
-                        return string.Empty;
-                    }
-                }
-                else
-                {
-                    LogFactory.LogInstance.WriteLog(LogLevel.ERR, "Import Failed", "Import ftstream failed with error response status code, the detail of response is:{0}.", sResponseText);
+                        sResponseText = oStreadReader.ReadToEnd();
 
-                    return oHttpWebResponse.StatusCode.ToString();
+                        if (oHttpWebResponse.StatusCode == HttpStatusCode.OK)
+                        {
+                            string responseCode = GetFirstResponseCode(sResponseText);
+
+                            if (responseCode != "NoError")
+                            {
+                                string messageText = GetFirstMessageText(sResponseText);
+                                LogFactory.LogInstance.WriteLog(LogLevel.ERR, "Import Failed", "Import ftstream failed with error stream, the detail of response is:{0}.", sResponseText);
+                                return messageText;
+                            }
+                            else
+                            {
+                                return string.Empty;
+                            }
+                        }
+                        else
+                        {
+                            LogFactory.LogInstance.WriteLog(LogLevel.ERR, "Import Failed", "Import ftstream failed with error response status code, the detail of response is:{0}.", sResponseText);
+
+                            return oHttpWebResponse.StatusCode.ToString();
+                        }
+                    }
                 }
             }
             catch (Exception e)
@@ -379,9 +452,10 @@ namespace EwsService.Common
 
         public static string UploadItemPost(string ServerVersion, FolderId ParentFolderId, CreateActionType oCreateActionType, string sItemId, string sFile, EwsServiceArgument argument)
         {
-            FileStream oFileStream = new FileStream(sFile, FileMode.Open, FileAccess.Read);
-
-            return UploadItemPost(ServerVersion, ParentFolderId, oCreateActionType, sItemId, oFileStream, argument);
+            using (FileStream oFileStream = new FileStream(sFile, FileMode.Open, FileAccess.Read))
+            {
+                return UploadItemPost(ServerVersion, ParentFolderId, oCreateActionType, sItemId, oFileStream, argument);
+            }
         }
 
         private static string GetFirstResponseCode(string xmlStr)

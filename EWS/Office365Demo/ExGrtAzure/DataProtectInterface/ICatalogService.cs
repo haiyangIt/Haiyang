@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DataProtectInterface
 {
-    public interface ICatalogService : ICatalogServiceEvent
+    public interface ICatalogService : ICatalogServiceEvent , IDisposable
     {
         DateTime StartTime { get; }
 

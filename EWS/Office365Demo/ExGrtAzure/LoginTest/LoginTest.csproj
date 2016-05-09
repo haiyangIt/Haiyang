@@ -272,6 +272,7 @@
     <Compile Include="Controllers\BackupController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
+    <Compile Include="Controllers\ProgressController.cs" />
     <Compile Include="Controllers\RestoreController.cs" />
     <Compile Include="Controllers\SettingController.cs" />
     <Compile Include="Controllers\TestController.cs" />
@@ -315,6 +316,7 @@
     <Compile Include="SqlServerTypes\Loader.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="Utils\CustomErrorHandler.cs" />
+    <Compile Include="Utils\JobProgressManager.cs" />
     <Compile Include="Utils\RSAUtil.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -334,11 +336,11 @@
       <Link>SqlServerTypes\x86\SqlServerSpatial110.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-	<Content Include="..\bin\libeay32.dll">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="..\bin\libeay32.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-	<Content Include="..\bin\ssleay32.dll">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="..\bin\ssleay32.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\bootstrap-dialog.css" />
     <Content Include="Content\bootstrap-select.css" />
@@ -408,6 +410,8 @@
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="Scripts\bootstrap-select.js.map" />
     <Content Include="Content\bootstrap-select.css.map" />
+    <None Include="Properties\PublishProfiles\arcserveewsdemo - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\arcserveewsdemo - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\arcserveewsdemo.pubxml" />
     <None Include="Properties\PublishProfiles\Test.pubxml" />
     <None Include="Properties\PublishProfiles\ToAzure.pubxml" />
@@ -566,6 +570,7 @@
     <Content Include="Views\Example\Index.cshtml" />
     <Content Include="Views\Setting\Index.cshtml" />
     <Content Include="Views\Test\Index.cshtml" />
+    <Content Include="Views\Progress\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -39,3 +39,14 @@ textarea {
 .main-index .jumbotron p > input {
     width: 232px;
 }
+
+.textarea_latestInfo{
+    width: 600px;
+    max-width: 600px;
+    height: 400px;
+}
+
+.input_progress{
+    width: 600px;
+    max-width:600px;
+}
