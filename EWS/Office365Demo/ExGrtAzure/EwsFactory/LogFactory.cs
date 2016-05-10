@@ -1,4 +1,5 @@
-﻿using LogInterface;
+﻿using EwsFrame.Util;
+using LogInterface;
 using Microsoft.WindowsAzure.ServiceRuntime;
 using System;
 using System.Collections.Generic;
@@ -20,13 +21,17 @@ namespace EwsFrame
             get
             {
                 if (_instance == null)
-                    lock (_lock)
-                    {
-                        if (_instance == null)
-                        {
-                            _instance = CreateFactory();
-                        }
-                    }
+                {
+                    using (_lock.LockWhile(() =>
+
+                          {
+                              if (_instance == null)
+                              {
+                                  _instance = CreateFactory();
+                              }
+                          }))
+                    { }
+                }
                 return _instance;
             }
         }
@@ -41,7 +46,7 @@ namespace EwsFrame
             result._ewsTraceLogInstance = result.CreateEWSLogInstance();
             return result;
         }
-        
+
 
         private ILog _logInstance;
         public static ILog LogInstance
@@ -60,7 +65,7 @@ namespace EwsFrame
                 return Instance._ewsTraceLogInstance;
             }
         }
-        
+
         protected override Dictionary<Type, string> InterfaceImplTypeNameDic
         {
             get
@@ -68,7 +73,7 @@ namespace EwsFrame
                 throw new NotSupportedException();
             }
         }
-        
+
 
         private ILog CreateLogInstance()
         {

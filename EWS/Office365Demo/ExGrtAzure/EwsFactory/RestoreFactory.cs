@@ -11,6 +11,7 @@ using System.Reflection;
 using System.IO;
 using Microsoft.WindowsAzure.ServiceRuntime;
 using System.Threading;
+using EwsFrame.Util;
 
 namespace EwsFrame
 {
@@ -24,13 +25,16 @@ namespace EwsFrame
             get
             {
                 if (_instance == null)
-                    lock (_lock)
-                    {
-                        if (_instance == null)
-                        {
-                            _instance = CreateFactory();
-                        }
-                    }
+                {
+                    using (_lock.LockWhile(() =>
+                      {
+                          if (_instance == null)
+                          {
+                              _instance = CreateFactory();
+                          }
+                      }))
+                    { }
+                }
                 return _instance;
             }
         }

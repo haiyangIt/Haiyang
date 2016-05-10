@@ -50,6 +50,7 @@
     <Compile Include="IItem.cs" />
     <Compile Include="IMailbox.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReadWriteLockExtension.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EwsDataInterface\EwsDataInterface.csproj">

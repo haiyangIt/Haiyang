@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EwsServiceInterface.Util;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -8,7 +9,6 @@ namespace EwsServiceInterface
 {
     public class EWSSetting
     {
-
         private static object _lock = new object();
         private static EWSSetting _instance = null;
         public static EWSSetting Instance
@@ -16,13 +16,16 @@ namespace EwsServiceInterface
             get
             {
                 if (_instance == null)
-                    lock (_lock)
-                    {
-                        if (_instance == null)
-                        {
-                            _instance = new EWSSetting();
-                        }
-                    }
+                {
+                    using (_lock.LockWhile(() =>
+                      {
+                          if (_instance == null)
+                          {
+                              _instance = new EWSSetting();
+                          }
+                      }))
+                    { }
+                }
                 return _instance;
             }
         }

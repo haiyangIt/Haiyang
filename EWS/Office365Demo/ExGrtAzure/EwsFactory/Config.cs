@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EwsFrame.Util;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -19,49 +20,60 @@ namespace EwsFrame
             get
             {
                 if (_instance == null)
-                    lock (_lock)
-                    {
-                        if (_instance == null)
-                        {
-                            _instance = new Config();
-                        }
-                    }
+                {
+                    using (_lock.LockWhile(() =>
+                       {
+                           if (_instance == null)
+                           {
+                               _instance = new Config();
+                           }
+                       }))
+                    { }
+                }
                 return _instance;
             }
         }
 
         public static RestoreConfig _RestoreCfgInstance;
-        public  static RestoreConfig RestoreCfgInstance
+        public static RestoreConfig RestoreCfgInstance
         {
             get
             {
                 if (_RestoreCfgInstance == null)
-                    lock (_lock)
-                    {
-                        if (_RestoreCfgInstance == null)
+                {
+                    using (_lock.LockWhile(() =>
+
                         {
-                            _RestoreCfgInstance = new RestoreConfig();
-                        }
-                    }
+                            if (_RestoreCfgInstance == null)
+                            {
+                                _RestoreCfgInstance = new RestoreConfig();
+                            }
+                        }))
+                    { }
+                }
                 return _RestoreCfgInstance;
             }
-        } 
+        }
         public static MailConfig _MailConfigInstance;
-        public  static MailConfig MailConfigInstance
+        public static MailConfig MailConfigInstance
         {
             get
             {
                 if (_MailConfigInstance == null)
-                    lock (_lock)
-                    {
-                        if (_MailConfigInstance == null)
-                        {
-                            _MailConfigInstance = new MailConfig();
-                        }
-                    }
+                {
+                    using (_lock.LockWhile(() =>
+
+                          {
+                              if (_MailConfigInstance == null)
+                              {
+                                  _MailConfigInstance = new MailConfig();
+                              }
+                          }))
+                    { }
+                }
                 return _MailConfigInstance;
             }
-        } 
+        }
         private Config() { }
 
 
@@ -167,9 +179,9 @@ namespace EwsFrame
                     Credentials = new NetworkCredential(this.CredentialUserName, this.CredentialPassword, string.Empty)
                 };
             }
-            
+
         }
     }
 
-    
+
 }

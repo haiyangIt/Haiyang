@@ -15,6 +15,7 @@ using System.Configuration;
 using System.IO;
 using EwsFrame;
 using System.Data.Entity;
+using EwsFrame.Util;
 
 namespace SqlDbImpl
 {
@@ -57,11 +58,12 @@ namespace SqlDbImpl
             {
                 if (_dbContext == null)
                 {
-                    lock (_lockObj)
+                    using (_lockObj.LockWhile(() =>
                     {
                         if (_dbContext == null)
                             _dbContext = new CatalogDbContext(new OrganizationModel() { Name = Organization });
-                    }
+                    }))
+                    { }
                 }
                 return _dbContext;
             }
@@ -118,6 +120,7 @@ namespace SqlDbImpl
                     {
                         return from f in context.Folders
                                where f.StartTime == CatalogJob.StartTime && f.ParentFolderId == parentFolder.FolderId
+                               orderby f.DisplayName ascending
                                select f;
                     }
                 );
@@ -136,6 +139,7 @@ namespace SqlDbImpl
                {
                    return from f in context.Items
                           where f.StartTime == CatalogJob.StartTime && f.ParentFolderId == folderId
+                          orderby f.CreateTime descending
                           select f;
                }
                );
@@ -162,6 +166,7 @@ namespace SqlDbImpl
                {
                    return from f in context.Mailboxes
                           where f.StartTime == CatalogJob.StartTime
+                          orderby f.MailAddress
                           select f;
                }
                );

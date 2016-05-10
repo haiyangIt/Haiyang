@@ -1,4 +1,5 @@
 ﻿using EwsFrame;
+using EwsFrame.Util;
 using Microsoft.WindowsAzure.Storage.Blob;
 using System;
 using System.Collections.Generic;
@@ -39,7 +40,7 @@ namespace SqlDbImpl.Storage
             }
         }
 
-        
+
 
         public void ResetAllBlob(string mailboxAddress, string organization, bool isResetAll = false)
         {
@@ -61,12 +62,30 @@ namespace SqlDbImpl.Storage
         }
         private CloudBlobClient _blobClient;
 
+        private CloudBlobContainer GetContainer(string containerName, bool isCreate)
+        {
+            CloudBlobContainer container = null;
+            using (_lock.LockWhile(() =>
+            {
+                container = _blobClient.GetContainerReference(containerName);
+                if (isCreate)
+                    container.CreateIfNotExists();
+                else
+                {
+                    if (!container.Exists())
+                        container = null;
+                }
+            }
+            ))
+            { }
+            return container;
+        }
 
+        private object _lock = new object();
         public void SaveBlob(string containerName, string blobNamePrefix, Stream data, bool isAdd = true)
         {
             containerName = ValidateContainerName(containerName, false);
-            CloudBlobContainer container = _blobClient.GetContainerReference(containerName);
-            container.CreateIfNotExists();
+            CloudBlobContainer container = GetContainer(containerName, true);
 
             string blobName = GetBlobName(blobNamePrefix, 0);
             blobName = ValidateBlobName(blobName, false);
@@ -90,8 +109,8 @@ namespace SqlDbImpl.Storage
         public bool IsBlobExist(string containerName, string blobNamePrefix)
         {
             containerName = ValidateContainerName(containerName, false);
-            CloudBlobContainer container = _blobClient.GetContainerReference(containerName);
-            if (!container.Exists())
+            CloudBlobContainer container = GetContainer(containerName, false);
+            if (container == null)
             {
                 return false;
             }
@@ -107,8 +126,8 @@ namespace SqlDbImpl.Storage
         public void GetBlob(string containerName, string blobNamePrefix, Stream writeData)
         {
             containerName = ValidateContainerName(containerName, false);
-            CloudBlobContainer container = _blobClient.GetContainerReference(containerName);
-            if (!container.Exists())
+            CloudBlobContainer container = GetContainer(containerName, false);
+            if (container == null)
             {
                 throw new FileNotFoundException(string.Format("container {0} can not found .", container));
             }
@@ -124,8 +143,7 @@ namespace SqlDbImpl.Storage
         public CloudBlockBlob GetBlockBlobObj(string containerName, string blobName)
         {
             containerName = ValidateContainerName(containerName, false);
-            CloudBlobContainer container = _blobClient.GetContainerReference(containerName);
-            container.CreateIfNotExists();
+            CloudBlobContainer container = GetContainer(containerName, true);
 
             blobName = ValidateBlobName(blobName, false);
             CloudBlockBlob blockBlob = container.GetBlockBlobReference(blobName);
@@ -235,7 +253,7 @@ namespace SqlDbImpl.Storage
             List<string> blobResult = new List<string>(blobNames.Count);
 
             StringBuilder sb = new StringBuilder(container.Uri.AbsoluteUri.Length + sasContainerToken.Length + 30);
-            foreach(var name in blobNames)
+            foreach (var name in blobNames)
             {
                 sb.Append(container.Uri.AbsoluteUri);
                 sb.Append("/");
@@ -251,8 +269,7 @@ namespace SqlDbImpl.Storage
         public string GetBlobSharedUri(string containerName, string blobName)
         {
             containerName = ValidateContainerName(containerName, false);
-            CloudBlobContainer container = _blobClient.GetContainerReference(containerName);
-            container.CreateIfNotExists();
+            CloudBlobContainer container = GetContainer(containerName, true);
 
             blobName = ValidateBlobName(blobName, false);
             var blob = container.GetBlobReferenceFromServer(blobName);

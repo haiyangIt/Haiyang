@@ -31,13 +31,16 @@ namespace FastTransferUtil.CompoundFile.MsgStruct.Helper
             get
             {
                 if (_instance == null)
-                    lock (_lock)
-                    {
-                        if (_instance == null)
-                        {
-                            _instance = new SpecialPropertyUtil();
-                        }
-                    }
+                {
+                    using (_lock.LockWhile(() =>
+                      {
+                          if (_instance == null)
+                          {
+                              _instance = new SpecialPropertyUtil();
+                          }
+                      }))
+                    { }
+                }
                 return _instance;
             }
         }
@@ -73,7 +76,7 @@ namespace FastTransferUtil.CompoundFile.MsgStruct.Helper
             sb.Append(property.PropTag.PropertyTag.ToString("X8"));
             sb.Append("].");
             sb.Append("Property Value:[");
-            foreach(var b in ((IFTTreeNode)property).Bytes)
+            foreach (var b in ((IFTTreeNode)property).Bytes)
             {
                 sb.Append(b.ToString("X2"));
                 sb.Append(" ");

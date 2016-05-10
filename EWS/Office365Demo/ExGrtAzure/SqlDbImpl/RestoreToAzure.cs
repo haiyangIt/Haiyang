@@ -16,6 +16,7 @@ using SqlDbImpl.Model;
 using System.Web.Script.Serialization;
 using DataProtectInterface.Util;
 using FastTransferUtil.CompoundFile;
+using LogInterface;
 
 namespace SqlDbImpl
 {
@@ -169,7 +170,7 @@ namespace SqlDbImpl
                 }
                 catch (Exception e)
                 {
-
+                    System.Diagnostics.Trace.TraceError(e.GetExceptionDetail());
                 }
             }
         }

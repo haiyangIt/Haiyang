@@ -1,4 +1,5 @@
 ﻿using DataProtectInterface;
+using LogInterface;
 using LoginTest.Models;
 using LoginTest.Utils;
 using System;
@@ -50,6 +51,7 @@ namespace LoginTest.Controllers
                 }
                 catch(Exception e)
                 {
+                    System.Diagnostics.Trace.TraceError(e.GetExceptionDetail());
                     AsyncManager.Parameters["ProgressModel"] = new ProgressModel(temp.ServiceId);
                 }
                 AsyncManager.OutstandingOperations.Decrement();

@@ -1,5 +1,6 @@
 ﻿using EwsFrame;
 using EwsServiceInterface;
+using LogInterface;
 using LoginTest.Models;
 using LoginTest.Models.Setting;
 using LoginTest.Utils;
@@ -102,6 +103,7 @@ namespace LoginTest.Controllers
                 }
                 catch(Exception e)
                 {
+                    System.Diagnostics.Trace.TraceError(e.GetExceptionDetail());
                     return Json(new { Success = false});
                 }
             }

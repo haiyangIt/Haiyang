@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EwsFrame.Util;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,48 +18,56 @@ namespace EwsFrame.Cache
 
         public ICache NewCache(string organization, string cacheName, Type cacheType)
         {
-            lock (CacheDic)
-            {
-                ICache outObj;
-                string name = GetName(organization, cacheName);
-                if (!CacheDic.TryGetValue(name, out outObj))
-                {
-                    outObj = cacheType.GetConstructor(new Type[0]).Invoke(new object[0]) as ICache;
-                    if (outObj == null)
-                        throw new ArgumentException(string.Format("type {0} is not implement class of ICache", cacheType.FullName), "cacheType");
-                    CacheDic.Add(name, outObj);
-                    outObj.DeSerialize();
-                }
-                return outObj;
-            }
+            ICache result = null;
+            using (CacheDic.LockWhile(() =>
+             {
+                 ICache outObj;
+                 string name = GetName(organization, cacheName);
+                 if (!CacheDic.TryGetValue(name, out outObj))
+                 {
+                     outObj = cacheType.GetConstructor(new Type[0]).Invoke(new object[0]) as ICache;
+                     if (outObj == null)
+                         throw new ArgumentException(string.Format("type {0} is not implement class of ICache", cacheType.FullName), "cacheType");
+                     CacheDic.Add(name, outObj);
+                     outObj.DeSerialize();
+                 }
+                 result = outObj;
+             }))
+            { }
+            return result;
         }
 
         public ICache GetCache(string organization, string cacheName)
         {
-            lock (CacheDic)
+            ICache result = null;
+            using (CacheDic.LockWhile(() =>
             {
                 string name = GetName(organization, cacheName);
-                
+
 
                 ICache outObj;
                 if (!CacheDic.TryGetValue(name, out outObj))
                 {
-                    return null;
+                    result = null;
+                    return;
                 }
-                return outObj;
-            }
+                result = outObj;
+            }))
+            { }
+            return result;
         }
 
         public void ReleaseCache(bool isSerialize = false)
         {
-            lock (CacheDic)
+            using (CacheDic.LockWhile(() =>
             {
                 foreach (var keyValue in CacheDic)
                 {
                     keyValue.Value.Serialize();
                 }
                 CacheDic.Clear();
-            }
+            }))
+            { }
         }
 
 

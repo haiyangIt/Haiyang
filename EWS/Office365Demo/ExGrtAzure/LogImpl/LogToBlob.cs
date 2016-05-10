@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using EwsFrame.Util;
 
 namespace LogImpl
 {
@@ -31,13 +32,17 @@ namespace LogImpl
             get
             {
                 if (_intance == null)
-                    lock (_lock)
+                {
+                    using (_lock.LockWhile(() =>
                     {
                         if (_intance == null)
                         {
                             _intance = new LogToBlobThread(BlobNameFormat);
                         }
                     }
+                        ))
+                    { }
+                }
                 return _intance;
             }
         }
@@ -65,12 +70,13 @@ namespace LogImpl
             }
             catch (Exception e)
             {
-
+                System.Diagnostics.Trace.TraceError(e.GetExceptionDetail());
             }
         }
 
         protected virtual void WriteToAppendBlob(string msg)
         {
+            Trace.TraceInformation(msg);
             Instance.WriteToLog(msg);
             TriggerEvent(msg);
             //var currentDay = DateTime.Now.Date;
@@ -165,10 +171,15 @@ namespace LogImpl
 
         public void Dispose()
         {
-            if(Instance != null)
+            if (Instance != null)
             {
                 Instance.Dispose();
             }
+        }
+
+        public void Flush()
+        {
+            throw new NotImplementedException();
         }
 
         class LogToBlobThread : ManageBase
@@ -178,33 +189,54 @@ namespace LogImpl
             {
                 BlobNameFormat = blobNameFormat;
             }
-            
+
 
             private DateTime LastDateTime = DateTime.MinValue.Date;
             private CloudAppendBlob _appendBlob = null;
 
             private volatile int _logCount = 0;
-            private const int MaxBlocks = 50000;
+            private const int MaxBlocks = 49900;
+
+            private ConcurrentQueue<string> MsgList = new ConcurrentQueue<string>();
+            private const int FlushCount = 20;
+
             private int _logFileIndex = 0;
+
+            private object _lockObj = new object();
 
             private CloudAppendBlob Create(DateTime currentDay)
             {
-                CloudBlobContainer container = BlobClient.GetContainerReference("logs");
-                container.CreateIfNotExists();
-                LastDateTime = currentDay;
-                CloudAppendBlob appBlob = container.GetAppendBlobReference(
-                    string.Format(BlobNameFormat, DateTime.Now.ToString("yyyyMMdd"), _logFileIndex++, ".log")
-                );
-
-                if (!appBlob.Exists())
+                CloudAppendBlob result = null;
+                using (_lockObj.LockWhile(() =>
                 {
-                    appBlob.CreateOrReplace();
-                }
+                    CloudBlobContainer container = BlobClient.GetContainerReference("logs");
+                    container.CreateIfNotExists();
+                    LastDateTime = currentDay;
+                    CloudAppendBlob appBlob = container.GetAppendBlobReference(
+                        string.Format(BlobNameFormat, DateTime.Now.ToString("yyyyMMdd"), _logFileIndex++, ".log")
+                    );
 
-                return appBlob;
+                    if (!appBlob.Exists())
+                    {
+                        appBlob.CreateOrReplace();
+                    }
+
+                    result = appBlob;
+                }))
+                { }
+                return result;
             }
 
-            protected override void DoWriteLog(string msg)
+            protected override void Flush()
+            {
+                using (_lockObj.LockWhile(() =>
+                {
+                    WriteToAppendBlob();
+                }))
+                { }
+            }
+
+            private void WriteToAppendBlob()
             {
                 var currentDay = DateTime.Now.Date;
                 if (currentDay != LastDateTime)
@@ -212,17 +244,44 @@ namespace LogImpl
                     _appendBlob = null;
                 }
 
-                if (Interlocked.CompareExchange(ref _logCount, 0, MaxBlocks) != _logCount)
+                if (_logCount >= MaxBlocks)
                 {
                     _appendBlob = null;
                 }
 
                 if (_appendBlob == null)
-                    //Interlocked.CompareExchange(ref _appendBlob, Create(currentDay), null);
-                    _appendBlob = Create(currentDay);
+                //Interlocked.CompareExchange(ref _appendBlob, Create(currentDay), null);
+                {
+                    using (_lockObj.LockWhile(() =>
+                    {
+                        if (_appendBlob == null)
+                        {
+                            _appendBlob = Create(currentDay);
+                        }
+                    }))
+                    { }
+                }
 
-                msg = msg + "\r\nArcserve";
-                _appendBlob.AppendText(msg);
+                StringBuilder sb = new StringBuilder();
+                while (MsgList.Count > 0)
+                {
+                    string result = null;
+                    bool hasItems = MsgList.TryDequeue(out result);
+                    if (hasItems)
+                    {
+                        sb.AppendLine(result);
+                        sb.Append("Arcserve");
+                    }
+                }
+                if (sb.Length > 0)
+                {
+                    using (_lockObj.LockWhile(() =>
+                    {
+                        _appendBlob.AppendText(sb.ToString());
+                    }))
+                    { }
+                }
+
                 //using (MemoryStream stream = new MemoryStream())
                 //{
                 //    StreamWriter writer = new StreamWriter(stream);
@@ -231,6 +290,20 @@ namespace LogImpl
                 //    _appendBlob.AppendBlock(stream);
                 //}
                 Interlocked.Increment(ref _logCount);
+            }
+
+            protected override void DoWriteLog(string msg)
+            {
+                MsgList.Enqueue(msg);
+
+                if (MsgList.Count > FlushCount)
+                {
+                    using (_lockObj.LockWhile(() =>
+                    {
+                        WriteToAppendBlob();
+                    }))
+                    { }
+                }
             }
 
             protected override void DoDispose()

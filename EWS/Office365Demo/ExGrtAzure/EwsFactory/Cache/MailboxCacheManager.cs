@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EwsFrame.Util;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -21,7 +22,8 @@ namespace EwsFrame.Cache
 
         public ICache NewCache(string mailboxAddress, string cacheName, Type cacheType)
         {
-            lock (CacheDic)
+            ICache result = null;
+            using (CacheDic.LockWhile(() =>
             {
                 if (string.IsNullOrEmpty(_mailboxAddress))
                     _mailboxAddress = mailboxAddress;
@@ -40,38 +42,47 @@ namespace EwsFrame.Cache
                     CacheDic.Add(cacheName, outObj);
                     outObj.DeSerialize();
                 }
-                return outObj;
-            }
+                result = outObj;
+            }))
+            { }
+            return result;
         }
 
         public ICache GetCache(string mailboxAddress, string cacheName)
         {
-            lock (CacheDic)
+            ICache result = null;
+            using (CacheDic.LockWhile(() =>
             {
                 if (!string.IsNullOrEmpty(_mailboxAddress) && !mailboxAddress.Equals(_mailboxAddress))
                 {
-                    return null;
+                    result = null;
+                    return;
                 }
 
                 ICache outObj;
                 if (!CacheDic.TryGetValue(cacheName, out outObj))
                 {
-                    return null;
+                    result = null;
+                    return;
                 }
-                return outObj;
-            }
+                result = outObj;
+            }))
+            { }
+            return result;
         }
 
         public void ReleaseCache(bool isSerialize = false)
         {
-            lock (CacheDic)
+            using (CacheDic.LockWhile(() =>
             {
                 foreach (var keyValue in CacheDic)
                 {
                     keyValue.Value.Serialize();
                 }
                 CacheDic.Clear();
-            }
+            }))
+            { }
+
         }
 
 

@@ -1,4 +1,5 @@
-﻿using FTStreamUtil.FTStream;
+﻿using FastTransferUtil.CompoundFile;
+using FTStreamUtil.FTStream;
 using FTStreamUtil.Item;
 using FTStreamUtil.Item.Marker;
 using FTStreamUtil.Item.PropValue;
@@ -36,13 +37,16 @@ namespace FTStreamUtil
             get
             {
                 if (_instance == null)
-                    lock (_lock)
+                {
+                    using (_lock.LockWhile(() =>
                     {
                         if (_instance == null)
                         {
                             _instance = new FTFactory();
                         }
-                    }
+                    }))
+                    { }
+                }
                 return _instance;
             }
         }

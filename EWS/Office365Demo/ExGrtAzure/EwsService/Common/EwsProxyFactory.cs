@@ -25,6 +25,7 @@ namespace EwsService.Common
             }
             catch (AutodiscoverLocalException oException)
             {
+                System.Diagnostics.Trace.TraceError(oException.GetExceptionDetail());
                 sError += string.Format("Error: {0}\r\n", oException.HResult);
                 sError += oException.ToString();
                 LogFactory.LogInstance.WriteLog(LogLevel.ERR, "Autodiscovery error", sError);
@@ -33,6 +34,7 @@ namespace EwsService.Common
             }
             catch (System.IO.IOException oIOException)
             {
+                System.Diagnostics.Trace.TraceError(oIOException.GetExceptionDetail());
                 sError += string.Format("Error: {0}\r\n", oIOException.HResult);
                 sError = oIOException.ToString();
                 LogFactory.LogInstance.WriteLog(LogLevel.ERR, "Autodiscovery error", sError);
@@ -226,6 +228,7 @@ namespace EwsService.Common
                 }
                 catch(Exception ex)
                 {
+                    System.Diagnostics.Trace.TraceError(ex.GetExceptionDetail());
                     DoAutodiscover(service, mailboxAddress);
                     urlCache.SetKeyValue(mailboxKey, service.Url);
                 }

@@ -120,7 +120,8 @@ namespace EwsService.Impl
         public bool IsItemNew(Item item, DateTime lastTime, DateTime thisTime)
         {
             var dataAccess = (ICatalogDataAccess)_dataAccess;
-            return !dataAccess.IsItemContentExist(item.Id.UniqueId);
+            var result = !dataAccess.IsItemContentExist(item.Id.UniqueId);
+            return result;
 
             //return (item.DateTimeCreated > lastTime && item.DateTimeCreated <= thisTime) || (item.LastModifiedTime > lastTime && item.LastModifiedTime <= thisTime);
         }

@@ -1,5 +1,6 @@
 ﻿using DataProtectInterface;
 using EwsDataInterface;
+using EwsFrame.Util;
 using EwsServiceInterface;
 using Microsoft.Exchange.WebServices.Data;
 using Microsoft.WindowsAzure.ServiceRuntime;
@@ -23,14 +24,17 @@ namespace EwsFrame
             get
             {
                 if (_instance == null)
-                    lock (_lock)
-                    {
-                        if (_instance == null)
-                        {
-                            _instance = CreateFactory();
-                        }
-                    }
-                return _instance;
+                {
+                    using (_lock.LockWhile(() =>
+                       {
+                           if (_instance == null)
+                           {
+                               _instance = CreateFactory();
+                           }
+                       }))
+                    { }
+                }
+                    return _instance;
             }
         }
 

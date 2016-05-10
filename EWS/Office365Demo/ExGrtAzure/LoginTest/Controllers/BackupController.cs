@@ -17,6 +17,7 @@ using System.Web.Script.Serialization;
 using LoginTest.Models.Setting;
 using LoginTest.Utils;
 using System.Threading;
+using LogInterface;
 
 namespace LoginTest.Controllers
 {
@@ -181,7 +182,7 @@ namespace LoginTest.Controllers
         {
             if (ModelState.IsValid)
             {
-                if (JobProgressManager.Instance.Count > 1)
+                if (!JobProgressManager.Instance.CanStartNewCatalog())
                     return Json(new { HasError = true, Msg = "Can't start Job." , Index = model.Index});
 
                 JavaScriptSerializer js = new JavaScriptSerializer();
@@ -213,6 +214,7 @@ namespace LoginTest.Controllers
             }
             catch (Exception e)
             {
+                System.Diagnostics.Trace.TraceError(e.GetExceptionDetail());
                 LogFactory.LogInstance.WriteException(LogInterface.LogLevel.ERR, "Backup job failed.", e, e.Message);
             }
         }

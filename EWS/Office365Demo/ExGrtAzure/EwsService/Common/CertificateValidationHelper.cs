@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EwsFrame.Util;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Security;
@@ -29,22 +30,27 @@ namespace EwsService.Common
             if (request != null)
             {
                 // Check for allowed UserAgent
-                lock (CertificateValidationHelper.uaLock)
+                
+
+                using (uaLock.LockWhile(() =>
                 {
                     if (CertificateValidationHelper.allowedUserAgents.Contains(request.UserAgent))
                     {
                         result = true;
                     }
-                }
+                }))
+                { };
 
                 // Check for allowed Url
-                lock (CertificateValidationHelper.urlLock)
+                
+                using (urlLock.LockWhile(() =>
                 {
                     if (CertificateValidationHelper.allowedUrls.Contains(request.RequestUri))
                     {
                         result = true;
                     }
-                }
+                }))
+                { };
             }
 
             return result;

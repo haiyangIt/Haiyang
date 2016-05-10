@@ -1,4 +1,5 @@
 ﻿using EwsFrame;
+using EwsFrame.Util;
 using Microsoft.WindowsAzure.ServiceRuntime;
 using Microsoft.WindowsAzure.Storage.Blob;
 using System;
@@ -19,7 +20,7 @@ namespace SqlDbImpl.Storage
             {
                 if (_blobMaxSize == 0)
                 {
-                    if(!FactoryBase.IsRunningOnAzure())
+                    if (!FactoryBase.IsRunningOnAzure())
                     {
                         _blobMaxSize = 2 * 1024 * 1024;
                     }
@@ -66,7 +67,7 @@ namespace SqlDbImpl.Storage
                 containers = _blobClient.ListContainers();
             else
                 containers = _blobClient.ListContainers(prefix);
-            foreach(var container in containers)
+            foreach (var container in containers)
             {
                 container.Delete();
             }
@@ -78,11 +79,30 @@ namespace SqlDbImpl.Storage
         }
         private CloudBlobClient _blobClient;
 
+        private object _lock = new object();
+        private CloudBlobContainer GetContainer(string containerName, bool isCreate)
+        {
+            CloudBlobContainer container = null;
+            using (_lock.LockWhile(() =>
+            {
+                container = _blobClient.GetContainerReference(containerName);
+                if (isCreate)
+                    container.CreateIfNotExists();
+                else
+                {
+                    if (!container.Exists())
+                        container = null;
+                }
+            }
+            ))
+            { }
+            return container;
+        }
+
         public void SaveBlob(string containerName, string blobNamePrefix, Stream data, bool isAdd = true)
         {
             containerName = ValidateContainerName(containerName, false);
-            CloudBlobContainer container = _blobClient.GetContainerReference(containerName);
-            container.CreateIfNotExists();
+            CloudBlobContainer container = GetContainer(containerName, true);
 
             long dataLength = data.Length;
             int index = 0;
@@ -117,8 +137,8 @@ namespace SqlDbImpl.Storage
         public bool IsBlobExist(string containerName, string blobNamePrefix)
         {
             containerName = ValidateContainerName(containerName, false);
-            CloudBlobContainer container = _blobClient.GetContainerReference(containerName);
-            if (!container.Exists())
+            CloudBlobContainer container = GetContainer(containerName, false);
+            if (container == null)
             {
                 return false;
             }
@@ -150,8 +170,8 @@ namespace SqlDbImpl.Storage
         private void GetBlob(string containerName, string blobNamePrefix, Stream writeData, IsOutofRange outOfRangeFunc)
         {
             containerName = ValidateContainerName(containerName, false);
-            CloudBlobContainer container = _blobClient.GetContainerReference(containerName);
-            if (!container.Exists())
+            CloudBlobContainer container = GetContainer(containerName, false);
+            if (container == null)
             {
                 throw new FileNotFoundException(string.Format("container {0} can not found .", container));
             }

@@ -57,8 +57,7 @@ namespace FTStreamUtil
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(ex.Message);
-                Debug.WriteLine(ex.StackTrace);
+                Trace.TraceError(ex.GetExceptionDetail());
             }
         }
 
@@ -111,8 +110,7 @@ namespace FTStreamUtil
             }
             catch (Exception e)
             {
-                Debug.WriteLine(e.Message);
-                Debug.WriteLine(e.StackTrace);
+                Trace.TraceError(e.GetExceptionDetail());
             }
         }
 
@@ -132,6 +130,7 @@ namespace FTStreamUtil
             }
             catch (Exception e)
             {
+                Trace.TraceError(e.GetExceptionDetail());
                 Debug.WriteLine(e.Message);
                 Debug.WriteLine(e.StackTrace);
             }
@@ -158,6 +157,7 @@ namespace FTStreamUtil
             }
             catch (Exception e)
             {
+                Trace.TraceError(e.GetExceptionDetail());
                 Debug.WriteLine(e.Message);
                 Debug.WriteLine(e.StackTrace);
             }
@@ -172,6 +172,7 @@ namespace FTStreamUtil
             }
             catch (Exception e)
             {
+                Trace.TraceError(e.GetExceptionDetail());
                 Debug.WriteLine(e.Message);
                 Debug.WriteLine(e.StackTrace);
             }
@@ -199,9 +200,55 @@ namespace FTStreamUtil
             }
             catch (Exception e)
             {
+                Trace.TraceError(e.GetExceptionDetail());
                 Debug.WriteLine(e.Message);
                 Debug.WriteLine(e.StackTrace);
             }
+        }
+    }
+
+    public static class LogExtension
+    {
+        public static string GetExceptionDetail(this Exception ex)
+        {
+            return GetExceptionString(ex);
+        }
+
+        public static string GetExceptionString(Exception exception)
+        {
+            StringBuilder sb = new StringBuilder();
+            var curEx = exception;
+            while (curEx != null)
+            {
+                if (curEx is AggregateException)
+                {
+                    sb.AppendLine(GetAggrateException(curEx as AggregateException));
+                }
+                else
+                {
+                    sb.AppendLine(string.Join("  ",
+                        curEx.Message,
+                        curEx.StackTrace));
+
+                    curEx = curEx.InnerException;
+                }
+            }
+            sb.AppendLine();
+            return sb.ToString();
+        }
+
+        internal static string GetAggrateException(AggregateException ex)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine(string.Join("  ",
+                    ex.Message,
+                    ex.StackTrace));
+
+            foreach (var innerEx in ex.Flatten().InnerExceptions)
+            {
+                sb.AppendLine(GetExceptionString(ex));
+            }
+            return sb.ToString();
         }
     }
 }

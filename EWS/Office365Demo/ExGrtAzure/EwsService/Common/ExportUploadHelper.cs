@@ -12,6 +12,7 @@ using EwsService.Resource;
 using System.Collections.Generic;
 using System.Threading;
 using System.Configuration;
+using EwsFrame.Util;
 
 namespace EwsService.Common
 {
@@ -114,6 +115,7 @@ namespace EwsService.Common
                 }
                 catch (Exception e)
                 {
+                    System.Diagnostics.Trace.TraceError(e.GetExceptionDetail());
                     LogFactory.LogInstance.WriteException(LogLevel.ERR, "Export error", e, e.Message);
                     lastException = e;
                     retryCount++;
@@ -132,7 +134,7 @@ namespace EwsService.Common
             {
                 if(_MaxSupportItemSize == 0)
                 {
-                    lock(_lockObj)
+                    using (_lockObj.LockWhile(() =>
                     {
                         if (_MaxSupportItemSize == 0)
                         {
@@ -144,7 +146,8 @@ namespace EwsService.Common
                             LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.INFO, string.Format("max item size is {0}M", result));
                             _MaxSupportItemSize = result * 1024 * 1024;
                         }
-                    }
+                    }))
+                    { };
                 }
                 return _MaxSupportItemSize;
             }
@@ -436,6 +439,7 @@ namespace EwsService.Common
             }
             catch (Exception e)
             {
+                System.Diagnostics.Trace.TraceError(e.GetExceptionDetail());
                 LogFactory.LogInstance.WriteException(LogLevel.ERR, "Import Failed", e, string.Empty);
                 return e.Message;
             }

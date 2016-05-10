@@ -17,6 +17,7 @@ using System.IO.Compression;
 using System.Net.Mail;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Microsoft.WindowsAzure.Storage;
+using LogInterface;
 
 namespace ExGrtAzure.Tests
 {
@@ -191,7 +192,7 @@ namespace ExGrtAzure.Tests
             }
             catch (Exception e)
             {
-
+                Trace.TraceError(e.GetExceptionDetail());
             }
         }
 

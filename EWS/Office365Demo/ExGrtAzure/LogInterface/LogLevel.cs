@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Web;
 
 namespace LogInterface
@@ -36,6 +37,51 @@ namespace LogInterface
         public static string GetLevelString(LogLevel level)
         {
             return Dic[level];
+        }
+    }
+
+    public static class LogExtension
+    {
+        public static string GetExceptionDetail(this Exception ex)
+        {
+            return GetExceptionString(ex);
+        }
+
+        public static string GetExceptionString(Exception exception)
+        {
+            StringBuilder sb = new StringBuilder();
+            var curEx = exception;
+            while (curEx != null)
+            {
+                if (curEx is AggregateException)
+                {
+                    sb.AppendLine(GetAggrateException(curEx as AggregateException));
+                }
+                else
+                {
+                    sb.AppendLine(string.Join("  ",
+                        curEx.Message,
+                        curEx.StackTrace));
+
+                    curEx = curEx.InnerException;
+                }
+            }
+            sb.AppendLine();
+            return sb.ToString();
+        }
+
+        internal static string GetAggrateException(AggregateException ex)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine(string.Join("  ",
+                    ex.Message,
+                    ex.StackTrace));
+
+            foreach (var innerEx in ex.Flatten().InnerExceptions)
+            {
+                sb.AppendLine(GetExceptionString(ex));
+            }
+            return sb.ToString();
         }
     }
 }

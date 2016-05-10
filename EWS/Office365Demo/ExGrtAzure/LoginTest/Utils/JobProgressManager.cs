@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Collections.Concurrent;
 using DataProtectInterface;
+using EwsFrame.Util;
 
 namespace LoginTest.Utils
 {
@@ -17,16 +18,27 @@ namespace LoginTest.Utils
             {
                 if(_Instance == null)
                 {
-                    lock (_lock)
+                    using (_lock.LockWhile(() =>
                     {
-                        if(_Instance == null)
+                        if (_Instance == null)
                         {
                             _Instance = new JobProgressManager();
                         }
-                    }
+                    }))
+                    { }
                 }
                 return _Instance;
             }
+        }
+
+        public bool CanStartNewCatalog()
+        {
+            foreach(var value in this.Values)
+            {
+                if (value.EndTime != DateTime.MinValue)
+                    return false;
+            }
+            return true;
         }
     }
 }

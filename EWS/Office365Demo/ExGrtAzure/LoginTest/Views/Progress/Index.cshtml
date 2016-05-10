@@ -117,7 +117,7 @@
         ;
         $(document).ready(function () {
             var refreshCount = 0;
-
+            var isEnd = false;
             refreshUi = function (data) {
                 $("#CurrentMailbox").val(data.CurrentMailbox);
                 $("#MailboxPercent").val(data.MailboxPercent);
@@ -142,7 +142,7 @@
                 $("#RefreshCount").val(refreshCount++);
 
                 if (data.EndTime) {
-                    clearInterval(timer);
+                    isEnd = true;
                 }
             };
 
@@ -171,11 +171,12 @@
             function long_polling() {
                 Arcserve.DataProtect.Util.Post(getFormData(), form.attr("action"), function (data) {
                     refreshUi(data);
-
-                    var time = setTimeout(function () {
-                        clearTimeout(time);
-                        long_polling();
-                    }, getInterval());
+                    if (!isEnd) {
+                        var time = setTimeout(function () {
+                            clearTimeout(time);
+                            long_polling();
+                        }, getInterval());
+                    }
                 });
             }
             long_polling();

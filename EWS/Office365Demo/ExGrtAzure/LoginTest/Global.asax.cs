@@ -18,6 +18,7 @@ namespace LoginTest
         protected void Application_Start()
         {
             LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.INFO, "Application_Start");
+            Trace.TraceInformation("Application Start.");
             SqlServerTypes.Utilities.LoadNativeAssemblies(Server.MapPath("~/bin"));
 
             AreaRegistration.RegisterAllAreas();
@@ -31,6 +32,8 @@ namespace LoginTest
         protected void Application_Error(object sender, EventArgs e)
         {
             Exception exception = Server.GetLastError();
+
+            Trace.TraceError("Application Error. message:{0}, stackTrace", exception.Message, exception.StackTrace);
             LogFactory.LogInstance.WriteException(LogInterface.LogLevel.ERR, "Application_Error", exception, exception.Message);
         }
 
@@ -62,8 +65,8 @@ namespace LoginTest
                                                                                null,
                                                                                runtime,
                                                                                null);
-
-
+                
+                Trace.TraceError("Application End. _shutDownMessage={0} _shutDownStack={1}", shutDownMessage, shutDownStack);
                 LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.ERR, "Application_End", "_shutDownMessage={0} _shutDownStack={1}", shutDownMessage, shutDownStack);
             }
             LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.INFO, "Application_End");

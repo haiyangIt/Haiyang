@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
+using LogInterface;
 
 namespace SqlDbImpl
 {
@@ -48,6 +49,7 @@ namespace SqlDbImpl
                 }
                 catch (DbUpdateConcurrencyException ex)
                 {
+                    System.Diagnostics.Trace.TraceError(ex.GetExceptionDetail());
                     saveFailed = true;
 
                     // Update the values of the entity that failed to save from the store 

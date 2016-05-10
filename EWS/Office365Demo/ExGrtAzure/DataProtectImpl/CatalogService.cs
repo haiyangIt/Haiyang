@@ -17,6 +17,8 @@ using System.Configuration;
 using System.Net.Mail;
 using System.Text;
 using System.Collections.Concurrent;
+using EwsFrame.Util;
+using LogInterface;
 
 namespace DataProtectImpl
 {
@@ -303,6 +305,8 @@ namespace DataProtectImpl
             catch (Exception e)
             {
                 OnExceptionThrowed(e);
+
+                System.Diagnostics.Trace.TraceError(e.GetExceptionDetail());
                 var timeSpan = DateTime.Now - StartTime;
                 LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.INFO, "Job failed",
                     "Total {0} folders {1} items's size {2} bytes actual size {3} bytes cost {4} minutes",
@@ -316,13 +320,14 @@ namespace DataProtectImpl
             finally
             {
                 ServiceContext.DataAccessObj.SaveChanges();
-                GenerateCatalogEnd(isFinished);
                 var timeSpan = DateTime.Now - StartTime;
                 LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.INFO, "Job completed",
                     "Total {0} folders {1} items's size {2} bytes actual size {3} bytes cost {4} minutes",
                     AllFolderIndex, AllItemIndex, MailboxSize, ActualSize, timeSpan.TotalMinutes);
                 _serviceContext.DataAccessObj.Dispose();
+                GenerateCatalogEnd(isFinished);
             }
+           
         }
 
         private void SendMail(string message, Exception e)
@@ -343,7 +348,7 @@ namespace DataProtectImpl
             }
             catch (Exception ex)
             {
-
+                System.Diagnostics.Trace.TraceError(ex.GetExceptionDetail());
             }
         }
 
@@ -509,34 +514,35 @@ namespace DataProtectImpl
                                  CurrentFolder = foldeHyPath;
                                  ItemPercent = string.Format("{0}/{1}", itemDealedCount, itemCount);
                                  CurrentItem = item.Subject;
-                                 LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.INFO, string.Format("{1} Item {0} start.", item.Subject, index));
+                                 //LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.INFO, string.Format("{1} Item {0} start.", item.Subject, index));
                                  DateTime itemStartTime = DateTime.Now;
                                  do
                                  {
-                                     IItemData itemData = dataConvert.Convert(item);
-                                     if (Filter.IsFilterItem(itemData, mailboxData, folderStack))
-                                     {
-                                         OnItemProgressChanged(CatalogItemProgressType.SkipItem, mailboxData, folderStack, folderData, itemData);
-                                         break;
-                                     }
-
-                                     Interlocked.Increment(ref AllItemIndex);
-                                     Interlocked.Add(ref MailboxSize, itemData.Size);
-
+                                     IItemData itemData = null;
                                      bool itemHasError = true;
-
-
-                                     OnFolderProgressChanged(CatalogFolderProgressType.ProcessingItemStart, mailboxData, folderStack, folderData, new Process((int)index, itemCount), itemData);
-                                     GenerateItemStart(itemData, mailboxData, folderStack, folderData);
                                      try
                                      {
+                                         itemData = dataConvert.Convert(item);
+                                         if (Filter.IsFilterItem(itemData, mailboxData, folderStack))
+                                         {
+                                             OnItemProgressChanged(CatalogItemProgressType.SkipItem, mailboxData, folderStack, folderData, itemData);
+                                             break;
+                                         }
+
+                                         Interlocked.Increment(ref AllItemIndex);
+                                         Interlocked.Add(ref MailboxSize, itemData.Size);
+
+                                         OnFolderProgressChanged(CatalogFolderProgressType.ProcessingItemStart, mailboxData, folderStack, folderData, new Process((int)index, itemCount), itemData);
+                                         GenerateItemStart(itemData, mailboxData, folderStack, folderData);
+
                                          OnItemProgressChanged(CatalogItemProgressType.SaveItemStart, mailboxData, folderStack, folderData, itemData);
                                          dataAccess.SaveItem(itemData, mailboxData, folderData);
 
-                                         lock (folderData)
+                                         using (_lockObj.LockWhile(() =>
                                          {
                                              folderData.ChildItemCount++;
-                                         }
+                                         }))
+                                         { };
 
                                          OnItemProgressChanged(CatalogItemProgressType.SaveItemEnd, mailboxData, folderStack, folderData, itemData);
 
@@ -554,15 +560,14 @@ namespace DataProtectImpl
                                          }
                                          itemHasError = false;
 
-                                         break;
                                      }
                                      catch (Exception ex)
                                      {
+                                         System.Diagnostics.Trace.TraceError(ex.GetExceptionDetail());
                                          var itemFailedMsg = string.Format("Item {0} ItemId:{2} in {1} can't export.", item.Subject, item.Id.UniqueId, foldeHyPath);
                                          FailureItems.Add(itemFailedMsg);
                                          LogFactory.LogInstance.WriteException(LogInterface.LogLevel.ERR, itemFailedMsg
                                              , ex, ex.Message);
-                                         break;
                                      }
                                      finally
                                      {
@@ -571,18 +576,22 @@ namespace DataProtectImpl
                                              OnFolderProgressChanged(CatalogFolderProgressType.ProcessingItemEndWithError, mailboxData, folderStack, folderData, new Process((int)index, itemCount), itemData);
                                          else
                                              OnFolderProgressChanged(CatalogFolderProgressType.ProcessingItemEndNoError, mailboxData, folderStack, folderData, new Process((int)index, itemCount), itemData);
+                                         LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.DEBUG, string.Format("{0} item {1} end", index, itemData.DisplayName),
+                                             "TotalTime:{0}", (DateTime.Now - itemStartTime).TotalSeconds);
                                      }
                                  } while (false);
 
-                                 LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.DEBUG, string.Format("{0} item {1} end", index, item.Subject),
-                                             "TotalTime:{0}", (DateTime.Now - itemStartTime).TotalSeconds);
                                  return localValue;
-                             }, localFinally: (localValue) => {
-                                 lock (_lockObj)
+                             }, localFinally: (localValue) =>
+                             {
+
+                                 using (_lockObj.LockWhile(() =>
                                  {
                                      itemDealedCount += 1;
                                      ItemPercent = string.Format("{0}/{1}", itemDealedCount, itemCount);
-                                 }
+                                 }))
+                                 { };
+
                              });
 
                             //foreach (var item in folderItems)
@@ -665,7 +674,7 @@ namespace DataProtectImpl
                     foreach (var childFolder in childFolders)
                     {
                         childFolderIndex++;
-                        
+
                         FolderPercent = string.Format("{0}/{1}", childFolderIndex, childFolders.Count);
 
                         IFolderData childFolderData = dataConvert.Convert(childFolder, mailboxData.MailAddress);
@@ -730,6 +739,7 @@ namespace DataProtectImpl
                 }
                 catch (Exception e)
                 {
+                    System.Diagnostics.Trace.TraceError(e.GetExceptionDetail());
                     OnExceptionThrowed(e);
                 }
             }
@@ -745,6 +755,7 @@ namespace DataProtectImpl
                 }
                 catch (Exception e)
                 {
+                    System.Diagnostics.Trace.TraceError(e.GetExceptionDetail());
                     OnExceptionThrowed(e);
                 }
             }
@@ -766,6 +777,7 @@ namespace DataProtectImpl
                 }
                 catch (Exception e)
                 {
+                    System.Diagnostics.Trace.TraceError(e.GetExceptionDetail());
                     OnExceptionThrowed(e);
                 }
             }
@@ -781,6 +793,7 @@ namespace DataProtectImpl
                 }
                 catch (Exception e)
                 {
+                    System.Diagnostics.Trace.TraceError(e.GetExceptionDetail());
                     OnExceptionThrowed(e);
                 }
             }
@@ -796,7 +809,7 @@ namespace DataProtectImpl
                 }
                 catch (Exception ex)
                 {
-
+                    System.Diagnostics.Trace.TraceError(ex.GetExceptionDetail());
                 }
             }
         }
@@ -847,7 +860,7 @@ namespace DataProtectImpl
             else
                 OnProgressChanged(CatalogProgressType.EndWithError);
 
-            if(FailureItems.Count > 0)
+            if (FailureItems.Count > 0)
             {
                 LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.ERR, string.Format("Following items [{0}] export failure.", string.Join("][", (from i in FailureItems select i).AsEnumerable())));
             }
@@ -885,7 +898,7 @@ namespace DataProtectImpl
             LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.INFO, string.Format("{0} folder start.", ((IFolderDataBase)folderData).DisplayName));
             OnFolderProgressChanged(CatalogFolderProgressType.Start, mailboxData, folderStack, folderData);
 
-            FolderPercent = "";
+            //FolderPercent = "";
         }
 
 

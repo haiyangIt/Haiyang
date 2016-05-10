@@ -21,6 +21,8 @@ using System.Transactions;
 using EwsServiceInterface;
 using System.Threading;
 using System.Data.Entity.Infrastructure;
+using EwsFrame.Util;
+using LogInterface;
 
 namespace SqlDbImpl
 {
@@ -42,11 +44,12 @@ namespace SqlDbImpl
             {
                 if (_dbContext == null)
                 {
-                    lock (_lockObj)
+                    using (_lockObj.LockWhile(() =>
                     {
                         if (_dbContext == null)
                             _dbContext = new CatalogDbContext(new OrganizationModel() { Name = _organization });
-                    }
+                    }))
+                    { }
                 }
                 return _dbContext;
             }
@@ -79,7 +82,7 @@ namespace SqlDbImpl
 
         public void SaveCatalogJob(ICatalogJob catalogJob)
         {
-            lock (_lockObj)
+            using (_lockObj.LockWhile(() =>
             {
                 CatalogInfoModel information = catalogJob as CatalogInfoModel;
                 if (information == null)
@@ -95,7 +98,8 @@ namespace SqlDbImpl
                 SaveModelCache<FolderModel>(null, true, CacheKeyNameDic[typeof(FolderModel)], CachPageCountDic[typeof(FolderModel)], (context, list) => context.Folders.AddRange(list));
                 SaveModelCache<ItemModel>(null, true, CacheKeyNameDic[typeof(ItemModel)], CachPageCountDic[typeof(ItemModel)], (context, list) => context.Items.AddRange(list));
                 SaveModelCache<ItemLocationModel>(null, true, CacheKeyNameDic[typeof(ItemLocationModel)], CachPageCountDic[typeof(ItemLocationModel)], (context, list) => context.ItemLocations.AddRange(list));
-            }
+            }))
+            { }
         }
 
         private static object _diclock = new object();
@@ -106,7 +110,7 @@ namespace SqlDbImpl
             {
                 if (_cacheKeyNameDic == null)
                 {
-                    lock (_diclock)
+                    using (_diclock.LockWhile(() =>
                     {
                         if (_cacheKeyNameDic == null)
                         {
@@ -117,7 +121,8 @@ namespace SqlDbImpl
                             _cacheKeyNameDic.Add(typeof(ItemModel), "SaveItemList");
                             _cacheKeyNameDic.Add(typeof(ItemLocationModel), "SaveItemLocationList");
                         }
-                    }
+                    }))
+                    { }
                 }
                 return _cacheKeyNameDic;
             }
@@ -130,7 +135,7 @@ namespace SqlDbImpl
             {
                 if (_cachePageCountDic == null)
                 {
-                    lock (_diclock)
+                    using (_diclock.LockWhile(() =>
                     {
                         if (_cachePageCountDic == null)
                         {
@@ -141,7 +146,8 @@ namespace SqlDbImpl
                             _cachePageCountDic.Add(typeof(ItemModel), 100);
                             _cachePageCountDic.Add(typeof(ItemLocationModel), 1);
                         }
-                    }
+                    }))
+                    { }
                 }
                 return _cachePageCountDic;
             }
@@ -245,7 +251,8 @@ namespace SqlDbImpl
         {
             // using (var context = new CatalogDbContext(new OrganizationModel() { Name = _organization }))
             // {
-            lock (_lockObj)
+            var boolResult = false;
+            using (_lockObj.LockWhile(() =>
             {
                 var result = from m in CatalogContext.ItemLocations
                              where m.ItemId == itemId
@@ -253,10 +260,13 @@ namespace SqlDbImpl
                 var itemContent = result.FirstOrDefault();
                 if (itemContent == default(ItemLocationModel))
                 {
-                    return false;
+                    boolResult = false;
                 }
-                return true;
-            }
+                else
+                    boolResult = true;
+            }))
+            { }
+            return boolResult;
             //}
         }
 
@@ -318,8 +328,8 @@ namespace SqlDbImpl
                 }
                 catch (DbUpdateConcurrencyException ex)
                 {
-
-                    LogFactory.LogInstance.WriteException(LogInterface.LogLevel.WARN,"Save change error", ex, "Save change error. will retry.");
+                    System.Diagnostics.Trace.TraceError(ex.GetExceptionDetail());
+                    LogFactory.LogInstance.WriteException(LogInterface.LogLevel.WARN, "Save change error", ex, "Save change error. will retry.");
                     saveFailed = true;
 
                     //var entry = ex.Entries.Single();
@@ -341,7 +351,7 @@ namespace SqlDbImpl
         /// <param name="delegateFunc"></param>
         private void SaveModelCache<T>(T modelData, bool isEnd, string keyName, int pageCount, AddToDbSet<T> delegateFunc, bool isInTransaction = true) where T : class
         {
-            lock (_lockObj)
+            using (_lockObj.LockWhile(() =>
             {
                 object modelListObject;
                 if (!OtherInformation.TryGetValue(keyName, out modelListObject))
@@ -393,7 +403,8 @@ namespace SqlDbImpl
                 //{
                 //    readWriteLock.ExitWriteLock();
                 //}
-            }
+            }))
+            { }
         }
 
         //private SqlConnection _sqlConn;
@@ -466,7 +477,7 @@ namespace SqlDbImpl
 
         public void UpdateFolderChildFolderItemCount(IFolderData folderData, DateTime startTime)
         {
-            lock (_lockObj)
+            using (_lockObj.LockWhile(() =>
             {
                 CatalogContext.Folders.Attach((FolderModel)folderData);
                 //using (var context = new CatalogDbContext(new OrganizationModel() { Name = _organization }))
@@ -480,12 +491,13 @@ namespace SqlDbImpl
                 //folderDataOld.ChildItemCount = folderData.ChildItemCount;
                 //context.SaveChanges();
                 //}
-            }
+            }))
+            { }
         }
 
         public void UpdateMailboxChildFolderCount(IMailboxData mailboxData, DateTime startTime)
         {
-            lock (_lockObj)
+            using (_lockObj.LockWhile(() =>
             {
                 //using (var context = new CatalogDbContext(new OrganizationModel() { Name = _organization }))
                 //{
@@ -495,7 +507,8 @@ namespace SqlDbImpl
                 mailboxDataOld.ChildFolderCount = mailboxData.ChildFolderCount;
                 //context.SaveChanges();
                 //}
-            }
+            }))
+            { }
         }
     }
 }

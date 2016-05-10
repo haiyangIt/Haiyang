@@ -1,4 +1,5 @@
-﻿using LogInterface;
+﻿using EwsFrame.Util;
+using LogInterface;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -70,13 +71,16 @@ namespace LogImpl
             get
             {
                 if (_instance == null)
-                    lock (_lock)
+                {
+                    using (_lock.LockWhile(() =>
                     {
                         if (_instance == null)
                         {
                             _instance = new LogToStreamManage(LogFolder, LogFileNameFormat, LogMaxRecordCount);
                         }
-                    }
+                    }))
+                    { }
+                }
                 return _instance;
             }
         }
@@ -99,14 +103,14 @@ namespace LogImpl
         {
             try
             {
-                if(WriteLogMsgEvent != null)
+                if (WriteLogMsgEvent != null)
                 {
                     WriteLogMsgEvent.Invoke(null, msg);
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-
+                System.Diagnostics.Trace.TraceError(e.GetExceptionDetail());
             }
         }
 
@@ -122,7 +126,8 @@ namespace LogImpl
                 {
                     sb.AppendLine(GetAggrateException(level, message, curEx as AggregateException, exMsg));
                 }
-                else {
+                else
+                {
                     sb.AppendLine(string.Join(blank, DateTime.Now.ToString(TimeFormat),
                         LogLevelHelper.GetLevelString(level),
                         message.RemoveRN(),
@@ -219,7 +224,8 @@ namespace LogImpl
             get
             {
                 if (_writer == null || LogCount > _MaxLogCount)
-                    lock (_lock)
+                {
+                    using (_lock.LockWhile(() =>
                     {
                         if (LogCount > _MaxLogCount)
                         {
@@ -233,7 +239,9 @@ namespace LogImpl
                             _fileStream = new FileStream(filePath, FileMode.Append, FileAccess.Write, FileShare.Read);
                             _writer = new StreamWriter(_fileStream);
                         }
-                    }
+                    }))
+                    { }
+                }
                 return _writer;
             }
         }
@@ -244,11 +252,13 @@ namespace LogImpl
             _MaxLogCount = fileMaxCount;
         }
 
+        
         protected override void DoWriteLog(string msg)
         {
             Interlocked.Increment(ref LogCount);
             writer.WriteLine(msg);
-            writer.Flush();
+            if (LogCount % 20 == 0)
+                writer.Flush();
             _fileStream.Flush();
         }
 
@@ -267,6 +277,11 @@ namespace LogImpl
                 Debug.WriteLine("_fileStream Disposed");
                 _fileStream = null;
             }
+        }
+
+        protected override void Flush()
+        {
+            writer.Flush();
         }
     }
 
@@ -291,6 +306,7 @@ namespace LogImpl
             msgQueue.Enqueue(msg);
             _logEvent.Set();
         }
+        
 
         private void InternalWriteLog()
         {
@@ -320,14 +336,30 @@ namespace LogImpl
                             }
                             catch (Exception e)
                             {
-                                Debug.WriteLine(e.Message);
+                                System.Diagnostics.Trace.TraceError(e.GetExceptionDetail());
                             }
                         }
 
                         if (result == 1)
                         {
-                            DoWriteLog("Log end.");
-                            isBreak = true;
+                            try {
+                                DoWriteLog("Log end.");
+                                isBreak = true;
+                            }
+                            catch(Exception e)
+                            {
+                                System.Diagnostics.Trace.TraceError(e.GetExceptionDetail());
+                            }
+                        }
+                        if(result == WaitHandle.WaitTimeout)
+                        {
+                            try {
+                                Flush();
+                            }
+                            catch(Exception ex1)
+                            {
+                                System.Diagnostics.Trace.TraceError(ex1.GetExceptionDetail());
+                            }
                         }
                         break;
                 }
@@ -342,6 +374,7 @@ namespace LogImpl
         }
 
         protected abstract void DoWriteLog(string msg);
+        protected abstract void Flush();
 
         public void Dispose()
         {
