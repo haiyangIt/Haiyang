@@ -79,6 +79,18 @@ namespace TableBlobImpl.Storage.Table.Model
             }
         }
 
+        [IgnoreProperty]
+        public int ChildFolderCountInEx
+        {
+            get; set;
+        }
+
+        [IgnoreProperty]
+        public int ChildItemCountInEx
+        {
+            get; set;
+        }
+
         #endregion
 
         public static FolderEntity CreateFolderEntityFromEws(Folder folder, DateTime catalogStartTime)

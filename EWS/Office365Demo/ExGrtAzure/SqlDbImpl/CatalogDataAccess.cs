@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using EwsDataInterface;
 using EwsFrame;
 using System.Data.Entity;
-using Microsoft.Exchange.WebServices.Data;
 using SqlDbImpl.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Microsoft.WindowsAzure.Storage.Table;
@@ -168,9 +167,10 @@ namespace SqlDbImpl
         internal static CloudBlobClient BlobClient = StorageAccount.CreateCloudBlobClient();
 
         public readonly BlobDataAccess BlobDataAccessObj = new BlobDataAccess(BlobClient);
+        
+        public IEwsAdapter EwsAdapter { get; set; }
         public void SaveItemContent(IItemData item, string mailboxAddress, DateTime startTime, bool isCheckExist = false, bool isExist = false)
         {
-            Item itemInEws = item.Data as Item;
 
             if (isCheckExist)
             {
@@ -182,7 +182,7 @@ namespace SqlDbImpl
 
             string containerName = string.Empty;
 
-            var itemOper = CatalogFactory.Instance.NewItemOperatorImpl(itemInEws.Service, this);
+            //var itemOper = CatalogFactory.Instance.NewItemOperatorImpl(itemInEws.Service, this);
             var itemLocationModel = new ItemLocationModel();
             List<MailLocation> locationInfos = new List<MailLocation>(3);
 
@@ -194,35 +194,37 @@ namespace SqlDbImpl
             try
             {
                 binStream = new MemoryStream();
-                itemOper.ExportItem(itemInEws, binStream, _argument);
+                EwsAdapter.ExportItem(item, binStream, _argument);
 
                 if (binStream == null || binStream.Length == 0)
                     return;
+
+                var location = ItemLocationModel.GetLocation(mailboxAddress, item);
+                string blobNamePrefix = MailLocation.GetBlobNamePrefix(item.ItemId);
 
                 binStream.Capacity = (int)binStream.Length;
                 binStream.Seek(0, SeekOrigin.Begin);
                 var binLocation = new ExportItemSizeInfo() { Type = ExportType.TransferBin, Size = (int)binStream.Length };
                 mailLocation.AddLocation(binLocation);
                 binStreamLength = (int)binStream.Length;
+                string binBlobName = MailLocation.GetBlobName(ExportType.TransferBin, blobNamePrefix);
+                BlobDataAccessObj.SaveBlob(location, binBlobName, binStream, true);
+                var binLength = binStream.Length;
+                binStream.Close();
+                binStream.Dispose();
+                binStream = null;
 
                 emlStream = new MemoryStream();
-                itemOper.ExportEmlItem(itemInEws, emlStream, _argument);
+                EwsAdapter.ExportEmlItem(item, emlStream, _argument);
                 emlStream.Capacity = (int)emlStream.Length;
                 emlStream.Seek(0, SeekOrigin.Begin);
                 var emlLocation = new ExportItemSizeInfo() { Type = ExportType.Eml, Size = (int)emlStream.Length };
                 mailLocation.AddLocation(emlLocation);
-
-                var location = ItemLocationModel.GetLocation(mailboxAddress, item);
-                mailLocation.Path = location;
-
-                string blobNamePrefix = MailLocation.GetBlobNamePrefix(item.ItemId);
-                string binBlobName = MailLocation.GetBlobName(ExportType.TransferBin, blobNamePrefix);
                 string emlBlobName = MailLocation.GetBlobName(ExportType.Eml, blobNamePrefix);
-
-                actualSize = (int)binStream.Length + (int)emlStream.Length;
-
-                BlobDataAccessObj.SaveBlob(location, binBlobName, binStream, true);
                 BlobDataAccessObj.SaveBlob(location, emlBlobName, emlStream, true);
+
+                mailLocation.Path = location;
+                actualSize = (int)binLength + (int)emlStream.Length;
             }
             finally
             {
@@ -244,29 +246,65 @@ namespace SqlDbImpl
             itemLocationModel.ActualSize = binStreamLength;
             ((ItemModel)item).ActualSize = actualSize;
 
-            SaveModel<IItemData, ItemLocationModel>(itemLocationModel, CacheKeyNameDic[typeof(ItemLocationModel)], CachPageCountDic[typeof(ItemLocationModel)], (dbContext, lists) => dbContext.ItemLocations.AddRange(lists), false);
+            SaveModel<IItemData, ItemLocationModel>(itemLocationModel,
+                CacheKeyNameDic[typeof(ItemLocationModel)],
+                CachPageCountDic[typeof(ItemLocationModel)],
+                (dbContext, lists) =>
+                {
+                    dbContext.ItemLocations.AddRange(lists);
+
+                    foreach (var i in lists)
+                    {
+                        if (!ItemCache.Contains(i.ItemId))
+                            ItemCache.Add(i.ItemId);
+                    }
+                },
+                false);
+        }
+
+        private HashSet<string> _ItemsCache = null;
+        private HashSet<string> ItemCache
+        {
+            get
+            {
+                if (_ItemsCache == null)
+                {
+                    using (_lockObj.LockWhile(() =>
+                    {
+                        if (_ItemsCache == null)
+                        {
+                            var list = (from m in CatalogContext.ItemLocations select m.ItemId).ToList();
+                            _ItemsCache = new HashSet<string>(list);
+                        }
+                    }))
+                    { }
+                }
+                return _ItemsCache;
+            }
         }
 
         public bool IsItemContentExist(string itemId)
         {
             // using (var context = new CatalogDbContext(new OrganizationModel() { Name = _organization }))
             // {
-            var boolResult = false;
-            using (_lockObj.LockWhile(() =>
-            {
-                var result = from m in CatalogContext.ItemLocations
-                             where m.ItemId == itemId
-                             select m;
-                var itemContent = result.FirstOrDefault();
-                if (itemContent == default(ItemLocationModel))
-                {
-                    boolResult = false;
-                }
-                else
-                    boolResult = true;
-            }))
-            { }
-            return boolResult;
+            //var boolResult = false;
+
+            return ItemCache.Contains(itemId);
+            //using (_lockObj.LockWhile(() =>
+            //{
+            //    var result = from m in CatalogContext.ItemLocations
+            //                 where m.ItemId == itemId
+            //                 select m;
+            //    var itemContent = result.FirstOrDefault();
+            //    if (itemContent == default(ItemLocationModel))
+            //    {
+            //        boolResult = false;
+            //    }
+            //    else
+            //        boolResult = true;
+            //}))
+            //{ }
+            //return boolResult;
             //}
         }
 

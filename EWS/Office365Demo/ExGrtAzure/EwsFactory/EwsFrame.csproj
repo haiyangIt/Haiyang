@@ -101,6 +101,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RestoreFactory.cs" />
     <Compile Include="ServiceContext.cs" />
+    <Compile Include="Util\EwsRequestGate.cs" />
+    <Compile Include="Util\OperatorCtrlBase.cs" />
     <Compile Include="Util\ReadWriteLockExtension.cs" />
     <Compile Include="Util\SendMailHelper.cs" />
     <Compile Include="Util\TreeNode.cs" />

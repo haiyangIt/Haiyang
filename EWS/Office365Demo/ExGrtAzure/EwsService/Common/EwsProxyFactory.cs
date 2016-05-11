@@ -24,7 +24,7 @@ namespace EwsService.Common
                 return true;
             }
             catch (AutodiscoverLocalException oException)
-            {
+            {   
                 System.Diagnostics.Trace.TraceError(oException.GetExceptionDetail());
                 sError += string.Format("Error: {0}\r\n", oException.HResult);
                 sError += oException.ToString();
@@ -59,7 +59,7 @@ namespace EwsService.Common
             return CreateExchangeService(new EwsServiceArgument(), mailboxAddress);
         }
 
-        public static ExchangeService CreateExchangeService(EwsServiceArgument ewsServiceArgument, string mailboxAddress)
+        public static ExchangeService CreateExchangeService(EwsServiceArgument ewsServiceArgument, string mailboxAddress, bool isDoAutodiscovery = false)
         {
             if (String.IsNullOrEmpty(ewsServiceArgument.ServiceCredential.Password))
             {
@@ -213,7 +213,7 @@ namespace EwsService.Common
 
             StringCacheKey mailboxKey = new StringCacheKey(domainName);
             object urlObj = null;
-            if(!urlCache.TryGetValue(mailboxKey, out urlObj))
+            if(!urlCache.TryGetValue(mailboxKey, out urlObj) || isDoAutodiscovery)
             {
                 DoAutodiscover(service, mailboxAddress);
                 urlObj = service.Url;

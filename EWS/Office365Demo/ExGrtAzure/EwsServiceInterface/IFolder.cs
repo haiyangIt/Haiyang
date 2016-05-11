@@ -11,7 +11,7 @@ namespace EwsServiceInterface
     /// <summary>
     /// An interface for getting folder information from EWS.
     /// </summary>
-    public interface IFolder
+    internal interface IFolder
     {
         List<Folder> GetChildFolder(Folder parentFolder);
 

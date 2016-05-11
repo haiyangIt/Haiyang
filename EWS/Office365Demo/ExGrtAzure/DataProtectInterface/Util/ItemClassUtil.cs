@@ -138,6 +138,11 @@ namespace DataProtectInterface.Util
                 get; set;
             }
 
+            public int SizeInEx
+            {
+                get; set;
+            }
+
             public IItemData Clone()
             {
                 throw new NotImplementedException();
@@ -218,7 +223,25 @@ namespace DataProtectInterface.Util
                 get; set;
             }
 
+            public int ChildFolderCountInEx
+            {
+                get
+                {
+                    throw new NotImplementedException();
+                }
+
+                set
+                {
+                    throw new NotImplementedException();
+                }
+            }
+
             public int ChildItemCount
+            {
+                get; set;
+            }
+
+            public int ChildItemCountInEx
             {
                 get; set;
             }

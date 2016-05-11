@@ -120,6 +120,7 @@
     <Compile Include="CatalogServiceTest.cs" />
     <Compile Include="RestoreServiceTest.cs" />
     <Compile Include="TestEwsSync.cs" />
+    <Compile Include="ThreadTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="App.config" />

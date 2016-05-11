@@ -22,7 +22,7 @@ namespace ExGrtAzure.Tests
             _factory = GetCatalogFactory();
             _service = GetCatalogService();
 
-            var mailboxOper = _factory.NewMailboxOperatorImpl();
+            //var mailboxOper = _factory.NewMailboxOperatorImpl();
             //ServiceContext.ContextInstance.CurrentMailbox = "haiyang.ling@arcserve.com";
             //mailboxOper.ConnectMailbox(ServiceContext.ContextInstance.Argument, "haiyang.ling@arcserve.com");
             //_ewsContext = mailboxOper.CurrentExchangeService;
@@ -72,7 +72,7 @@ namespace ExGrtAzure.Tests
             //GetChildFolder(dataConvert, folder, rootFolder, "haiyang.ling@arcserve.com", 1);
         }
 
-        private void GetChildFolder(IDataConvert dataConvert, IFolder folder, Folder parentFolder, string mailbox, int level)
+        private void GetChildFolder(IDataConvert dataConvert, IEwsAdapter ewsAdapter, Folder parentFolder, string mailbox, int level)
         {
             IFolderData folderData = dataConvert.Convert(parentFolder, mailbox);
 
@@ -80,10 +80,10 @@ namespace ExGrtAzure.Tests
             if (parentFolder.ChildFolderCount == 0)
                 Debug.WriteLine(string.Format("{0} {1} doesn't have any child folder", "".PadLeft(level * 2), parentFolder.DisplayName));
 
-            var childFolders = folder.GetChildFolder(parentFolder);
+            var childFolders = ewsAdapter.GetChildFolder(parentFolder.Id.UniqueId);
             foreach (Folder childFolder in childFolders)
             {
-                GetChildFolder(dataConvert, folder, childFolder, mailbox, level + 1);
+                GetChildFolder(dataConvert, ewsAdapter, childFolder, mailbox, level + 1);
             }
         }
 

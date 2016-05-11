@@ -1,7 +1,6 @@
 ﻿using EwsDataInterface;
 using EwsFrame;
 using EwsFrame.Cache;
-using Microsoft.Exchange.WebServices.Data;
 using SqlDbImpl;
 using SqlDbImpl.Cache;
 using SqlDbImpl.Storage;
@@ -95,6 +94,11 @@ namespace SqlDbImpl.Model
             }
             set { }
         }
+        [NotMapped]
+        public int SizeInEx
+        {
+            get; set;
+        }
 
         internal static string GetItemContainerName(string mailboxAddress, string folderIdMd5Str, int index)
         {
@@ -175,7 +179,8 @@ namespace SqlDbImpl.Model
                 ItemId = ItemId,
                 Location = Location,
                 Size = Size,
-                ActualSize = ActualSize
+                ActualSize = ActualSize,
+                SizeInEx = SizeInEx
             };
         }
     }

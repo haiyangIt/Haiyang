@@ -20,7 +20,7 @@ namespace SqlDbImpl.Storage
             {
                 if (_blobMaxSize == 0)
                 {
-                    if (!FactoryBase.IsRunningOnAzure())
+                    if (!FactoryBase.IsRunningOnAzureOrStorageInAzure())
                     {
                         _blobMaxSize = 2 * 1024 * 1024;
                     }

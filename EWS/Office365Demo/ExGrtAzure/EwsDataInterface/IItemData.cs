@@ -18,6 +18,8 @@ namespace EwsDataInterface
         string Location { get; }
 
         IItemData Clone();
+
+        int SizeInEx { get; }
     }
 
     public enum ExportType : byte

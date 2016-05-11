@@ -18,6 +18,7 @@ using LoginTest.Models.Setting;
 using LoginTest.Utils;
 using System.Threading;
 using LogInterface;
+using System.Diagnostics;
 
 namespace LoginTest.Controllers
 {
@@ -67,7 +68,7 @@ namespace LoginTest.Controllers
 
                 if (model.Index == 1)
                 {
-                    IMailbox mailboxOper = CatalogFactory.Instance.NewMailboxOperatorImpl();
+                    IEwsAdapter mailboxOper = CatalogFactory.Instance.NewEwsAdapter();
                     EwsServiceArgument argument = new EwsServiceArgument();
                     var password = RSAUtil.AsymmetricDecrypt(model.EncryptPassword);
                     argument.ServiceCredential = new System.Net.NetworkCredential(model.BackupUserMailAddress, password);
@@ -198,10 +199,30 @@ namespace LoginTest.Controllers
                 var serviceId = Guid.NewGuid();
                 JobProgressManager.Instance[serviceId] = (IDataProtectProgress)service;
                 ThreadPool.QueueUserWorkItem(ThreadBackup, new CatalogArgs() { Service = service, FilterItem = filterObj });
+
+                ThreadPool.QueueUserWorkItem(Performance);
                 return Json(new { HasError = false, ServiceId = serviceId.ToString(), Index = model.Index });
             }
 
             return Json(new {  HasError = true, Msg = "Can't start job"});
+        }
+
+        private static void Performance(object arg)
+        {
+            //PerformanceCounter cpuCounter = new PerformanceCounter();
+            //PerformanceCounter ramCounter = new PerformanceCounter("Memory", "Available MBytes");
+
+            //Trace.TraceInformation(string.Format("ThreadCount\tworkingSet\tcpuprocessTime\tmemory available\t"));
+            while (true)
+            {
+                Thread.Sleep(10000);
+            //    var currentProcess = System.Diagnostics.Process.GetCurrentProcess();
+            //    long workingSet = currentProcess.WorkingSet64;
+            //    int threadCount = currentProcess.Threads.Count;
+
+            //    Trace.TraceInformation("{0}\t{1}\t{2}\t{3}\t{4}", DateTime.Now.ToString("HHmmssfff"), threadCount, workingSet, cpuCounter.NextValue(), ramCounter.NextValue());
+                Trace.Flush();
+            }
         }
 
         private static void ThreadBackup(object arg)

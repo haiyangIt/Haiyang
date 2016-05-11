@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using EwsDataInterface;
 using EwsServiceInterface;
-using Microsoft.Exchange.WebServices.Data;
 using System.Reflection;
 using System.IO;
 using Microsoft.WindowsAzure.ServiceRuntime;
@@ -56,9 +55,10 @@ namespace EwsFrame
             result._interfaceImplTypeNameDic.Add(typeof(IDataConvertFromDb), "SqlDbImpl.DataConvertFromDb");
             result._interfaceImplTypeNameDic.Add(typeof(ICatalogJob), "SqlDbImpl.Model.CatalogInfoModel");
 
-            result._interfaceImplTypeNameDic.Add(typeof(IMailbox), "EwsService.Impl.MailboxOperatorImpl");
-            result._interfaceImplTypeNameDic.Add(typeof(IFolder), "EwsService.Impl.FolderOperatorImpl");
-            result._interfaceImplTypeNameDic.Add(typeof(IItem), "EwsService.Impl.ItemOperatorImpl");
+            //result._interfaceImplTypeNameDic.Add(typeof(IMailbox), "EwsService.Impl.MailboxOperatorImpl");
+            //result._interfaceImplTypeNameDic.Add(typeof(IFolder), "EwsService.Impl.FolderOperatorImpl");
+            //result._interfaceImplTypeNameDic.Add(typeof(IItem), "EwsService.Impl.ItemOperatorImpl");
+            result._interfaceImplTypeNameDic.Add(typeof(IEwsAdapter), "EwsService.Impl.EwsAdapter");
             result._interfaceImplTypeNameDic.Add(typeof(IRestoreDestination), "EwsService.Impl.RestoreDestinationImpl");
             result._interfaceImplTypeNameDic.Add(typeof(IRestoreDestinationEx), "EwsService.Impl.RestoreDestinationExImpl");
 
@@ -66,6 +66,11 @@ namespace EwsFrame
             result._interfaceImplTypeNameDic.Add(typeof(IRestoreService), "DataProtectImpl.RestoreService");
             result._interfaceImplTypeNameDic.Add(typeof(IRestoreServiceEx), "DataProtectImpl.RestoreServiceEx");
             return result;
+        }
+
+        public IEwsAdapter NewEwsAdapter()
+        {
+            return (IEwsAdapter)CreateType<IEwsAdapter>(EwsServiceImplAssembly);
         }
 
         private Dictionary<Type, string> _interfaceImplTypeNameDic;
@@ -127,20 +132,20 @@ namespace EwsFrame
             return (IDataConvertFromDb)CreateType<IDataConvertFromDb>(EwsDataImplAssembly);
         }
 
-        public IMailbox NewMailboxOperatorImpl()
-        {
-            return (IMailbox)CreateType<IMailbox>(EwsServiceImplAssembly);
-        }
+        //public IMailbox NewMailboxOperatorImpl()
+        //{
+        //    return (IMailbox)CreateType<IMailbox>(EwsServiceImplAssembly);
+        //}
 
-        public IFolder NewFolderOperatorImpl(ExchangeService currentExService)
-        {
-            return (IFolder)CreateType<IFolder>(EwsServiceImplAssembly, currentExService);
-        }
+        //public IFolder NewFolderOperatorImpl(ExchangeService currentExService)
+        //{
+        //    return (IFolder)CreateType<IFolder>(EwsServiceImplAssembly, currentExService);
+        //}
 
-        public IItem NewItemOperatorImpl(ExchangeService currentExService, IDataAccess dataAccess)
-        {
-            return (IItem)CreateType<IItem>(EwsServiceImplAssembly, currentExService, dataAccess);
-        }
+        //public IItem NewItemOperatorImpl(ExchangeService currentExService, IDataAccess dataAccess)
+        //{
+        //    return (IItem)CreateType<IItem>(EwsServiceImplAssembly, currentExService, dataAccess);
+        //}
 
         public ICatalogJob NewCatalogJob(string organizationName, string catalogJobName, DateTime catalogTime)
         {

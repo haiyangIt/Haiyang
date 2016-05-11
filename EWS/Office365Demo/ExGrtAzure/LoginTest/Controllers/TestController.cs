@@ -20,7 +20,7 @@ namespace LoginTest.Controllers
 
         public JsonResult TestIsInAzure()
         {
-            if (FactoryBase.IsRunningOnAzure())
+            if (FactoryBase.IsRunningOnAzureOrStorageInAzure())
                 return Json("");
             else
                 throw new InvalidOperationException("the method FactoryBase.IsRunningOnAzure may be wrong.");
@@ -61,11 +61,9 @@ namespace LoginTest.Controllers
         public JsonResult TestLoadAssembly()
         {
             var log = LogFactory.LogInstance;
-            var mailboxOper = CatalogFactory.Instance.NewMailboxOperatorImpl();
             var dataConvert = CatalogFactory.Instance.NewDataConvert();
             var dataAccess = RestoreFactory.Instance.NewDataAccessForQuery();
             var restoreDataConvert = RestoreFactory.Instance.NewDataConvert();
-            var restoreMailboxOper = RestoreFactory.Instance.NewMailboxOperatorImpl();
             return Json("");
         }
 

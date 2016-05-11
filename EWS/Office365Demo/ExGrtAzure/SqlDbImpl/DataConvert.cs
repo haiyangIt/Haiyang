@@ -55,7 +55,8 @@ namespace SqlDbImpl
                 DisplayName = item.Subject,
                 CreateTime = item.DateTimeCreated,
                 Data = item,
-                Size = item.Size
+                Size = item.Size,
+                SizeInEx = item.Size
             };
             return model;
         }
@@ -71,8 +72,9 @@ namespace SqlDbImpl
                 FolderType = folder.FolderClass,
                 ChildItemCount = 0,
                 ChildFolderCount = 0,
-                MailboxAddress = folderMailbox
-
+                MailboxAddress = folderMailbox,
+                ChildFolderCountInEx = folder.ChildFolderCount,
+                ChildItemCountInEx = folder.TotalCount
             };
             return model;
         }

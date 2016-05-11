@@ -10,6 +10,8 @@ using EwsService.Common;
 using EwsServiceInterface;
 using EwsFrame;
 using DataProtectInterface;
+using System.Threading;
+using LogInterface;
 
 namespace EwsService.Impl
 {
@@ -64,19 +66,96 @@ namespace EwsService.Impl
             get; set;
         }
 
-        public void ExportEmlItem(Item itemInEws, MemoryStream emlStream, EwsServiceArgument argument)
+        private void DoExportEmlItem(Item itemInEws, MemoryStream emlStream, EwsServiceArgument argument)
         {
             PropertySet props = new PropertySet(EmailMessageSchema.MimeContent);
+            //itemInEws.Load(props);
+            //This results in a GetItem call to EWS.
+            AutoResetEvent ev = new AutoResetEvent(false);
+            Exception ex = null;
+            Timer t = null;
+            try
+            {
+                bool hasLoad = false;
+                t = new Timer((arg) =>
+                {
+                    try
+                    {
+                        if (hasLoad)
+                        {
+                            ex = new TimeoutException("Export eml message time out.");
+                            ev.Set();
+                        }
+                        else
+                        {
+                            hasLoad = true;
+                            itemInEws.Load(props);
+                            ev.Set();
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        ex = e;
+                        LogFactory.LogInstance.WriteException(LogLevel.ERR, "Export eml failed", e, e.Message);
+                        ev.Set();
+                    }
+                }, null, 0, ExportUploadHelper.TimeOut);
+                while (!ev.WaitOne(1000))
+                {
 
-            // This results in a GetItem call to EWS.
-            itemInEws.Load(props);
+                }
+            }
+            finally
+            {
+                if (t != null)
+                    t.Dispose();
+                if (ev != null)
+                    ev.Dispose();
+                t = null;
+                ev = null;
+            }
+
+            if (ex != null)
+            {
+                throw new ApplicationException("Export eml error", ex);
+            }
+
             //var email = EmailMessage.Bind(CurrentExchangeService, itemInEws.Id, props);
             emlStream.Write(itemInEws.MimeContent.Content, 0, itemInEws.MimeContent.Content.Length);
+            itemInEws.MimeContent.Content = null;
+        }
+        public void ExportEmlItem(Item itemInEws, MemoryStream emlStream, EwsServiceArgument argument)
+        {
+            int retryCount = 0;
+            Exception lastException = null;
+            while (retryCount < 3)
+            {
+                if (retryCount > 0)
+                {
+                    const int sleepCount = 10 * 1000;
+                    LogFactory.LogInstance.WriteLog(LogLevel.WARN, "retry export eml", "after sleeping  {0} seconde ,will try the [{1}]th export.", sleepCount, retryCount);
+                    Thread.Sleep(sleepCount);
+                }
+                try
+                {
+                    DoExportEmlItem(itemInEws, emlStream, argument);
+                    break;
+                }
+                catch (Exception e)
+                {
+                    System.Diagnostics.Trace.TraceError(e.GetExceptionDetail());
+                    LogFactory.LogInstance.WriteException(LogLevel.ERR, "Export eml error", e, e.Message);
+                    lastException = e;
+                    retryCount++;
+                }
+            }
+            if (lastException != null)
+                throw new ApplicationException("Export eml failure", lastException);
         }
 
         public void ExportItem(Item item, Stream stream, EwsServiceArgument argument)
         {
-            ExportUploadHelper.ExportItemPost(Enum.GetName(typeof(ExchangeVersion), item.Service.RequestedServerVersion), item.Id.UniqueId,  stream, argument);
+            ExportUploadHelper.ExportItemPost(Enum.GetName(typeof(ExchangeVersion), item.Service.RequestedServerVersion), item.Id.UniqueId, stream, argument);
         }
 
         public List<Item> GetFolderItems(Folder folder)

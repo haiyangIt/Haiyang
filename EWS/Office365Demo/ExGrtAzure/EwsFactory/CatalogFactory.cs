@@ -2,7 +2,6 @@
 using EwsDataInterface;
 using EwsFrame.Util;
 using EwsServiceInterface;
-using Microsoft.Exchange.WebServices.Data;
 using Microsoft.WindowsAzure.ServiceRuntime;
 using System;
 using System.Collections.Generic;
@@ -53,10 +52,10 @@ namespace EwsFrame
             result._interfaceImplTypeNameDic.Add(typeof(ICatalogDataAccess), "SqlDbImpl.CatalogDataAccess");
             result._interfaceImplTypeNameDic.Add(typeof(IDataConvert), "SqlDbImpl.DataConvert");
 
-            result._interfaceImplTypeNameDic.Add(typeof(IMailbox), "EwsService.Impl.MailboxOperatorImpl");
-            result._interfaceImplTypeNameDic.Add(typeof(IFolder), "EwsService.Impl.FolderOperatorImpl");
-            result._interfaceImplTypeNameDic.Add(typeof(IItem), "EwsService.Impl.ItemOperatorImpl");
-
+            //result._interfaceImplTypeNameDic.Add(typeof(IMailbox), "EwsService.Impl.MailboxOperatorImpl");
+            //result._interfaceImplTypeNameDic.Add(typeof(IFolder), "EwsService.Impl.FolderOperatorImpl");
+            //result._interfaceImplTypeNameDic.Add(typeof(IItem), "EwsService.Impl.ItemOperatorImpl");
+            result._interfaceImplTypeNameDic.Add(typeof(IEwsAdapter), "EwsService.Impl.EwsAdapter");
             result._interfaceImplTypeNameDic.Add(typeof(ICatalogService), "DataProtectImpl.CatalogService");
             result._interfaceImplTypeNameDic.Add(typeof(IFilterItem), "DataProtectImpl.FilterBySelectedTree");
             return result;
@@ -77,18 +76,18 @@ namespace EwsFrame
             return (ICatalogService)CreateType<ICatalogService>(DataProtectImplAssembly, adminUserName, adminUserPassword, domainName, organization);
         }
 
-        public IMailbox NewMailboxOperatorImpl()
-        {
-            return (IMailbox)CreateType<IMailbox>(EwsServiceImplAssembly);
-        }
-        public IFolder NewFolderOperatorImpl(ExchangeService service)
-        {
-            return (IFolder)CreateType<IFolder>(EwsServiceImplAssembly, service);
-        }
-        public IItem NewItemOperatorImpl(ExchangeService service, IDataAccess dataAccess)
-        {
-            return (IItem)CreateType<IItem>(EwsServiceImplAssembly, service, dataAccess);
-        }
+        //public IMailbox NewMailboxOperatorImpl()
+        //{
+        //    return (IMailbox)CreateType<IMailbox>(EwsServiceImplAssembly);
+        //}
+        //public IFolder NewFolderOperatorImpl(ExchangeService service)
+        //{
+        //    return (IFolder)CreateType<IFolder>(EwsServiceImplAssembly, service);
+        //}
+        //public IItem NewItemOperatorImpl(ExchangeService service, IDataAccess dataAccess)
+        //{
+        //    return (IItem)CreateType<IItem>(EwsServiceImplAssembly, service, dataAccess);
+        //}
 
         internal ICatalogDataAccess NewCatalogDataAccessInternal(EwsServiceArgument argument, string organization)
         {
@@ -108,6 +107,11 @@ namespace EwsFrame
         public IFilterItem NewFilterItemBySelectTree(LoadedTreeItem orgSelectItem)
         {
             return (IFilterItem)CreateType<IFilterItem>(DataProtectImplAssembly, orgSelectItem);
+        }
+
+        public IEwsAdapter NewEwsAdapter()
+        {
+            return (IEwsAdapter)CreateType<IEwsAdapter>(EwsServiceImplAssembly);
         }
     }
 }

@@ -11,7 +11,7 @@ namespace EwsServiceInterface
     /// <summary>
     /// An interface for getting item information from EWS.
     /// </summary>
-    public interface IItem
+    internal interface IItem
     {
         List<Item> GetFolderItems(Folder folder);
         

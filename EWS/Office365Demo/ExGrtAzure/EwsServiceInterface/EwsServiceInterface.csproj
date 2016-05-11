@@ -46,9 +46,7 @@
   <ItemGroup>
     <Compile Include="EwsServiceArgument.cs" />
     <Compile Include="EWSSetting.cs" />
-    <Compile Include="IFolder.cs" />
-    <Compile Include="IItem.cs" />
-    <Compile Include="IMailbox.cs" />
+    <Compile Include="IEwsAdapter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReadWriteLockExtension.cs" />
   </ItemGroup>

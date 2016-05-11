@@ -15,7 +15,7 @@ namespace EwsService.Impl
         public MailboxOperatorImpl()
         {
         }
-
+        
         public ExchangeService CurrentExchangeService
         {
             get; private set;
@@ -36,6 +36,15 @@ namespace EwsService.Impl
         public IFolder NewFolderOperatorInstance()
         {
             return new FolderOperatorImpl(CurrentExchangeService);
+        }
+
+        class ExchangeServiceObserver
+        {
+            public ExchangeService CurrentExchangeService { get; set; }
+            public EwsServiceArgument Argument { get; set; }
+            public string Mailbox { get; set; }
+
+
         }
     }
 }

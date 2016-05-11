@@ -22,7 +22,7 @@ namespace LogInterface
         {
             get
             {
-                if(_Dic == null)
+                if (_Dic == null)
                 {
                     _Dic = new Dictionary<LogLevel, string>(8);
                     _Dic[LogLevel.COM] = "C";
@@ -60,6 +60,7 @@ namespace LogInterface
                 else
                 {
                     sb.AppendLine(string.Join("  ",
+                        curEx.GetType().FullName,
                         curEx.Message,
                         curEx.StackTrace));
 
@@ -74,6 +75,7 @@ namespace LogInterface
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine(string.Join("  ",
+                ex.GetType().FullName,
                     ex.Message,
                     ex.StackTrace));
 

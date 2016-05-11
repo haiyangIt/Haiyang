@@ -1,6 +1,5 @@
 ﻿using DataProtectInterface;
 using EwsServiceInterface;
-using Microsoft.Exchange.WebServices.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;

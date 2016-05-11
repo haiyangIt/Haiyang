@@ -11,7 +11,7 @@ namespace EwsServiceInterface
     /// <summary>
     /// An interface to get mailbox information from EWS.
     /// </summary>
-    public interface IMailbox
+    internal interface IMailbox
     {
         void ConnectMailbox(EwsServiceArgument argument, string connectMailAddress);
         

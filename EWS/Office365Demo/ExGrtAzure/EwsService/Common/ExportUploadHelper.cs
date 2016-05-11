@@ -13,6 +13,8 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Configuration;
 using EwsFrame.Util;
+using System.Xml.Linq;
+using System.Linq;
 
 namespace EwsService.Common
 {
@@ -128,11 +130,11 @@ namespace EwsService.Common
 
         private static object _lockObj = new object();
         private static int _MaxSupportItemSize = 0;
-        private static int MaxSupportItemSize
+        public static int MaxSupportItemSize
         {
             get
             {
-                if(_MaxSupportItemSize == 0)
+                if (_MaxSupportItemSize == 0)
                 {
                     using (_lockObj.LockWhile(() =>
                     {
@@ -150,6 +152,31 @@ namespace EwsService.Common
                     { };
                 }
                 return _MaxSupportItemSize;
+            }
+        }
+
+        private static int _timeOut = 0;
+        public static int TimeOut
+        {
+            get
+            {
+                if (_timeOut == 0)
+                {
+                    using (_lockObj.LockWhile(() =>
+                    {
+                        if (_timeOut == 0)
+                        {
+                            int result = 0;
+                            if (!int.TryParse(ConfigurationManager.AppSettings["ExportItemTimeOut"], out result))
+                            {
+                                result = 120;
+                            }
+                            _timeOut = result * 1000;
+                        }
+                    }))
+                    { }
+                }
+                return _timeOut;
             }
         }
 
@@ -171,6 +198,7 @@ namespace EwsService.Common
                 // Use request to do POST to EWS so we get back the data for the item to export.
                 byte[] bytes = Encoding.UTF8.GetBytes(EwsRequest);
                 oHttpWebRequest.ContentLength = bytes.Length;
+                oHttpWebRequest.Timeout = TimeOut;
                 using (Stream requestStream = oHttpWebRequest.GetRequestStream())
                 {
                     requestStream.Write(bytes, 0, bytes.Length);
@@ -181,45 +209,56 @@ namespace EwsService.Common
                 // Get response
                 oHttpWebResponse = (HttpWebResponse)oHttpWebRequest.GetResponse();
 
-                oStreadReader = new StreamReader(oHttpWebResponse.GetResponseStream());
-                sResponseText = oStreadReader.ReadToEnd();
-                if (sResponseText.Length > MaxSupportItemSize)
-                {
-                    LogFactory.LogInstance.WriteLog(LogLevel.WARN, string.Format("{0} is too much. not support now.", sItemId));
-                    return false;
-                }
+                //oStreadReader = new StreamReader(oHttpWebResponse.GetResponseStream());
+                //sResponseText = oStreadReader.ReadToEnd();
+                //if (sResponseText.Length > MaxSupportItemSize)
+                //{
+                //    LogFactory.LogInstance.WriteLog(LogLevel.WARN, string.Format("{0} is too much. not support now.", sItemId));
+                //    return false;
+                //}
 
                 // OK?
                 if (oHttpWebResponse.StatusCode == HttpStatusCode.OK)
                 {
                     int BUFFER_SIZE = 1024;
                     int iReadBytes = 0;
-                    XmlDocument oDoc = new XmlDocument();
-                    XmlNamespaceManager namespaces = new XmlNamespaceManager(oDoc.NameTable);
-                    namespaces.AddNamespace("m", "http://schemas.microsoft.com/exchange/services/2006/messages");
-                    oDoc.LoadXml(sResponseText);
-                    XmlNode oData = oDoc.SelectSingleNode("//m:Data", namespaces);
+                    //XmlDocument oDoc = new XmlDocument();
+                    //XmlNamespaceManager namespaces = new XmlNamespaceManager(oDoc.NameTable);
+                    //namespaces.AddNamespace("m", "http://schemas.microsoft.com/exchange/services/2006/messages");
+                    //oDoc.LoadXml(sResponseText);
+                    //XmlNode oData = oDoc.SelectSingleNode("//m:Data", namespaces);
 
+                    XDocument doc = XDocument.Load(oHttpWebResponse.GetResponseStream());
+                    XNamespace mnameSpace = "http://schemas.microsoft.com/exchange/services/2006/messages";
+
+                    //var sb = new StringBuilder(102400);
+                    //sb.Append("<Data>");
+                    //sb.Append(doc.Descendants(mnameSpace + "Data").FirstOrDefault().Value);
+                    //sb.Append("</Data>");
+                    var val = doc.Descendants(mnameSpace + "Data").FirstOrDefault().Value;
+                    byte[] buffer = Convert.FromBase64String(val);
+                    writer.Write(buffer, 0, buffer.Length);
                     // Write base 64 encoded text Data XML string into a binary base 64 text/XML file
                     //BinaryWriter oBinaryWriter = new BinaryWriter(File.Open(sFile, FileMode.Create));
-                    using (StringReader oStringReader = new StringReader(oData.OuterXml))
-                    {
-                        using (XmlTextReader oXmlTextReader = new XmlTextReader(oStringReader))
-                        {
+                    //using (StringReader oStringReader = new StringReader(sb.ToString()))
+                    //{
+                    //    using (XmlTextReader oXmlTextReader = new XmlTextReader(oStringReader))
+                    //    {
 
-                            oXmlTextReader.MoveToContent();
-                            byte[] buffer = new byte[BUFFER_SIZE];
-                            do
-                            {
-                                iReadBytes = oXmlTextReader.ReadBase64(buffer, 0, BUFFER_SIZE);
-                                //oBinaryWriter.Write(buffer, 0, iReadBytes);
-                                writer.Write(buffer, 0, iReadBytes);
-                            }
-                            while (iReadBytes >= BUFFER_SIZE);
+                    //        oXmlTextReader.MoveToContent();
+                    //        byte[] buffer = new byte[BUFFER_SIZE];
+                    //        do
+                    //        {
 
-                            oXmlTextReader.Close();
-                        }
-                    }
+                    //            iReadBytes = oXmlTextReader.ReadBase64(buffer, 0, BUFFER_SIZE);
+                    //            //oBinaryWriter.Write(buffer, 0, iReadBytes);
+                    //            writer.Write(buffer, 0, iReadBytes);
+                    //        }
+                    //        while (iReadBytes >= BUFFER_SIZE);
+
+                    //        oXmlTextReader.Close();
+                    //    }
+                    //}
 
                     bSuccess = true;
                 }
@@ -350,7 +389,7 @@ namespace EwsService.Common
             return result;
         }
 
-        public static string UploadItemPost(string ServerVersion, FolderId ParentFolderId, CreateActionType oCreateActionType, string sItemId, Stream stream, EwsServiceArgument argument)
+        public static string UploadItemPost(string ServerVersion, string parentFolderId, CreateActionType oCreateActionType, string sItemId, Stream stream, EwsServiceArgument argument)
         {
             try
             {
@@ -376,7 +415,7 @@ namespace EwsService.Common
                     EwsRequest = EwsRequest.Replace("##CreateAction##", "CreateNew");
                 }
                 EwsRequest = EwsRequest.Replace("##RequestServerVersion##", ServerVersion);
-                EwsRequest = EwsRequest.Replace("##ParentFolderId_Id##", ParentFolderId.UniqueId);
+                EwsRequest = EwsRequest.Replace("##ParentFolderId_Id##", parentFolderId);
 
                 string sBase64Data = string.Empty;
                 sBase64Data = FileHelper.GetBinaryFileAsBase64(stream);
@@ -450,7 +489,7 @@ namespace EwsService.Common
         {
             using (var memoryStream = new MemoryStream(data))
             {
-                return UploadItemPost(ServerVersion, ParentFolderId, oCreateActionType, sItemId, memoryStream, argument);
+                return UploadItemPost(ServerVersion, ParentFolderId.UniqueId, oCreateActionType, sItemId, memoryStream, argument);
             }
         }
 
@@ -458,7 +497,7 @@ namespace EwsService.Common
         {
             using (FileStream oFileStream = new FileStream(sFile, FileMode.Open, FileAccess.Read))
             {
-                return UploadItemPost(ServerVersion, ParentFolderId, oCreateActionType, sItemId, oFileStream, argument);
+                return UploadItemPost(ServerVersion, ParentFolderId.UniqueId, oCreateActionType, sItemId, oFileStream, argument);
             }
         }
 

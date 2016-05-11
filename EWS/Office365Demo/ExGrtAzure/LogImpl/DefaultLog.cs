@@ -128,11 +128,11 @@ namespace LogImpl
                 }
                 else
                 {
-                    sb.AppendLine(string.Join(blank, DateTime.Now.ToString(TimeFormat),
+                    sb.AppendLine(string.Join(blank, DateTime.Now.ToString(TimeFormat), Thread.CurrentThread.ManagedThreadId, Task.CurrentId,
                         LogLevelHelper.GetLevelString(level),
                         message.RemoveRN(),
                         curEx.Message.RemoveRN(),
-                        curEx.StackTrace.RemoveRN()));
+                        curEx.StackTrace.RemoveRN(), curEx.GetType().FullName));
 
                     curEx = curEx.InnerException;
                 }
@@ -144,11 +144,11 @@ namespace LogImpl
         internal static string GetAggrateException(LogLevel level, string message, AggregateException ex, string exMsg)
         {
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine(string.Join(blank, DateTime.Now.ToString(TimeFormat),
+            sb.AppendLine(string.Join(blank, DateTime.Now.ToString(TimeFormat), Thread.CurrentThread.ManagedThreadId, Task.CurrentId,
                     LogLevelHelper.GetLevelString(level),
                     message.RemoveRN(),
                     ex.Message.RemoveRN(),
-                    ex.StackTrace.RemoveRN()));
+                    ex.StackTrace.RemoveRN(), ex.GetType().FullName));
 
             foreach (var innerEx in ex.Flatten().InnerExceptions)
             {
@@ -164,7 +164,7 @@ namespace LogImpl
 
         internal static string GetLogString(LogLevel level, string message)
         {
-            return string.Join(blank, DateTime.Now.ToString(TimeFormat),
+            return string.Join(blank, DateTime.Now.ToString(TimeFormat), Thread.CurrentThread.ManagedThreadId, Task.CurrentId,
                 LogLevelHelper.GetLevelString(level),
                 message.RemoveRN());
         }
@@ -176,7 +176,7 @@ namespace LogImpl
 
         internal static string GetLogString(LogLevel level, string message, string format, params object[] args)
         {
-            return string.Join(blank, DateTime.Now.ToString(TimeFormat),
+            return string.Join(blank, DateTime.Now.ToString(TimeFormat), Thread.CurrentThread.ManagedThreadId, Task.CurrentId,
                 LogLevelHelper.GetLevelString(level),
                 message.RemoveRN(),
                 args.Length > 0 ? string.Format(format, args).RemoveRN() : format.RemoveRN());
@@ -204,6 +204,8 @@ namespace LogImpl
     {
         internal static string RemoveRN(this string message)
         {
+            if (string.IsNullOrEmpty(message))
+                return "";
             return message.Replace('\r', ' ').Replace('\n', ' ');
         }
     }
@@ -235,7 +237,11 @@ namespace LogImpl
 
                         if (_writer == null)
                         {
-                            var filePath = Path.Combine(_logFolder, string.Format(_fileNameFormat, DateTime.Now.ToString("yyyyMMdd"), FileIndex++));
+                            var filePath = string.Empty;
+                            do
+                            {
+                                filePath = Path.Combine(_logFolder, string.Format(_fileNameFormat, DateTime.Now.ToString("yyyyMMdd"), FileIndex++));
+                            } while (File.Exists(filePath));
                             _fileStream = new FileStream(filePath, FileMode.Append, FileAccess.Write, FileShare.Read);
                             _writer = new StreamWriter(_fileStream);
                         }
@@ -252,14 +258,17 @@ namespace LogImpl
             _MaxLogCount = fileMaxCount;
         }
 
-        
+
         protected override void DoWriteLog(string msg)
         {
             Interlocked.Increment(ref LogCount);
             writer.WriteLine(msg);
             if (LogCount % 20 == 0)
+            {
                 writer.Flush();
-            _fileStream.Flush();
+                _fileStream.Flush();
+                Trace.Flush();
+            }
         }
 
         protected override void DoDispose()
@@ -267,21 +276,23 @@ namespace LogImpl
             if (_writer != null)
             {
                 _writer.Dispose();
-                Debug.WriteLine("writer Disposed");
+                Trace.WriteLine("writer Disposed");
                 _writer = null;
 
             }
             if (_fileStream != null)
             {
                 _fileStream.Dispose();
-                Debug.WriteLine("_fileStream Disposed");
+                Trace.WriteLine("_fileStream Disposed");
                 _fileStream = null;
             }
+            Trace.Flush();
         }
 
         protected override void Flush()
         {
             writer.Flush();
+            Trace.Flush();
         }
     }
 
@@ -303,10 +314,11 @@ namespace LogImpl
 
         public void WriteToLog(string msg)
         {
+            Trace.WriteLine(msg);
             msgQueue.Enqueue(msg);
             _logEvent.Set();
         }
-        
+
 
         private void InternalWriteLog()
         {
@@ -342,21 +354,23 @@ namespace LogImpl
 
                         if (result == 1)
                         {
-                            try {
+                            try
+                            {
                                 DoWriteLog("Log end.");
                                 isBreak = true;
                             }
-                            catch(Exception e)
+                            catch (Exception e)
                             {
                                 System.Diagnostics.Trace.TraceError(e.GetExceptionDetail());
                             }
                         }
-                        if(result == WaitHandle.WaitTimeout)
+                        if (result == WaitHandle.WaitTimeout)
                         {
-                            try {
+                            try
+                            {
                                 Flush();
                             }
-                            catch(Exception ex1)
+                            catch (Exception ex1)
                             {
                                 System.Diagnostics.Trace.TraceError(ex1.GetExceptionDetail());
                             }
@@ -385,6 +399,7 @@ namespace LogImpl
             _endedEvent.Dispose();
             DoDispose();
             Debug.WriteLine("Manager Disposed");
+            Trace.Flush();
         }
 
         protected abstract void DoDispose();

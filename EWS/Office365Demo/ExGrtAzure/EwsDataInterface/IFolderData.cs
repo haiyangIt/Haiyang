@@ -15,6 +15,9 @@ namespace EwsDataInterface
         int ChildFolderCount { get; set; }
         string FolderId { get; }
         IFolderData Clone();
+
+        int ChildFolderCountInEx { get; set; }
+        int ChildItemCountInEx { get; set; }
     }
 
     public interface IFolderDataBase

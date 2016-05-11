@@ -68,6 +68,13 @@ namespace SqlDbImpl.Model
             set { }
         }
 
+        [NotMapped]
+        public int SizeInEx
+        {
+            get; set;
+            
+        }
+
         public IItemData Clone()
         {
             return new ItemModel()
@@ -80,7 +87,8 @@ namespace SqlDbImpl.Model
                 ParentFolderId = ParentFolderId,
                 StartTime = StartTime,
                 Size = Size,
-                ActualSize = ActualSize
+                ActualSize = ActualSize,
+                SizeInEx = SizeInEx
             };
         }
     }

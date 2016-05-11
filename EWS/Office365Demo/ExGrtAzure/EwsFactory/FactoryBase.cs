@@ -106,7 +106,7 @@ namespace EwsFrame
 
         public static CloudStorageAccount GetStorageAccount()
         {
-            if (!IsRunningOnAzure())
+            if (!IsRunningOnAzureOrStorageInAzure())
                 return CloudStorageAccount.Parse(
         ConfigurationManager.ConnectionStrings["StorageConnectionString"].ConnectionString);
             else
@@ -116,10 +116,15 @@ namespace EwsFrame
             }
         }
 
-        public static bool IsRunningOnAzure()
+        public static bool IsRunningOnAzureOrStorageInAzure()
         {
             var isDebugAzure = ConfigurationManager.AppSettings["ForDebugAzure"];
             return !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME")) || isDebugAzure == "1";
+        }
+
+        public static bool IsRunningOnAzure()
+        {
+            return !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME"));
         }
     }
 }

@@ -91,6 +91,16 @@ namespace SqlDbImpl.Model
             }
             set { }
         }
+        [NotMapped]
+        public int ChildFolderCountInEx
+        {
+            get; set;
+        }
+        [NotMapped]
+        public int ChildItemCountInEx
+        {
+            get; set;
+        }
 
         public IFolderData Clone()
         {
@@ -104,7 +114,9 @@ namespace SqlDbImpl.Model
                 Location = Location,
                 MailboxAddress = MailboxAddress,
                 ParentFolderId = ParentFolderId,
-                ChildFolderCount = ChildFolderCount
+                ChildFolderCount = ChildFolderCount,
+                ChildItemCountInEx = ChildItemCountInEx,
+                ChildFolderCountInEx =ChildFolderCountInEx
             };
         }
     }

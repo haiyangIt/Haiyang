@@ -78,7 +78,7 @@ namespace EwsFrame
         private ILog CreateLogInstance()
         {
             ILog result;
-            if (!IsRunningOnAzure())
+            if (!IsRunningOnAzureOrStorageInAzure())
             {
                 result = (ILog)(CreateTypeWithName<ILog>(LogImplAssembly, "LogImpl.DefaultLog"));
             }
@@ -92,7 +92,7 @@ namespace EwsFrame
         private ILog CreateEWSLogInstance()
         {
             ILog result;
-            if (!IsRunningOnAzure())
+            if (!IsRunningOnAzureOrStorageInAzure())
             {
                 result = (ILog)(CreateTypeWithName<ILog>(LogImplAssembly, "LogImpl.DefaultEwsTraceLog"));
             }

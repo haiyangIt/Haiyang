@@ -386,9 +386,35 @@ namespace ExGrtAzure.Tests
                 }
             }
 
+            public int ChildFolderCountInEx
+            {
+                get
+                {
+                    throw new NotImplementedException();
+                }
+
+                set
+                {
+                    throw new NotImplementedException();
+                }
+            }
+
             public int ChildItemCount
             {
                 get
+                {
+                    throw new NotImplementedException();
+                }
+            }
+
+            public int ChildItemCountInEx
+            {
+                get
+                {
+                    throw new NotImplementedException();
+                }
+
+                set
                 {
                     throw new NotImplementedException();
                 }

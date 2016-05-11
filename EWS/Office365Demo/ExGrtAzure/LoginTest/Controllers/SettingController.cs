@@ -87,19 +87,19 @@ namespace LoginTest.Controllers
         {
             if (ModelState.IsValid)
             {
-                IMailbox mailboxOper = CatalogFactory.Instance.NewMailboxOperatorImpl();
+                IEwsAdapter mailboxOper = CatalogFactory.Instance.NewEwsAdapter();
                 EwsServiceArgument argument = new EwsServiceArgument();
                 var password = RSAUtil.AsymmetricDecrypt(model.EncryptPassword);
                 argument.ServiceCredential = new System.Net.NetworkCredential(model.AdminUserName, password);
                 argument.UseDefaultCredentials = false;
                 argument.SetConnectMailbox(model.AdminUserName);
                 try {
-                    mailboxOper.ConnectMailbox(argument, model.AdminUserName);
+                    var url = mailboxOper.ConnectMailbox(argument, model.AdminUserName);
 
-                    if (mailboxOper.CurrentExchangeService.Url.AbsoluteUri == model.EwsConnectUrl)
+                    if (url == model.EwsConnectUrl)
                         return Json(new { Success = true, IsChangeUrl = false });
                     else
-                        return Json(new { Success = true, IsChangeUrl = true, Url = mailboxOper.CurrentExchangeService.Url.AbsoluteUri });
+                        return Json(new { Success = true, IsChangeUrl = true, Url = url });
                 }
                 catch(Exception e)
                 {

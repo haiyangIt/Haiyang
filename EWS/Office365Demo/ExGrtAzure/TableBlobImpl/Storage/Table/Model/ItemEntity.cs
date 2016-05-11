@@ -93,6 +93,14 @@ namespace TableBlobImpl.Storage.Table.Model
             }
         }
 
+        public int SizeInEx
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         public static ItemEntity CreateItemEntityFromEws(Item item, DateTime catalogStartTime)
         {
             ItemEntity entity = new ItemEntity();
