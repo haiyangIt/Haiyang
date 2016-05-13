@@ -45,6 +45,9 @@ namespace LogImpl
         {
             get
             {
+                int result = 500;
+                if (int.TryParse(ConfigurationManager.AppSettings["FileMaxRecordCount"], out result))
+                    return result;
                 return 500;
             }
         }

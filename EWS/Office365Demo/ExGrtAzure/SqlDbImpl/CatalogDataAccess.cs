@@ -210,14 +210,14 @@ namespace SqlDbImpl
             var binLength = buffer.Length;
             buffer = null;
 
-            buffer = EwsAdapter.ExportEmlItem(item, _argument);
-            var emlLocation = new ExportItemSizeInfo() { Type = ExportType.Eml, Size = (int)buffer.Length };
-            mailLocation.AddLocation(emlLocation);
-            string emlBlobName = MailLocation.GetBlobName(ExportType.Eml, blobNamePrefix);
-            using (MemoryStream emlStream = new MemoryStream(buffer))
-            {
-                BlobDataAccessObj.SaveBlob(location, emlBlobName, emlStream, true);
-            }
+            //buffer = EwsAdapter.ExportEmlItem(item, _argument);
+            //var emlLocation = new ExportItemSizeInfo() { Type = ExportType.Eml, Size = (int)buffer.Length };
+            //mailLocation.AddLocation(emlLocation);
+            //string emlBlobName = MailLocation.GetBlobName(ExportType.Eml, blobNamePrefix);
+            //using (MemoryStream emlStream = new MemoryStream(buffer))
+            //{
+            //    BlobDataAccessObj.SaveBlob(location, emlBlobName, emlStream, true);
+            //}
 
             mailLocation.Path = location;
             actualSize = (int)binLength + (int)buffer.Length;
