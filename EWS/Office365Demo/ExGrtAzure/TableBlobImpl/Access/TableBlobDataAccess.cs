@@ -46,6 +46,14 @@ namespace TableBlobImpl.Access
             }
         }
 
+        public object OtherObj
+        {
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         public void SaveMailbox(IMailboxData mailboxAddress)
         {
             MailboxEntity entity = mailboxAddress as MailboxEntity;

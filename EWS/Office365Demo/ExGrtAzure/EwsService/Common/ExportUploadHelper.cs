@@ -98,35 +98,35 @@ namespace EwsService.Common
         //    return bSuccess;
         //}
 
-        public static bool ExportItemPost(string ServerVersion, string sItemId, Stream writer, EwsServiceArgument argument)
-        {
-            int retryCount = 0;
-            Exception lastException = null;
-            while (retryCount < 3)
-            {
-                if (retryCount > 0)
-                {
-                    const int sleepCount = 10 * 1000;
-                    LogFactory.LogInstance.WriteLog(LogLevel.WARN, "retry export", "after sleeping  {0} seconde ,will try the [{1}]th export.", sleepCount, retryCount);
-                    Thread.Sleep(sleepCount);
-                }
-                try
-                {
-                    var result = DoExportItemPost(ServerVersion, sItemId, writer, argument);
-                    return result;
-                }
-                catch (Exception e)
-                {
-                    System.Diagnostics.Trace.TraceError(e.GetExceptionDetail());
-                    LogFactory.LogInstance.WriteException(LogLevel.ERR, "Export error", e, e.Message);
-                    lastException = e;
-                    retryCount++;
-                }
-            }
-            if (lastException != null)
-                throw new ApplicationException("Export failure", lastException);
-            return false;
-        }
+        //public static bool ExportItemPost(string ServerVersion, string sItemId, Stream writer, EwsServiceArgument argument)
+        //{
+        //    int retryCount = 0;
+        //    Exception lastException = null;
+        //    while (retryCount < 3)
+        //    {
+        //        if (retryCount > 0)
+        //        {
+        //            const int sleepCount = 10 * 1000;
+        //            LogFactory.LogInstance.WriteLog(LogLevel.WARN, "retry export", "after sleeping  {0} seconde ,will try the [{1}]th export.", sleepCount, retryCount);
+        //            Thread.Sleep(sleepCount);
+        //        }
+        //        try
+        //        {
+        //            var result = DoExportItemPost(ServerVersion, sItemId, writer, argument);
+        //            return result;
+        //        }
+        //        catch (Exception e)
+        //        {
+        //            System.Diagnostics.Trace.TraceError(e.GetExceptionDetail());
+        //            LogFactory.LogInstance.WriteException(LogLevel.ERR, "Export error", e, e.Message);
+        //            lastException = e;
+        //            retryCount++;
+        //        }
+        //    }
+        //    if (lastException != null)
+        //        throw new ApplicationException("Export failure", lastException);
+        //    return false;
+        //}
 
         private static object _lockObj = new object();
         private static int _MaxSupportItemSize = 0;
@@ -180,14 +180,13 @@ namespace EwsService.Common
             }
         }
 
-        public static bool DoExportItemPost(string ServerVersion, string sItemId, Stream writer, EwsServiceArgument argument)
+        internal static byte[] ExportItemPost(string ServerVersion, string sItemId, EwsServiceArgument argument)
         {
-            bool bSuccess = false;
             string sResponseText = string.Empty;
             System.Net.HttpWebRequest oHttpWebRequest = null;
             StreamReader oStreadReader = null;
             HttpWebResponse oHttpWebResponse = null;
-
+            byte[] buffer = null;
             // Build request body...
             try
             {
@@ -220,8 +219,8 @@ namespace EwsService.Common
                 // OK?
                 if (oHttpWebResponse.StatusCode == HttpStatusCode.OK)
                 {
-                    int BUFFER_SIZE = 1024;
-                    int iReadBytes = 0;
+                    //int BUFFER_SIZE = 1024;
+                    //int iReadBytes = 0;
                     //XmlDocument oDoc = new XmlDocument();
                     //XmlNamespaceManager namespaces = new XmlNamespaceManager(oDoc.NameTable);
                     //namespaces.AddNamespace("m", "http://schemas.microsoft.com/exchange/services/2006/messages");
@@ -235,9 +234,12 @@ namespace EwsService.Common
                     //sb.Append("<Data>");
                     //sb.Append(doc.Descendants(mnameSpace + "Data").FirstOrDefault().Value);
                     //sb.Append("</Data>");
-                    var val = doc.Descendants(mnameSpace + "Data").FirstOrDefault().Value;
-                    byte[] buffer = Convert.FromBase64String(val);
-                    writer.Write(buffer, 0, buffer.Length);
+                    var dataNode = doc.Descendants(mnameSpace + "Data").FirstOrDefault();
+                    if (dataNode == null)
+                        throw new XmlException("can't find the data.");
+                    var val = dataNode.Value;
+                    buffer = Convert.FromBase64String(val);
+                    
                     // Write base 64 encoded text Data XML string into a binary base 64 text/XML file
                     //BinaryWriter oBinaryWriter = new BinaryWriter(File.Open(sFile, FileMode.Create));
                     //using (StringReader oStringReader = new StringReader(sb.ToString()))
@@ -259,8 +261,7 @@ namespace EwsService.Common
                     //        oXmlTextReader.Close();
                     //    }
                     //}
-
-                    bSuccess = true;
+                    
                 }
 
 
@@ -278,22 +279,21 @@ namespace EwsService.Common
                     oHttpWebResponse = null;
                 }
             }
-
-            return bSuccess;
+            return buffer;
         }
 
-        public static bool ExportItemPost(string ServerVersion, string sItemId, string sFile, EwsServiceArgument argument)
+        internal static bool ExportItemPost(string ServerVersion, string sItemId, string sFile, EwsServiceArgument argument)
         {
             // Write base 64 encoded text Data XML string into a binary base 64 text/XML file
             using (FileStream stream = File.Open(sFile, FileMode.Create))
             {
-                var result = ExportItemPost(ServerVersion, sItemId, stream, argument);
+                var result = ExportItemPost(ServerVersion, sItemId, argument);
+                
+                stream.Write(result, 0, result.Length);
                 stream.Flush();
-                return result;
+                return true;
             }
         }
-
-
 
         private static string GetExportSOAPXml(EwsServiceArgument argument, ref HttpWebRequest webRequest)
         {

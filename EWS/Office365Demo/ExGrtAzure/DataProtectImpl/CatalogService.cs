@@ -210,6 +210,7 @@ namespace DataProtectImpl
         /// </summary>
         public void GenerateCatalog()
         {
+            ThreadData.Information = (-1).ToString("D8");
             StartTime = DateTime.Now;
             if (Filter == null)
             {
@@ -227,6 +228,7 @@ namespace DataProtectImpl
                 EwsAdapter.DataConvert = dataConvert;
 
                 ICatalogDataAccess dataAccess = NewDataAccessInstance();
+                dataAccess.OtherObj = EwsAdapter;
 
                 OnProgressChanged(CatalogProgressType.GetAllMailboxStart);
                 List<IMailboxData> allUserMailbox = GetAllUserMailboxFromFilter();
@@ -305,7 +307,7 @@ namespace DataProtectImpl
                 var timeSpan = DateTime.Now - StartTime;
                 LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.INFO, "Job failed",
                     "Total {0} folders {1} items's size {2} bytes actual size {3} bytes cost {4} minutes",
-                    AllFolderIndex, AllItemIndex, MailboxSize, ActualSize, timeSpan.TotalMinutes);
+                    AllDealedFolderIndex, AllDealedItemIndex, MailboxSize, ActualSize, timeSpan.TotalMinutes);
 
                 LogFactory.LogInstance.WriteException(LogInterface.LogLevel.ERR, "InCompleted", e, e.Message);
 
@@ -318,7 +320,7 @@ namespace DataProtectImpl
                 var timeSpan = DateTime.Now - StartTime;
                 LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.INFO, "Job completed",
                     "Total {0} folders {1} items's size {2} bytes actual size {3} bytes cost {4} minutes",
-                    AllFolderIndex, AllItemIndex, MailboxSize, ActualSize, timeSpan.TotalMinutes);
+                    AllDealedFolderIndex, AllDealedItemIndex, MailboxSize, ActualSize, timeSpan.TotalMinutes);
                 _serviceContext.DataAccessObj.Dispose();
                 GenerateCatalogEnd(isFinished);
             }
@@ -460,8 +462,12 @@ namespace DataProtectImpl
             }
         }
 
+        private long AllDealedItemIndex = 0;
+        
+        private long AllDealedFolderIndex = 0;
+
         private long AllItemIndex = 0;
-        private long AllFolderIndex = 0;
+
         private long ActualSize = 0;
         private long MailboxSize = 0;
 
@@ -508,7 +514,9 @@ namespace DataProtectImpl
                                  using (_lockObj.LockWhile(() =>
                                  {
                                      itemDealedCount++;
+                                     AllItemIndex++;
                                      dealedCountTemp = itemDealedCount;
+                                     ThreadData.Information = AllItemIndex.ToString("D8");
                                  }))
                                  { };
 
@@ -534,7 +542,7 @@ namespace DataProtectImpl
                                              break;
                                          }
 
-                                         Interlocked.Increment(ref AllItemIndex);
+                                         Interlocked.Increment(ref AllDealedItemIndex);
                                          Interlocked.Add(ref MailboxSize, item.SizeInEx);
 
                                          OnFolderProgressChanged(CatalogFolderProgressType.ProcessingItemStart, mailboxData, folderStack, folderData, new Process((int)dealedCountTemp, itemCount), item);
@@ -569,7 +577,7 @@ namespace DataProtectImpl
                                      catch (Exception ex)
                                      {
                                          System.Diagnostics.Trace.TraceError(ex.GetExceptionDetail());
-                                         var itemFailedMsg = string.Format("Item {0} ItemId:{2} in {1} can't export.", item.DisplayName, item.Id, foldeHyPath);
+                                         var itemFailedMsg = string.Format("Item {0} ItemId:{2} in {1} can't export.", item.DisplayName, foldeHyPath, item.Id);
                                          FailureItems.Add(itemFailedMsg);
                                          LogFactory.LogInstance.WriteException(LogInterface.LogLevel.ERR, itemFailedMsg
                                              , ex, ex.Message);
@@ -581,7 +589,7 @@ namespace DataProtectImpl
                                              OnFolderProgressChanged(CatalogFolderProgressType.ProcessingItemEndWithError, mailboxData, folderStack, folderData, new Process((int)dealedCountTemp, itemCount), item);
                                          else
                                              OnFolderProgressChanged(CatalogFolderProgressType.ProcessingItemEndNoError, mailboxData, folderStack, folderData, new Process((int)dealedCountTemp, itemCount), item);
-                                         LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.DEBUG, string.Format("{0} item {1} end", dealedCountTemp, item.DisplayName),
+                                         LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.DEBUG, string.Format("{0} item {1} size {2}b end", dealedCountTemp, item.DisplayName, item.SizeInEx),
                                              "TotalTime:{0}", (DateTime.Now - itemStartTime).TotalSeconds);
                                      }
                                  } while (false);
@@ -687,7 +695,7 @@ namespace DataProtectImpl
                             continue;
                         }
 
-                        Interlocked.Increment(ref AllFolderIndex);
+                        Interlocked.Increment(ref AllDealedFolderIndex);
 
 
                         folderStack.Push(childFolderData);
@@ -931,6 +939,12 @@ namespace DataProtectImpl
                 EwsAdapter = CatalogFactory.Instance.NewEwsAdapter();
             }
             EwsAdapter.ConnectMailbox(ServiceContext.Argument, mailbox);
+            IDataConvert dataConvert = CatalogFactory.Instance.NewDataConvert();
+            dataConvert.OrganizationName = AdminInfo.OrganizationName;
+            dataConvert.StartTime = DateTime.Now;
+
+            EwsAdapter.DataConvert = dataConvert;
+
             List<IFolderData> folders = null;
             if (string.IsNullOrEmpty(parentId) || parentId == "0")
             {
@@ -950,9 +964,7 @@ namespace DataProtectImpl
             }
 
             List<IFolderData> folderdatas = new List<IFolderData>(folders.Count);
-            IDataConvert dataConvert = CatalogFactory.Instance.NewDataConvert();
-            dataConvert.OrganizationName = AdminInfo.OrganizationName;
-            dataConvert.StartTime = DateTime.Now;
+            
 
             foreach (var folder in folders)
             {

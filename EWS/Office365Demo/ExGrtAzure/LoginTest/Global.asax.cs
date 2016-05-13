@@ -1,5 +1,6 @@
 ﻿using EwsFrame;
 using EwsFrame.EF;
+using EwsFrame.Util;
 using FTStreamUtil;
 using System;
 using System.Collections.Generic;
@@ -95,6 +96,7 @@ namespace LoginTest
                 LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.INFO, "Application_End");
                 LogFactory.LogInstance.Dispose();
                 LogFactory.EwsTraceLogInstance.Dispose();
+                EwsRequestGate.Instance.Dispose();
             }
             catch(Exception e)
             {

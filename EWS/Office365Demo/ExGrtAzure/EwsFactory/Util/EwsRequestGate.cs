@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace EwsFrame.Util
 {
-    
 
-    public class EwsRequestGate
+
+    public class EwsRequestGate : IDisposable
     {
         private static object _lockObj = new object();
         private static EwsRequestGate _instance;
@@ -33,7 +33,7 @@ namespace EwsFrame.Util
             }
         }
 
-        private static ManualResetEventSlim manualReset = new ManualResetEventSlim(true);
+        private ManualResetEventSlim manualReset = new ManualResetEventSlim(true);
         public void Enter()
         {
             manualReset.Wait();
@@ -44,7 +44,7 @@ namespace EwsFrame.Util
         private DateTime WaitingStartTime;
 
         private const int actionWaitingMaxTime = 60;
-        private bool isInWaiting = false;
+        private bool isInSuspending = false;
         public void Close(KeyValuePair<Type, OperationForFailBeforeRun> actionToOpen)
         {
             using (_lockObj.LockWhile(() =>
@@ -52,14 +52,14 @@ namespace EwsFrame.Util
                 _actions[actionToOpen.Key] = actionToOpen.Value;
                 if (WaitingTime < actionToOpen.Value.WaitTimeSecond)
                     WaitingTime = actionToOpen.Value.WaitTimeSecond;
-                if (isInWaiting)
+                if (isInSuspending)
                     return;
                 else
                 {
-                    isInWaiting = true;
+                    isInSuspending = true;
                     manualReset.Reset();
-                    ThreadPool.QueueUserWorkItem(InternalWaiting);
-                    LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.INFO, "suspend all ews request. will resume after little second ");
+                    ThreadPool.QueueUserWorkItem(InternalSuspending);
+                    LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.WARN, "suspend all ews request. will resume after little second ");
                 }
             }))
             { }
@@ -68,14 +68,15 @@ namespace EwsFrame.Util
         /// <summary>
         /// to wait some second to avoid re-close.
         /// </summary>
-        private void InternalWaiting(object args)
+        private void InternalSuspending(object args)
         {
             WaitingStartTime = DateTime.Now;
             bool isBreak = false;
             while (!isBreak)
             {
                 Thread.Sleep(1000);
-                using (_lockObj.LockWhile(() => {
+                using (_lockObj.LockWhile(() =>
+                {
                     if ((DateTime.Now - WaitingStartTime).TotalSeconds > WaitingTime)
                     {
                         foreach (var operatorForRunAgain in _actions.Values)
@@ -88,7 +89,8 @@ namespace EwsFrame.Util
                                 }
                                 catch (Exception e)
                                 {
-                                    try {
+                                    try
+                                    {
                                         LogFactory.LogInstance.WriteException(LogInterface.LogLevel.ERR, string.Format("For exception {0} failure, the restore operation is failed", operatorForRunAgain.ExceptionType.FullName), e, e.Message);
                                     }
                                     catch
@@ -102,10 +104,10 @@ namespace EwsFrame.Util
                         WaitingStartTime = DateTime.Now;
                         WaitingTime = actionWaitingMaxTime;
                         _actions.Clear();
-                        isInWaiting = false;
+                        isInSuspending = false;
                         isBreak = true;
+                        LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.INFO, string.Format("resume ews request. operationCount:{0}.", OperatorCtrlBase.OperationCount));
                         Open();
-                        LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.INFO, "resume ews request.");
                     }
                 }))
                 { }
@@ -115,6 +117,11 @@ namespace EwsFrame.Util
         public void Open()
         {
             manualReset.Set();
+        }
+
+        public void Dispose()
+        {
+            manualReset.Dispose();
         }
     }
 

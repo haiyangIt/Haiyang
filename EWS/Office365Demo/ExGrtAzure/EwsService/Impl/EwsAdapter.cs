@@ -18,12 +18,7 @@ namespace EwsService.Impl
 {
     public class EwsAdapter : IEwsAdapter
     {
-        private EwsBaseOperator _ewsOperator;
-
-        private ExchangeService CurrentExchangeService
-        {
-            get; set;
-        }
+        private EwsBaseOperator _ewsOperator = new EwsLimitOperator();
 
         public string MailboxPrincipalAddress
         {
@@ -34,9 +29,9 @@ namespace EwsService.Impl
         {
             argument.SetConnectMailbox(connectMailAddress);
             MailboxPrincipalAddress = connectMailAddress;
-            CurrentExchangeService = EwsProxyFactory.CreateExchangeService(argument, MailboxPrincipalAddress);
+            var url = _ewsOperator.NewExchangeService(connectMailAddress, argument);
             CreatedFolders = new Dictionary<string, FolderId>();
-            return CurrentExchangeService.Url.AbsoluteUri;
+            return url;
         }
 
         class ExchangeServiceObserver
@@ -98,10 +93,7 @@ namespace EwsService.Impl
 
         private FolderId CreateChildFolder(IFolderDataBase folderData, string parentFolderId)
         {
-            Folder folder = new Folder(CurrentExchangeService);
-            folder.DisplayName = folderData.DisplayName;
-            folder.FolderClass = folderData.FolderType;
-            _ewsOperator.FolderSave(folder, parentFolderId);
+            _ewsOperator.FolderSave(folderData.DisplayName, folderData.FolderType, parentFolderId);
             return FindFolder(folderData, parentFolderId);
         }
 
@@ -297,20 +289,25 @@ namespace EwsService.Impl
             get; set;
         }
         
-        public void ExportEmlItem(IItemData item, MemoryStream emlStream, EwsServiceArgument argument)
+        public byte[] ExportEmlItem(IItemData item, EwsServiceArgument argument)
         {
             var itemInEws = item.Data as Item;
-
             PropertySet props = new PropertySet(EmailMessageSchema.MimeContent);
             _ewsOperator.Load(itemInEws, props);
-            //var email = EmailMessage.Bind(CurrentExchangeService, itemInEws.Id, props);
-            emlStream.Write(itemInEws.MimeContent.Content, 0, itemInEws.MimeContent.Content.Length);
+            byte[] result = itemInEws.MimeContent.Content;
             itemInEws.MimeContent.Content = null;
+            return result;
         }
 
-        public void ExportItem(IItemData item, Stream stream, EwsServiceArgument argument)
+        public byte[] ExportItem(IItemData item, EwsServiceArgument argument)
         {
-            ExportUploadHelper.ExportItemPost(Enum.GetName(typeof(ExchangeVersion), CurrentExchangeService.RequestedServerVersion), item.Id, stream, argument);
+            return _ewsOperator.ExportItem(item.Id, argument);
+        }
+
+
+        public byte[] ExportItem(string itemId, EwsServiceArgument argument)
+        {
+            return _ewsOperator.ExportItem(itemId, argument);
         }
 
         public List<IItemData> GetFolderItems(IFolderData folder)
@@ -343,18 +340,12 @@ namespace EwsService.Impl
 
         public void ImportItem(string parentFolderId, Stream stream, EwsServiceArgument argument)
         {
-            ExportUploadHelper.UploadItemPost(Enum.GetName(typeof(ExchangeVersion),
-                CurrentExchangeService.RequestedServerVersion),
-                parentFolderId,
-                CreateActionType.CreateNew,
-                string.Empty,
-                stream,
-                argument);
+            _ewsOperator.ImportItem(parentFolderId, stream, argument);
         }
 
         public void ImportItem(string parentFolderId, byte[] itemData, EwsServiceArgument argument)
         {
-            ExportUploadHelper.UploadItemPost(Enum.GetName(typeof(ExchangeVersion), CurrentExchangeService.RequestedServerVersion), parentFolderId, CreateActionType.CreateNew, string.Empty, itemData, argument);
+            _ewsOperator.ImportItem(parentFolderId, itemData, argument);
         }
 
         public bool IsItemNew(IItemData item, DateTime lastTime, DateTime thisTime)
@@ -367,9 +358,5 @@ namespace EwsService.Impl
             //return (item.DateTimeCreated > lastTime && item.DateTimeCreated <= thisTime) || (item.LastModifiedTime > lastTime && item.LastModifiedTime <= thisTime);
         }
     }
-
-    public class EwsOperationBase
-    {
-
-    }
+    
 }

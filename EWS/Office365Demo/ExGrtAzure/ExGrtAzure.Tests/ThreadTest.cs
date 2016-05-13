@@ -15,12 +15,48 @@ namespace ExGrtAzure.Tests
     [TestClass]
     public class ThreadTest
     {
+
         [TestInitialize]
         public void TestInit()
         {
-            string logFolder = ConfigurationManager.AppSettings["LogPath"];
-            var logPath = Path.Combine(logFolder, string.Format("{0}Trace.txt", DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss")));
-            Trace.Listeners.Add(new TextWriterTraceListener(logPath));
+            //string logFolder = ConfigurationManager.AppSettings["LogPath"];
+            //var logPath = Path.Combine(logFolder, string.Format("{0}Trace.txt", DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss")));
+            //Trace.Listeners.Add(new TextWriterTraceListener(logPath));
+            TextWriterTraceListener myCreator = new TextWriterTraceListener(System.Console.Out); 
+            Trace.Listeners.Add(myCreator);
+
+            Debug.Listeners.Add(new DefaultTraceListener());
+        }
+
+        private TestContext testContextInstance;
+        /// <summary>
+        ///Gets or sets the test context which provides
+        ///information about and functionality for the current test run.
+        ///</summary>
+        public TestContext TestContext
+        {
+            get
+            {
+                return testContextInstance;
+            }
+            set
+            {
+                testContextInstance = value;
+            }
+        }
+
+        [TestMethod]
+        public void TestTrace()
+        {
+            for (int i = 0; i < 1000; i++)
+            {
+                Trace.WriteLine("Test Trace");
+                Debug.WriteLine("Test Trace Debug");
+
+                TestContext.WriteLine("Message...");
+
+            }
+            Trace.Flush();
         }
 
         [TestMethod]
@@ -32,9 +68,9 @@ namespace ExGrtAzure.Tests
 
                 Parallel.ForEach(items, new ParallelOptions() { MaxDegreeOfParallelism = 10 }, (item) =>
                  {
-                     var b = new OperatorCtrlBaseImpl();
-                     var timeOut = new TimeOutOperatorCtrl(b);
-                     var retry = new RetryOperator(timeOut,
+                     var b = new OperatorCtrlBaseImpl("Test");
+                     var timeOut = new TimeOutOperatorCtrl(b, "Test");
+                     var retry = new RetryOperator(timeOut, "Test",
                          () =>
                          {
                              EwsRequestGate.Instance.Enter();
@@ -110,7 +146,8 @@ namespace ExGrtAzure.Tests
         [TestCleanup]
         public void End()
         {
-            LogFactory.LogInstance.Dispose();
+            //LogFactory.LogInstance.Dispose();
+            Trace.Flush();
         }
     }
 }

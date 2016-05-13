@@ -216,8 +216,9 @@ namespace EwsService.Common
             if(!urlCache.TryGetValue(mailboxKey, out urlObj) || isDoAutodiscovery)
             {
                 DoAutodiscover(service, mailboxAddress);
+                if (isDoAutodiscovery && urlObj == null)
+                    urlCache.AddKeyValue(mailboxKey, urlObj);
                 urlObj = service.Url;
-                urlCache.AddKeyValue(mailboxKey, urlObj);
             }
             else
             {

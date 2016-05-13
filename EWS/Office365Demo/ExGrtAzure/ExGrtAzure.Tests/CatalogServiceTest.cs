@@ -7,141 +7,134 @@ using Microsoft.Exchange.WebServices.Data;
 using EwsServiceInterface;
 using System.Diagnostics;
 using EwsDataInterface;
+using Newtonsoft.Json;
+using LogInterface;
+using System.Threading;
+using EwsFrame.Util;
+using SqlDbImpl;
+using System.Configuration;
 
 namespace ExGrtAzure.Tests
 {
     [TestClass]
     public class CatalogServiceTest
     {
-        private static CatalogFactory _factory;
-        private static ICatalogService _service;
 
+        private static AutoResetEvent _wait = new AutoResetEvent(false);
         [ClassInitialize]
         public static void TestInit(TestContext context)
         {
-            _factory = GetCatalogFactory();
-            _service = GetCatalogService();
+            //TextWriterTraceListener myCreator = new TextWriterTraceListener(System.Console.Out);
+            //Trace.Listeners.Add(myCreator);
+            string logFolder = ConfigurationManager.AppSettings["LogPath"];
+            var logPath = Path.Combine(logFolder, string.Format("{0}Trace.txt", DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss")));
+            Trace.Listeners.Add(new TextWriterTraceListener(logPath));
 
-            //var mailboxOper = _factory.NewMailboxOperatorImpl();
-            //ServiceContext.ContextInstance.CurrentMailbox = "haiyang.ling@arcserve.com";
-            //mailboxOper.ConnectMailbox(ServiceContext.ContextInstance.Argument, "haiyang.ling@arcserve.com");
-            //_ewsContext = mailboxOper.CurrentExchangeService;
-        }
+            IServiceContext serviceContext = ServiceContext.NewServiceContext("haiyang.ling@arcserve.com", "", "", "Arcserve", DataProtectInterface.TaskType.Catalog);
+            serviceContext.CurrentMailbox = "haiyang.ling@arcserve.com";
+            serviceContext.DataAccessObj.ResetAllStorage(serviceContext.CurrentMailbox);
 
-        public static CatalogFactory GetCatalogFactory()
-        {
-            var directory = AppDomain.CurrentDomain.BaseDirectory;
-            directory = Path.Combine(directory, "..\\..\\..\\lib");
-            CatalogFactory.LibPath = directory;
-            CatalogFactory factory = CatalogFactory.Instance;
-
-            return factory;
-        }
-
-        public static ICatalogService GetCatalogService()
-        {
-            var service = _factory.NewCatalogService("devO365admin@arcservemail.onmicrosoft.com", "arcserve1!", null, "Arcserve");
-            return service;
-        }
-
-        [TestMethod]
-        [Description("Test GetAllMailboxes")]
-        public void TestGetAllMailbox()
-        {
-            var result = _service.GetAllUserMailbox();
-
-            Assert.AreEqual(result.Count, 1);
-            Assert.AreEqual(result[0].MailAddress.ToLower(), "haiyang.ling@arcserve.com");
-        }
-
-        [TestMethod]
-        [Description("Test ConnectMailbox")]
-        public void TestConnectMailbox()
-        {
-        }
-
-        [TestMethod]
-        [Description("Test folder operation include GetChildFolder GetRootFolder.")]
-        public void TestFolderOperator()
-        {
-            //var folder = _factory.NewFolderOperatorImpl(_ewsContext);
-            //Folder rootFolder = folder.GetRootFolder();
-            //IDataConvert dataConvert = _factory.NewDataConvert();
-            //dataConvert.StartTime = DateTime.Now;
-            //dataConvert.OrganizationName = ServiceContext.ContextInstance.AdminInfo.OrganizationName;
-            //GetChildFolder(dataConvert, folder, rootFolder, "haiyang.ling@arcserve.com", 1);
-        }
-
-        private void GetChildFolder(IDataConvert dataConvert, IEwsAdapter ewsAdapter, Folder parentFolder, string mailbox, int level)
-        {
-            IFolderData folderData = dataConvert.Convert(parentFolder, mailbox);
-
-            OutputFolderData(folderData, level);
-            if (parentFolder.ChildFolderCount == 0)
-                Debug.WriteLine(string.Format("{0} {1} doesn't have any child folder", "".PadLeft(level * 2), parentFolder.DisplayName));
-
-            var childFolders = ewsAdapter.GetChildFolder(parentFolder.Id.UniqueId);
-            foreach (Folder childFolder in childFolders)
+            using (CatalogDbContext dbContext = new CatalogDbContext(new SqlDbImpl.Model.OrganizationModel() { Name = "Arcserve" }))
             {
-                GetChildFolder(dataConvert, ewsAdapter, childFolder, mailbox, level + 1);
+                dbContext.Folders.RemoveRange(dbContext.Folders);
+                dbContext.ItemLocations.RemoveRange(dbContext.ItemLocations);
+                dbContext.Items.RemoveRange(dbContext.Items);
+                dbContext.Catalogs.RemoveRange(dbContext.Catalogs);
+                dbContext.Mailboxes.RemoveRange(dbContext.Mailboxes);
+
+                dbContext.SaveChanges();
             }
         }
 
-        private void OutputFolderData(IFolderData folderData, int level)
+        [TestMethod]
+        public void TestInit()
         {
-            Debug.WriteLine(string.Format("{0} Folder: [{1}],type: [{2}],ChildFolderCount:[{3}],ChildItemCount:[{4}],Id:[{5}],ParentId:[{6}]",
-                "".PadLeft(level * 2), ((IItemBase)folderData).DisplayName,
-                folderData.FolderType,
-                folderData.ChildFolderCount,
-                folderData.ChildItemCount,
-                folderData.FolderId,
-                folderData.ParentFolderId));
+
+        }
+
+        private static void Performance(object arg)
+        {
+            //PerformanceCounter cpuCounter = new PerformanceCounter();
+            //PerformanceCounter ramCounter = new PerformanceCounter("Memory", "Available MBytes");
+
+            //Trace.TraceInformation(string.Format("ThreadCount\tworkingSet\tcpuprocessTime\tmemory available\t"));
+            //while (true)
+            //{
+            //    Thread.Sleep(10000);
+            //    //    var currentProcess = System.Diagnostics.Process.GetCurrentProcess();
+            //    //    long workingSet = currentProcess.WorkingSet64;
+            //    //    int threadCount = currentProcess.Threads.Count;
+
+            //    //    Trace.TraceInformation("{0}\t{1}\t{2}\t{3}\t{4}", DateTime.Now.ToString("HHmmssfff"), threadCount, workingSet, cpuCounter.NextValue(), ramCounter.NextValue());
+            //    Trace.Flush();
+            //}
+        }
+
+        private static void ThreadBackup(object arg)
+        {
+            var argument = arg as CatalogArgs;
+            try
+            {
+                using (argument.Service)
+                    argument.Service.GenerateCatalog(argument.FilterItem);
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Trace.TraceError(e.GetExceptionDetail());
+                LogFactory.LogInstance.WriteException(LogInterface.LogLevel.ERR, "Backup job failed.", e, e.Message);
+            }
+            finally
+            {
+                _wait.Set();
+            }
+
+        }
+
+        class CatalogArgs
+        {
+            public ICatalogService Service;
+            public IFilterItem FilterItem;
         }
 
         [TestMethod]
-        [Description("Test Item Operation")]
-        public void TestItemOperator()
+        public void TestGenerateCatalogPart()
         {
-            //IItem itemOper = _factory.NewItemOperatorImpl(_ewsContext, null);
-            //Folder inboxFolder = Folder.Bind(_ewsContext, WellKnownFolderName.SentItems);
-            //var items = itemOper.GetFolderItems(inboxFolder);
+            TestCatalog(@"D:\21GitHub\Haiyang\EWS\Office365Demo\ExGrtAzure\ExGrtAzure.Tests\PartSelectItems.txt");
+        }
 
-            //IDataConvert dataConvert = _factory.NewDataConvert();
-            //dataConvert.StartTime = DateTime.Now;
-            //dataConvert.OrganizationName = ServiceContext.ContextInstance.AdminInfo.OrganizationName;
+        private void TestCatalog(string file)
+        {
+            var service = CatalogFactory.Instance.NewCatalogService("devO365admin@arcservemail.onmicrosoft.com", "JackyMao1!", "", "arcserve");
+            var partSelect = "";
+            using (StreamReader reader = new StreamReader(file))
+            {
+                partSelect = reader.ReadToEnd();
+            }
+            LoadedTreeItem selectedItem = JsonConvert.DeserializeObject<LoadedTreeItem>(partSelect);
+            service.CatalogJobName = string.Format("Test Catalog job {0}", DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss"));
+            IFilterItem filterObj = CatalogFactory.Instance.NewFilterItemBySelectTree(selectedItem);
+            var serviceId = Guid.NewGuid();
+            JobProgressManager.Instance[serviceId] = (IDataProtectProgress)service;
+            ThreadPool.QueueUserWorkItem(ThreadBackup, new CatalogArgs() { Service = service, FilterItem = filterObj });
 
-            //foreach (var item in items)
-            //{
-            //    var itemData = dataConvert.Convert(item);
-            //}
-
-            //var path = string.Format("{0}.bin", DateTime.Now.ToString("yyyyMMddHHmmss"));
-            //using (StreamWriter write = new StreamWriter(path))
-            //{
-            //    itemOper.ExportItem(items[0], write.BaseStream, ServiceContext.ContextInstance.Argument);
-            //}
-
-            //IFolder folderOper = _factory.NewFolderOperatorImpl(_ewsContext);
-            //var findFolderId = folderOper.FindFolder(new FolderDataBaseDefault() { DisplayName = "Test" }, inboxFolder.Id);
-            //if (findFolderId != null)
-            //{
-            //    folderOper.DeleteFolder(findFolderId);
-            //}
-
-            //FolderId testFolderId = folderOper.CreateChildFolder(new FolderDataBaseDefault() { DisplayName = "Test" }, inboxFolder.Id);
-            //using (StreamReader reader = new StreamReader(path))
-            //{
-            //    itemOper.ImportItem(testFolderId, reader.BaseStream, ServiceContext.ContextInstance.Argument);
-            //}
+           // ThreadPool.QueueUserWorkItem(Performance);
+            _wait.WaitOne();
         }
 
         [TestMethod]
-        public void TestGenerateCatalog()
+        public void TestGenerateCatalogAll()
         {
-            //_service.GenerateCatalog("haiyang.ling@arcserve.com","Test");
+            TestCatalog(@"D:\21GitHub\Haiyang\EWS\Office365Demo\ExGrtAzure\ExGrtAzure.Tests\AllSelectItems.txt");
         }
-        
 
-        
+        [ClassCleanup]
+        public static void TestClearUp()
+        {
+            EwsRequestGate.Instance.Dispose();
+            LogFactory.LogInstance.Dispose();
+            LogFactory.EwsTraceLogInstance.Dispose();
+            _wait.Dispose();
+        }
+
     }
 }

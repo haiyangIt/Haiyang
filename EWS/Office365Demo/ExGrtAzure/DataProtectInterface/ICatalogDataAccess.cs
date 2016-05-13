@@ -25,5 +25,6 @@ namespace DataProtectInterface
         bool IsItemContentExist(string itemId);
         void UpdateFolderChildFolderItemCount(IFolderData folderData, DateTime startTime);
         void UpdateMailboxChildFolderCount(IMailboxData mailboxData, DateTime startTime);
+        object OtherObj { set; }
     }
 }

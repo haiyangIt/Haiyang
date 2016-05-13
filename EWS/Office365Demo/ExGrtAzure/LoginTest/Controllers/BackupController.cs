@@ -19,6 +19,8 @@ using LoginTest.Utils;
 using System.Threading;
 using LogInterface;
 using System.Diagnostics;
+using System.IO;
+using EwsFrame.Util;
 
 namespace LoginTest.Controllers
 {
@@ -188,8 +190,8 @@ namespace LoginTest.Controllers
 
                 JavaScriptSerializer js = new JavaScriptSerializer();
                 LoadedTreeItem selectedItem = js.Deserialize<LoadedTreeItem>(model.BackupSelectItems);
+                
 
-                //return View(model);
                 // todo need use job table to save job status.
                 var password = RSAUtil.AsymmetricDecrypt(model.EncryptPassword);
                 var service = CatalogFactory.Instance.NewCatalogService(model.BackupUserMailAddress, password, null, model.BackupUserOrganization);
@@ -237,6 +239,10 @@ namespace LoginTest.Controllers
             {
                 System.Diagnostics.Trace.TraceError(e.GetExceptionDetail());
                 LogFactory.LogInstance.WriteException(LogInterface.LogLevel.ERR, "Backup job failed.", e, e.Message);
+            }
+            finally
+            {
+                argument.Service.Dispose();
             }
         }
 

@@ -11,6 +11,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
+using System.IO;
+using System.Net;
+using System.Net.Sockets;
 
 namespace EwsService.Impl
 {
@@ -21,14 +24,18 @@ namespace EwsService.Impl
         private string Mailbox;
         private EwsServiceArgument EwsArgument;
 
-        public virtual void NewExchangeService(string mailbox, EwsServiceArgument arg, bool isDoAutodiscovery = false)
+        public virtual string NewExchangeService(string mailbox, EwsServiceArgument arg, bool isDoAutodiscovery = false)
         {
-            DoNewExchangeService(mailbox, arg, isDoAutodiscovery);
+            return DoNewExchangeService(mailbox, arg, isDoAutodiscovery);
+
         }
 
-        private void DoNewExchangeService(string mailbox, EwsServiceArgument arg, bool isDoAutodiscovery = false)
+        private string DoNewExchangeService(string mailbox, EwsServiceArgument arg, bool isDoAutodiscovery = false)
         {
+            Mailbox = mailbox;
+            EwsArgument = arg;
             service = EwsProxyFactory.CreateExchangeService(arg, mailbox, isDoAutodiscovery);
+            return service.Url.AbsoluteUri;
         }
 
         public virtual Folder FolderBind(WellKnownFolderName name, PropertySet propertySet)
@@ -51,6 +58,14 @@ namespace EwsService.Impl
 
         public virtual void FolderSave(Folder folder, FolderId parentFolderId)
         {
+            folder.Save(parentFolderId);
+        }
+
+        public virtual void FolderSave(string folderName, string folderClass, FolderId parentFolderId)
+        {
+            Folder folder = new Folder(service);
+            folder.DisplayName = folderName;
+            folder.FolderClass = folderClass;
             folder.Save(parentFolderId);
         }
 
@@ -190,78 +205,56 @@ namespace EwsService.Impl
             return service.FindItems(parentFolderId, searchFilter, view);
         }
 
-        protected void TryAction(Action operation)
+        public virtual byte[] ExportItem(string sItemId, EwsServiceArgument argument)
         {
-            DoAction(() =>
+            return ExportUploadHelper.ExportItemPost(Enum.GetName(typeof(ExchangeVersion), service.RequestedServerVersion), sItemId, argument);
+        }
+
+        public virtual void ImportItem(string parentFolderId, Stream stream, EwsServiceArgument argument)
+        {
+            ExportUploadHelper.UploadItemPost(Enum.GetName(typeof(ExchangeVersion),
+                service.RequestedServerVersion), parentFolderId, CreateActionType.CreateNew, string.Empty, stream, argument);
+        }
+
+        public virtual void ImportItem(string parentFolderId, byte[] itemData, EwsServiceArgument argument)
+        {
+            ExportUploadHelper.UploadItemPost(Enum.GetName(typeof(ExchangeVersion),
+                service.RequestedServerVersion), parentFolderId, CreateActionType.CreateNew, string.Empty, itemData, argument);
+        }
+
+        protected void TryAction(Action operation, string operationName)
+        {
+            OperatorCtrlBase.DoActionWithRetryTimeOut(() =>
             {
                 operation.Invoke();
-            });
+            }, operationName);
         }
 
-        protected T TryFunc<T>(Func<T> operation)
+        protected T TryFunc<T>(Func<T> operation, string operationName)
         {
             T result = default(T);
-            DoAction(() =>
+            OperatorCtrlBase.DoActionWithRetryTimeOut(() =>
             {
                 result = operation.Invoke();
-            });
+            }, operationName);
             return result;
         }
-
-
-        private static ConcurrentQueue<Exception> ex = new ConcurrentQueue<Exception>();
-
-        private static object _lockAllAction = new object();
-        private void DoAction(Action operation)
-        {
-            _operatorCtrl.DoAction(operation);
-        }
-        OperatorCtrlBase _operatorCtrl;
-
+       
         protected EwsBaseOperator()
         {
-            var b = new OperatorCtrlBaseImpl();
-            var timeOut = new TimeOutOperatorCtrl(b);
-            var retry = new RetryOperator(timeOut,
-                () =>
-                {
-                    EwsRequestGate.Instance.Enter();
-                },
-                (e) =>
-            {
-                var type = e.GetType();
-                if (e is ServiceRequestException)
-                {
-                    EwsRequestGate.Instance.Close(new KeyValuePair<Type, OperationForFailBeforeRun>(type, new OperationForFailBeforeRun(60,
-                        ()=> {
-                            DoNewExchangeService(Mailbox, EwsArgument, true);
-                        }, type)));
-                }
-                else if(e is OutOfMemoryException)
-                {
-                    EwsRequestGate.Instance.Close(new KeyValuePair<Type, OperationForFailBeforeRun>(type, new OperationForFailBeforeRun(10, null, type)));
-                }
-                else if(e is TimeoutException)
-                {
-                    EwsRequestGate.Instance.Close(new KeyValuePair<Type, OperationForFailBeforeRun>(type, new OperationForFailBeforeRun(10, null, type)));
-                }
-                else
-                {
-                    EwsRequestGate.Instance.Close(new KeyValuePair<Type, OperationForFailBeforeRun>(type, new OperationForFailBeforeRun(10, null, type)));
-                }
-            });
-            _operatorCtrl = retry;
+
         }
     }
 
     public class EwsLimitOperator : EwsBaseOperator
     {
+        public EwsLimitOperator() : base() { }
         public override Folder FolderBind(WellKnownFolderName name, PropertySet propertySet)
         {
             return TryFunc(() =>
             {
                 return base.FolderBind(name, propertySet);
-            });
+            }, "FolderBind");
         }
 
         public override Folder FolderBind(WellKnownFolderName name)
@@ -269,7 +262,7 @@ namespace EwsService.Impl
             return TryFunc(() =>
             {
                 return base.FolderBind(name);
-            });
+            }, "FolderBind");
         }
 
         public override Folder FolderBind(FolderId id, PropertySet propertySet)
@@ -277,7 +270,7 @@ namespace EwsService.Impl
             return TryFunc(() =>
             {
                 return base.FolderBind(id, propertySet);
-            });
+            }, "FolderBind");
         }
 
         public override Folder FolderBind(FolderId id)
@@ -285,7 +278,7 @@ namespace EwsService.Impl
             return TryFunc(() =>
             {
                 return base.FolderBind(id);
-            });
+            }, "FolderBind");
         }
 
         public override void FolderSave(Folder folder, FolderId parentFolderId)
@@ -293,7 +286,7 @@ namespace EwsService.Impl
             TryAction(() =>
             {
                 base.FolderSave(folder, parentFolderId);
-            });
+            }, "FolderSave");
         }
 
         public override void FolderDelete(Folder folder, DeleteMode deleteMode)
@@ -301,7 +294,7 @@ namespace EwsService.Impl
             TryAction(() =>
             {
                 base.FolderDelete(folder, deleteMode);
-            });
+            }, "FolderDelete");
         }
 
         public override FindFoldersResults FindFolders(FolderId parentFolderId, FolderView view)
@@ -309,7 +302,7 @@ namespace EwsService.Impl
             return TryFunc(() =>
             {
                 return base.FindFolders(parentFolderId, view);
-            });
+            }, "FindFolders");
         }
 
         public override FindFoldersResults FindFolders(FolderId parentFolderId, SearchFilter searchFilter, FolderView view)
@@ -317,7 +310,7 @@ namespace EwsService.Impl
             return TryFunc(() =>
             {
                 return base.FindFolders(parentFolderId, searchFilter, view);
-            });
+            }, "FindFolders");
         }
 
         public override FindFoldersResults FindFolders(WellKnownFolderName parentFolderName, FolderView view)
@@ -325,7 +318,7 @@ namespace EwsService.Impl
             return TryFunc(() =>
             {
                 return base.FindFolders(parentFolderName, view);
-            });
+            }, "FindFolders");
         }
 
         public override FindFoldersResults FindFolders(WellKnownFolderName parentFolderName, SearchFilter searchFilter, FolderView view)
@@ -333,7 +326,7 @@ namespace EwsService.Impl
             return TryFunc(() =>
             {
                 return base.FindFolders(parentFolderName, searchFilter, view);
-            });
+            }, "FindFolders");
         }
 
         public override void Load(Item item, PropertySet propertySet)
@@ -341,7 +334,7 @@ namespace EwsService.Impl
             TryAction(() =>
             {
                 base.Load(item, propertySet);
-            });
+            }, "Load");
         }
 
         public override FindItemsResults<Item> FindItems(FolderId parentFolderId, SearchFilter searchFilter, ViewBase view)
@@ -349,7 +342,7 @@ namespace EwsService.Impl
             return TryFunc(() =>
             {
                 return base.FindItems(parentFolderId, searchFilter, view);
-            });
+            }, "FindItems");
         }
 
         public override FindItemsResults<Item> FindItems(FolderId parentFolderId, ViewBase view)
@@ -357,15 +350,48 @@ namespace EwsService.Impl
             return TryFunc(() =>
             {
                 return base.FindItems(parentFolderId, view);
-            });
+            }, "FindItems");
         }
 
-        public override void NewExchangeService(string mailbox, EwsServiceArgument arg, bool isDoAutodiscovery = false)
+        public override string NewExchangeService(string mailbox, EwsServiceArgument arg, bool isDoAutodiscovery = false)
+        {
+            return TryFunc(() =>
+            {
+                return base.NewExchangeService(mailbox, arg, isDoAutodiscovery);
+            }, "NewExchangeService");
+        }
+
+        public override void FolderSave(string folderName, string folderClass, FolderId parentFolderId)
         {
             TryAction(() =>
             {
-                base.NewExchangeService(mailbox, arg, isDoAutodiscovery);
-            });
+                base.FolderSave(folderName, folderClass, parentFolderId);
+            }, "FolderSave");
+        }
+
+
+        public override byte[] ExportItem(string sItemId, EwsServiceArgument argument)
+        {
+            return TryFunc(() =>
+            {
+                return base.ExportItem(sItemId, argument);
+            }, "ExportItem");
+        }
+
+        public override void ImportItem(string parentFolderId, byte[] itemData, EwsServiceArgument argument)
+        {
+            TryAction(() =>
+            {
+                base.ImportItem(parentFolderId, itemData, argument);
+            }, "ImportItem");
+        }
+
+        public override void ImportItem(string parentFolderId, Stream stream, EwsServiceArgument argument)
+        {
+            TryAction(() =>
+            {
+                base.ImportItem(parentFolderId, stream, argument);
+            }, "ImportItem");
         }
     }
 

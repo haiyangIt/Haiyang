@@ -62,6 +62,7 @@ namespace LogInterface
                     sb.AppendLine(string.Join("  ",
                         curEx.GetType().FullName,
                         curEx.Message,
+                        curEx.HResult.ToString("X8"),
                         curEx.StackTrace));
 
                     curEx = curEx.InnerException;
@@ -77,6 +78,7 @@ namespace LogInterface
             sb.AppendLine(string.Join("  ",
                 ex.GetType().FullName,
                     ex.Message,
+                    ex.HResult.ToString("X8"),
                     ex.StackTrace));
 
             foreach (var innerEx in ex.Flatten().InnerExceptions)

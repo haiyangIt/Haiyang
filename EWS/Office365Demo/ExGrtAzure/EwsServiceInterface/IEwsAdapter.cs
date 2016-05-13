@@ -36,13 +36,14 @@ namespace EwsServiceInterface
 
         List<IItemData> GetFolderItems(IFolderData folder);
 
-        void ExportItem(IItemData item, Stream stream, EwsServiceArgument argument);
+        byte[] ExportItem(IItemData item, EwsServiceArgument argument);
+        byte[] ExportItem(string itemId,  EwsServiceArgument argument);
         void ImportItem(string parentFolderId, byte[] itemData, EwsServiceArgument argument);
         void ImportItem(string parentFolderId, Stream stream, EwsServiceArgument argument);
 
         bool IsItemNew(IItemData item, DateTime lastTime, DateTime thisTime);
 
-        void ExportEmlItem(IItemData itemInEws, MemoryStream emlStream, EwsServiceArgument argument);
+        byte[] ExportEmlItem(IItemData itemInEws, EwsServiceArgument argument);
 
     }
 }

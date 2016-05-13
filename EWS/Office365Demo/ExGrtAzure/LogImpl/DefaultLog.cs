@@ -128,10 +128,11 @@ namespace LogImpl
                 }
                 else
                 {
-                    sb.AppendLine(string.Join(blank, DateTime.Now.ToString(TimeFormat), Thread.CurrentThread.ManagedThreadId, Task.CurrentId,
+                    sb.AppendLine(string.Join(blank, DateTime.Now.ToString(TimeFormat), Thread.CurrentThread.ManagedThreadId.ToString("D4"), Task.CurrentId.HasValue ? Task.CurrentId.Value.ToString("D4") : "0000",
                         LogLevelHelper.GetLevelString(level),
                         message.RemoveRN(),
                         curEx.Message.RemoveRN(),
+                        curEx.HResult.ToString("X8"),
                         curEx.StackTrace.RemoveRN(), curEx.GetType().FullName));
 
                     curEx = curEx.InnerException;
@@ -144,10 +145,11 @@ namespace LogImpl
         internal static string GetAggrateException(LogLevel level, string message, AggregateException ex, string exMsg)
         {
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine(string.Join(blank, DateTime.Now.ToString(TimeFormat), Thread.CurrentThread.ManagedThreadId, Task.CurrentId,
+            sb.AppendLine(string.Join(blank, DateTime.Now.ToString(TimeFormat), Thread.CurrentThread.ManagedThreadId.ToString("D4"), Task.CurrentId.HasValue ? Task.CurrentId.Value.ToString("D4") : "0000",
                     LogLevelHelper.GetLevelString(level),
                     message.RemoveRN(),
                     ex.Message.RemoveRN(),
+                    ex.HResult.ToString("X8"),
                     ex.StackTrace.RemoveRN(), ex.GetType().FullName));
 
             foreach (var innerEx in ex.Flatten().InnerExceptions)
@@ -164,7 +166,7 @@ namespace LogImpl
 
         internal static string GetLogString(LogLevel level, string message)
         {
-            return string.Join(blank, DateTime.Now.ToString(TimeFormat), Thread.CurrentThread.ManagedThreadId, Task.CurrentId,
+            return string.Join(blank, DateTime.Now.ToString(TimeFormat), Thread.CurrentThread.ManagedThreadId.ToString("D4"), Task.CurrentId.HasValue ? Task.CurrentId.Value.ToString("D4") : "0000",
                 LogLevelHelper.GetLevelString(level),
                 message.RemoveRN());
         }
@@ -176,7 +178,7 @@ namespace LogImpl
 
         internal static string GetLogString(LogLevel level, string message, string format, params object[] args)
         {
-            return string.Join(blank, DateTime.Now.ToString(TimeFormat), Thread.CurrentThread.ManagedThreadId, Task.CurrentId,
+            return string.Join(blank, DateTime.Now.ToString(TimeFormat), Thread.CurrentThread.ManagedThreadId.ToString("D4"), Task.CurrentId.HasValue ? Task.CurrentId.Value.ToString("D4") : "0000",
                 LogLevelHelper.GetLevelString(level),
                 message.RemoveRN(),
                 args.Length > 0 ? string.Format(format, args).RemoveRN() : format.RemoveRN());
@@ -292,6 +294,7 @@ namespace LogImpl
         protected override void Flush()
         {
             writer.Flush();
+            _fileStream.Flush();
             Trace.Flush();
         }
     }

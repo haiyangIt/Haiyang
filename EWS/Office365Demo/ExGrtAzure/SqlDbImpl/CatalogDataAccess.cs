@@ -167,7 +167,7 @@ namespace SqlDbImpl
         internal static CloudBlobClient BlobClient = StorageAccount.CreateCloudBlobClient();
 
         public readonly BlobDataAccess BlobDataAccessObj = new BlobDataAccess(BlobClient);
-        
+
         public IEwsAdapter EwsAdapter { get; set; }
         public void SaveItemContent(IItemData item, string mailboxAddress, DateTime startTime, bool isCheckExist = false, bool isExist = false)
         {
@@ -186,59 +186,43 @@ namespace SqlDbImpl
             var itemLocationModel = new ItemLocationModel();
             List<MailLocation> locationInfos = new List<MailLocation>(3);
 
-            MemoryStream binStream = null;
-            MemoryStream emlStream = null;
             MailLocation mailLocation = new MailLocation();
             int binStreamLength = 0;
             int actualSize = 0;
-            try
+            byte[] buffer = null;
+
+            buffer = EwsAdapter.ExportItem(item, _argument);
+
+            if (buffer == null || buffer.Length == 0)
+                return;
+
+            var location = ItemLocationModel.GetLocation(mailboxAddress, item);
+            string blobNamePrefix = MailLocation.GetBlobNamePrefix(item.ItemId);
+
+            var binLocation = new ExportItemSizeInfo() { Type = ExportType.TransferBin, Size = (int)buffer.Length };
+            mailLocation.AddLocation(binLocation);
+            binStreamLength = (int)buffer.Length;
+            string binBlobName = MailLocation.GetBlobName(ExportType.TransferBin, blobNamePrefix);
+            using (MemoryStream binStream = new MemoryStream(buffer))
             {
-                binStream = new MemoryStream();
-                EwsAdapter.ExportItem(item, binStream, _argument);
-
-                if (binStream == null || binStream.Length == 0)
-                    return;
-
-                var location = ItemLocationModel.GetLocation(mailboxAddress, item);
-                string blobNamePrefix = MailLocation.GetBlobNamePrefix(item.ItemId);
-
-                binStream.Capacity = (int)binStream.Length;
-                binStream.Seek(0, SeekOrigin.Begin);
-                var binLocation = new ExportItemSizeInfo() { Type = ExportType.TransferBin, Size = (int)binStream.Length };
-                mailLocation.AddLocation(binLocation);
-                binStreamLength = (int)binStream.Length;
-                string binBlobName = MailLocation.GetBlobName(ExportType.TransferBin, blobNamePrefix);
                 BlobDataAccessObj.SaveBlob(location, binBlobName, binStream, true);
-                var binLength = binStream.Length;
-                binStream.Close();
-                binStream.Dispose();
-                binStream = null;
-
-                emlStream = new MemoryStream();
-                EwsAdapter.ExportEmlItem(item, emlStream, _argument);
-                emlStream.Capacity = (int)emlStream.Length;
-                emlStream.Seek(0, SeekOrigin.Begin);
-                var emlLocation = new ExportItemSizeInfo() { Type = ExportType.Eml, Size = (int)emlStream.Length };
-                mailLocation.AddLocation(emlLocation);
-                string emlBlobName = MailLocation.GetBlobName(ExportType.Eml, blobNamePrefix);
-                BlobDataAccessObj.SaveBlob(location, emlBlobName, emlStream, true);
-
-                mailLocation.Path = location;
-                actualSize = (int)binLength + (int)emlStream.Length;
             }
-            finally
+            var binLength = buffer.Length;
+            buffer = null;
+
+            buffer = EwsAdapter.ExportEmlItem(item, _argument);
+            var emlLocation = new ExportItemSizeInfo() { Type = ExportType.Eml, Size = (int)buffer.Length };
+            mailLocation.AddLocation(emlLocation);
+            string emlBlobName = MailLocation.GetBlobName(ExportType.Eml, blobNamePrefix);
+            using (MemoryStream emlStream = new MemoryStream(buffer))
             {
-                if (binStream != null)
-                {
-                    binStream.Close();
-                    binStream.Dispose();
-                }
-                if (emlStream != null)
-                {
-                    emlStream.Close();
-                    emlStream.Dispose();
-                }
+                BlobDataAccessObj.SaveBlob(location, emlBlobName, emlStream, true);
             }
+
+            mailLocation.Path = location;
+            actualSize = (int)binLength + (int)buffer.Length;
+            buffer = null;
+
 
             itemLocationModel.ItemId = item.ItemId;
             itemLocationModel.ParentFolderId = item.ParentFolderId;
@@ -334,6 +318,14 @@ namespace SqlDbImpl
                     _otherInformation = new Dictionary<string, object>();
                 }
                 return _otherInformation;
+            }
+        }
+
+        public object OtherObj
+        {
+            set
+            {
+                EwsAdapter = value as IEwsAdapter;
             }
         }
 
