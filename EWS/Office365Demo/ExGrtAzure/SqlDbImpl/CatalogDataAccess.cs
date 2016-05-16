@@ -220,7 +220,7 @@ namespace SqlDbImpl
             //}
 
             mailLocation.Path = location;
-            actualSize = (int)binLength + (int)buffer.Length;
+            actualSize = (int)binLength;// + (int)buffer.Length;
             buffer = null;
 
 

@@ -34,15 +34,19 @@ namespace ExGrtAzure.Tests
             serviceContext.CurrentMailbox = "haiyang.ling@arcserve.com";
             serviceContext.DataAccessObj.ResetAllStorage(serviceContext.CurrentMailbox);
 
-            using (CatalogDbContext dbContext = new CatalogDbContext(new SqlDbImpl.Model.OrganizationModel() { Name = "Arcserve" }))
+            if (!FactoryBase.IsRunningOnAzureOrStorageInAzure())
             {
-                dbContext.Folders.RemoveRange(dbContext.Folders);
-                dbContext.ItemLocations.RemoveRange(dbContext.ItemLocations);
-                dbContext.Items.RemoveRange(dbContext.Items);
-                dbContext.Catalogs.RemoveRange(dbContext.Catalogs);
-                dbContext.Mailboxes.RemoveRange(dbContext.Mailboxes);
 
-                dbContext.SaveChanges();
+                using (CatalogDbContext dbContext = new CatalogDbContext(new SqlDbImpl.Model.OrganizationModel() { Name = "Arcserve" }))
+                {
+                    dbContext.Folders.RemoveRange(dbContext.Folders);
+                    dbContext.ItemLocations.RemoveRange(dbContext.ItemLocations);
+                    dbContext.Items.RemoveRange(dbContext.Items);
+                    dbContext.Catalogs.RemoveRange(dbContext.Catalogs);
+                    dbContext.Mailboxes.RemoveRange(dbContext.Mailboxes);
+
+                    dbContext.SaveChanges();
+                }
             }
         }
 
