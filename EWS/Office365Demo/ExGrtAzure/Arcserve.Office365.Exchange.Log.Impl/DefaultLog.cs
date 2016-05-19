@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Arcserve.Office365.Exchange.Log.Impl
 {
-    public class DefaultLog : ILog , IDisposable
+    public class DefaultLog : ILog
     {
         public DefaultLog()
         {
@@ -82,6 +82,8 @@ namespace Arcserve.Office365.Exchange.Log.Impl
             WriteLine(GetExceptionString(level, message, exception, exMsg));
         }
         const string blank = "\t";
+
+        public event EventHandler<string> WriteLogMsgEvent;
 
         internal static string GetExceptionString(LogLevel level, string message, Exception exception, string exMsg)
         {

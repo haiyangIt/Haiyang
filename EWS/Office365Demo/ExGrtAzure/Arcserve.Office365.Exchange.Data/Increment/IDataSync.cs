@@ -8,7 +8,7 @@ namespace Arcserve.Office365.Exchange.Data.Increment
 {
     public interface IDataSync
     {
-        string SyncStatus { get; }
+        string SyncStatus { get; set; }
 
         string ChangeKey { get; }
     }

@@ -46,6 +46,12 @@ namespace Arcserve.Office365.Exchange.EwsApi
             }
         }
 
+        public EwsServiceArgument(string mailbox, string userName, string password) : base()
+        {
+            ServiceCredential = new NetworkCredential(userName, password);
+            SetConnectMailbox(mailbox);
+        }
+
         public EwsServiceArgument()
         {
             RequestedExchangeVersion = ExchangeVersion.Exchange2013_SP1;

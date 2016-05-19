@@ -16,7 +16,7 @@ using Arcserve.Office365.Exchange.Data.Mail;
 
 namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
 {
-    public class SyncBackup : BackupFlowTemplate, ITaskSyncContext<IJobProgress>
+    public class SyncBackup : BackupFlowTemplate, ITaskSyncContext<IJobProgress>, IExchangeAccess<IJobProgress>
     {
         public SyncBackup()
         {
@@ -40,7 +40,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
 
         public OrganizationAdminInfo AdminInfo { get; set; }
         public string Organization { get; }
-        public IBackupQueryAsync<IJobProgress> BackupQuery { get; }
+        public ICatalogAccess<IJobProgress> CatalogAccess { get; set; }
         public IEwsServiceAdapter<IJobProgress> EwsServiceAdapter { get; set; }
         public IDataFromClient<IJobProgress> DataFromClient { get; set; }
         public DateTime JobStartTime { get; }
@@ -68,13 +68,13 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
         }
 
 
-        public override Func<ICatalogJob, ICollection<IMailboxDataSync>> FuncGetAllMailboxFromLastCatalog
+        public override Func<ICatalogJob, IEnumerable<IMailboxDataSync>> FuncGetAllMailboxFromLastCatalog
         {
             get
             {
                 return (latestCatalogJob) =>
                 {
-                    return BackupQuery.GetMailboxes(latestCatalogJob);
+                    return CatalogAccess.GetMailboxesFromLatestCatalog(latestCatalogJob);
                 };
             }
         }
@@ -90,7 +90,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
             }
         }
 
-        public override Func<ICollection<IMailboxDataSync>, ICollection<IMailboxDataSync>, ICollection<IMailboxDataSync>> FuncGetValidMailbox
+        public override Func<ICollection<IMailboxDataSync>, ICollection<IMailboxDataSync>, ICollection<IMailboxDataSync>> FuncGetIntersectionMailboxCollection
         {
             get
             {
@@ -123,43 +123,43 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
             }
         }
 
-        public override Func<ICollection<IMailboxDataSync>, ICollection<IMailboxDataSync>, ICollection<IMailboxDataSync>[]> FuncGetMailboxCatalog
-        {
-            get
-            {
-                return (mailboxValid, mailboxInLastCatalog) =>
-                {
-                    var result = new ICollection<IMailboxDataSync>[2];
+        //public override Func<ICollection<IMailboxDataSync>, ICollection<IMailboxDataSync>, ICollection<IMailboxDataSync>> FuncGetMailboxCatalog
+        //{
+        //    get
+        //    {
+        //        return (mailboxValid, mailboxInLastCatalog) =>
+        //        {
+        //            var result = new ICollection<IMailboxDataSync>[2];
 
-                    var dicValid = new Dictionary<string, IMailboxDataSync>();
-                    foreach (var item in mailboxValid)
-                    {
-                        dicValid.Add(item.Id, item);
-                    }
+        //            var dicValid = new Dictionary<string, IMailboxDataSync>();
+        //            foreach (var item in mailboxValid)
+        //            {
+        //                dicValid.Add(item.Id, item);
+        //            }
 
-                    var dicCatalog = new Dictionary<string, IMailboxDataSync>();
-                    foreach (var item in mailboxInLastCatalog)
-                    {
-                        dicCatalog.Add(item.Id, item);
-                    }
+        //            var dicCatalog = new Dictionary<string, IMailboxDataSync>();
+        //            foreach (var item in mailboxInLastCatalog)
+        //            {
+        //                dicCatalog.Add(item.Id, item);
+        //            }
 
-                    HashSet<string> ids = new HashSet<string>();
+        //            HashSet<string> ids = new HashSet<string>();
                     
-                    foreach (var key in dicValid.Keys)
-                    {
-                        if (dicCatalog.ContainsKey(key))
-                        {
-                            ids.Add(key);
-                        }
-                    }
+        //            foreach (var key in dicValid.Keys)
+        //            {
+        //                if (dicCatalog.ContainsKey(key))
+        //                {
+        //                    ids.Add(key);
+        //                }
+        //            }
 
-                    result[0] = (from keyValue in dicValid where !ids.Contains(keyValue.Key) select keyValue.Value).ToList();
-                    result[1] = (from keyValue in dicCatalog where !ids.Contains(keyValue.Key) select keyValue.Value).ToList();
+        //            result[0] = (from keyValue in dicValid where !ids.Contains(keyValue.Key) select keyValue.Value).ToList();
+        //            result[1] = (from keyValue in dicCatalog where !ids.Contains(keyValue.Key) select keyValue.Value).ToList();
 
-                    return result;
-                };
-            }
-        }
+        //            return result;
+        //        };
+        //    }
+        //}
 
         public override Action<ICollection<IMailboxDataSync>> AddMailboxToCurrentCatalog
         {
@@ -167,25 +167,41 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
             {
                 return (mailboxes) =>
                 {
-                    BackupQuery.AddMailboxes(mailboxes);
+                    CatalogAccess.AddMailboxesToCatalog(mailboxes);
                 };
             }
         }
 
 
-        public override Action<ICollection<IMailboxDataSync>> RemoveMailboxToCurrentCatalog
-        {
-            get
-            {
-                return (mailboxes) =>
-                {
-                    BackupQuery.DeleteMailboxes(mailboxes);
-                };
-            }
-        }
+        //public override Action<ICollection<IMailboxDataSync>> RemoveMailboxToCurrentCatalog
+        //{
+        //    get
+        //    {
+        //        return (mailboxes) =>
+        //        {
+        //            CatalogAccess.DeleteMailboxesToCatalog(mailboxes);
+        //        };
+        //    }
+        //}
 
 
-        public override BackupMailboxFlowTemplate MailboxTemplate
+        //public override BackupMailboxFlowTemplate MailboxTemplate
+        //{
+        //    get
+        //    {
+        //        throw new NotImplementedException();
+        //    }
+        //}
+
+        //public override Func<ICollection<IMailboxDataSync>, ICollection<IMailboxDataSync>, ICollection<IMailboxDataSync>> FuncGetMailboxCatalog
+        //{
+        //    get
+        //    {
+        //        throw new NotImplementedException();
+        //    }
+        //}
+
+        public override Func<BackupMailboxFlowTemplate> FuncNewMailboxTemplate
         {
             get
             {

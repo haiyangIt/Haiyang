@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Arcserve.Office365.Exchange.DataProtect.Interface
 {
-    public interface IServiceContext
+    public interface IServiceContext : IDisposable
     {
         OrganizationAdminInfo AdminInfo { get; }
         string CurrentMailbox { get; set; }
@@ -17,6 +17,6 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface
         IDataAccess DataAccessObj { get; }
         TaskType TaskType { get; }
         Exception LastException { get; set; }
-        string GetOrganizationPrefix();
+        
     }
 }

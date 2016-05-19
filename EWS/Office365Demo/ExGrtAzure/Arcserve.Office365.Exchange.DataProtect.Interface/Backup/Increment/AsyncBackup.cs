@@ -22,7 +22,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
         public CancellationToken CancelToken { get; set; }
         public OrganizationAdminInfo AdminInfo { get; set; }
         public string Organization { get; }
-        public IBackupQueryAsync<IJobProgress> BackupQuery { get; }
+        public ICatalogAccess<IJobProgress> BackupQuery { get; }
         public IEwsServiceAdapter<IJobProgress> EwsServiceAdapter { get; set; }
         public DateTime JobStartTime { get; }
         public async System.Threading.Tasks.Task Run()

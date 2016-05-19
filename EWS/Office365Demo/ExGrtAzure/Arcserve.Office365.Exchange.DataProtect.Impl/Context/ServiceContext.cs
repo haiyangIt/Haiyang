@@ -126,6 +126,8 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Context
             return DataHelper.GetOrganizationPrefix(CurrentMailbox);
         }
 
-        
+        public void Dispose()
+        {
+        }
     }
 }

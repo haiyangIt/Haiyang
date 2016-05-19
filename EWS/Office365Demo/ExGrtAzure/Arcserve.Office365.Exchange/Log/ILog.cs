@@ -14,6 +14,7 @@ namespace Arcserve.Office365.Exchange.Log
         void WriteException(LogLevel level, string message, Exception exception, string exMsg);
         [Obsolete("Please use other api which contains module paramter.")]
         void WriteLog(LogLevel level, string message, string format, params object[] args);
+        event EventHandler<string> WriteLogMsgEvent;
 
         void WriteLog(string module, LogLevel level, string message);
         void WriteException(string module, LogLevel level, string message, Exception exception, string exMsg);

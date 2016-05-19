@@ -9,12 +9,14 @@ using Microsoft.Exchange.WebServices.Data;
 using System.Threading;
 using Arcserve.Office365.Exchange.EwsApi.Increment;
 using Arcserve.Office365.Exchange.Data.Account;
+using Arcserve.Office365.Exchange.Data.Increment;
+using Arcserve.Office365.Exchange.Util;
 
 namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
 {
-    public class SyncBackupMailbox : BackupMailboxFlowTemplate, ITaskSyncContext<IJobProgress>
+    public class SyncBackupMailbox : BackupMailboxFlowTemplate, ITaskSyncContext<IJobProgress>, IExchangeAccess<IJobProgress>
     {
-        public IBackupQueryAsync<IJobProgress> BackupQuery { get; }
+        public ICatalogAccess<IJobProgress> CatalogAccess { get; set; }
         public IEwsServiceAdapter<IJobProgress> EwsServiceAdapter { get; set; }
         public IDataFromClient<IJobProgress> DataFromClient { get; set; }
         public OrganizationAdminInfo AdminInfo { get; set; }
@@ -22,18 +24,10 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
 
         public CancellationToken CancelToken
         {
-            get
-            {
-                throw new NotImplementedException();
-            }
-
-            set
-            {
-                throw new NotImplementedException();
-            }
+            get; set;
         }
 
-        public override BackupFolderFlowTemplate FolderTemplate
+        public override Func<BackupFolderFlowTemplate> FuncNewFolderTemplate
         {
             get
             {
@@ -47,70 +41,106 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
             {
                 return (lastSyncStatus) =>
                 {
-                    return EwsServiceAdapter.SyncFolders(lastSyncStatus);
+                    return EwsServiceAdapter.SyncFolderHierarchy(lastSyncStatus);
                 };
             }
         }
 
-        public override Func<ExchangeService> FuncGetExchangeService
+        public override Action ActionConnectExchangeService
         {
             get
             {
                 return () =>
                 {
-                    return EwsServiceAdapter.GetExchangeService(MailboxInfo.MailAddress, AdminInfo);
+                    EwsServiceAdapter.GetExchangeService(MailboxInfo.MailAddress, AdminInfo);
                 };
             }
         }
 
-        public override Func<FolderChange, bool> FuncIsFolderInPlan
-        {
-            get
-            {
-                return (folderChange) =>
-                {
-                    return DataFromClient.IsFolderInPlan(folderChange.FolderId.UniqueId);
-                };
-            }
-        }
 
         public IJobProgress Progress
         {
-            get
-            {
-                throw new NotImplementedException();
-            }
-
-            set
-            {
-                throw new NotImplementedException();
-            }
+            get; set;
         }
 
         public TaskScheduler Scheduler
         {
+            get; set;
+        }
+
+        public override Func<IMailboxDataSync, IEnumerable<IFolderDataSync>> FuncGetFoldersInLastCatalog
+        {
             get
             {
-                throw new NotImplementedException();
-            }
-
-            set
-            {
-                throw new NotImplementedException();
+                return (mailboxData) =>
+                {
+                    return CatalogAccess.GetFoldersFromLatestCatalog(mailboxData);
+                };
             }
         }
 
-        public override void ForEachLoop(ICollection<FolderChange> folderChanges, Action<FolderChange> DoEachFolderChange)
+        //public override Func<IMailboxDataSync, IEnumerable<IFolderDataSync>> FuncGetFoldersFromClient
+        //{
+        //    get
+        //    {
+        //        return (mailboxData) =>
+        //        {
+        //            return DataFromClient.GetFolders(mailboxData);
+        //        };
+        //    }
+        //}
+        
+
+        public override Func<string, bool> FuncIsFolderInPlan
         {
-            foreach(var folderChange in folderChanges)
+            get
             {
-                DoEachFolderChange(folderChange);
+                return (folderId) =>
+                {
+                    return DataFromClient.IsFolderInPlan(folderId);
+                };
+            }
+        }
+        
+
+        public override Action<IMailboxDataSync> ActionUpdateMailbox
+        {
+            get
+            {
+                return (mailbox) =>
+                {
+                    CatalogAccess.UpdateMailbox(mailbox);
+                };
+            }
+        }
+
+        public override Func<IEnumerable<IFolderDataSync>, IEnumerable<FolderChange>, TreeNode<IFolderDataSync>> FuncGetFolderTrees
+        {
+            get
+            {
+                throw new NotImplementedException();
             }
         }
 
         public void InitTaskSyncContext(ITaskSyncContext<IJobProgress> mainContext)
         {
-            throw new NotImplementedException();
+            this.CloneSyncContext(mainContext);
+        }
+
+        public override void ForEachLoop(ICollection<IFolderDataSync> folders, Action<IFolderDataSync> DoEachFolderChange)
+        {
+            foreach(var folder in folders)
+            {
+                DoEachFolderChange(folder);
+            }
+        }
+
+        public override void ForEachLoop(ICollection<FolderChange> folderChanges, Dictionary<string, IFolderDataSync> folderDic, Action<FolderChange, Dictionary<string, IFolderDataSync>> DoEachFolderChange)
+        {
+            foreach(var folder in folderChanges)
+            {
+                DoEachFolderChange(folder, folderDic);
+            }
         }
     }
 }

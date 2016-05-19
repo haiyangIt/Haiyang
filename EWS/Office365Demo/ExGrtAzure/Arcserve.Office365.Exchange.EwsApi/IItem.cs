@@ -15,7 +15,7 @@ namespace Arcserve.Office365.Exchange.EwsApi
     {
         List<Item> GetFolderItems(Folder folder);
         
-        void ExportItem(Item item, Stream stream, EwsServiceArgument argument);
+        byte[] ExportItem(Item item,  EwsServiceArgument argument);
         void ImportItem(FolderId parentFolderId, byte[] itemData, EwsServiceArgument argument);
         void ImportItem(FolderId parentFolderId, Stream stream, EwsServiceArgument argument);
 
@@ -23,6 +23,6 @@ namespace Arcserve.Office365.Exchange.EwsApi
         
         ExchangeService CurrentExchangeService { get; }
 
-        void ExportEmlItem(Item itemInEws, MemoryStream emlStream, EwsServiceArgument argument);
+        byte[] ExportEmlItem(Item itemInEws,  EwsServiceArgument argument);
     }
 }

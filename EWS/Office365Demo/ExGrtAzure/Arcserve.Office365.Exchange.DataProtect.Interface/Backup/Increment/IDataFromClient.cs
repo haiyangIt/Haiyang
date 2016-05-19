@@ -17,5 +17,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
         Task<ICatalogJob> GetLatestCatalogJobAsync();
         bool IsFolderInPlan(string uniqueFolderId);
         Task<bool> IsFolderInPlanAsync(string uniqueFolderId);
+        //IEnumerable<IFolderDataSync> GetFolders(IMailboxDataSync mailboxData);
+        Task<IEnumerable<IFolderDataSync>> GetFoldersAsync(IMailboxDataSync mailboxData);
     }
 }

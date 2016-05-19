@@ -7,12 +7,12 @@ using System.IO.Compression;
 using Microsoft.WindowsAzure.Storage.Blob;
 using System.IO;
 using System.Net.Mail;
-using FastTransferUtil.CompoundFile;
 using Arcserve.Office365.Exchange.Data;
 using Arcserve.Office365.Exchange.Data.Mail;
 using Arcserve.Office365.Exchange.DataProtect.Interface;
 using Arcserve.Office365.Exchange.Util;
 using Arcserve.Office365.Exchange.Util.Setting;
+using FastTransferUtil.CompoundFile;
 
 namespace Arcserve.Office365.Exchange.StorageAccess.Azure
 {

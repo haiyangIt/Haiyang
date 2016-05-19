@@ -83,7 +83,7 @@ namespace Arcserve.Office365.Exchange.Util
                 bool isBreak = false; ;
                 do
                 {
-                    if (Monitor.TryEnter(_obj, 300))
+                    if (Monitor.TryEnter(_obj, 1000))
                     {
                         try
                         {

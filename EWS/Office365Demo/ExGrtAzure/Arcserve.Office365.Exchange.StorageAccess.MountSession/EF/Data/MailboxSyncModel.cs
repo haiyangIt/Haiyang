@@ -1,25 +1,25 @@
-﻿using Arcserve.Office365.Exchange.Data.Mail;
+﻿using Arcserve.Office365.Exchange.Data.Increment;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Arcserve.Office365.Exchange.Data;
+using Arcserve.Office365.Exchange.Data.Mail;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
-namespace Arcserve.Office365.Exchange.Data.Increment
+namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data
 {
-    public interface IMailboxDataSync : IMailboxData, IDataSync
+    [Table("MailboxSync")]
+    public class MailboxSyncModel : IMailboxDataSync
     {
-
-    }
-
-    public class MailboxDataSyncBase : IMailboxDataSync
-    {
-        public MailboxDataSyncBase(string displayName, string mailboxAddress)
+        public MailboxSyncModel()
         {
-            DisplayName = displayName;
-            MailAddress = mailboxAddress;
+
         }
 
+        [NotMapped]
         public string ChangeKey
         {
             get; set;
@@ -29,35 +29,27 @@ namespace Arcserve.Office365.Exchange.Data.Increment
         {
             get; set;
         }
-
+        
+        [MaxLength(255)]
         public string DisplayName
         {
             get; set;
         }
 
+        [Key]
         public string Id
         {
-            get
-            {
-                return RootFolderId;
-            }
-
-            set
-            {
-                RootFolderId = value;
-            }
+            get; set;
         }
 
+        [NotMapped]
         public ItemKind ItemKind
         {
             get
             {
                 return ItemKind.Mailbox;
             }
-
-            set
-            {
-            }
+            set { }
         }
 
         public string Location
@@ -65,31 +57,30 @@ namespace Arcserve.Office365.Exchange.Data.Increment
             get; set;
         }
 
+        [MaxLength(255)]
+        [EmailAddress]
         public string MailAddress
         {
-            get; private set;
+            get; set;
         }
 
+        [MaxLength(512)]
+        [CaseSensitive]
         public string RootFolderId
         {
             get; set;
         }
 
+        /// <summary>
+        /// FolderHierarchy status. 
+        /// </summary>
+        [CaseSensitive]
         public string SyncStatus
         {
             get; set;
         }
 
-        public IMailboxDataSync Clone()
-        {
-            return new MailboxDataSyncBase(DisplayName, MailAddress)
-            {
-                Location = Location,
-                RootFolderId = RootFolderId
-            };
-        }
-
-        IMailboxData IMailboxData.Clone()
+        public IMailboxData Clone()
         {
             throw new NotImplementedException();
         }

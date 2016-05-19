@@ -9,6 +9,6 @@ namespace Arcserve.Office365.Exchange.Data.Increment
 {
     public interface IFolderDataSync : IFolderData, IDataSync
     {
-        string FolderPath { get; }
+        string MailboxId { get; set; }
     }
 }

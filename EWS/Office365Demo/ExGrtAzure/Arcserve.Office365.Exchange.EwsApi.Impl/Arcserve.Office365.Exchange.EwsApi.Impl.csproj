@@ -63,8 +63,8 @@
     <Compile Include="Impl\MailboxOperatorImpl.cs" />
     <Compile Include="Impl\RestoreDestinationExImpl.cs" />
     <Compile Include="Impl\RestoreDestinationImpl.cs" />
+    <Compile Include="Increment\EwsBaseOperator.cs" />
     <Compile Include="Increment\EwsServiceAdapter.cs" />
-    <Compile Include="Increment\EwsServiceAdapterBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resource\TemplateEwsRequests.Designer.cs">
       <DependentUpon>TemplateEwsRequests.resx</DependentUpon>

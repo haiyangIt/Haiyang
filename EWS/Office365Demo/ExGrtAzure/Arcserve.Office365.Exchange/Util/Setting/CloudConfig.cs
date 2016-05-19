@@ -107,7 +107,10 @@ namespace Arcserve.Office365.Exchange.Util.Setting
         {
             get
             {
-                return Convert.ToInt32(CloudConfigurationManager.GetSetting("ServiceBusQueueMaxSize"));
+                int result = 0;
+                if (!int.TryParse(ConfigurationManager.AppSettings["ServiceBusQueueTTL"], out result))
+                    return 5120;
+                return result;
             }
         }
 
@@ -115,7 +118,10 @@ namespace Arcserve.Office365.Exchange.Util.Setting
         {
             get
             {
-                return Convert.ToInt32(CloudConfigurationManager.GetSetting("ServiceBusQueueTTL"));
+                int result = 0;
+                if (!int.TryParse(ConfigurationManager.AppSettings["ServiceBusQueueTTL"], out result))
+                    return 5;
+                return result;
             }
         }
 
@@ -131,7 +137,10 @@ namespace Arcserve.Office365.Exchange.Util.Setting
         {
             get
             {
-                return Convert.ToInt32(CloudConfigurationManager.GetSetting("ServiceBusTopicMaxSize"));
+                int result = 0;
+                if (!int.TryParse(ConfigurationManager.AppSettings["ServiceBusTopicMaxSize"], out result))
+                    return 5120;
+                return result;
             }
         }
 
@@ -139,7 +148,10 @@ namespace Arcserve.Office365.Exchange.Util.Setting
         {
             get
             {
-                return Convert.ToInt32(CloudConfigurationManager.GetSetting("ServiceBusTopicTTL"));
+                int result = 0;
+                if (!int.TryParse(ConfigurationManager.AppSettings["ServiceBusTopicTTL"], out result))
+                    return 5;
+                return result;
             }
         }
 
@@ -151,7 +163,44 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             }
         }
 
+        public virtual int ExportItemTimeOut
+        {
+            get
+            {
+                int result = 0;
+                if (!int.TryParse(ConfigurationManager.AppSettings["ExportItemTimeOut"], out result))
+                {
+                    result = 120;
+                }
+                return result * 1000;
+            }
+        }
 
+        public virtual int RequestTimeOut
+        {
+            get
+            {
+                int result = 0;
+                if (!int.TryParse(ConfigurationManager.AppSettings["RequestTimeOut"], out result))
+                {
+                    result = 120;
+                }
+                return result * 1000;
+            }
+        }
+
+        public virtual int MaxItemChangesReturn
+        {
+            get
+            {
+                int result = 0;
+                if (!int.TryParse(ConfigurationManager.AppSettings["MaxItemChangesReturn"], out result))
+                {
+                    result = 10;
+                }
+                return result;
+            }
+        }
     }
 
     //internal class ConfigInAppconfigOrWebConfig : CloudConfig

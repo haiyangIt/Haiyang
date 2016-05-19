@@ -103,10 +103,26 @@ namespace Arcserve.Office365.Exchange
 
         public static CloudStorageAccount GetStorageAccount()
         {
-            return CloudConfig.Instance.StorageAccount;
+            if (!IsRunningOnAzureOrStorageInAzure())
+                return CloudStorageAccount.Parse(
+        ConfigurationManager.ConnectionStrings["StorageConnectionString"].ConnectionString);
+            else
+            {
+                return CloudStorageAccount.Parse(
+        ConfigurationManager.ConnectionStrings["StorageConnectionStringRunning"].ConnectionString);
+            }
         }
 
-        
+        public static bool IsRunningOnAzureOrStorageInAzure()
+        {
+            var isDebugAzure = ConfigurationManager.AppSettings["ForDebugAzure"];
+            return !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME")) || isDebugAzure == "1";
+        }
+
+        public static bool IsRunningOnAzure()
+        {
+            return !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME"));
+        }
     }
 
 }

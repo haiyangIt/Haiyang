@@ -129,49 +129,42 @@ namespace Arcserve.Office365.Exchange.StorageAccess.Azure
             var itemLocationModel = new ItemLocationModel();
             List<MailLocation> locationInfos = new List<MailLocation>(3);
 
-            MemoryStream binStream = null;
-            MemoryStream emlStream = null;
             MailLocation mailLocation = new MailLocation();
             int binStreamLength = 0;
+            byte[] buffer = null;
             try
             {
-                binStream = new MemoryStream();
-                itemOper.ExportItem(itemInEws, binStream, _argument);
-                binStream.Capacity = (int)binStream.Length;
-                binStream.Seek(0, SeekOrigin.Begin);
-                var binLocation = new ExportItemSizeInfo() { Type = ExportType.TransferBin, Size = (int)binStream.Length };
-                mailLocation.AddLocation(binLocation);
-                binStreamLength = (int)binStream.Length;
-
-                emlStream = new MemoryStream();
-                itemOper.ExportEmlItem(itemInEws, emlStream, _argument);
-                emlStream.Capacity = (int)emlStream.Length;
-                emlStream.Seek(0, SeekOrigin.Begin);
-                var emlLocation = new ExportItemSizeInfo() { Type = ExportType.Eml, Size = (int)emlStream.Length };
-                mailLocation.AddLocation(emlLocation);
-
-                var location = DataHelper.GetLocation(item, _argument.CurrentMailbox);
-                mailLocation.Path = location;
-
                 string blobNamePrefix = MailLocation.GetBlobNamePrefix(item.ItemId);
                 string binBlobName = MailLocation.GetBlobName(ExportType.TransferBin, blobNamePrefix);
                 string emlBlobName = MailLocation.GetBlobName(ExportType.Eml, blobNamePrefix);
+                var location = DataHelper.GetLocation(item, _argument.CurrentMailbox);
+                mailLocation.Path = location;
 
-                BlobDataAccessObj.SaveBlob(location, binBlobName, binStream, true);
-                BlobDataAccessObj.SaveBlob(location, emlBlobName, emlStream, true);
+                buffer = itemOper.ExportItem(itemInEws, _argument);
+                var binLocation = new ExportItemSizeInfo() { Type = ExportType.TransferBin, Size = (int)buffer.Length };
+                mailLocation.AddLocation(binLocation);
+                binStreamLength = (int)buffer.Length;
+
+                using (MemoryStream stream = new MemoryStream(buffer))
+                {
+                    BlobDataAccessObj.SaveBlob(location, binBlobName, stream, true);
+                }
+                buffer = null;
+
+                buffer = itemOper.ExportEmlItem(itemInEws, _argument);
+                var emlLocation = new ExportItemSizeInfo() { Type = ExportType.Eml, Size = (int)buffer.Length };
+                mailLocation.AddLocation(emlLocation);
+
+                using (MemoryStream stream = new MemoryStream(buffer))
+                {
+                    BlobDataAccessObj.SaveBlob(location, emlBlobName, stream, true);
+                }
+                buffer = null;
+
             }
             finally
             {
-                if (binStream != null)
-                {
-                    binStream.Close();
-                    binStream.Dispose();
-                }
-                if (emlStream != null)
-                {
-                    emlStream.Close();
-                    emlStream.Dispose();
-                }
+                
             }
 
             itemLocationModel.ItemId = item.ItemId;

@@ -26,19 +26,21 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Impl
             get; set;
         }
 
-        public void ExportEmlItem(Item itemInEws, MemoryStream emlStream, EwsServiceArgument argument)
+        public byte[] ExportEmlItem(Item itemInEws, EwsServiceArgument argument)
         {
             PropertySet props = new PropertySet(EmailMessageSchema.MimeContent);
 
             // This results in a GetItem call to EWS.
             itemInEws.Load(props);
             //var email = EmailMessage.Bind(CurrentExchangeService, itemInEws.Id, props);
-            emlStream.Write(itemInEws.MimeContent.Content, 0, itemInEws.MimeContent.Content.Length);
+            var result = itemInEws.MimeContent.Content;
+            itemInEws.MimeContent.Content = null;
+            return result;
         }
 
-        public void ExportItem(Item item, Stream stream, EwsServiceArgument argument)
+        public byte[] ExportItem(Item item, EwsServiceArgument argument)
         {
-            ExportUploadHelper.ExportItemPost(Enum.GetName(typeof(ExchangeVersion), item.Service.RequestedServerVersion), item.Id.UniqueId, stream, argument);
+            return ExportUploadHelper.ExportItemPost(Enum.GetName(typeof(ExchangeVersion), item.Service.RequestedServerVersion), item.Id.UniqueId, argument);
         }
 
         public List<Item> GetFolderItems(Folder folder)

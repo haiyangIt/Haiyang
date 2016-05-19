@@ -46,8 +46,10 @@
   <ItemGroup>
     <Compile Include="Backup\Increment\AsyncBackup.cs" />
     <Compile Include="Backup\Increment\BackupFlowTemplate.cs" />
-    <Compile Include="Backup\Increment\IBackupQueryAsync.cs" />
+    <Compile Include="Backup\Increment\ICatalogAccess.cs" />
+    <Compile Include="Backup\Increment\IDataConvert.cs" />
     <Compile Include="Backup\Increment\IDataFromClient.cs" />
+    <Compile Include="Backup\Increment\IExchangeAccess.cs" />
     <Compile Include="Backup\Increment\IFilterItemWithFolderAsync.cs" />
     <Compile Include="CatalogException.cs" />
     <Compile Include="Backup\Full\CatalogFactory.cs" />

@@ -9,5 +9,6 @@ namespace Arcserve.Office365.Exchange.Data.Increment
 {
     public interface IItemDataSync : IItemData, IDataSync
     {
+        bool IsRead { get; set; }
     }
 }
