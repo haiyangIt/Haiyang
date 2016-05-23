@@ -61,6 +61,15 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Resource {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ##ItemNode##.
+        /// </summary>
+        internal static string ExportItemPlaceHolder {
+            get {
+                return ResourceManager.GetString("ExportItemPlaceHolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;
         ///&lt;soap:Envelope xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
         ///      xmlns:xsd=&quot;http://www.w3.org/2001/XMLSchema&quot;
@@ -76,6 +85,15 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Resource {
         internal static string ExportItems {
             get {
                 return ResourceManager.GetString("ExportItems", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;t:ItemId Id=&quot;##ItemId##&quot;/&gt;.
+        /// </summary>
+        internal static string ExportItemsString {
+            get {
+                return ResourceManager.GetString("ExportItemsString", resourceCulture);
             }
         }
         

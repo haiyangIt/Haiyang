@@ -19,6 +19,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession
         private string LatestCatalogFile;
         private string StorageFolder;
         private CatalogDbAccess _catalogDbAccess;
+        private ExportItemWriter _exportItemWriter;
         public CatalogAccess(string newCatalogFile, string latestCatalogFile, string storageFolder)
         {
             CatalogFile = newCatalogFile;
@@ -26,6 +27,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession
             StorageFolder = storageFolder;
             _catalogDbAccess = new CatalogDbAccess(newCatalogFile, latestCatalogFile);
             _catalogDbAccess.CloneSyncContext(this);
+            _exportItemWriter = new ExportItemWriter(storageFolder);
         }
 
         public CancellationToken CancelToken
@@ -90,6 +92,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession
                 _catalogDbAccess = null;
             }
         }
+
 
         public IEnumerable<IFolderDataSync> GetFoldersFromLatestCatalog(IMailboxDataSync mailboxData)
         {
@@ -162,14 +165,18 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession
             throw new NotImplementedException();
         }
 
-        public void WriteItemsToStorage(IEnumerable<ItemDatas> items)
+        public void WriteBufferToStorage(IItemDataSync item, byte[] buffer, int length)
         {
-            throw new NotImplementedException();
+            _exportItemWriter.WriteBufferToStorage(item, buffer, length);
         }
 
-        public Task WriteItemsToStorageAsync(IEnumerable<ItemDatas> items)
+        public void WriteComplete(IItemDataSync item)
         {
-            throw new NotImplementedException();
+            _exportItemWriter.WriteComplete(item);
+        }
+        public void ExportItemError(EwsResponseException ewsResponseError)
+        {
+            _exportItemWriter.ExportItemError(ewsResponseError);
         }
     }
 }

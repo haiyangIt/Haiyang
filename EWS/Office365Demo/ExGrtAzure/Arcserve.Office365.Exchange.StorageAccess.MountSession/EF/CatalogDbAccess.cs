@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Arcserve.Office365.Exchange.EwsApi.Increment;
 using Arcserve.Office365.Exchange.Util;
+using System.Data.Entity.Infrastructure;
 
 namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 {
@@ -45,12 +46,28 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         private void SaveChanges()
         {
-            throw new NotImplementedException();
+            bool saveFailed;
+            do
+            {
+                saveFailed = false;
+                try
+                {
+                    _updateContext.SaveChanges();
+                }
+                catch (DbUpdateConcurrencyException ex)
+                {
+                    saveFailed = true;
+
+                    // Update original values from the database 
+                    var entry = ex.Entries.Single();
+                    entry.OriginalValues.SetValues(entry.GetDatabaseValues());
+                }
+            } while (saveFailed);
         }
 
         public void AddMailboxesToCatalog(IEnumerable<IMailboxDataSync> mailboxes)
         {
-            _updateContext.Mailboxes.AddRange(_dataConvert.Convert(mailboxes));
+            _updateContext.Mailboxes.AddRange(_dataConvert.ConvertToMailboxModel(mailboxes));
             SaveChanges();
         }
 
@@ -61,7 +78,10 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         public IEnumerable<IFolderDataSync> GetFoldersFromLatestCatalog(IMailboxDataSync mailboxData)
         {
-            return (from folder in _updateContext.Folders where folder.MailboxAddress == mailboxData.MailAddress select folder).AsEnumerable();
+            if (_queryContext != null)
+                return (from folder in _queryContext.Folders where folder.MailboxAddress == mailboxData.MailAddress select folder).AsEnumerable();
+            else
+                return new List<IFolderDataSync>(0);
         }
 
         public Task<IEnumerable<IFolderDataSync>> GetFoldersFromLatestCatalogAsync(IMailboxDataSync mailboxData)
@@ -91,7 +111,8 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         public void AddItemsToCatalog(IEnumerable<IItemDataSync> items)
         {
-            _updateContext.Items.AddRange(items as IEnumerable<ItemSyncModel>);
+            var result = _dataConvert.ConvertToItemModel(items);
+            _updateContext.Items.AddRange(result);
             SaveChanges();
         }
 
@@ -100,15 +121,6 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
             throw new NotImplementedException();
         }
 
-        public void WriteItemsToStorage(IEnumerable<ItemDatas> items)
-        {
-            throw new InvalidOperationException();
-        }
-
-        public Task WriteItemsToStorageAsync(IEnumerable<ItemDatas> items)
-        {
-            throw new InvalidOperationException();
-        }
 
         public void AddFolderToCatalog(IFolderDataSync folder)
         {
@@ -135,13 +147,13 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
         private static object _lock = new object();
         public IEnumerable<IItemDataSync> GetItemsFromLatestCatalog(IEnumerable<string> itemIds)
         {
-            if(_queryContext != null)
+            if (_queryContext != null)
             {
                 return (from item in _queryContext.Items where itemIds.Contains(item.ItemId) select item).AsEnumerable();
             }
             return new List<IItemDataSync>(0);
         }
-        
+
         public Task<IEnumerable<IItemDataSync>> GetItemsFromLatestCatalogAsync(IEnumerable<string> itemIds)
         {
             throw new NotImplementedException();
@@ -149,7 +161,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         public IEnumerable<IItemDataSync> GetItemsByParentFolderIdFromCatalog(string parentFolderId)
         {
-            if(_queryContext != null)
+            if (_queryContext != null)
             {
                 return (from item in _queryContext.Items where item.ParentFolderId == parentFolderId select item).AsEnumerable();
             }
@@ -163,7 +175,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         public void UpdateMailbox(IMailboxDataSync mailbox)
         {
-            _updateContext.Entry(mailbox).State = System.Data.Entity.EntityState.Modified;
+            _updateContext.Entry(mailbox as MailboxSyncModel).State = System.Data.Entity.EntityState.Modified;
             SaveChanges();
         }
 
@@ -174,7 +186,10 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         public IEnumerable<IMailboxDataSync> GetMailboxesFromLatestCatalog(ICatalogJob catalogJob)
         {
-            return (from mailbox in _queryContext.Mailboxes select mailbox).AsEnumerable();
+            if (_queryContext != null)
+                return (from mailbox in _queryContext.Mailboxes select mailbox).AsEnumerable();
+            else
+                return new List<IMailboxDataSync>(0);
         }
 
         public Task<IEnumerable<IMailboxDataSync>> GetMailboxFromLatestCatalogAsync(ICatalogJob catalogJob)
@@ -184,10 +199,28 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         public IEnumerable<IMailboxDataSync> GetMailboxesFromLatestCatalog(DateTime currentJobStartTime)
         {
-            return (from mailbox in _queryContext.Mailboxes select mailbox).AsEnumerable();
+            if (_queryContext != null)
+                return (from mailbox in _queryContext.Mailboxes select mailbox).AsEnumerable();
+            else
+                return new List<IMailboxDataSync>(0);
         }
 
         public Task<IEnumerable<IMailboxDataSync>> GetMailboxesFromLatestCatalogAsync(DateTime currentJobStartTime)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void WriteBufferToStorage(IItemDataSync itemId, byte[] buffer, int length)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void WriteComplete(IItemDataSync itemId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ExportItemError(EwsResponseException ewsResponseError)
         {
             throw new NotImplementedException();
         }

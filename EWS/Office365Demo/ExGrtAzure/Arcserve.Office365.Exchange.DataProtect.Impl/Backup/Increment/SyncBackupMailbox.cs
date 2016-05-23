@@ -19,19 +19,21 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
         public ICatalogAccess<IJobProgress> CatalogAccess { get; set; }
         public IEwsServiceAdapter<IJobProgress> EwsServiceAdapter { get; set; }
         public IDataFromClient<IJobProgress> DataFromClient { get; set; }
-        public OrganizationAdminInfo AdminInfo { get; set; }
-        public string Organization { get; }
-
-        public CancellationToken CancelToken
-        {
-            get; set;
-        }
+        public OrganizationAdminInfo AdminInfo { get; internal set; }
+        public string Organization { get; internal set; }
+        
 
         public override Func<BackupFolderFlowTemplate> FuncNewFolderTemplate
         {
             get
             {
-                throw new NotImplementedException();
+                return ()=>
+                {
+                    var result = new SyncBackupFolder();
+                    result.CloneSyncContext(this);
+                    result.CloneExchangeAccess(this);
+                    return result;
+                };
             }
         }
 
@@ -57,16 +59,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
             }
         }
 
-
-        public IJobProgress Progress
-        {
-            get; set;
-        }
-
-        public TaskScheduler Scheduler
-        {
-            get; set;
-        }
+        
 
         public override Func<IMailboxDataSync, IEnumerable<IFolderDataSync>> FuncGetFoldersInLastCatalog
         {
@@ -78,17 +71,6 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
                 };
             }
         }
-
-        //public override Func<IMailboxDataSync, IEnumerable<IFolderDataSync>> FuncGetFoldersFromClient
-        //{
-        //    get
-        //    {
-        //        return (mailboxData) =>
-        //        {
-        //            return DataFromClient.GetFolders(mailboxData);
-        //        };
-        //    }
-        //}
         
 
         public override Func<string, bool> FuncIsFolderInPlan
@@ -114,32 +96,61 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
             }
         }
 
-        public override Func<IEnumerable<IFolderDataSync>, IEnumerable<FolderChange>, TreeNode<IFolderDataSync>> FuncGetFolderTrees
+        public override Func<IEnumerable<IFolderDataSync>, IEnumerable<IFolderDataSync>, FolderTree> FuncGetFolderTrees
         {
             get
             {
-                throw new NotImplementedException();
+                return (array1, array2) =>
+                {
+                    FolderTree result = new FolderTree();
+                    foreach (var f in array1)
+                    {
+                        result.AddNode(f);
+                    }
+                    foreach (var f in array2)
+                    {
+                        result.AddNode(f);
+                    }
+                    result.AddComplete();
+                    return result;
+                };
             }
         }
 
-        public void InitTaskSyncContext(ITaskSyncContext<IJobProgress> mainContext)
+        public override Action<Folder> ActionLoadFolderProperties
         {
-            this.CloneSyncContext(mainContext);
+            get
+            {
+                return (folder) =>
+                {
+                    EwsServiceAdapter.LoadFolderProperties(folder);
+                };
+            }
         }
+
+        public override IDataConvert DataConvert
+        {
+            get; set;
+        }
+
+        public override Func<string, bool> FuncIsFolderClassValid
+        {
+            get
+            {
+                return (folderClass) =>
+                {
+                    return DataFromClient.IsFolderClassValid(folderClass);
+                };
+            }
+        }
+        
 
         public override void ForEachLoop(ICollection<IFolderDataSync> folders, Action<IFolderDataSync> DoEachFolderChange)
         {
+            
             foreach(var folder in folders)
             {
                 DoEachFolderChange(folder);
-            }
-        }
-
-        public override void ForEachLoop(ICollection<FolderChange> folderChanges, Dictionary<string, IFolderDataSync> folderDic, Action<FolderChange, Dictionary<string, IFolderDataSync>> DoEachFolderChange)
-        {
-            foreach(var folder in folderChanges)
-            {
-                DoEachFolderChange(folder, folderDic);
             }
         }
     }

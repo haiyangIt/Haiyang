@@ -11,7 +11,7 @@ using Arcserve.Office365.Exchange.EwsApi.Increment;
 
 namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
 {
-    public interface ICatalogAccess<ProgressType> : ITaskSyncContext<ProgressType>
+    public interface ICatalogAccess<ProgressType> : ITaskSyncContext<ProgressType>, IExportItemsOper
     {
 
         IEnumerable<IMailboxDataSync> GetMailboxesFromLatestCatalog(ICatalogJob catalogJob);
@@ -43,8 +43,8 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
         //void DeleteFolderToCatalog(Folder folder);
         //System.Threading.Tasks.Task DeleteFolderToCatalogAsync(Folder folder);
 
-        void WriteItemsToStorage(IEnumerable<ItemDatas> items);
-        System.Threading.Tasks.Task WriteItemsToStorageAsync(IEnumerable<ItemDatas> items);
+        //void WriteItemsToStorage(IEnumerable<ItemDatas> items);
+        //System.Threading.Tasks.Task WriteItemsToStorageAsync(IEnumerable<ItemDatas> items);
 
         IEnumerable<IFolderDataSync> GetFoldersFromLatestCatalog(IMailboxDataSync mailboxData);
         Task<IEnumerable<IFolderDataSync>> GetFoldersFromLatestCatalogAsync(IMailboxDataSync mailboxData);

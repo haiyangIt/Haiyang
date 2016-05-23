@@ -9,7 +9,6 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Common
 {
     public class EwsProxyFactory
     {
-
         private static bool DoAutodiscover(ExchangeService exchangeService, string mailboxAddress)
         {
             //service.EnableScpLookup = GlobalSettings.EnableScpLookups;

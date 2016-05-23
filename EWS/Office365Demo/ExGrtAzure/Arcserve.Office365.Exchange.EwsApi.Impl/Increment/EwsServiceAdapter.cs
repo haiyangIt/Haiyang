@@ -10,6 +10,7 @@ using Arcserve.Office365.Exchange.Thread;
 using Microsoft.Exchange.WebServices.Data;
 using System.Threading;
 using Arcserve.Office365.Exchange.Util;
+using Arcserve.Office365.Exchange.Data.Mail;
 
 namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
 {
@@ -118,16 +119,16 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
             throw new NotImplementedException();
         }
 
-        public void ExportItems(IEnumerable<Item> items, Action<IEnumerable<ItemDatas>> writeItemsToStorage)
-        {
-            IEnumerable<ItemDatas> itemDatas = _ewsOperator.ExportItems(items);
-            writeItemsToStorage(itemDatas);
-        }
+        //public void ExportItems(IEnumerable<Item> items, Action<IEnumerable<ItemDatas>> writeItemsToStorage)
+        //{
+        //    IEnumerable<ItemDatas> itemDatas = _ewsOperator.ExportItems(items);
+        //    writeItemsToStorage(itemDatas);
+        //}
 
-        public System.Threading.Tasks.Task ExportItemsAsync(IEnumerable<Item> items, Action<IEnumerable<Item>> writeItemsToStorage)
-        {
-            throw new NotImplementedException();
-        }
+        //public System.Threading.Tasks.Task ExportItemsAsync(IEnumerable<Item> items, Action<IEnumerable<Item>> writeItemsToStorage)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         private static PropertySet _itemPropertySet = null;
         private static PropertySet ItemPropertySet
@@ -144,7 +145,8 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
                         ItemSchema.DateTimeCreated,
                         ItemSchema.ParentFolderId,
                         ItemSchema.ItemClass,
-                        ItemSchema.Size);
+                        ItemSchema.Size,
+                        ItemSchema.HasAttachments);
                         }
                     }))
                     { }
@@ -153,12 +155,58 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
                 return _itemPropertySet;
             }
         }
-        public void LoadItemsProperties(IEnumerable<Item> items)
+
+        private static PropertySet _emailPropertySet = null;
+        private static PropertySet EmailPropertySet
         {
-            _ewsOperator.LoadPropertiesForItems(items, ItemPropertySet);
+            get
+            {
+                if (_emailPropertySet == null)
+                {
+                    using (_lockObj.LockWhile(() =>
+                    {
+                        if (_emailPropertySet == null)
+                        {
+                            _emailPropertySet = new PropertySet(ItemSchema.Subject,
+                        ItemSchema.DateTimeCreated,
+                        ItemSchema.ParentFolderId,
+                        ItemSchema.ItemClass,
+                        ItemSchema.Size,
+                        ItemSchema.HasAttachments,
+                        EmailMessageSchema.IsRead);
+                        }
+                    }))
+                    { }
+                }
+                return _emailPropertySet;
+            }
         }
 
-        public System.Threading.Tasks.Task LoadItemsPropertiesAsync(IEnumerable<Item> items)
+        public void LoadItemsProperties(IEnumerable<Item> items, ItemClass itemClass)
+        {
+            switch (itemClass)
+            {
+                case ItemClass.Message:
+                    _ewsOperator.LoadPropertiesForItems(items, EmailPropertySet);
+                    break;
+                default:
+                    _ewsOperator.LoadPropertiesForItems(items, ItemPropertySet);
+                    break;
+            }
+
+        }
+
+        public System.Threading.Tasks.Task LoadItemsPropertiesAsync(IEnumerable<Item> items, ItemClass itemClass)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int ExportItems(IEnumerable<IItemDataSync> items, IExportItemsOper exportItemOper)
+        {
+            return _ewsOperator.ExportItems(items, exportItemOper);
+        }
+
+        public System.Threading.Tasks.Task<int> ExportItemsAsync(IEnumerable<IItemDataSync> items, IExportItemsOper exportItemOper)
         {
             throw new NotImplementedException();
         }

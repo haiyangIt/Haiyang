@@ -29,7 +29,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data
         {
             get; set;
         }
-        
+
         [MaxLength(255)]
         public string DisplayName
         {
@@ -51,10 +51,15 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data
             }
             set { }
         }
-
+        
+        [NotMapped]
         public string Location
         {
-            get; set;
+            get
+            {
+                return MailAddress;
+            }
+            set { }
         }
 
         [MaxLength(255)]
@@ -64,6 +69,12 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data
             get; set;
         }
 
+        public string Name
+        {
+            get; set;
+        }
+
+        [NotMapped]
         [MaxLength(512)]
         [CaseSensitive]
         public string RootFolderId

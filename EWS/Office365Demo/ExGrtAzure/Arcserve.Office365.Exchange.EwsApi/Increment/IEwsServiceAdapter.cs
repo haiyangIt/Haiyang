@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Exchange.WebServices.Data;
+using Arcserve.Office365.Exchange.Data.Mail;
 
 namespace Arcserve.Office365.Exchange.EwsApi.Increment
 {
@@ -25,9 +26,9 @@ namespace Arcserve.Office365.Exchange.EwsApi.Increment
         System.Threading.Tasks.Task LoadFolderPropertiesAsync(Folder folder);
         ChangeCollection<ItemChange> SyncItems(FolderId folderId, string lastSyncStatus);
         Task<ChangeCollection<ItemChange>> SyncItemsAsync(FolderId folderId, string lastSyncStatus);
-        void ExportItems(IEnumerable<Item> items, Action<IEnumerable<ItemDatas>> writeItemsToStorage);
-        System.Threading.Tasks.Task ExportItemsAsync(IEnumerable<Item> items, Action<IEnumerable<Item>> writeItemsToStorage);
-        void LoadItemsProperties(IEnumerable<Item> items);
-        System.Threading.Tasks.Task LoadItemsPropertiesAsync(IEnumerable<Item> items);
+        int ExportItems(IEnumerable<IItemDataSync> items, IExportItemsOper exportItemOper);
+        System.Threading.Tasks.Task<int> ExportItemsAsync(IEnumerable<IItemDataSync> items, IExportItemsOper exportItemOper);
+        void LoadItemsProperties(IEnumerable<Item> items, ItemClass itemClass);
+        System.Threading.Tasks.Task LoadItemsPropertiesAsync(IEnumerable<Item> items, ItemClass itemClass);
     }
 }

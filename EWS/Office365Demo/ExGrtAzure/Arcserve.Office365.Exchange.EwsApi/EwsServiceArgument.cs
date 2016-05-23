@@ -46,10 +46,10 @@ namespace Arcserve.Office365.Exchange.EwsApi
             }
         }
 
-        public EwsServiceArgument(string mailbox, string userName, string password) : base()
+        public EwsServiceArgument(string connectMailbox, string adminUserName, string adminPsw) : this()
         {
-            ServiceCredential = new NetworkCredential(userName, password);
-            SetConnectMailbox(mailbox);
+            ServiceCredential = new NetworkCredential(adminUserName, adminPsw);
+            SetConnectMailbox(connectMailbox);
         }
 
         public EwsServiceArgument()

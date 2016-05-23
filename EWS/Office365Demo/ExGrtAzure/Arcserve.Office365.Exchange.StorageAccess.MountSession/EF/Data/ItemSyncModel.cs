@@ -79,6 +79,16 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data
             get; set;
         }
 
+        public bool? IsRead
+        {
+            get; set;
+        }
+
+        public string MailboxAddress
+        {
+            get; set;
+        }
+
         public IItemData Clone()
         {
             throw new NotImplementedException();

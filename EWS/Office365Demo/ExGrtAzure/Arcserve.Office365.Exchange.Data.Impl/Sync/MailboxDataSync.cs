@@ -18,12 +18,14 @@ namespace Arcserve.Office365.Exchange.Data.Impl.Sync
             }
         }
 
+        public string Name
+        {
+            get; set;
+        }
+
         public string SyncStatus
         {
-            get
-            {
-                throw new NotImplementedException();
-            }
+            get; set;
         }
     }
 }

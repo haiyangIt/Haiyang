@@ -9,7 +9,7 @@ namespace Arcserve.Office365.Exchange.Data.Increment
 {
     public interface IMailboxDataSync : IMailboxData, IDataSync
     {
-
+        string Name { get; set; }
     }
 
     public class MailboxDataSyncBase : IMailboxDataSync
@@ -37,15 +37,7 @@ namespace Arcserve.Office365.Exchange.Data.Increment
 
         public string Id
         {
-            get
-            {
-                return RootFolderId;
-            }
-
-            set
-            {
-                RootFolderId = value;
-            }
+            get; set;
         }
 
         public ItemKind ItemKind
@@ -70,6 +62,11 @@ namespace Arcserve.Office365.Exchange.Data.Increment
             get; private set;
         }
 
+        public string Name
+        {
+            get; set;
+        }
+
         public string RootFolderId
         {
             get; set;
@@ -84,14 +81,17 @@ namespace Arcserve.Office365.Exchange.Data.Increment
         {
             return new MailboxDataSyncBase(DisplayName, MailAddress)
             {
+                Id = Id,
                 Location = Location,
-                RootFolderId = RootFolderId
+                RootFolderId = RootFolderId,
+                Name = Name,
+                SyncStatus = SyncStatus
             };
         }
 
         IMailboxData IMailboxData.Clone()
         {
-            throw new NotImplementedException();
+            return Clone();
         }
     }
 }

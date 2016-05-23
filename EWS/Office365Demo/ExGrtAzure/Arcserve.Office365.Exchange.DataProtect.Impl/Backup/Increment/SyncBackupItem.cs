@@ -9,11 +9,23 @@ using Arcserve.Office365.Exchange.EwsApi.Increment;
 using System.Threading;
 using Microsoft.Exchange.WebServices.Data;
 using Arcserve.Office365.Exchange.Data.Increment;
+using Arcserve.Office365.Exchange.Data.Mail;
+using Arcserve.Office365.Exchange.Util.Setting;
+using Arcserve.Office365.Exchange.Util;
 
 namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
 {
     public class SyncBackupItem : BackupItemFlow, ITaskSyncContext<IJobProgress>, IExchangeAccess<IJobProgress>
     {
+        BatchItemUtil<IItemDataSync> _batchItemUtil;
+        public SyncBackupItem()
+        {
+            _batchItemUtil = new BatchItemUtil<IItemDataSync>((item) =>
+            {
+                return item.Size;
+            });
+        }
+
         public override Action<IEnumerable<IItemDataSync>> ActionAddItemsToCatalog
         {
             get
@@ -25,55 +37,19 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
             }
         }
 
-        //public override Action<IEnumerable<Item>> ActionDeleteItemsToCatalog
-        //{
-        //    get
-        //    {
-        //        return (items) =>
-        //        {
-        //            CatalogAccess.DeleteItemsToCatalog(items);
-        //        };
-        //    }
-        //}
-        
 
-        //public override Action<IEnumerable<Item>> ActionUpdateItemsToCatalog
-        //{
-        //    get
-        //    {
-        //        return (items) =>
-        //        {
-        //            CatalogAccess.UpdateItems(items);
-        //        };
-        //    }
-        //}
-
-        //public override Action<IEnumerable<Item>> ActionUpdateReadFlagItemsToCatalog
-        //{
-        //    get
-        //    {
-        //        return (itemsWithReadFlagChange) =>
-        //        {
-        //            CatalogAccess.UpdateReadFlagItems(itemsWithReadFlagChange);
-        //        };
-        //    }
-        //}
-
-        public override Action<IEnumerable<Item>> ActionWriteItemsToStorage
+        public override Func<IEnumerable<IItemDataSync>, int> FuncWriteItemsToStorage
         {
             get
             {
                 return (items) =>
                 {
-                    EwsServiceAdapter.ExportItems(items, CatalogAccess.WriteItemsToStorage);
+                    return EwsServiceAdapter.ExportItems(items, CatalogAccess);
                 };
             }
         }
 
-        public CancellationToken CancelToken
-        {
-            get; set;
-        }
+       
 
         public ICatalogAccess<IJobProgress> CatalogAccess
         {
@@ -90,41 +66,28 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
             get; set;
         }
 
-        public override Action<IEnumerable<Item>> ActionLoadPropertyForItems
+        public override Action<IEnumerable<Item>, ItemClass> ActionLoadPropertyForItems
         {
             get
             {
-                return (items) =>
+                return (items, itemClass) =>
                 {
-                    EwsServiceAdapter.LoadItemsProperties(items);
+                    EwsServiceAdapter.LoadItemsProperties(items, itemClass);
                 };
             }
         }
-
-        public IJobProgress Progress
-        {
-            get; set;
-        }
-
-        public TaskScheduler Scheduler
-        {
-            get; set;
-        }
-
+        
         protected override bool IsRewriteDataIfReadFlagChanged
         {
             get
             {
-                throw new NotImplementedException();
+                return CloudConfig.Instance.IsRewriteDataIfReadFlagChanged;
             }
         }
 
         public override IDataConvert DataConvert
         {
-            get
-            {
-                throw new NotImplementedException();
-            }
+            get; set;
         }
 
         public override Action<IItemDataSync> ActionAddItemToCatalog
@@ -160,29 +123,105 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
             }
         }
 
-        public void InitTaskSyncContext(ITaskSyncContext<IJobProgress> mainContext)
+        private static int _loadPropertyMaxCount = CloudConfig.Instance.BatchLoadPropertyItemCount;
+
+        private Dictionary<ItemClass, List<ItemChange>> _dicItemChangs = new Dictionary<ItemClass, List<ItemChange>>();
+
+        protected override bool CheckCanBatchAdded(ItemChange itemChange, ItemClass itemClass, out ICollection<ItemChange> batchItems)
         {
-            this.CloneSyncContext(mainContext);
+            return CheckCanBatch(itemChange, itemClass, out batchItems);
         }
 
-        protected override bool CheckCanBatchAdded(ItemChange itemChange, out ICollection<ItemChange> batchItems)
+        private bool CheckCanBatch(ItemChange itemChange, ItemClass itemClass, out ICollection<ItemChange> batchItems)
         {
-            throw new NotImplementedException();
+            List<ItemChange> outPut = null;
+            bool isGet = false;
+            using (_dicItemChangs.LockWhile(() =>
+            {
+                List<ItemChange> result;
+                if (!_dicItemChangs.TryGetValue(itemClass, out result))
+                {
+                    result = new List<ItemChange>(_loadPropertyMaxCount);
+                    _dicItemChangs.Add(itemClass, result);
+                }
+                result.Add(itemChange);
+                if (result.Count >= _loadPropertyMaxCount)
+                {
+                    outPut = result;
+                    result = new List<ItemChange>(_loadPropertyMaxCount);
+                    isGet = true;
+                }
+            }))
+            { }
+
+            batchItems = outPut;
+            return isGet;
         }
 
-        protected override bool CheckCanBatchDelete(ItemChange itemChange, out ICollection<ItemChange> batchItems)
+        protected override bool CheckCanBatchDelete(ItemChange itemChange, ItemClass itemClass, out ICollection<ItemChange> batchItems)
         {
-            throw new NotImplementedException();
+            batchItems = null;
+            return false;
         }
 
-        protected override bool CheckCanBatchReadChange(ItemChange itemChange, out ICollection<ItemChange> batchItems)
+        private List<ItemChange> _dicItemReadChangs = new List<ItemChange>();
+        protected override bool CheckCanBatchReadChange(ItemChange itemChange, ItemClass itemClass, out ICollection<ItemChange> batchItems)
         {
-            throw new NotImplementedException();
+            List<ItemChange> result = null;
+            bool isGet = false;
+            using (_dicItemReadChangs.LockWhile(() =>
+            {
+                _dicItemReadChangs.Add(itemChange);
+                if (_dicItemReadChangs.Count >= _loadPropertyMaxCount)
+                {
+                    result = new List<ItemChange>(_dicItemReadChangs);
+                    _dicItemReadChangs.Clear();
+                }
+            }))
+            {
+
+            }
+            batchItems = result;
+            return isGet;
         }
 
-        protected override bool CheckCanBatchUpdate(ItemChange itemChange, out ICollection<ItemChange> batchItems)
+        protected override bool CheckCanBatchUpdate(ItemChange itemChange, ItemClass itemClass, out ICollection<ItemChange> batchItems)
         {
-            throw new NotImplementedException();
+            return CheckCanBatch(itemChange, itemClass, out batchItems);
+        }
+
+        protected override bool CheckCanWriteToStorage(IItemDataSync item, out IEnumerable<IEnumerable<IItemDataSync>> items)
+        {
+            return _batchItemUtil.AddItem(item, out items);
+        }
+
+        protected override Dictionary<ItemClass, List<ItemChange>> GetLeftBatchAdded()
+        {
+            var result = new Dictionary<ItemClass, List<ItemChange>>(_dicItemChangs);
+            _dicItemChangs.Clear();
+            return result;
+        }
+
+        protected override Dictionary<ItemClass, List<ItemChange>> GetLeftBatchUpdated()
+        {
+            var result = new Dictionary<ItemClass, List<ItemChange>>(_dicItemChangs);
+            _dicItemChangs.Clear();
+            return result;
+        }
+
+        protected override List<ItemChange> GetLeftBatchReadChanged()
+        {
+            return _dicItemReadChangs;
+        }
+
+        protected override Dictionary<ItemClass, List<ItemChange>> GetLeftBatchDeleted()
+        {
+            return new Dictionary<ItemClass, List<ItemChange>>(0);
+        }
+
+        protected override IEnumerable<IEnumerable<IItemDataSync>> GetLeftWriteToStorageItems()
+        {
+            return _batchItemUtil.AddComplete();
         }
     }
 }

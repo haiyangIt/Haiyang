@@ -14,7 +14,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
     public class CloudConfig
     {
 
-        public static CloudConfig Instance = new CloudConfig();
+        public static CloudConfig Instance = new CloudConfigCache();
 
         public virtual CloudStorageAccount StorageAccount
         {
@@ -22,6 +22,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             {
                 return CloudStorageAccount.Parse(CloudConfigurationManager.GetSetting("StorageConnectionStringRunning"));
             }
+            protected set { }
         }
 
         protected CloudConfig() { }
@@ -39,8 +40,9 @@ namespace Arcserve.Office365.Exchange.Util.Setting
                 //throw new NotImplementedException();
                 return CloudConfigurationManager.GetSetting("Organization");
             }
+            protected set { }
         }
-        
+
         public virtual string DbDefaultConnectString
         {
             get
@@ -54,6 +56,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
                 //throw new NotImplementedException();
                 return CloudConfigurationManager.GetSetting("DefaultConnection");
             }
+            protected set { }
         }
 
 
@@ -69,6 +72,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             {
                 return CloudConfigurationManager.GetSetting("LogPath");
             }
+            protected set { }
         }
 
         public virtual bool IsLog
@@ -77,6 +81,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             {
                 return CloudConfigurationManager.GetSetting("IsLog") == "1";
             }
+            protected set { }
         }
 
         public virtual string ServiceBusConnectionString
@@ -85,6 +90,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             {
                 return CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.ConnectionString");
             }
+            protected set { }
         }
 
         public virtual string ServiceBusNameSpace
@@ -93,6 +99,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             {
                 return CloudConfigurationManager.GetSetting("ServiceBusNameSpace");
             }
+            protected set { }
         }
 
         public virtual string ServiceBusQueueName
@@ -101,6 +108,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             {
                 return CloudConfigurationManager.GetSetting("ServiceBusQueueName");
             }
+            protected set { }
         }
 
         public virtual int ServiceBusQueueMaxSize
@@ -112,6 +120,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
                     return 5120;
                 return result;
             }
+            protected set { }
         }
 
         public virtual int ServiceBusQueueTTL
@@ -123,6 +132,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
                     return 5;
                 return result;
             }
+            protected set { }
         }
 
         public virtual string ServiceBusTopicName
@@ -131,6 +141,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             {
                 return CloudConfigurationManager.GetSetting("ServiceBusTopicName");
             }
+            protected set { }
         }
 
         public virtual int ServiceBusTopicMaxSize
@@ -142,6 +153,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
                     return 5120;
                 return result;
             }
+            protected set { }
         }
 
         public virtual int ServiceBusTopicTTL
@@ -153,6 +165,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
                     return 5;
                 return result;
             }
+            protected set { }
         }
 
         public virtual string SubscriptionNameForAzure
@@ -161,6 +174,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             {
                 return CloudConfigurationManager.GetSetting("SubscriptionNameForScheduler");
             }
+            protected set { }
         }
 
         public virtual int ExportItemTimeOut
@@ -174,6 +188,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
                 }
                 return result * 1000;
             }
+            protected set { }
         }
 
         public virtual int RequestTimeOut
@@ -187,6 +202,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
                 }
                 return result * 1000;
             }
+            protected set { }
         }
 
         public virtual int MaxItemChangesReturn
@@ -200,6 +216,336 @@ namespace Arcserve.Office365.Exchange.Util.Setting
                 }
                 return result;
             }
+            protected set { }
+        }
+
+        public virtual bool IsRewriteDataIfReadFlagChanged
+        {
+            get
+            {
+                bool result = false;
+                if (bool.TryParse(ConfigurationManager.AppSettings["IsRewriteDataIfReadFlagChanged"], out result))
+                {
+                    return result;
+                }
+                return false;
+            }
+            protected set { }
+        }
+
+        public virtual int BatchExportImportItemMaxCount
+        {
+            get
+            {
+                int result = 0;
+                if (!int.TryParse(ConfigurationManager.AppSettings["BatchExportImportItemMaxCount"], out result))
+                {
+                    result = 10;
+                }
+                return result;
+            }
+            protected set { }
+        }
+
+        /// <summary>
+        /// one item if his size is equal this value, then will start a request for this item. not put it to the request for batch items.
+        /// </summary>
+        /// <remarks>
+        /// if item larger than this value, we still support. but if larger than the SupportMaxSize, we can't not support it.
+        /// </remarks>
+
+        public virtual int BatchExportImportItemMaxSizeForSingleMB
+        {
+            get
+            {
+                int result = 0;
+                if (!int.TryParse(ConfigurationManager.AppSettings["BatchExportImportItemMaxSizeForSingleMB"], out result))
+                {
+                    result = 10;
+                }
+                return result * 1024 * 1024;
+            }
+            protected set { }
+        }
+
+        public virtual int SupportMaxSize
+        {
+            get
+            {
+                int result = 0;
+                if (!int.TryParse(ConfigurationManager.AppSettings["SupportMaxSize"], out result))
+                {
+                    result = 15;
+                }
+                return result * 1024 * 1024;
+            }
+            protected set { }
+        }
+
+        public virtual int BatchExportImportMaxAddCount
+        {
+            get
+            {
+                int result = 0;
+                if (!int.TryParse(ConfigurationManager.AppSettings["BatchExportImportMaxAddCount"], out result))
+                {
+                    result = 50;
+                }
+                return result;
+            }
+            protected set { }
+        }
+
+        public virtual int BatchExportImportSmallCountInPartition
+        {
+            get
+            {
+                int result = 0;
+                if (!int.TryParse(ConfigurationManager.AppSettings["BatchExportImportSmallCountInPartition"], out result))
+                {
+                    result = 7;
+                }
+                return result;
+            }
+            protected set { }
+        }
+        public virtual int BatchExportImportLargeCountInPartition
+        {
+            get
+            {
+                int result = 0;
+                if (!int.TryParse(ConfigurationManager.AppSettings["BatchExportImportLargeCountInPartition"], out result))
+                {
+                    result = 3;
+                }
+                return result;
+            }
+            protected set { }
+        }
+
+        public virtual int BatchLoadPropertyItemCount
+        {
+            get
+            {
+                int result = 0;
+                if (!int.TryParse(ConfigurationManager.AppSettings["BatchLoadPropertyItemCount"], out result))
+                {
+                    result = 10;
+                }
+                return result;
+            }
+            protected set { }
+        }
+
+        public virtual int LogFileMaxRecordCount
+        {
+            get
+            {
+                int result = 500;
+                if (int.TryParse(ConfigurationManager.AppSettings["LogFileMaxRecordCount"], out result))
+                    return result;
+                return 500;
+            }
+            protected set { }
+        }
+    }
+
+    public class CloudConfigCache : CloudConfig
+    {
+        public override CloudStorageAccount StorageAccount
+        {
+            get; protected set;
+        }
+
+        internal CloudConfigCache()
+        {
+            StorageAccount = base.StorageAccount;
+            DbConnectString = base.DbConnectString;
+
+            DbDefaultConnectString = base.DbDefaultConnectString;
+
+            LogPath = base.LogPath;
+
+            IsLog = base.IsLog;
+
+            ServiceBusConnectionString = base.ServiceBusConnectionString;
+
+            ServiceBusNameSpace = base.ServiceBusNameSpace;
+
+            ServiceBusQueueName = base.ServiceBusQueueName;
+
+            ServiceBusQueueMaxSize = base.ServiceBusQueueMaxSize;
+
+            ServiceBusQueueTTL = base.ServiceBusQueueTTL;
+
+            ServiceBusTopicName = base.ServiceBusTopicName;
+
+            ServiceBusTopicMaxSize = base.ServiceBusTopicMaxSize;
+
+            ServiceBusTopicTTL = base.ServiceBusTopicTTL;
+
+            SubscriptionNameForAzure = base.SubscriptionNameForAzure;
+
+            ExportItemTimeOut = base.ExportItemTimeOut;
+
+            RequestTimeOut = base.RequestTimeOut;
+
+            MaxItemChangesReturn = base.MaxItemChangesReturn;
+
+            IsRewriteDataIfReadFlagChanged = base.IsRewriteDataIfReadFlagChanged;
+
+            BatchExportImportItemMaxCount = base.BatchExportImportItemMaxCount;
+
+            BatchExportImportItemMaxSizeForSingleMB = base.BatchExportImportItemMaxSizeForSingleMB;
+
+            SupportMaxSize = base.SupportMaxSize;
+
+            BatchExportImportMaxAddCount = base.BatchExportImportMaxAddCount;
+
+            BatchExportImportSmallCountInPartition = base.BatchExportImportSmallCountInPartition;
+
+            BatchExportImportLargeCountInPartition = base.BatchExportImportLargeCountInPartition;
+
+            BatchLoadPropertyItemCount = base.BatchLoadPropertyItemCount;
+            LogFileMaxRecordCount = base.LogFileMaxRecordCount;
+        }
+
+        public override int LogFileMaxRecordCount
+        {
+            get; protected set;
+        }
+
+        public override string DbConnectString
+        {
+            get; protected set;
+        }
+
+        public override string DbDefaultConnectString
+        {
+            get; protected set;
+        }
+
+
+        public static bool IsRunningOnAzure()
+        {
+            var isDebugAzure = CloudConfigurationManager.GetSetting("ForDebugAzure");
+            return !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME")) || isDebugAzure == "1";
+        }
+
+        public override string LogPath
+        {
+            get; protected set;
+        }
+
+        public override bool IsLog
+        {
+            get; protected set;
+        }
+
+        public override string ServiceBusConnectionString
+        {
+            get; protected set;
+        }
+
+        public override string ServiceBusNameSpace
+        {
+            get; protected set;
+        }
+
+        public override string ServiceBusQueueName
+        {
+            get; protected set;
+        }
+
+        public override int ServiceBusQueueMaxSize
+        {
+            get; protected set;
+        }
+
+        public override int ServiceBusQueueTTL
+        {
+            get; protected set;
+        }
+
+        public override string ServiceBusTopicName
+        {
+            get; protected set;
+        }
+
+        public override int ServiceBusTopicMaxSize
+        {
+            get; protected set;
+        }
+
+        public override int ServiceBusTopicTTL
+        {
+            get; protected set;
+        }
+
+        public override string SubscriptionNameForAzure
+        {
+            get; protected set;
+        }
+
+        public override int ExportItemTimeOut
+        {
+            get; protected set;
+        }
+
+        public override int RequestTimeOut
+        {
+            get; protected set;
+        }
+
+        public override int MaxItemChangesReturn
+        {
+            get; protected set;
+        }
+
+        public override bool IsRewriteDataIfReadFlagChanged
+        {
+            get; protected set;
+        }
+
+        public override int BatchExportImportItemMaxCount
+        {
+            get; protected set;
+        }
+
+        /// <summary>
+        /// one item if his size is equal this value, then will start a request for this item. not put it to the request for batch items.
+        /// </summary>
+        /// <remarks>
+        /// if item larger than this value, we still support. but if larger than the SupportMaxSize, we can't not support it.
+        /// </remarks>
+
+        public override int BatchExportImportItemMaxSizeForSingleMB
+        {
+            get; protected set;
+        }
+
+        public override int SupportMaxSize
+        {
+            get; protected set;
+        }
+
+        public override int BatchExportImportMaxAddCount
+        {
+            get; protected set;
+        }
+
+        public override int BatchExportImportSmallCountInPartition
+        {
+            get; protected set;
+        }
+        public override int BatchExportImportLargeCountInPartition
+        {
+            get; protected set;
+        }
+
+        public override int BatchLoadPropertyItemCount
+        {
+            get; protected set;
         }
     }
 

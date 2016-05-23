@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Arcserve.Office365.Exchange.Util;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Arcserve.Office365.Exchange.Data.Mail
 {
-    public class ItemClassUtil
+    public static class ItemClassUtil
     {
         public static string GetItemClassStr(IItemBase itemBase)
         {
@@ -16,7 +17,7 @@ namespace Arcserve.Office365.Exchange.Data.Mail
             if (itemBase is LoadedTreeItem)
             {
                 var str = ((LoadedTreeItem)itemBase).ItemData;
-                
+
                 ItemModel item = JsonConvert.DeserializeObject<ItemModel>(str);
                 return item.ItemClass;
             }
@@ -56,7 +57,7 @@ namespace Arcserve.Office365.Exchange.Data.Mail
             { ItemClass.Task, ".eml" }
         };
 
-        public static ItemClass GetItemClass(string itemClass)
+        public static ItemClass GetItemClass(this string itemClass)
         {
             ItemClass result;
             if (_itemClassDic.TryGetValue(itemClass, out result))
@@ -69,7 +70,7 @@ namespace Arcserve.Office365.Exchange.Data.Mail
                 throw new NotSupportedException("Modify code to support this type");
         }
 
-        public static string GetItemSuffix(ItemClass itemClass)
+        public static string GetItemSuffix(this ItemClass itemClass)
         {
             string result;
             if (_itemClassSuffixDic.TryGetValue(itemClass, out result))
@@ -143,13 +144,15 @@ namespace Arcserve.Office365.Exchange.Data.Mail
             }
         }
     }
-    
 
-    public class FolderClassUtil
+
+    public static class FolderClassUtil
     {
         private static HashSet<string> _validFolderType;
 
         public static readonly string DefaultFolderType = FolderDataBaseDefault.FolderDefaultType;
+
+        private static object _lockObj = new object();
 
         private static HashSet<string> ValidFolderType
         {
@@ -157,14 +160,39 @@ namespace Arcserve.Office365.Exchange.Data.Mail
             {
                 if (_validFolderType == null)
                 {
-                    _validFolderType = new HashSet<string>();
-                    _validFolderType.Add("IPF.Note");
-                    _validFolderType.Add("IPF.Appointment");
-                    _validFolderType.Add("IPF.Contact");
-                    _validFolderType.Add("IPF.Task");
+                    using (_lockObj.LockWhile(() =>
+                    {
+                        if (_validFolderType == null)
+                        {
+                            _validFolderType = new HashSet<string>();
+                            _validFolderType.Add("IPF.Note");
+                            _validFolderType.Add("IPF.Appointment");
+                            _validFolderType.Add("IPF.Contact");
+                            _validFolderType.Add("IPF.Task");
+                        }
+                    }))
+                    { }
                 }
                 return _validFolderType;
             }
+        }
+
+        private readonly static Dictionary<string, FolderClass> _folderClassDic = new Dictionary<string, FolderClass>()
+        {
+            {"IPF.Contact", FolderClass.Contact},
+            {"IPF.Appointment", FolderClass.Calendar },
+            {"IPF.Note", FolderClass.Message },
+            {"IPF.Task", FolderClass.Task }
+        };
+
+        public static FolderClass GetFolderClass(this string folderClass)
+        {
+            FolderClass result;
+            if (_folderClassDic.TryGetValue(folderClass, out result))
+                return result;
+            
+            else
+                throw new NotSupportedException("Modify code to support this type");
         }
 
         public static bool IsFolderValid(string folderClass)

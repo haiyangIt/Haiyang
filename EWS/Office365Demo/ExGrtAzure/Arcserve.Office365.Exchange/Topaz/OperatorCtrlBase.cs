@@ -145,7 +145,7 @@ namespace Arcserve.Office365.Exchange.Topaz
                         ev.Set();
                 }, null);
 
-                if (!ev.WaitOne(CloudConfig.Instance.RequestTimeOut))
+                if (!ev.WaitOne())//CloudConfig.Instance.RequestTimeOut))
                 {
                     exception = new TimeoutException();
                     LogFactory.LogInstance.WriteException(LogLevel.ERR, GetMessage("time out"), exception, "time out");

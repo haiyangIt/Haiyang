@@ -48,10 +48,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Backup\BatchItemUtil.cs" />
     <Compile Include="Backup\Increment\SyncBackup.cs" />
     <Compile Include="Backup\Increment\SyncBackupFolder.cs" />
     <Compile Include="Backup\Increment\SyncBackupItem.cs" />
     <Compile Include="Backup\Increment\SyncBackupMailbox.cs" />
+    <Compile Include="Backup\Increment\TaskSyncContextBase.cs" />
     <Compile Include="CatalogService.cs" />
     <Compile Include="Context\ServiceContext.cs" />
     <Compile Include="Context\ServiceContextManager.cs" />

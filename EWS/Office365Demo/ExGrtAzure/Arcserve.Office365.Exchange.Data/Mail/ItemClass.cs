@@ -14,4 +14,13 @@ namespace Arcserve.Office365.Exchange.Data.Mail
         Contact = 3,
         Task = 4
     }
+
+    public enum FolderClass
+    {
+        None = 0,
+        Message = 1,
+        Calendar = 2,
+        Contact = 3,
+        Task = 4
+    }
 }

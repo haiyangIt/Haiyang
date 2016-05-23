@@ -11,8 +11,10 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
 {
     public interface IDataConvert
     {
-        IFolderDataSync Convert(Folder folder, TreeNode<IFolderDataSync> FolderTree);
-        IFolderDataSync Convert(IFolderDataSync oldFolder, Folder folder, TreeNode<IFolderDataSync> FolderTree);
+        IFolderDataSync Convert(Folder folder, IMailboxDataSync mailboxDataSync);
         IEnumerable<IItemDataSync> Convert(IEnumerable<Item> items, IFolderDataSync parentFolder);
+        IItemDataSync Convert(Item item, IFolderDataSync parentFolder);
+        IMailboxDataSync Convert(IMailboxDataSync mailbox);
+        IEnumerable<IMailboxDataSync> Convert(IEnumerable<IMailboxDataSync> mailboxes);
     }
 }

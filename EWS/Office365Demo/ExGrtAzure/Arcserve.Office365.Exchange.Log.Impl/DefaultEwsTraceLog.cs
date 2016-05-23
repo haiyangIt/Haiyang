@@ -8,17 +8,11 @@ namespace Arcserve.Office365.Exchange.Log.Impl
 {
     public class DefaultEwsTraceLog : DefaultLog
     {
-        public DefaultEwsTraceLog()
+        public DefaultEwsTraceLog() : base()
         {
-            RegisterLogStream(new DefaultLogStream(DefaultLogStream.GetLogPath(LogFileName)));
+            
         }
 
-        protected string LogFileName
-        {
-            get
-            {
-                return string.Format("{0}EwsTrace.txt", DateTime.Now.ToString("yyyyMMdd"));
-            }
-        }
+        
     }
 }

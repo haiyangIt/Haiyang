@@ -15,7 +15,7 @@ namespace Arcserve.Office365.Exchange.Data.Mail
         object Data { get; }
         string ItemClass { get; }
         int Size { get; }
-        int ActualSize { get; }
+        int ActualSize { get; set; }
         string Location { get; }
 
         IItemData Clone();

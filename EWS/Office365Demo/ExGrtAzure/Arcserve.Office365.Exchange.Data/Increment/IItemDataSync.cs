@@ -9,6 +9,15 @@ namespace Arcserve.Office365.Exchange.Data.Increment
 {
     public interface IItemDataSync : IItemData, IDataSync
     {
-        bool IsRead { get; set; }
+        bool? IsRead { get; set; }
+        string MailboxAddress { get; set; }
+    }
+
+    public static class IItemDataSyncExtension
+    {
+        public static string GetFileName(this IItemDataSync item)
+        {
+            return string.Format("{0}_{1}.bin", item.DisplayName.GetValidFileName(), item.CreateTime.Value.Ticks);
+        }
     }
 }

@@ -51,6 +51,7 @@
     <Compile Include="IMailbox.cs" />
     <Compile Include="Increment\EwsServiceExtension.cs" />
     <Compile Include="Increment\IEwsServiceAdapter.cs" />
+    <Compile Include="Increment\IExportItemsOper.cs" />
     <Compile Include="Increment\ItemDatas.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

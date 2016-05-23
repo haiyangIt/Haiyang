@@ -14,7 +14,7 @@ namespace Arcserve.Office365.Exchange.Log.Impl
     {
         public LogToBlob()
         {
-            RegisterLogStream(new LogBlobStreamProvider());
+            //RegisterLogStream(new LogBlobStreamProvider());
         }
     }
 
@@ -88,43 +88,43 @@ namespace Arcserve.Office365.Exchange.Log.Impl
 
         private void WriteToAppendBlob(string msg)
         {
-            var currentDay = DateTime.Now.Date;
-            if (currentDay != LastDateTime)
-            {
-                _appendBlob = null;
-            }
+            //var currentDay = DateTime.Now.Date;
+            //if (currentDay != LastDateTime)
+            //{
+            //    _appendBlob = null;
+            //}
 
-            if (Interlocked.CompareExchange(ref _logCount, 0, MaxBlocks) != _logCount)
-            {
-                _appendBlob = null;
-            }
+            //if (Interlocked.CompareExchange(ref _logCount, 0, MaxBlocks) != _logCount)
+            //{
+            //    _appendBlob = null;
+            //}
 
-            if (_appendBlob == null)
-            {
-                lock (SyncObj)
-                {
-                    if (_appendBlob == null)
-                    {
-                        CloudBlobContainer container = BlobClient.GetContainerReference("logs");
-                        container.CreateIfNotExists();
-                        LastDateTime = currentDay;
-                        CloudAppendBlob appBlob = container.GetAppendBlobReference(
-                            string.Format(BlobNameFormat, DateTime.Now.ToString("yyyyMMdd"), _logFileIndex++, ".log")
-                        );
+            //if (_appendBlob == null)
+            //{
+            //    lock (SyncObj)
+            //    {
+            //        if (_appendBlob == null)
+            //        {
+            //            CloudBlobContainer container = BlobClient.GetContainerReference("logs");
+            //            container.CreateIfNotExists();
+            //            LastDateTime = currentDay;
+            //            CloudAppendBlob appBlob = container.GetAppendBlobReference(
+            //                string.Format(BlobNameFormat, DateTime.Now.ToString("yyyyMMdd"), _logFileIndex++, ".log")
+            //            );
 
-                        if (!appBlob.Exists())
-                        {
-                            appBlob.CreateOrReplace();
-                        }
+            //            if (!appBlob.Exists())
+            //            {
+            //                appBlob.CreateOrReplace();
+            //            }
 
-                        _appendBlob = appBlob;
-                    }
-                }
-            }
+            //            _appendBlob = appBlob;
+            //        }
+            //    }
+            //}
 
-            msg = msg + "\r\nArcserve";
-            _appendBlob.AppendText(msg);
-            Interlocked.Increment(ref _logCount);
+            //msg = msg + "\r\nArcserve";
+            //_appendBlob.AppendText(msg);
+            //Interlocked.Increment(ref _logCount);
         }
     }
 
@@ -132,7 +132,7 @@ namespace Arcserve.Office365.Exchange.Log.Impl
     {
         public LogToBlobEwsTrace() : base()
         {
-            RegisterLogStream(new LogBlobStreamProvider("{0}EwsTrace-{1}{2}"));
+            //RegisterLogStream(new LogBlobStreamProvider("{0}EwsTrace-{1}{2}"));
         }
     }
 }

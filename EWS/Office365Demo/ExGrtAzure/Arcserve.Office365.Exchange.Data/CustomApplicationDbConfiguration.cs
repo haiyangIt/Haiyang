@@ -101,20 +101,28 @@ namespace Arcserve.Office365.Exchange.Data
                             writer.WriteLine("ALTER TABLE {0} DROP CONSTRAINT {1}", tableName, Quote(PrimaryKeyOperation.BuildDefaultName(tableName)));
                         }
 
+                        string isNullable = string.Empty;
+                        if(column.IsNullable.HasValue && !column.IsNullable.Value)
+                        {
+                            isNullable = " NOT NULL ";
+                        }
+
                         if (column.MaxLength.HasValue)
                         {
                             writer.WriteLine(
-                            "ALTER TABLE {0} ALTER COLUMN {1} NVARCHAR({2}) COLLATE SQL_Latin1_General_CP1_CS_AS NOT NULL",
+                            "ALTER TABLE {0} ALTER COLUMN {1} NVARCHAR({2}) COLLATE SQL_Latin1_General_CP1_CS_AS {3}", 
                             tableName,
                             column.Name,
-                            column.MaxLength.Value);
+                            column.MaxLength.Value,
+                            isNullable);
                         }
                         else
                         {
                             writer.WriteLine(
-                                "ALTER TABLE {0} ALTER COLUMN {1} NVARCHAR(MAX) COLLATE SQL_Latin1_General_CP1_CS_AS NOT NULL",
+                                "ALTER TABLE {0} ALTER COLUMN {1} NVARCHAR(MAX) COLLATE SQL_Latin1_General_CP1_CS_AS {2} ", 
                                 tableName,
-                                column.Name);
+                                column.Name,
+                                isNullable);
                         }
 
                         if (!string.IsNullOrEmpty(newValue.PrimaryKeys))
@@ -149,20 +157,26 @@ namespace Arcserve.Office365.Exchange.Data
                             writer.WriteLine("ALTER TABLE {0} DROP CONSTRAINT {1}", tableName, Quote(PrimaryKeyOperation.BuildDefaultName(tableName)));
                         }
 
+                        string isNullable = string.Empty;
+                        if (column.IsNullable.HasValue && !column.IsNullable.Value)
+                        {
+                            isNullable = " NOT NULL ";
+                        }
+
                         if (column.MaxLength.HasValue)
                         {
                             writer.WriteLine(
-                            "ALTER TABLE {0} ALTER COLUMN {1} NVARCHAR({2}) COLLATE SQL_Latin1_General_CP1_CS_AS NOT NULL",
+                            "ALTER TABLE {0} ALTER COLUMN {1} NVARCHAR({2}) COLLATE SQL_Latin1_General_CP1_CS_AS {3} ",
                             tableName,
                             column.Name,
-                            column.MaxLength.Value);
+                            column.MaxLength.Value, isNullable);
                         }
                         else
                         {
                             writer.WriteLine(
-                                "ALTER TABLE {0} ALTER COLUMN {1} NVARCHAR(MAX) COLLATE SQL_Latin1_General_CP1_CS_AS NOT NULL",
+                                "ALTER TABLE {0} ALTER COLUMN {1} NVARCHAR(MAX) COLLATE SQL_Latin1_General_CP1_CS_AS {2} ",
                                 tableName,
-                                column.Name);
+                                column.Name, isNullable);
                         }
 
                         if (!string.IsNullOrEmpty(newValue.PrimaryKeys))

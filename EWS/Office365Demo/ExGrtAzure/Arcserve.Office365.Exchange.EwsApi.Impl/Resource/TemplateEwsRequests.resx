@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ExportItemPlaceHolder" xml:space="preserve">
+    <value>##ItemNode##</value>
+  </data>
   <data name="ExportItems" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8" ?&gt;
 &lt;soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -130,12 +133,15 @@
   &lt;soap:Body&gt;
     &lt;m:ExportItems&gt;
       &lt;m:ItemIds&gt;
-        &lt;t:ItemId Id="##ItemId##"/&gt;
+        ##ItemNode##
       &lt;/m:ItemIds&gt;
     &lt;/m:ExportItems&gt;
   &lt;/soap:Body&gt;
 &lt;/soap:Envelope&gt;</value>
     <comment>Used in POST for getting full fidelity binary of an item.</comment>
+  </data>
+  <data name="ExportItemsString" xml:space="preserve">
+    <value>&lt;t:ItemId Id="##ItemId##"/&gt;</value>
   </data>
   <data name="ExportItemsWithImpersonateId" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8" ?&gt;
@@ -155,7 +161,7 @@
   &lt;soap:Body&gt;
     &lt;m:ExportItems&gt;
       &lt;m:ItemIds&gt;
-        &lt;t:ItemId Id="##ItemId##"/&gt;
+        ##ItemNode##
       &lt;/m:ItemIds&gt;
     &lt;/m:ExportItems&gt;
   &lt;/soap:Body&gt;
@@ -179,7 +185,7 @@
   &lt;soap:Body&gt;
     &lt;m:ExportItems&gt;
       &lt;m:ItemIds&gt;
-        &lt;t:ItemId Id="##ItemId##"/&gt;
+        ##ItemNode##
       &lt;/m:ItemIds&gt;
     &lt;/m:ExportItems&gt;
   &lt;/soap:Body&gt;
@@ -203,7 +209,7 @@
   &lt;soap:Body&gt;
     &lt;m:ExportItems&gt;
       &lt;m:ItemIds&gt;
-        &lt;t:ItemId Id="##ItemId##"/&gt;
+        ##ItemNode##
       &lt;/m:ItemIds&gt;
     &lt;/m:ExportItems&gt;
   &lt;/soap:Body&gt;

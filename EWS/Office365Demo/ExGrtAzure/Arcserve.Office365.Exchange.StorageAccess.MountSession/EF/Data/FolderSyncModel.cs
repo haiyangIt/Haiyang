@@ -96,10 +96,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data
         [CaseSensitive]
         public string ChangeKey
         {
-            get
-            {
-                throw new NotImplementedException();
-            }
+            get; set;
         }
 
         public string MailboxId

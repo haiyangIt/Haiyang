@@ -1,5 +1,6 @@
 ﻿using Arcserve.Office365.Exchange.Log;
 using Arcserve.Office365.Exchange.Manager.IF;
+using Arcserve.Office365.Exchange.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,7 @@ namespace Arcserve.Office365.Exchange.Manager.Impl
         private AutoResetEvent endEvent = new AutoResetEvent(false);
         private AutoResetEvent endWaitingEvent = new AutoResetEvent(false);
 
-
+        private object _lockObj = new object();
         private AutoResetEvent[] events;
         private int EndEventIndex;
         private const int WaitTimeOut = 2000;
@@ -55,7 +56,7 @@ namespace Arcserve.Office365.Exchange.Manager.Impl
                 {
                     MethodWhenOtherEventTriggered(waitResult);
                 }
-                else if(waitResult == WaitHandle.WaitTimeout)
+                else if (waitResult == WaitHandle.WaitTimeout)
                 {
                     MethodWhenTimeOutTriggerd();
                 }
@@ -81,11 +82,16 @@ namespace Arcserve.Office365.Exchange.Manager.Impl
 
         protected void TriggerOtherEvent(int eventIndex)
         {
-            if(eventIndex < 0 || eventIndex > EndEventIndex)
+            if (eventIndex < 0 || eventIndex > EndEventIndex)
             {
                 throw new ArgumentException("eventIndex is invalid.");
             }
-            events[eventIndex].Set();
+            using (_lockObj.LockWhile(() =>
+            {
+                if (events[eventIndex] != null)
+                    events[eventIndex].Set();
+            }))
+            { }
         }
 
         protected virtual void BeforeEnd() { }
@@ -100,12 +106,20 @@ namespace Arcserve.Office365.Exchange.Manager.Impl
             endEvent.Set();
             endWaitingEvent.WaitOne();
 
-            foreach(var ev in events)
+            using (_lockObj.LockWhile(() =>
             {
-                ev.Dispose();
-            }
+                int i = 0;
+                foreach (var ev in events)
+                {
+                    ev.Dispose();
+                    events[i++] = null;
+                }
 
-            endWaitingEvent.Dispose();
+                endWaitingEvent.Dispose();
+                endWaitingEvent = null;
+                endEvent = null;
+            }))
+            { }
             AfterEnd();
 
             LogFactory.LogInstance.WriteLog(ManagerName, LogLevel.DEBUG, string.Format("Manager [{0}] ended.", ManagerName));

@@ -54,12 +54,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CatalogAccess.cs" />
+    <Compile Include="DataFromClient.cs" />
     <Compile Include="EF\CatalogDbAccess.cs" />
     <Compile Include="EF\CatalogSyncDbContext.cs" />
     <Compile Include="EF\Data\DataConvert.cs" />
     <Compile Include="EF\Data\FolderSyncModel.cs" />
     <Compile Include="EF\Data\ItemSyncModel.cs" />
     <Compile Include="EF\Data\MailboxSyncModel.cs" />
+    <Compile Include="ExportItemWriter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

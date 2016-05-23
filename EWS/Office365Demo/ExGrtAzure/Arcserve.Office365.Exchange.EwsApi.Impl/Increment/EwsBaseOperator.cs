@@ -22,7 +22,6 @@ using Arcserve.Office365.Exchange.Log;
 
 namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
 {
-
     public abstract class EwsBaseOperator
     {
         private ExchangeService service;
@@ -75,7 +74,7 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
                     CommandGetMailbox.Parameters.Add("RecipientTypeDetails", "UserMailbox");
                     pipe.Commands.Add(CommandGetMailbox);
 
-                    var props = new string[] { "Name", "DisplayName", "UserPrincipalName" };
+                    var props = new string[] { "Name", "DisplayName", "UserPrincipalName", "Guid" };
                     Command CommandSelect = new Command("Select-Object");
                     CommandSelect.Parameters.Add("Property", props);
                     pipe.Commands.Add(CommandSelect);
@@ -87,27 +86,37 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
                     List<IMailboxDataSync> result = new List<IMailboxDataSync>(information.Count);
                     string displayName = string.Empty;
                     string address = string.Empty;
+                    string name = string.Empty;
+                    string guid = string.Empty;
                     foreach (PSObject eachUserMailBox in information)
                     {
                         displayName = string.Empty;
                         address = string.Empty;
+                        name = string.Empty;
+                        guid = string.Empty;
+
                         foreach (PSPropertyInfo propertyInfo in eachUserMailBox.Properties)
                         {
                             if (propertyInfo.Name == "DisplayName")
                                 displayName = propertyInfo.Value.ToString();
                             if (propertyInfo.Name == "UserPrincipalName")
                                 address = propertyInfo.Value.ToString().ToLower();
+                            if (propertyInfo.Name == "Guid")
+                                guid = propertyInfo.Value.ToString();
+                            if (propertyInfo.Name == "Name")
+                                name = propertyInfo.Value.ToString();
+
                         }
 
                         //if (IsNeedGenerateMailbox(address) && address.ToLower() == "haiyang.ling@arcserve.com") // todo remove the specific mail address.
-                        result.Add(new MailboxDataSyncBase(displayName, address));
+                        result.Add(new MailboxDataSyncBase(displayName, address) { Name = name, Id = guid });
                     }
                     return result;
                 }
             }
         }
 
-        
+
 
         public virtual void LoadFolderProperties(Folder folder, PropertySet folderPropertySet)
         {
@@ -292,31 +301,31 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
             return service.FindItems(parentFolderId, searchFilter, view);
         }
 
-        internal void LoadPropertiesForItems(IEnumerable<Item> items, PropertySet itemPropertySet)
+        public virtual void LoadPropertiesForItems(IEnumerable<Item> items, PropertySet itemPropertySet)
         {
             var response = service.LoadPropertiesForItems(items, itemPropertySet);
 
-            foreach(var item in response)
+            foreach (var item in response)
             {
                 if (item.Result == ServiceResult.Error)
                 {
                     LogFactory.LogInstance.WriteLog("", LogLevel.ERR, item.GetDetailInformation());
                 }
-                else if(item.Result == ServiceResult.Warning)
+                else if (item.Result == ServiceResult.Warning)
                 {
                     LogFactory.LogInstance.WriteLog("", LogLevel.WARN, item.GetDetailInformation());
                 }
             }
         }
 
-        public virtual byte[] ExportItem(string sItemId, EwsServiceArgument argument)
+        public virtual byte[] ExportItem(string sItemId)
         {
-            return ExportUploadHelper.ExportItemPost(Enum.GetName(typeof(ExchangeVersion), service.RequestedServerVersion), sItemId, argument);
+            return ExportUploadHelper.ExportItemPost(Enum.GetName(typeof(ExchangeVersion), service.RequestedServerVersion), sItemId, EwsArgument);
         }
 
-        public virtual IEnumerable<ItemDatas> ExportItems(IEnumerable<Item> items)
+        public virtual int ExportItems(IEnumerable<IItemDataSync> items, IExportItemsOper exportItemOper)
         {
-            throw new NotImplementedException();
+            return ExportUploadHelper.ExportItemsPost(Enum.GetName(typeof(ExchangeVersion), service.RequestedServerVersion), items, EwsArgument, exportItemOper);
         }
 
         public virtual void ImportItem(string parentFolderId, Stream stream, EwsServiceArgument argument)
@@ -487,13 +496,13 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
         }
 
 
-        public override byte[] ExportItem(string sItemId, EwsServiceArgument argument)
-        {
-            return TryFunc(() =>
-            {
-                return base.ExportItem(sItemId, argument);
-            }, "ExportItem");
-        }
+        //public override void (string sItemId, EwsServiceArgument argument)
+        //{
+        //    return TryFunc(() =>
+        //    {
+        //        return base.ExportItem(sItemId, argument);
+        //    }, "ExportItem");
+        //}
 
         public override void ImportItem(string parentFolderId, byte[] itemData, EwsServiceArgument argument)
         {
@@ -511,13 +520,13 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
             }, "ImportItem");
         }
 
-        public override IEnumerable<ItemDatas> ExportItems(IEnumerable<Item> items)
-        {
-            return TryFunc(() =>
-            {
-                return base.ExportItems(items);
-            }, "ExportItems");
-        }
+        //public override IEnumerable<ItemDatas> ExportItems(IEnumerable<Item> items)
+        //{
+        //    return TryFunc(() =>
+        //    {
+        //        return base.ExportItems(items);
+        //    }, "ExportItems");
+        //}
 
         public override void LoadFolderProperties(Folder folder, PropertySet folderPropertySet)
         {
@@ -541,6 +550,30 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
             {
                 return base.SyncFolderItems(folderId, lastSyncStatus);
             }, "SyncFolderItems");
+        }
+
+        public override byte[] ExportItem(string sItemId)
+        {
+            return TryFunc(() =>
+            {
+                return base.ExportItem(sItemId);
+            }, "ExportItem");
+        }
+
+        public override int ExportItems(IEnumerable<IItemDataSync> items, IExportItemsOper exportItemOper)
+        {
+            return TryFunc(() =>
+            {
+                return base.ExportItems(items, exportItemOper);
+            }, "ExportItems");
+        }
+
+        public override void LoadPropertiesForItems(IEnumerable<Item> items, PropertySet itemPropertySet)
+        {
+            TryAction(() =>
+            {
+                base.LoadPropertiesForItems(items, itemPropertySet);
+            }, "LoadPropertiesForItems");
         }
     }
 

@@ -11,90 +11,13 @@ using Arcserve.Office365.Exchange.Log;
 using System.Xml.Linq;
 using Arcserve.Office365.Exchange.Util.Setting;
 using System.Linq;
+using Arcserve.Office365.Exchange.EwsApi.Increment;
+using Arcserve.Office365.Exchange.Data.Increment;
 
 namespace Arcserve.Office365.Exchange.EwsApi.Impl.Common
 {
     public class ExportUploadHelper
     {
-        //public static bool ExportItemPost(string ServerVersion, string sItemId, byte[] buffer)
-        //{
-        //    bool bSuccess = false;
-        //    string sResponseText = string.Empty;
-        //    System.Net.HttpWebRequest oHttpWebRequest = null;
-        //    EwsProxyFactory.CreateHttpWebRequest(ref oHttpWebRequest, argument);
-
-        //    // Build request body...
-        //    string EwsRequest = TemplateEwsRequests.ExportItems;
-        //    EwsRequest = EwsRequest.Replace("##RequestServerVersion##", ServerVersion);
-        //    EwsRequest = EwsRequest.Replace("##ItemId##", sItemId);
-
-        //    try
-        //    {
-
-        //        // Use request to do POST to EWS so we get back the data for the item to export.
-        //        byte[] bytes = Encoding.UTF8.GetBytes(EwsRequest);
-        //        oHttpWebRequest.ContentLength = bytes.Length;
-        //        using (Stream requestStream = oHttpWebRequest.GetRequestStream())
-        //        {
-        //            requestStream.Write(bytes, 0, bytes.Length);
-        //            requestStream.Flush();
-        //            requestStream.Close();
-        //        }
-
-        //        // Get response
-        //        HttpWebResponse oHttpWebResponse = (HttpWebResponse)oHttpWebRequest.GetResponse();
-
-        //        StreamReader oStreadReader = new StreamReader(oHttpWebResponse.GetResponseStream());
-        //        sResponseText = oStreadReader.ReadToEnd();
-
-
-
-        //        // OK?
-        //        if (oHttpWebResponse.StatusCode == HttpStatusCode.OK)
-        //        {
-        //            int BUFFER_SIZE = 1024;
-        //            int iReadBytes = 0;
-
-        //            XmlDocument oDoc = new XmlDocument();
-        //            XmlNamespaceManager namespaces = new XmlNamespaceManager(oDoc.NameTable);
-        //            namespaces.AddNamespace("m", "http://schemas.microsoft.com/exchange/services/2006/messages");
-        //            oDoc.LoadXml(sResponseText);
-        //            XmlNode oData = oDoc.SelectSingleNode("//m:Data", namespaces);
-
-        //            // Write base 64 encoded text Data XML string into a binary base 64 text/XML file
-        //            //BinaryWriter oBinaryWriter = new BinaryWriter(File.Open(sFile, FileMode.Create));
-        //            StringReader oStringReader = new StringReader(oData.OuterXml);
-        //            XmlTextReader oXmlTextReader = new XmlTextReader(oStringReader);
-        //            oXmlTextReader.MoveToContent();
-        //            byte[] buffer = new byte[BUFFER_SIZE];
-        //            do
-        //            {
-        //                iReadBytes = oXmlTextReader.ReadBase64(buffer, 0, BUFFER_SIZE);
-        //                //oBinaryWriter.Write(buffer, 0, iReadBytes);
-        //                writer.Write(buffer, 0, iReadBytes);
-        //            }
-        //            while (iReadBytes >= BUFFER_SIZE);
-
-        //            oXmlTextReader.Close();
-
-        //            // oBinaryWriter.Flush();
-        //            //oBinaryWriter.Close();
-
-        //            bSuccess = true;
-        //        }
-
-
-        //    }
-        //    finally
-        //    {
-
-
-        //    }
-
-        //    return bSuccess;
-        //}
-
-
         internal static byte[] ExportItemPost(string ServerVersion, string sItemId, EwsServiceArgument argument)
         {
             string sResponseText = string.Empty;
@@ -108,7 +31,7 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Common
                 EwsProxyFactory.CreateHttpWebRequest(ref oHttpWebRequest, argument);
                 string EwsRequest = GetExportSOAPXml(argument, ref oHttpWebRequest);
                 EwsRequest = EwsRequest.Replace("##RequestServerVersion##", ServerVersion);
-                EwsRequest = EwsRequest.Replace("##ItemId##", sItemId);
+                EwsRequest = EwsRequest.Replace("##ItemNode##", string.Format("<t:ItemId Id=\"{0}\"/>", sItemId));
                 // Use request to do POST to EWS so we get back the data for the item to export.
                 byte[] bytes = Encoding.UTF8.GetBytes(EwsRequest);
                 oHttpWebRequest.ContentLength = bytes.Length;
@@ -123,59 +46,18 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Common
                 // Get response
                 oHttpWebResponse = (HttpWebResponse)oHttpWebRequest.GetResponse();
 
-                //oStreadReader = new StreamReader(oHttpWebResponse.GetResponseStream());
-                //sResponseText = oStreadReader.ReadToEnd();
-                //if (sResponseText.Length > MaxSupportItemSize)
-                //{
-                //    LogFactory.LogInstance.WriteLog(LogLevel.WARN, string.Format("{0} is too much. not support now.", sItemId));
-                //    return false;
-                //}
-
                 // OK?
                 if (oHttpWebResponse.StatusCode == HttpStatusCode.OK)
                 {
-                    //int BUFFER_SIZE = 1024;
-                    //int iReadBytes = 0;
-                    //XmlDocument oDoc = new XmlDocument();
-                    //XmlNamespaceManager namespaces = new XmlNamespaceManager(oDoc.NameTable);
-                    //namespaces.AddNamespace("m", "http://schemas.microsoft.com/exchange/services/2006/messages");
-                    //oDoc.LoadXml(sResponseText);
-                    //XmlNode oData = oDoc.SelectSingleNode("//m:Data", namespaces);
 
                     XDocument doc = XDocument.Load(oHttpWebResponse.GetResponseStream());
                     XNamespace mnameSpace = "http://schemas.microsoft.com/exchange/services/2006/messages";
 
-                    //var sb = new StringBuilder(102400);
-                    //sb.Append("<Data>");
-                    //sb.Append(doc.Descendants(mnameSpace + "Data").FirstOrDefault().Value);
-                    //sb.Append("</Data>");
                     var dataNode = doc.Descendants(mnameSpace + "Data").FirstOrDefault();
                     if (dataNode == null)
                         throw new XmlException("can't find the data.");
                     var val = dataNode.Value;
                     buffer = Convert.FromBase64String(val);
-
-                    // Write base 64 encoded text Data XML string into a binary base 64 text/XML file
-                    //BinaryWriter oBinaryWriter = new BinaryWriter(File.Open(sFile, FileMode.Create));
-                    //using (StringReader oStringReader = new StringReader(sb.ToString()))
-                    //{
-                    //    using (XmlTextReader oXmlTextReader = new XmlTextReader(oStringReader))
-                    //    {
-
-                    //        oXmlTextReader.MoveToContent();
-                    //        byte[] buffer = new byte[BUFFER_SIZE];
-                    //        do
-                    //        {
-
-                    //            iReadBytes = oXmlTextReader.ReadBase64(buffer, 0, BUFFER_SIZE);
-                    //            //oBinaryWriter.Write(buffer, 0, iReadBytes);
-                    //            writer.Write(buffer, 0, iReadBytes);
-                    //        }
-                    //        while (iReadBytes >= BUFFER_SIZE);
-
-                    //        oXmlTextReader.Close();
-                    //    }
-                    //}
 
                 }
 
@@ -197,6 +79,254 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Common
             return buffer;
         }
 
+        private static int ParseExportResultXml(HttpWebResponse webResponse, Dictionary<string, IItemDataSync> dic, IExportItemsOper exportOper)
+        {
+            /*
+            <ExportItemsResponseMessage ResponseClass="">
+               <MessageText/>
+               <ResponseCode/>
+               <DescriptiveLinkKey/>
+               <MessageXml/>
+               <ItemId/>
+               <Data/>
+            </ExportItemsResponseMessage>
+
+            ResponseClass
+                Describes the status of the response. The following values are valid for this attribute:
+            Success
+            Warning
+            Error
+            */
+
+            byte[] buffer = new byte[100];
+            using (XmlReader xmlReader = XmlReader.Create(webResponse.GetResponseStream()))
+            {
+                int depth = -1;
+                bool isNeedRead = true;
+                while (true)
+                {
+                    if (isNeedRead)
+                    {
+                        if (xmlReader.Read())
+                        {
+                            isNeedRead = false;
+                            if (depth != -1 && xmlReader.Depth < depth)
+                                break;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                    if (xmlReader.Name == "m:ExportItemsResponseMessage")
+                    {
+                        depth = xmlReader.Depth;
+                        var status = xmlReader.GetAttribute("ResponseClass");
+                        string itemId = string.Empty;
+                        if (status == "Warning" || status == "Error")
+                        {
+                            var detail = ReadErrorDetail(xmlReader, depth, out itemId);
+                            exportOper.ExportItemError(new EwsResponseException(dic[itemId], detail));
+                            if (xmlReader.NodeType == XmlNodeType.EndElement)
+                                isNeedRead = true;
+                        }
+                        else
+                        {
+                            IItemDataSync itemData = null;
+                            var detail = WriteDataToStream(xmlReader, depth, exportOper.WriteBufferToStorage, dic, out itemData);
+                            exportOper.WriteComplete(itemData);
+                            if (xmlReader.NodeType == XmlNodeType.EndElement)
+                                isNeedRead = true;
+                        }
+
+                    }
+                    else
+                    {
+                        isNeedRead = true;
+                    }
+                }
+
+
+            }
+
+            int size = 0;
+            foreach(var value in dic.Values)
+            {
+                size += value.ActualSize;
+            }
+            return size;
+        }
+
+        private static string ReadErrorDetail(XmlReader xmlReader, int depth, out string itemId)
+        {
+            StringBuilder sb = new StringBuilder();
+            itemId = string.Empty;
+            bool needRead = true;
+            do
+            {
+                if (needRead)
+                {
+                    if (!xmlReader.Read())
+                        break; ;
+                    needRead = false;
+                }
+                if (xmlReader.Depth <= depth)
+                {
+                    break;
+                }
+                switch (xmlReader.NodeType)
+                {
+                    case XmlNodeType.Element:
+                        if (xmlReader.Name == "m:ItemId")
+                        {
+                            itemId = xmlReader.GetAttribute("Id");
+                            needRead = true;
+                        }
+                        else
+                        {
+                            sb.AppendLine(xmlReader.ReadOuterXml());
+                        }
+                        break;
+                    case XmlNodeType.EndElement:
+                        needRead = true;
+                        break;
+                    case XmlNodeType.Whitespace:
+                        needRead = true;
+                        break;
+                    default:
+                        sb.AppendLine(xmlReader.ReadOuterXml());
+                        break;
+                }
+            } while (true);
+            return sb.ToString();
+        }
+
+        private static string WriteDataToStream(XmlReader xmlReader, int depth, Action<IItemDataSync, byte[], int> writeBuffer, Dictionary<string, IItemDataSync> dic, out IItemDataSync itemData)
+        {
+            StringBuilder sb = new StringBuilder();
+            string itemId = string.Empty;
+            itemData = null;
+            byte[] buffer = new byte[1024];
+            bool isNeedRead = true;
+            while (true)
+            {
+                if (isNeedRead)
+                {
+                    if (xmlReader.Read())
+                    {
+                        isNeedRead = false;
+                        if (xmlReader.Depth <= depth)
+                            break;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                switch (xmlReader.NodeType)
+                {
+                    case XmlNodeType.Element:
+                        if (xmlReader.Name == "m:ItemId")
+                        {
+                            itemId = xmlReader.GetAttribute("Id");
+                            itemData = dic[itemId];
+                            isNeedRead = true;
+                        }
+                        else if (xmlReader.Name == "m:Data")
+                        {
+                            int readCount = 0;
+                            do
+                            {
+                                readCount = xmlReader.ReadElementContentAsBase64(buffer, 0, buffer.Length);
+                                writeBuffer(itemData, buffer, readCount);
+                                itemData.ActualSize += readCount;
+                            } while (readCount == buffer.Length);
+                            isNeedRead = true;
+                        }
+                        else
+                        {
+                            sb.AppendLine(xmlReader.ReadOuterXml());
+                        }
+                        break;
+                    case XmlNodeType.EndElement:
+                        isNeedRead = true;
+                        break;
+                    case XmlNodeType.Whitespace:
+                        isNeedRead = true;
+                        break;
+                    default:
+                        sb.AppendLine(xmlReader.ReadOuterXml());
+                        break;
+                }
+            }
+            return sb.ToString();
+        }
+
+
+
+        public static int ExportItemsPost(string ServerVersion, IEnumerable<IItemDataSync> exportItems, EwsServiceArgument argument, IExportItemsOper exportItemOper)
+        {
+            string sResponseText = string.Empty;
+            System.Net.HttpWebRequest oHttpWebRequest = null;
+            StreamReader oStreadReader = null;
+            HttpWebResponse oHttpWebResponse = null;
+            // Build request body...
+            try
+            {
+                EwsProxyFactory.CreateHttpWebRequest(ref oHttpWebRequest, argument);
+                string EwsRequest = GetExportSOAPXml(argument, ref oHttpWebRequest);
+                EwsRequest = EwsRequest.Replace("##RequestServerVersion##", ServerVersion);
+
+                var itemStr = string.Empty;
+                StringBuilder sb = new StringBuilder(1000);
+                foreach (var item in exportItems)
+                {
+                    sb.AppendFormat("<t:ItemId Id=\"{0}\"/>", item.ItemId);
+                }
+                EwsRequest = EwsRequest.Replace("##ItemNode##", sb.ToString());
+                // Use request to do POST to EWS so we get back the data for the item to export.
+                byte[] bytes = Encoding.UTF8.GetBytes(EwsRequest);
+                oHttpWebRequest.ContentLength = bytes.Length;
+                oHttpWebRequest.Timeout = CloudConfig.Instance.ExportItemTimeOut;
+                using (Stream requestStream = oHttpWebRequest.GetRequestStream())
+                {
+                    requestStream.Write(bytes, 0, bytes.Length);
+                    requestStream.Flush();
+                    requestStream.Close();
+                }
+
+                // Get response
+                oHttpWebResponse = (HttpWebResponse)oHttpWebRequest.GetResponse();
+
+                // OK?
+                if (oHttpWebResponse.StatusCode == HttpStatusCode.OK)
+                {
+                    Dictionary<string, IItemDataSync> dic = new Dictionary<string, IItemDataSync>(10);
+                    foreach (var item in exportItems)
+                    {
+                        dic.Add(item.ItemId, item);
+                    }
+                    return ParseExportResultXml(oHttpWebResponse, dic, exportItemOper);
+                }
+                return 0;
+
+            }
+            finally
+            {
+                if (oStreadReader != null)
+                {
+                    oStreadReader.Dispose();
+                    oStreadReader = null;
+                }
+                if (oHttpWebResponse != null)
+                {
+                    oHttpWebResponse.Dispose();
+                    oHttpWebResponse = null;
+                }
+            }
+        }
+
         internal static bool ExportItemPost(string ServerVersion, string sItemId, string sFile, EwsServiceArgument argument)
         {
             // Write base 64 encoded text Data XML string into a binary base 64 text/XML file
@@ -214,13 +344,13 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Common
         private static string GetExportSOAPXml(EwsServiceArgument argument, ref HttpWebRequest webRequest)
         {
             string result;
-            if(argument.UserToImpersonate == null)
+            if (argument.UserToImpersonate == null)
             {
                 result = TemplateEwsRequests.ExportItems;
             }
             else
             {
-                switch(argument.UserToImpersonate.IdType)
+                switch (argument.UserToImpersonate.IdType)
                 {
                     case ConnectingIdType.PrincipalName:
                         result = TemplateEwsRequests.ExportItemsWithImpersonatePrincipleName;
