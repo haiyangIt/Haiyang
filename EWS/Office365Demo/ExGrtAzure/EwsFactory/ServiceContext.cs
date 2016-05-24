@@ -33,38 +33,7 @@ namespace EwsFrame
         //    }
         //}
 
-        private IDataAccess _dataAccessObj;
-
-        //public static IDataAccess GetDataAccessInstance(TaskType taskType, EwsServiceArgument argument, string organization)
-        //{
-        //    if (_dataAccessObj == null)
-        //        CreateDataAccess(taskType, argument, organization);
-        //    return _dataAccessObj;
-        //}
-
-        public IDataAccess DataAccessObj
-        {
-            get
-            {
-                if (_dataAccessObj == null)
-                {
-                    throw new NullReferenceException();
-                }
-                return _dataAccessObj;
-            }
-        }
-
-        private void CreateDataAccess(TaskType taskType, EwsServiceArgument argument, string organization)
-        {
-            if (taskType == TaskType.Catalog)
-            {
-                _dataAccessObj = CatalogFactory.Instance.NewCatalogDataAccessInternal(argument, organization);
-            }
-            else
-            {
-                _dataAccessObj = RestoreFactory.Instance.NewCatalogDataAccessInternal();
-            }
-        }
+        
 
         public TaskType TaskType { get; private set; }
 
@@ -126,7 +95,6 @@ namespace EwsFrame
             CurrentMailbox = adminUserName;
 
             TaskType = taskType;
-            CreateDataAccess(TaskType, Argument, organization);
         }
 
         public static IServiceContext NewServiceContext(string userName, string password, string domainName, string organization, TaskType taskType)
@@ -144,11 +112,6 @@ namespace EwsFrame
 
         public void Dispose()
         {
-            if(_dataAccessObj != null)
-            {
-                _dataAccessObj.Dispose();
-                _dataAccessObj = null;
-            }
         }
     }
 }

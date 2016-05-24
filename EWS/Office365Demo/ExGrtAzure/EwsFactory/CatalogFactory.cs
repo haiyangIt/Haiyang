@@ -89,7 +89,7 @@ namespace EwsFrame
         //    return (IItem)CreateType<IItem>(EwsServiceImplAssembly, service, dataAccess);
         //}
 
-        internal ICatalogDataAccess NewCatalogDataAccessInternal(EwsServiceArgument argument, string organization)
+        public ICatalogDataAccess NewCatalogDataAccessInternal(EwsServiceArgument argument, string organization)
         {
             return (ICatalogDataAccess)CreateType<ICatalogDataAccess>(EwsDataImplAssembly, argument, organization);
         }

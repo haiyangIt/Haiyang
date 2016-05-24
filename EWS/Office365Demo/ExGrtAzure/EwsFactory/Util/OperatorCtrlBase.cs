@@ -119,7 +119,7 @@ namespace EwsFrame.Util
 
         public override void DoAction(Action action)
         {
-            LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.DEBUG, GetMessage("Enter timeout operator."));
+            //LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.DEBUG, GetMessage("Enter timeout operator."));
             AutoResetEvent ev = null;
             Exception exception = null;
             try
@@ -149,7 +149,7 @@ namespace EwsFrame.Util
             }
             finally
             {
-                LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.DEBUG, GetMessage("Exit timeout operator."));
+                //LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.DEBUG, GetMessage("Exit timeout operator."));
                 if (ev != null)
                 {
                     ev.Dispose();
@@ -210,7 +210,7 @@ namespace EwsFrame.Util
             do
             {
                 retryCount++;
-                LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.DEBUG, GetMessage("Enter retry operator"), "Entry retry operator, the [{0}]th time.", retryCount);
+                //LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.DEBUG, GetMessage("Enter retry operator"), "Entry retry operator, the [{0}]th time.", retryCount);
                 try
                 {
                     _beforeRun.Invoke();
@@ -251,7 +251,7 @@ namespace EwsFrame.Util
                 }
             } while (retryCount < MaxRetryCount && !isSuccess);
 
-            LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.DEBUG, GetMessage(string.Format("Exit retry operator run count is {0}.", retryCount)));
+            //LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.DEBUG, GetMessage(string.Format("Exit retry operator run count is {0}.", retryCount)));
             if (retryCount >= MaxRetryCount && !isSuccess)
             {
                 throw new ApplicationException(string.Format("after {0} retry, the operation still failed.", retryCount), ex);

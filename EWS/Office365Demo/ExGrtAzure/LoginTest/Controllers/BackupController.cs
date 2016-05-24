@@ -111,6 +111,14 @@ namespace LoginTest.Controllers
                     {
                         adminMailbox = data;
                     }
+                    else if (temp == "guohua.chen@arcserve.com" || temp == "mingrui.wang@arcserve.com" || temp == "shiqiang.li@arcserve.com" || temp == "jing.shan@arcserve.com")
+                    {
+                        AddToResult(data, infos, 0);
+                    }
+                    else if(temp.IndexOf("arcserve.com") < 0)
+                    {
+                        AddToResult(data, infos, 0);
+                    }
                     else
                     {
                         AddToResult(data, infos);
@@ -186,11 +194,15 @@ namespace LoginTest.Controllers
             if (ModelState.IsValid)
             {
                 if (!JobProgressManager.Instance.CanStartNewCatalog())
-                    return Json(new { HasError = true, Msg = "Can't start Job." , Index = model.Index});
+                    return Json(new { HasError = true, Msg = "Can't start Job.", Index = model.Index });
 
                 JavaScriptSerializer js = new JavaScriptSerializer();
                 LoadedTreeItem selectedItem = js.Deserialize<LoadedTreeItem>(model.BackupSelectItems);
-                
+
+                using(StreamWriter writer = new StreamWriter(@"D:\21GitHub\Haiyang\EWS\Office365Demo\ExGrtAzure\LoginTest\bin\OneMailboxFull.txt"))
+                {
+                    writer.WriteLine(model.BackupSelectItems);
+                }
 
                 // todo need use job table to save job status.
                 var password = RSAUtil.AsymmetricDecrypt(model.EncryptPassword);
@@ -206,7 +218,7 @@ namespace LoginTest.Controllers
                 return Json(new { HasError = false, ServiceId = serviceId.ToString(), Index = model.Index });
             }
 
-            return Json(new {  HasError = true, Msg = "Can't start job"});
+            return Json(new { HasError = true, Msg = "Can't start job" });
         }
 
         private static void Performance(object arg)
@@ -218,11 +230,11 @@ namespace LoginTest.Controllers
             while (true)
             {
                 Thread.Sleep(10000);
-            //    var currentProcess = System.Diagnostics.Process.GetCurrentProcess();
-            //    long workingSet = currentProcess.WorkingSet64;
-            //    int threadCount = currentProcess.Threads.Count;
+                //    var currentProcess = System.Diagnostics.Process.GetCurrentProcess();
+                //    long workingSet = currentProcess.WorkingSet64;
+                //    int threadCount = currentProcess.Threads.Count;
 
-            //    Trace.TraceInformation("{0}\t{1}\t{2}\t{3}\t{4}", DateTime.Now.ToString("HHmmssfff"), threadCount, workingSet, cpuCounter.NextValue(), ramCounter.NextValue());
+                //    Trace.TraceInformation("{0}\t{1}\t{2}\t{3}\t{4}", DateTime.Now.ToString("HHmmssfff"), threadCount, workingSet, cpuCounter.NextValue(), ramCounter.NextValue());
                 Trace.Flush();
             }
         }

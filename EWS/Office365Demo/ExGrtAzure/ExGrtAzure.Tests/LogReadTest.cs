@@ -56,6 +56,9 @@ namespace ExGrtAzure.Tests
         [TestMethod]
         public void ReadErrorLogs()
         {
+            int value = 12;
+            var st = string.Format("{0:D8}", value);
+
             HashSet<string> fileNames = new HashSet<string>();
             ReadLogs((line, filePath, lineIndex) =>
             {

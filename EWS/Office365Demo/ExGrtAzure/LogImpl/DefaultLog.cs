@@ -309,6 +309,7 @@ namespace LogImpl
         private AutoResetEvent _endEvent = new AutoResetEvent(false);
         private AutoResetEvent _endedEvent;
         private AutoResetEvent[] events;
+        private object _lockObj = new object();
         private Thread _logThread;
         protected ManageBase(string threadName)
         {
@@ -322,7 +323,14 @@ namespace LogImpl
         {
             Trace.WriteLine(msg);
             msgQueue.Enqueue(msg);
-            _logEvent.Set();
+            using (_lockObj.LockWhile(() =>
+            {
+                if (_logEvent != null)
+                {
+                    _logEvent.Set();
+                }
+            }))
+            { }
         }
 
 
@@ -387,8 +395,21 @@ namespace LogImpl
                     break;
             }
             Debug.WriteLine("Manager internal Dispose");
-            _logEvent.Dispose();
-            _endEvent.Dispose();
+            using (_lockObj.LockWhile(() =>
+            {
+                if (_logEvent != null)
+                {
+                    _logEvent.Dispose();
+                    _logEvent = null;
+                }
+                if (_endEvent != null)
+                {
+                    _endEvent.Dispose();
+                    _endEvent = null;
+                }
+
+            }))
+            { }
             _endedEvent.Set();
 
         }
@@ -403,6 +424,7 @@ namespace LogImpl
             Debug.WriteLine("Manager Dispose");
             _endedEvent.WaitOne();
             _endedEvent.Dispose();
+            _endedEvent = null;
             DoDispose();
             Debug.WriteLine("Manager Disposed");
             Trace.Flush();

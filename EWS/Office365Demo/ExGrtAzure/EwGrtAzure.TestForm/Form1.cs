@@ -67,21 +67,23 @@ namespace EwGrtAzure.TestForm
 
         private void BeforeBackup()
         {
-            IServiceContext serviceContext = ServiceContext.NewServiceContext("haiyang.ling@arcserve.com", "", "", "Arcserve", DataProtectInterface.TaskType.Catalog);
-            serviceContext.CurrentMailbox = "haiyang.ling@arcserve.com";
-            serviceContext.DataAccessObj.ResetAllStorage(serviceContext.CurrentMailbox);
+            
+            IServiceContext serviceContext = ServiceContext.NewServiceContext(txtAdminUser.Text, "", "", txtOrg.Text, DataProtectInterface.TaskType.Catalog);
+            serviceContext.CurrentMailbox = txtAdminUser.Text;
+            var dataAccess = CatalogFactory.Instance.NewCatalogDataAccessInternal(serviceContext.Argument, serviceContext.AdminInfo.OrganizationName);
+            dataAccess.ResetAllStorage(serviceContext.CurrentMailbox);
 
             if (!FactoryBase.IsRunningOnAzureOrStorageInAzure())
             {
 
-                using (CatalogDbContext dbContext = new CatalogDbContext(new SqlDbImpl.Model.OrganizationModel() { Name = "Arcserve" }))
+                using (CatalogDbContext dbContext = new CatalogDbContext(new SqlDbImpl.Model.OrganizationModel() { Name = txtOrg.Text }))
                 {
-                    dbContext.Folders.RemoveRange(dbContext.Folders);
-                    dbContext.ItemLocations.RemoveRange(dbContext.ItemLocations);
-                    dbContext.Items.RemoveRange(dbContext.Items);
-                    dbContext.Catalogs.RemoveRange(dbContext.Catalogs);
-                    dbContext.Mailboxes.RemoveRange(dbContext.Mailboxes);
-
+                    AppendToTextbox1(dbContext.Database.Connection.ConnectionString);
+                    dbContext.Database.ExecuteSqlCommand("TRUNCATE TABLE CatalogInformation");
+                    dbContext.Database.ExecuteSqlCommand("TRUNCATE TABLE MailboxInformation");
+                    dbContext.Database.ExecuteSqlCommand("TRUNCATE TABLE ItemLocation");
+                    dbContext.Database.ExecuteSqlCommand("TRUNCATE TABLE ItemInformation");
+                    dbContext.Database.ExecuteSqlCommand("TRUNCATE TABLE FolderInformation");
                     dbContext.SaveChanges();
                 }
             }
@@ -131,7 +133,7 @@ namespace EwGrtAzure.TestForm
 
         private void TestCatalog(string file)
         {
-            var service = CatalogFactory.Instance.NewCatalogService("devO365admin@arcservemail.onmicrosoft.com", "JackyMao1!", "", "arcserve");
+            var service = CatalogFactory.Instance.NewCatalogService(txtAdminUser.Text, txtAdminPsw.Text, "", txtOrg.Text);
             var partSelect = "";
             using (StreamReader reader = new StreamReader(file))
             {
@@ -179,24 +181,95 @@ namespace EwGrtAzure.TestForm
             EwsRequestGate.Instance.Dispose();
             _wait.Dispose();
         }
+        
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            if (JobProgressManager.Instance.Count > 1)
+                return;
+            this.txtLog.Text = "";
+            AppendToTextbox1("Clear Environment.");
+            BeforeBackup();
+            TestCatalog(@"FourMailboxPartial.txt");
+            AfterBackup();
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            if (JobProgressManager.Instance.Count > 1)
+                return;
+            this.txtLog.Text = "";
+            AppendToTextbox1("Clear Environment.");
+            BeforeBackup();
+            TestCatalog(@"FourMailboxAll.txt");
+            AfterBackup();
+        }
 
         private void button3_Click(object sender, EventArgs e)
         {
-            AppendToTextbox1("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcccccccccccccccccccccccccccccccccccccccccccc  ");
+            HashSet<string> filePaths = new HashSet<string>();
+            ReadLogs((line, filePath, lineIndex) =>
+            {
+                if (line.IndexOf("\tE\t") >= 0)
+                {
+                    if (!filePaths.Contains(filePath))
+                    {
+                        AppendToTextbox1(filePath);
+                        filePaths.Add(filePath);
+                    }
+
+                    AppendToTextbox1(string.Format("[{0,4}] {1}", lineIndex, line));
+                }
+            });
+        }
+
+        private void ReadLogs(Action<string, string, int> findOperator)
+        {
+            var files = GetTraceFiles();
+
+            foreach (var filePath in files)
+            {
+
+                int lineIndex = 0;
+                using (StreamReader reader = new StreamReader(filePath))
+                {
+                    do
+                    {
+                        lineIndex++;
+                        var line = reader.ReadLine();
+                        findOperator(line, filePath, lineIndex);
+                    } while (!reader.EndOfStream);
+                }
+            }
+        }
+
+        private ICollection<string> GetTraceFiles()
+        {
+            string folder = @"D:\21GitHub\Haiyang\EWS\Office365Demo\ExGrtAzure\EwGrtAzure.TestForm\bin\Debug\FourLogs";
+            return Directory.EnumerateFiles(folder).ToList();
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
-            try {
-                using (CatalogDbContext context = new CatalogDbContext(new OrganizationModel() { Name = "Arcserve" }))
-                {
-                    AppendToTextbox1(context.Database.Connection.ConnectionString);
-                }
-            }
-            catch(Exception ex)
-            {
-                AppendToTextbox1(ex.Message + "\r\n" + ex.StackTrace);
-            }
+            if (JobProgressManager.Instance.Count > 1)
+                return;
+            this.txtLog.Text = "";
+            AppendToTextbox1("Clear Environment.");
+            BeforeBackup();
+            TestCatalog(txtFile.Text);
+            AfterBackup();
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            BeforeBackup();
+        }
+
+        private void btnSwitchCount_Click(object sender, EventArgs e)
+        {
+            txtAdminUser.Text = "ArcserveJacky@ArcserveJacky.onmicrosoft.com";
+            txtAdminPsw.Text = "Arcserve1!";
+            txtOrg.Text = "ArcserveJacky";
         }
     }
 }

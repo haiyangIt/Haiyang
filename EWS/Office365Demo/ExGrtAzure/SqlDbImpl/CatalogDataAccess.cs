@@ -196,7 +196,7 @@ namespace SqlDbImpl
             if (buffer == null || buffer.Length == 0)
                 return;
 
-            var location = ItemLocationModel.GetLocation(mailboxAddress, item);
+            var location = ItemLocationModel.GetLocation(item);
             string blobNamePrefix = MailLocation.GetBlobNamePrefix(item.ItemId);
 
             var binLocation = new ExportItemSizeInfo() { Type = ExportType.TransferBin, Size = (int)buffer.Length };

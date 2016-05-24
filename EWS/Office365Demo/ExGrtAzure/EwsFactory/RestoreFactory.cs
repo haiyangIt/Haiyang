@@ -117,7 +117,7 @@ namespace EwsFrame
             return (IQueryCatalogDataAccess)CreateType<IQueryCatalogDataAccess>(EwsDataImplAssembly);
         }
 
-        internal IQueryCatalogDataAccess NewCatalogDataAccessInternal()
+        public IQueryCatalogDataAccess NewCatalogDataAccessInternal()
         {
             return (IQueryCatalogDataAccess)CreateType<IQueryCatalogDataAccess>(EwsDataImplAssembly);
         }

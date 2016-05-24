@@ -32,7 +32,8 @@ namespace ExGrtAzure.Tests
 
             IServiceContext serviceContext = ServiceContext.NewServiceContext("haiyang.ling@arcserve.com", "", "", "Arcserve", DataProtectInterface.TaskType.Catalog);
             serviceContext.CurrentMailbox = "haiyang.ling@arcserve.com";
-            serviceContext.DataAccessObj.ResetAllStorage(serviceContext.CurrentMailbox);
+            var dataAccess = CatalogFactory.Instance.NewCatalogDataAccessInternal(serviceContext.Argument, serviceContext.AdminInfo.OrganizationName);
+            dataAccess.ResetAllStorage(serviceContext.CurrentMailbox);
 
             if (!FactoryBase.IsRunningOnAzureOrStorageInAzure())
             {

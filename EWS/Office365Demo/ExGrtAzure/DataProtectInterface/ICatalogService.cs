@@ -18,7 +18,7 @@ namespace DataProtectInterface
 
         OrganizationAdminInfo AdminInfo { get; }
 
-        IServiceContext ServiceContext { get; }
+        //IServiceContext ServiceContext { get; }
 
         List<IMailboxData> GetAllUserMailbox();
 

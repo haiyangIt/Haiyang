@@ -144,7 +144,8 @@ namespace ExGrtAzure.Tests
         {
             IServiceContext context = ServiceContext.NewServiceContext("haiyang.ling@arcserve.com", "", "", "Arcserve", DataProtectInterface.TaskType.Catalog);
             context.CurrentMailbox = "haiyang.ling@arcserve.com";
-            context.DataAccessObj.ResetAllStorage(context.CurrentMailbox);
+            var dataAccess = CatalogFactory.Instance.NewCatalogDataAccessInternal(context.Argument, context.AdminInfo.OrganizationName);
+            dataAccess.ResetAllStorage(context.CurrentMailbox);
         }
 
         [TestMethod]

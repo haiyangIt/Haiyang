@@ -12,8 +12,7 @@ namespace DataProtectInterface
         string CurrentMailbox { get; set; }
         
         EwsServiceArgument Argument { get; }
-
-        IDataAccess DataAccessObj { get; }
+        
 
         TaskType TaskType { get; }
 

@@ -1,4 +1,5 @@
-﻿using DataProtectInterface;
+﻿using DataProtectImpl;
+using DataProtectInterface;
 using Demo.Models.Restore;
 using EwsDataInterface;
 using EwsFrame;
@@ -206,7 +207,9 @@ namespace LoginTest.Controllers
             var password = RSAUtil.AsymmetricDecrypt(restoreAdminUserInfo.Password);
             IRestoreServiceEx restore = RestoreFactory.Instance.NewRestoreServiceEx(restoreAdminUserInfo.UserAddress, password, string.Empty, restoreAdminUserInfo.Organization);
             restore.CurrentRestoreCatalogJob = catalog;
-            restore.Destination = RestoreFactory.Instance.NewRestoreDestinationEx(restore.ServiceContext.Argument, restore.ServiceContext.DataAccessObj);
+            var context = ((RestoreServiceEx)restore).ServiceContext;
+            var dataAccess = CatalogFactory.Instance.NewCatalogDataAccessInternal(context.Argument, context.AdminInfo.OrganizationName);
+            restore.Destination = RestoreFactory.Instance.NewRestoreDestinationEx(restore.ServiceContext.Argument, dataAccess);
             restore.Destination.SetOtherInformation(destination.MailboxAddress, destination.FolderPath);
             restore.Restore(selectedItem);
             return Json(new { IsSuccess = true });
@@ -221,7 +224,9 @@ namespace LoginTest.Controllers
             var password = RSAUtil.AsymmetricDecrypt(restoreAdminUserInfo.Password);
             IRestoreServiceEx restore = RestoreFactory.Instance.NewRestoreServiceEx(restoreAdminUserInfo.UserAddress, password, string.Empty, restoreAdminUserInfo.Organization);
             restore.CurrentRestoreCatalogJob = catalog;
-            restore.Destination = RestoreFactory.Instance.NewRestoreDestinationOrgEx(restore.ServiceContext.Argument, restore.ServiceContext.DataAccessObj);
+            var context = ((RestoreServiceEx)restore).ServiceContext;
+            var dataAccess = RestoreFactory.Instance.NewCatalogDataAccessInternal();
+            restore.Destination = RestoreFactory.Instance.NewRestoreDestinationOrgEx(restore.ServiceContext.Argument, dataAccess);
             restore.Destination.SetOtherInformation(destination.FolderPath);
             restore.Restore(selectedItem);
             return Json(new { IsSuccess = true });

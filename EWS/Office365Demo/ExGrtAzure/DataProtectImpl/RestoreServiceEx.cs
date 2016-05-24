@@ -69,11 +69,16 @@ namespace DataProtectImpl
             get; private set;
         }
 
+        private IQueryCatalogDataAccess _dataAccess;
         private IQueryCatalogDataAccess DataAccess
         {
             get
             {
-                var catalogQueryDataAccess = (IQueryCatalogDataAccess)ServiceContext.DataAccessObj;
+                if(_dataAccess == null)
+                {
+                    _dataAccess = RestoreFactory.Instance.NewDataAccessForQuery();
+                }
+                var catalogQueryDataAccess = _dataAccess;
                 catalogQueryDataAccess.CatalogJob = CurrentRestoreCatalogJob;
                 return catalogQueryDataAccess;
             }
@@ -366,7 +371,6 @@ namespace DataProtectImpl
         private void RestoreEnd()
         {
             Destination.RestoreComplete(true, this, null);
-            ServiceContext.DataAccessObj.Dispose();
         }
 
         private void RestoreStart()

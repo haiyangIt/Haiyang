@@ -6,6 +6,7 @@ using LogInterface;
 using EwsServiceInterface;
 using EwsFrame.Cache;
 using EwsService.Impl;
+using EwsFrame.Util;
 
 namespace EwsService.Common
 {
@@ -204,36 +205,65 @@ namespace EwsService.Common
                 }
             }
 
-            var domainName = AutodiscoveryUrlCache.GetDomainName(mailboxAddress);
-            var urlCache = OrganizationCacheManager.CacheManager.GetCache(domainName, AutodiscoveryUrlCache.CacheName);
-            if(urlCache == null)
-            {
-                urlCache = OrganizationCacheManager.CacheManager.NewCache(domainName, AutodiscoveryUrlCache.CacheName, typeof(AutodiscoveryUrlCache));
-            }
+            //var domainName = AutodiscoveryUrlCache.GetDomainName(mailboxAddress);
+            //ICache urlCache = null;
+            //using(OrganizationCacheManager.CacheManager.LockWhile(()=> {
 
-            StringCacheKey mailboxKey = new StringCacheKey(domainName);
+            //    urlCache = OrganizationCacheManager.CacheManager.GetCache(domainName, AutodiscoveryUrlCache.CacheName);
+            //    if (urlCache == null)
+            //    {
+            //        urlCache = OrganizationCacheManager.CacheManager.NewCache(domainName, AutodiscoveryUrlCache.CacheName, typeof(AutodiscoveryUrlCache));
+            //    }
+
+            //})) { }
+
+            //StringCacheKey mailboxKey = new StringCacheKey(domainName);
             object urlObj = null;
-            if(!urlCache.TryGetValue(mailboxKey, out urlObj) || isDoAutodiscovery)
+
+            if (isDoAutodiscovery)
             {
                 DoAutodiscover(service, mailboxAddress);
-                if (isDoAutodiscovery && urlObj == null)
-                    urlCache.AddKeyValue(mailboxKey, urlObj);
                 urlObj = service.Url;
             }
             else
             {
+                urlObj = "https://outlook.office365.com/EWS/Exchange.asmx";
+                service.Url = new Uri(urlObj.ToString());
                 try
                 {
-                    service.Url = new Uri(urlObj.ToString());
                     TestExchangeService(service);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     System.Diagnostics.Trace.TraceError(ex.GetExceptionDetail());
                     DoAutodiscover(service, mailboxAddress);
-                    urlCache.SetKeyValue(mailboxKey, service.Url);
                 }
             }
+
+
+
+
+            //if(!urlCache.TryGetValue(mailboxKey, out urlObj) || isDoAutodiscovery)
+            //{
+            //    DoAutodiscover(service, mailboxAddress);
+            //    if (!isDoAutodiscovery && urlObj == null)
+            //        urlCache.AddKeyValue(mailboxKey, urlObj);
+            //    urlObj = service.Url;
+            //}
+            //else
+            //{
+            //    try
+            //    {
+            //        service.Url = new Uri(urlObj.ToString());
+            //        TestExchangeService(service);
+            //    }
+            //    catch(Exception ex)
+            //    {
+            //        System.Diagnostics.Trace.TraceError(ex.GetExceptionDetail());
+            //        DoAutodiscover(service, mailboxAddress);
+            //        urlCache.SetKeyValue(mailboxKey, service.Url);
+            //    }
+            //}
 
             ewsServiceArgument.EwsUrl = service.Url;
             return service;

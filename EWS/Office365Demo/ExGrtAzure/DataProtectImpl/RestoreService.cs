@@ -38,13 +38,10 @@ namespace DataProtectImpl
         protected override void RestoreStart()
         {
             StartTime = DateTime.Now;
-            ServiceContext.DataAccessObj.BeginTransaction();
         }
 
         protected override void RestoreEnd(bool isFinished)
         {
-            ServiceContext.DataAccessObj.EndTransaction(isFinished);
-            ServiceContext.DataAccessObj.Dispose();
         }
 
         public override void RestoreItem(string mailbox, IRestoreItemInformation item)
@@ -237,11 +234,16 @@ namespace DataProtectImpl
 
         public virtual DateTime StartTime { get; protected set; }
 
+        private IQueryCatalogDataAccess _dataAccess;
         protected IQueryCatalogDataAccess DataAccess
         {
             get
             {
-                var result = (IQueryCatalogDataAccess)ServiceContext.DataAccessObj;
+                if(_dataAccess == null)
+                {
+                    _dataAccess = RestoreFactory.Instance.NewDataAccessForQuery();
+                }
+                var result = _dataAccess;
                 result.CatalogJob = CurrentRestoreCatalogJob;
                 return result;
             }

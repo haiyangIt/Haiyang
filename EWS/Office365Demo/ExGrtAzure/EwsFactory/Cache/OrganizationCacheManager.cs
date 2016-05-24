@@ -9,7 +9,25 @@ namespace EwsFrame.Cache
 {
     public class OrganizationCacheManager : ICacheManager
     {
-        public static OrganizationCacheManager CacheManager = new OrganizationCacheManager();
+        private static object _lock = new object();
+        private static OrganizationCacheManager _cacheManager;
+        public static OrganizationCacheManager CacheManager
+        {
+            get
+            {
+                if (_cacheManager == null) {
+                    using (_lock.LockWhile(() =>
+                     {
+                         if(_cacheManager == null)
+                         {
+                             _cacheManager = new OrganizationCacheManager();
+                         }
+                     }))
+                    { }
+                }
+                return _cacheManager;
+            }
+        }
 
         private static string GetName(string organization, string cacheName)
         {
@@ -19,7 +37,7 @@ namespace EwsFrame.Cache
         public ICache NewCache(string organization, string cacheName, Type cacheType)
         {
             ICache result = null;
-            using (CacheDic.LockWhile(() =>
+            using (_lock.LockWhile(() =>
              {
                  ICache outObj;
                  string name = GetName(organization, cacheName);
@@ -40,7 +58,7 @@ namespace EwsFrame.Cache
         public ICache GetCache(string organization, string cacheName)
         {
             ICache result = null;
-            using (CacheDic.LockWhile(() =>
+            using (_lock.LockWhile(() =>
             {
                 string name = GetName(organization, cacheName);
 
@@ -59,7 +77,7 @@ namespace EwsFrame.Cache
 
         public void ReleaseCache(bool isSerialize = false)
         {
-            using (CacheDic.LockWhile(() =>
+            using (_lock.LockWhile(() =>
             {
                 foreach (var keyValue in CacheDic)
                 {

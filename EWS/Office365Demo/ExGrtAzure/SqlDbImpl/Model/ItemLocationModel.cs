@@ -100,21 +100,21 @@ namespace SqlDbImpl.Model
             get; set;
         }
 
-        internal static string GetItemContainerName(string mailboxAddress, string folderIdMd5Str, int index)
+        internal static string GetItemContainerName(string folderIdMd5Str, int index)
         {
-            return string.Format("{0}{3}{1}{3}{2}", ServiceContext.GetOrganizationPrefix(mailboxAddress), folderIdMd5Str, index, BlobDataAccess.DashChar);
+            return string.Format("{0}{2}{1}", folderIdMd5Str, index, BlobDataAccess.DashChar);
         }
 
-        internal static string GetItemContainerName(string mailboxAddress, IItemData itemData)
+        internal static string GetItemContainerName(IItemData itemData)
         {
-            return GetItemContainerName(mailboxAddress, MD5Utility.ConvertToMd5(itemData.ParentFolderId), 0);
+            return GetItemContainerName(MD5Utility.ConvertToMd5(itemData.ParentFolderId), 0);
         }
 
-        internal static string GetItemNextContainerName(string mailboxAddress, string containerName)
+        internal static string GetItemNextContainerName(string containerName)
         {
             string[] array = containerName.Split(BlobDataAccess.DashCharArray, StringSplitOptions.RemoveEmptyEntries);
             int index = Convert.ToInt32(array[1]);
-            return GetItemContainerName(mailboxAddress, array[0], index + 1);
+            return GetItemContainerName(array[0], index + 1);
         }
 
         internal static string GetFolderContainerMappingBlobName(string name)
@@ -123,9 +123,9 @@ namespace SqlDbImpl.Model
         }
 
 
-        public static string GetLocation(string mailboxAddress, IItemData item)
+        public static string GetLocation(IItemData item)
         {
-            return GetItemContainerName(mailboxAddress, item);
+            return GetItemContainerName(item);
         }
 
         /// <summary>
@@ -196,13 +196,13 @@ namespace SqlDbImpl.Model
         {
             var result = new FolderContainerMapping();
             result.FolderId = folderId;
-            result.ContainerInfo = ContainerCount.NewInstance(mailboxAddress, folderId, 0);
+            result.ContainerInfo = ContainerCount.NewInstance(folderId, 0);
             return result;
         }
 
         public static FolderContainerMapping NewNextContainer(string mailboxAddress, FolderContainerMapping currentMapping)
         {
-            currentMapping.ContainerInfo = ContainerCount.NewInstanceByPrevContainerName(mailboxAddress, currentMapping.ContainerInfo.ContainerName);
+            currentMapping.ContainerInfo = ContainerCount.NewInstanceByPrevContainerName(currentMapping.ContainerInfo.ContainerName);
             return currentMapping;
         }
 
@@ -253,15 +253,15 @@ namespace SqlDbImpl.Model
 
         private static MD5 _md5Hash = MD5.Create();
 
-        public static ContainerCount NewInstance(string mailboxAddress, string parentFolderId, int index = 0)
+        public static ContainerCount NewInstance(string parentFolderId, int index = 0)
         {
-            return new ContainerCount(mailboxAddress, parentFolderId, index, 0);
+            return new ContainerCount(parentFolderId, index, 0);
         }
 
-        public static ContainerCount NewInstanceByPrevContainerName(string mailboxAddress, string prevContainerName, int usedCount = 0)
+        public static ContainerCount NewInstanceByPrevContainerName(string prevContainerName, int usedCount = 0)
         {
             var result = new ContainerCount();
-            result.ContainerName = ItemLocationModel.GetItemNextContainerName(mailboxAddress, prevContainerName);
+            result.ContainerName = ItemLocationModel.GetItemNextContainerName(prevContainerName);
             result.UsedCount = usedCount;
             return result;
         }
@@ -279,10 +279,10 @@ namespace SqlDbImpl.Model
 
         }
 
-        private ContainerCount(string mailboxAddress, string parentFolderId, int index, int usedCount)
+        private ContainerCount(string parentFolderId, int index, int usedCount)
         {
             ContainerName = GetFolderIdContainerName(parentFolderId);
-            ContainerName = ItemLocationModel.GetItemContainerName(mailboxAddress, ContainerName, index);
+            ContainerName = ItemLocationModel.GetItemContainerName(ContainerName, index);
             UsedCount = usedCount;
         }
 

@@ -64,14 +64,15 @@ namespace DataProtectImpl
 
         private IFilterItem Filter { get; set; }
 
-        private IServiceContext _serviceContext;
-        public IServiceContext ServiceContext
-        {
-            get
-            {
-                return _serviceContext;
-            }
-        }
+        //[ThreadStatic]
+        //private IServiceContext _serviceContext;
+        //public IServiceContext ServiceContext
+        //{
+        //    get
+        //    {
+        //        return _serviceContext;
+        //    }
+        //}
 
         public OrganizationAdminInfo AdminInfo { get; private set; }
 
@@ -127,7 +128,7 @@ namespace DataProtectImpl
             AdminInfo.UserDomain = domainName;
             AdminInfo.OrganizationName = organizationName;
 
-            _serviceContext = EwsFrame.ServiceContext.NewServiceContext(AdminInfo.UserName, AdminInfo.UserPassword, AdminInfo.UserDomain, AdminInfo.OrganizationName, TaskType.Catalog);
+
             LatestInformation = new ConcurrentQueue<string>();
             LogFactory.LogInstance.WriteLogMsgEvent += DoEventHandler;
         }
@@ -174,20 +175,24 @@ namespace DataProtectImpl
                     List<IMailboxData> result = new List<IMailboxData>(information.Count);
                     string displayName = string.Empty;
                     string address = string.Empty;
+                    string name = string.Empty;
                     foreach (PSObject eachUserMailBox in information)
                     {
                         displayName = string.Empty;
                         address = string.Empty;
+                        name = string.Empty;
                         foreach (PSPropertyInfo propertyInfo in eachUserMailBox.Properties)
                         {
                             if (propertyInfo.Name == "DisplayName")
                                 displayName = propertyInfo.Value.ToString();
                             if (propertyInfo.Name == "UserPrincipalName")
                                 address = propertyInfo.Value.ToString().ToLower();
+                            if (propertyInfo.Name == "Name")
+                                name = propertyInfo.Value.ToString();
                         }
 
                         //if (IsNeedGenerateMailbox(address) && address.ToLower() == "haiyang.ling@arcserve.com") // todo remove the specific mail address.
-                        result.Add(new MailboxInfo(displayName, address));
+                        result.Add(new MailboxInfo(displayName, address) { Name = name });
                     }
                     return result;
                 }
@@ -203,7 +208,7 @@ namespace DataProtectImpl
             return GetAllUserMailbox();
         }
 
-        private IEwsAdapter EwsAdapter { get; set; }
+        //private IEwsAdapter EwsAdapter { get; set; }
 
         /// <summary>
         /// 
@@ -219,46 +224,57 @@ namespace DataProtectImpl
 
             GenerateCatalogStart();
             bool isFinished = false;
+            ICatalogDataAccess dbDataAccess = null;
             try
             {
                 IDataConvert dataConvert = NewDataConvertInstance();
                 dataConvert.StartTime = StartTime;
                 dataConvert.OrganizationName = AdminInfo.OrganizationName;
-                EwsAdapter = CatalogFactory.Instance.NewEwsAdapter();
-                EwsAdapter.DataConvert = dataConvert;
 
-                ICatalogDataAccess dataAccess = NewDataAccessInstance();
-                dataAccess.OtherObj = EwsAdapter;
 
                 OnProgressChanged(CatalogProgressType.GetAllMailboxStart);
                 List<IMailboxData> allUserMailbox = GetAllUserMailboxFromFilter();
                 OnProgressChanged(CatalogProgressType.GetAllMailboxEnd, new Process(-1, allUserMailbox.Count));
 
                 int mailboxIndex = 0;
-                int totalMailboxCount = allUserMailbox.Count;
-                Stack<IFolderData> folderStack = new Stack<IFolderData>(4);
+
+                var validMailbox = new List<IMailboxData>();
                 foreach (IMailboxData userMailbox in allUserMailbox)
                 {
+                    if (!Filter.IsFilterMailbox(userMailbox))
+                    {
+                        validMailbox.Add(userMailbox);
+                    }
+                }
+                int totalMailboxCount = validMailbox.Count;
+
+                Parallel.ForEach(validMailbox, new ParallelOptions() { MaxDegreeOfParallelism = MaxConcurrentMailboxNumber }, (userMailbox) =>
+                {
+                    Stack<IFolderData> folderStack = new Stack<IFolderData>(4);
                     mailboxIndex++;
                     MailboxGenerateStart(userMailbox, mailboxIndex, totalMailboxCount);
 
-                    if (Filter.IsFilterMailbox(userMailbox))
-                    {
-                        OnMailboxProgressChanged(CatalogMailboxProgressType.SkipMailbox, userMailbox);
-                        continue;
-                    }
-
                     bool hasError = true;
+                    IServiceContext serviceContext = null;
+                    ICatalogDataAccess dataAccess = null;
+                    var mailboxDealInfo = new MailboxDealInfo();
                     try
                     {
+                        serviceContext = EwsFrame.ServiceContext.NewServiceContext(AdminInfo.UserName, AdminInfo.UserPassword, AdminInfo.UserDomain, AdminInfo.OrganizationName, TaskType.Catalog);
+                        serviceContext.CurrentMailbox = userMailbox.DisplayName;
+                        var ewsAdapter = CatalogFactory.Instance.NewEwsAdapter();
+                        ewsAdapter.DataConvert = dataConvert;
+
+                        dataAccess = CatalogFactory.Instance.NewCatalogDataAccessInternal(serviceContext.Argument, Organization);
+                        dataAccess.OtherObj = ewsAdapter;
                         OnMailboxProgressChanged(CatalogMailboxProgressType.ConnectMailboxStart, userMailbox);
-                        ServiceContext.CurrentMailbox = userMailbox.MailAddress;
-                        EwsAdapter.ConnectMailbox(ServiceContext.Argument, userMailbox.MailAddress);
+                        serviceContext.CurrentMailbox = userMailbox.MailAddress;
+                        ewsAdapter.ConnectMailbox(serviceContext.Argument, userMailbox.MailAddress);
                         OnMailboxProgressChanged(CatalogMailboxProgressType.ConnectMailboxEnd, userMailbox);
 
 
                         OnMailboxProgressChanged(CatalogMailboxProgressType.GetRootFolderStart, userMailbox);
-                        IFolderData rootFolder = EwsAdapter.GetRootFolder();
+                        IFolderData rootFolder = ewsAdapter.GetRootFolder();
 
                         OnMailboxProgressChanged(CatalogMailboxProgressType.GetRootFolderEnd, userMailbox);
 
@@ -267,13 +283,16 @@ namespace DataProtectImpl
 
                         IFolderData rootFolderData = rootFolder;
                         //dataAccess.SaveFolder(rootFolderData, mailboxData, null); // root folder don't need save.
-
+                        
                         folderStack.Push(rootFolderData);
                         GenerateEachFolderCatalog(mailboxData,
                             rootFolderData,
                             dataAccess,
                             dataConvert,
-                            folderStack);
+                            folderStack,
+                            ewsAdapter,
+                            serviceContext, mailboxDealInfo
+                            );
                         folderStack.Pop();
 
                         //mailboxData.ChildFolderCount = rootFolderData.ChildFolderCount;
@@ -286,15 +305,88 @@ namespace DataProtectImpl
 
                         hasError = false;
                     }
+                    catch(Exception ex)
+                    {
+                        LogFactory.LogInstance.WriteException(LogLevel.ERR, "maibox export error.", ex, ex.Message);
+                        mailboxDealInfo.MailboxEndTime = DateTime.Now;
+                        LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.INFO, string.Format("{0} catalog Job failed", userMailbox.DisplayName),
+                    "Total {0} folders {1} items's size {2} bytes actual size {3} bytes cost {4} minutes",
+                    mailboxDealInfo.FolderCount, mailboxDealInfo.ItemCount, mailboxDealInfo.ItemSize, mailboxDealInfo.ItemActualSize, (mailboxDealInfo.MailboxEndTime - mailboxDealInfo.MailboxStartTime).TotalMinutes);
+                    }
 
                     finally
                     {
-                        ServiceContext.DataAccessObj.SaveChanges();
+                        dataAccess.SaveChanges();
                         MailboxGenerateEnd(userMailbox, hasError, mailboxIndex, totalMailboxCount);
+                        dataAccess.Dispose();
+                        serviceContext.Dispose();
+                        mailboxDealInfo.MailboxEndTime = DateTime.Now;
+                        LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.INFO, string.Format("{0} catalog Job completed", userMailbox.DisplayName),
+                    "Total {0} folders {1} items's size {2} bytes actual size {3} bytes cost {4} minutes",
+                    mailboxDealInfo.FolderCount, mailboxDealInfo.ItemCount, mailboxDealInfo.ItemSize, mailboxDealInfo.ItemActualSize, (mailboxDealInfo.MailboxEndTime - mailboxDealInfo.MailboxStartTime).TotalMinutes);
                     }
-                }
+                });
+
+                //Stack<IFolderData> folderStack = new Stack<IFolderData>(4);
+                //foreach (IMailboxData userMailbox in allUserMailbox)
+                //{
+                //    mailboxIndex++;
+                //    MailboxGenerateStart(userMailbox, mailboxIndex, totalMailboxCount);
+
+                //    if (Filter.IsFilterMailbox(userMailbox))
+                //    {
+                //        OnMailboxProgressChanged(CatalogMailboxProgressType.SkipMailbox, userMailbox);
+                //        continue;
+                //    }
+
+                //    bool hasError = true;
+                //    try
+                //    {
+                //        OnMailboxProgressChanged(CatalogMailboxProgressType.ConnectMailboxStart, userMailbox);
+                //        ServiceContext.CurrentMailbox = userMailbox.MailAddress;
+                //        EwsAdapter.ConnectMailbox(ServiceContext.Argument, userMailbox.MailAddress);
+                //        OnMailboxProgressChanged(CatalogMailboxProgressType.ConnectMailboxEnd, userMailbox);
+
+
+                //        OnMailboxProgressChanged(CatalogMailboxProgressType.GetRootFolderStart, userMailbox);
+                //        IFolderData rootFolder = EwsAdapter.GetRootFolder();
+
+                //        OnMailboxProgressChanged(CatalogMailboxProgressType.GetRootFolderEnd, userMailbox);
+
+                //        userMailbox.RootFolderId = rootFolder.Id;
+                //        IMailboxData mailboxData = dataConvert.Convert(userMailbox);
+
+                //        IFolderData rootFolderData = rootFolder;
+                //        //dataAccess.SaveFolder(rootFolderData, mailboxData, null); // root folder don't need save.
+
+                //        folderStack.Push(rootFolderData);
+                //        GenerateEachFolderCatalog(mailboxData,
+                //            rootFolderData,
+                //            dataAccess,
+                //            dataConvert,
+                //            folderStack);
+                //        folderStack.Pop();
+
+                //        //mailboxData.ChildFolderCount = rootFolderData.ChildFolderCount;
+                //        //dataAccess.UpdateMailboxChildFolderCount(mailboxData, StartTime);
+
+                //        OnMailboxProgressChanged(CatalogMailboxProgressType.SaveMailboxStart, userMailbox);
+                //        mailboxData.ChildFolderCount = rootFolderData.ChildFolderCount;
+                //        dataAccess.SaveMailbox(mailboxData);
+                //        OnMailboxProgressChanged(CatalogMailboxProgressType.SaveMailboxEnd, userMailbox);
+
+                //        hasError = false;
+                //    }
+
+                //    finally
+                //    {
+                //        ServiceContext.DataAccessObj.SaveChanges();
+                //        MailboxGenerateEnd(userMailbox, hasError, mailboxIndex, totalMailboxCount);
+                //    }
+                //}
+                dbDataAccess = CatalogFactory.Instance.NewCatalogDataAccessInternal(null, Organization);
                 ICatalogJob job = dataConvert.Convert(this);
-                dataAccess.SaveCatalogJob(job);
+                dbDataAccess.SaveCatalogJob(job);
 
                 isFinished = true;
                 //SendMail("complete success", null);
@@ -306,8 +398,8 @@ namespace DataProtectImpl
                 System.Diagnostics.Trace.TraceError(e.GetExceptionDetail());
                 var timeSpan = DateTime.Now - StartTime;
                 LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.INFO, "Job failed",
-                    "Total {0} folders {1} items's size {2} bytes actual size {3} bytes cost {4} minutes",
-                    AllDealedFolderIndex, AllDealedItemIndex, MailboxSize, ActualSize, timeSpan.TotalMinutes);
+                    "Total {0} folders {1} items's size {2} bytes actual size {3} bytes cost {4} minutes, speed:{5} G/H.",
+                    AllDealedFolderIndex, AllDealedItemIndex, MailboxSize, ActualSize, timeSpan.TotalMinutes, GetGitaEachHour(ActualSize, timeSpan));
 
                 LogFactory.LogInstance.WriteException(LogInterface.LogLevel.ERR, "InCompleted", e, e.Message);
 
@@ -316,15 +408,21 @@ namespace DataProtectImpl
             }
             finally
             {
-                ServiceContext.DataAccessObj.SaveChanges();
+                dbDataAccess.SaveChanges();
                 var timeSpan = DateTime.Now - StartTime;
                 LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.INFO, "Job completed",
-                    "Total {0} folders {1} items's size {2} bytes actual size {3} bytes cost {4} minutes",
-                    AllDealedFolderIndex, AllDealedItemIndex, MailboxSize, ActualSize, timeSpan.TotalMinutes);
-                _serviceContext.DataAccessObj.Dispose();
+                    "Total {0} folders {1} items's size {2} bytes actual size {3} bytes cost {4} minutes, speed:{5} G/H.",
+                    AllDealedFolderIndex, AllDealedItemIndex, MailboxSize, ActualSize, timeSpan.TotalMinutes, GetGitaEachHour(ActualSize, timeSpan));
+                dbDataAccess.Dispose();
                 GenerateCatalogEnd(isFinished);
             }
-           
+
+        }
+
+        private string GetGitaEachHour(long actualSize, TimeSpan timeSpan)
+        {
+            double result = (double)actualSize / (1024 * 1024 * 1024 * timeSpan.TotalHours);
+            return result.ToString("0.00"); 
         }
 
         private void SendMail(string message, Exception e)
@@ -389,6 +487,24 @@ namespace DataProtectImpl
             return sb.ToString();
         }
 
+        private int _maxConcurrentMailboxNumber = 0;
+        private int MaxConcurrentMailboxNumber
+        {
+            get
+            {
+                if (_maxConcurrentMailboxNumber == 0)
+                {
+                    _maxConcurrentMailboxNumber = 2;
+                    int result = 0;
+                    if (int.TryParse(ConfigurationManager.AppSettings["MaxConcurrentMailboxNumber"], out result))
+                    {
+                        _maxConcurrentMailboxNumber = result > 0 ? result : 5;
+                    }
+                    LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.INFO, string.Format("Parralle count is {0}", _maxConcurrentMailboxNumber));
+                }
+                return _maxConcurrentMailboxNumber;
+            }
+        }
 
         private int _maxConcurrentItemNumber = 0;
         private int MaxConcurrentItemNumber
@@ -463,7 +579,7 @@ namespace DataProtectImpl
         }
 
         private long AllDealedItemIndex = 0;
-        
+
         private long AllDealedFolderIndex = 0;
 
         private long AllItemIndex = 0;
@@ -480,6 +596,8 @@ namespace DataProtectImpl
            ICatalogDataAccess dataAccess,
            IDataConvert dataConvert,
            Stack<IFolderData> folderStack,
+           IEwsAdapter EwsAdapter,
+           IServiceContext serviceContext, MailboxDealInfo mailboxDealInfo,
            int level = 0)
         {
             var foldeHyPath = string.Join(" | ", (from f in folderStack select ((IFolderDataBase)f).DisplayName).Reverse().AsEnumerable());
@@ -510,12 +628,15 @@ namespace DataProtectImpl
                                 body: (item, state, index, localValue) =>
                              {
                                  var dealedCountTemp = 0;
+                                 long allItemIndex = 0;
 
                                  using (_lockObj.LockWhile(() =>
                                  {
                                      itemDealedCount++;
                                      AllItemIndex++;
+                                     allItemIndex = AllItemIndex;
                                      dealedCountTemp = itemDealedCount;
+                                     mailboxDealInfo.ItemCount++;
                                      ThreadData.Information = AllItemIndex.ToString("D8");
                                  }))
                                  { };
@@ -536,14 +657,15 @@ namespace DataProtectImpl
                                              break;
                                          }
 
-                                         if(item.SizeInEx > ExportUploadHelper.MaxSupportItemSize)
+                                         if (item.SizeInEx > ExportUploadHelper.MaxSupportItemSize)
                                          {
-                                             LogFactory.LogInstance.WriteLog(LogLevel.WARN, "Item out of max size.", "{0} item {1} out of max size {2}", dealedCountTemp, item.DisplayName, ExportUploadHelper.MaxSupportItemSize);
+                                             LogFactory.LogInstance.WriteLog(LogLevel.WARN, "Item out of max size.", "{3:D8} {0:D8} item {1} out of max size {2}", dealedCountTemp, dealedCountTemp, ExportUploadHelper.MaxSupportItemSize, allItemIndex);
                                              break;
                                          }
 
                                          Interlocked.Increment(ref AllDealedItemIndex);
                                          Interlocked.Add(ref MailboxSize, item.SizeInEx);
+                                         Interlocked.Add(ref mailboxDealInfo.ItemSize, item.SizeInEx);
 
                                          OnFolderProgressChanged(CatalogFolderProgressType.ProcessingItemStart, mailboxData, folderStack, folderData, new Process((int)dealedCountTemp, itemCount), item);
                                          GenerateItemStart(item, mailboxData, folderStack, folderData);
@@ -566,6 +688,7 @@ namespace DataProtectImpl
                                              dataAccess.SaveItemContent(item, mailboxData.MailAddress, StartTime, true, !itemIsNew);
                                              OnItemProgressChanged(CatalogItemProgressType.SaveItemContentEnd, mailboxData, folderStack, folderData, item);
                                              Interlocked.Add(ref ActualSize, item.ActualSize);
+                                             Interlocked.Add(ref mailboxDealInfo.ItemActualSize, item.ActualSize);
                                          }
                                          else
                                          {
@@ -577,7 +700,7 @@ namespace DataProtectImpl
                                      catch (Exception ex)
                                      {
                                          System.Diagnostics.Trace.TraceError(ex.GetExceptionDetail());
-                                         var itemFailedMsg = string.Format("Item {0} ItemId:{2} in {1} can't export.", item.DisplayName, foldeHyPath, item.Id);
+                                         var itemFailedMsg = string.Format("{3:D8} {0:D8} Item ItemId:{2} in {1} can't export.", dealedCountTemp, foldeHyPath, item.Id, allItemIndex);
                                          FailureItems.Add(itemFailedMsg);
                                          LogFactory.LogInstance.WriteException(LogInterface.LogLevel.ERR, itemFailedMsg
                                              , ex, ex.Message);
@@ -589,7 +712,7 @@ namespace DataProtectImpl
                                              OnFolderProgressChanged(CatalogFolderProgressType.ProcessingItemEndWithError, mailboxData, folderStack, folderData, new Process((int)dealedCountTemp, itemCount), item);
                                          else
                                              OnFolderProgressChanged(CatalogFolderProgressType.ProcessingItemEndNoError, mailboxData, folderStack, folderData, new Process((int)dealedCountTemp, itemCount), item);
-                                         LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.DEBUG, string.Format("{0} item {1} size {2}b end", dealedCountTemp, item.DisplayName, item.SizeInEx),
+                                         LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.DEBUG, string.Format("{3:D8} {0:D8} item {1:D8} size {2:D16}b end", dealedCountTemp, dealedCountTemp, item.SizeInEx, allItemIndex),
                                              "TotalTime:{0}", (DateTime.Now - itemStartTime).TotalSeconds);
                                      }
                                  } while (false);
@@ -653,7 +776,7 @@ namespace DataProtectImpl
                             OnFolderProgressChanged(CatalogFolderProgressType.NoChildItem, mailboxData, folderStack, folderData);
                         }
 
-                        ServiceContext.DataAccessObj.SaveChanges();
+                        dataAccess.SaveChanges();
                     }
                     OnFolderProgressChanged(CatalogFolderProgressType.ChildItemEnd, mailboxData, folderStack, folderData);
                 }
@@ -696,17 +819,17 @@ namespace DataProtectImpl
                         }
 
                         Interlocked.Increment(ref AllDealedFolderIndex);
-
+                        Interlocked.Increment(ref mailboxDealInfo.FolderCount);
 
                         folderStack.Push(childFolderData);
-                        GenerateEachFolderCatalog(mailboxData, childFolderData, dataAccess, dataConvert, folderStack, level + 1);
+                        GenerateEachFolderCatalog(mailboxData, childFolderData, dataAccess, dataConvert, folderStack, EwsAdapter, serviceContext, mailboxDealInfo,level + 1);
                         folderStack.Pop();
                         //dataAccess.UpdateFolderChildFolderItemCount(childFolderData, StartTime);
                         //ServiceContext.DataAccessObj.SaveChanges();
 
                         OnFolderProgressChanged(CatalogFolderProgressType.SaveFolderStart, mailboxData, folderStack, folderData, null, null, new Process(childFolderIndex, childFolderCount));
                         dataAccess.SaveFolder(childFolderData, mailboxData, folderData);
-                        ServiceContext.DataAccessObj.SaveChanges();
+                        dataAccess.SaveChanges();
                         OnFolderProgressChanged(CatalogFolderProgressType.SaveFolderEnd, mailboxData, folderStack, folderData, null, null, new Process(childFolderIndex, childFolderCount));
 
                         folderData.ChildFolderCount++;
@@ -723,7 +846,7 @@ namespace DataProtectImpl
             }
             finally
             {
-                ServiceContext.DataAccessObj.SaveChanges();
+                dataAccess.SaveChanges();
                 GenerateFolderEnd(folderStack, mailboxData, folderData, hasError);
             }
         }
@@ -824,8 +947,6 @@ namespace DataProtectImpl
             OnProgressChanged(CatalogProgressType.GRTForMailboxStart, new Process(mailboxIndex, mailboxCount), mailbox);
             OnMailboxProgressChanged(CatalogMailboxProgressType.Start, mailbox);
 
-            _serviceContext.CurrentMailbox = mailbox.MailAddress;
-
             CurrentMailbox = mailbox.MailAddress;
             MailboxPercent = string.Format("{0}/{1}", mailboxIndex, mailboxCount);
 
@@ -846,20 +967,17 @@ namespace DataProtectImpl
                 OnProgressChanged(CatalogProgressType.GRTForMailboxEndWithError, new Process(mailboxIndex, mailboxCount), mailbox);
                 OnMailboxProgressChanged(CatalogMailboxProgressType.EndWithError, mailbox);
             }
-            ServiceContext.CurrentMailbox = string.Empty;
 
         }
 
         public void GenerateCatalogStart()
         {
-            ServiceContext.DataAccessObj.BeginTransaction();
             LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.INFO, string.Format("{0} Catalog Start", CatalogJobName));
             OnProgressChanged(CatalogProgressType.Start);
         }
 
         public void GenerateCatalogEnd(bool isFinished)
         {
-            ServiceContext.DataAccessObj.EndTransaction(isFinished);
             if (isFinished)
                 OnProgressChanged(CatalogProgressType.EndWithNoError);
             else
@@ -918,12 +1036,8 @@ namespace DataProtectImpl
             }
             return ss;
         }
-        
 
-        public virtual ICatalogDataAccess NewDataAccessInstance()
-        {
-            return (ICatalogDataAccess)ServiceContext.DataAccessObj;
-        }
+        
 
         public IDataConvert NewDataConvertInstance()
         {
@@ -933,12 +1047,10 @@ namespace DataProtectImpl
 
         public List<IFolderData> GetFolder(string mailbox, string parentId, bool containRootFolder)
         {
-            ServiceContext.CurrentMailbox = mailbox;
-            if(EwsAdapter == null)
-            {
-                EwsAdapter = CatalogFactory.Instance.NewEwsAdapter();
-            }
-            EwsAdapter.ConnectMailbox(ServiceContext.Argument, mailbox);
+            var serviceContext = EwsFrame.ServiceContext.NewServiceContext(AdminInfo.UserName, AdminInfo.UserPassword, AdminInfo.UserDomain, AdminInfo.OrganizationName, TaskType.Catalog);
+            serviceContext.CurrentMailbox = mailbox;
+            var  EwsAdapter = CatalogFactory.Instance.NewEwsAdapter();
+            EwsAdapter.ConnectMailbox(serviceContext.Argument, mailbox);
             IDataConvert dataConvert = CatalogFactory.Instance.NewDataConvert();
             dataConvert.OrganizationName = AdminInfo.OrganizationName;
             dataConvert.StartTime = DateTime.Now;
@@ -964,7 +1076,7 @@ namespace DataProtectImpl
             }
 
             List<IFolderData> folderdatas = new List<IFolderData>(folders.Count);
-            
+
 
             foreach (var folder in folders)
             {
@@ -984,14 +1096,9 @@ namespace DataProtectImpl
 
         public void Dispose()
         {
-            if (_serviceContext != null)
-            {
-                _serviceContext.Dispose();
-                _serviceContext = null;
-            }
         }
 
-        class MailboxInfo : IMailboxData
+        public class MailboxInfo : IMailboxData
         {
             public MailboxInfo(string displayName, string mailboxAddress)
             {
@@ -1020,6 +1127,11 @@ namespace DataProtectImpl
                 {
                     RootFolderId = value;
                 }
+            }
+
+            public string Name
+            {
+                get; set;
             }
 
             public ItemKind ItemKind
@@ -1082,5 +1194,15 @@ namespace DataProtectImpl
             return false;
         }
 
+    }
+
+    public class MailboxDealInfo
+    {
+        public int ItemCount = 0;
+        public int ItemSize = 0;
+        public int ItemActualSize = 0;
+        public int FolderCount = 0;
+        public DateTime MailboxStartTime = DateTime.Now;
+        public DateTime MailboxEndTime = DateTime.Now;
     }
 }
