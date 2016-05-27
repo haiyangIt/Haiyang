@@ -71,6 +71,19 @@ namespace Arcserve.Office365.Exchange.Data.Increment
 
     public static class FolderPathUtil
     {
+        static FolderPathUtil()
+        {
+            HashSet<char> charHash = new HashSet<char>(Path.GetInvalidPathChars());
+            if (!charHash.Contains('\\'))
+                charHash.Add('\\');
+            InvalidFolderChar = charHash.ToArray();
+
+            charHash = new HashSet<char>(Path.GetInvalidFileNameChars());
+            if (!charHash.Contains('\\'))
+                charHash.Add('\\');
+            InvalidFileChars = charHash.ToArray();
+        }
+
         public static string GetFolderLocation(this List<string> folderDisplays)
         {
             var str = JsonConvert.SerializeObject(folderDisplays);
@@ -87,29 +100,7 @@ namespace Arcserve.Office365.Exchange.Data.Increment
             return JsonConvert.DeserializeObject<List<string>>(path);
         }
 
-        private static char[] _invalidFolderChar;
-        private static object _lockObj = new object();
-        private static char[] InvalidFolderChar
-        {
-            get
-            {
-                if (_invalidFolderChar == null)
-                {
-                    using (_lockObj.LockWhile(() =>
-                    {
-                        if (_invalidFolderChar == null)
-                        {
-                            HashSet<char> charHash = new HashSet<char>(Path.GetInvalidPathChars());
-                            if (!charHash.Contains('\\'))
-                                charHash.Add('\\');
-                            _invalidFolderChar = charHash.ToArray();
-                        }
-                    }))
-                    { }
-                }
-                return _invalidFolderChar;
-            }
-        }
+        private static readonly char[] InvalidFolderChar;
 
         public static string GetValidFolderName(this string folderDisplayName)
         {
@@ -117,21 +108,7 @@ namespace Arcserve.Office365.Exchange.Data.Increment
         }
 
 
-        private static char[] _invalidFileChars;
-        public static char[] InvalidFileChars
-        {
-            get
-            {
-                if (_invalidFileChars == null)
-                {
-                    HashSet<char> charHash = new HashSet<char>(Path.GetInvalidFileNameChars());
-                    if (!charHash.Contains('\\'))
-                        charHash.Add('\\');
-                    _invalidFileChars = charHash.ToArray();
-                }
-                return _invalidFileChars;
-            }
-        }
+        public static readonly char[] InvalidFileChars;
         public static string GetValidFileName(this string itemSubject)
         {
             return string.Join("_", itemSubject.Split(InvalidFileChars));

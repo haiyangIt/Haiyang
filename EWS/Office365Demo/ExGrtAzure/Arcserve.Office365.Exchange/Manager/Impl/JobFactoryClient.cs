@@ -1,4 +1,5 @@
 ﻿using Arcserve.Office365.Exchange.Manager.IF;
+using Arcserve.Office365.Exchange.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,19 +12,19 @@ namespace Arcserve.Office365.Exchange.Manager.Impl
     {
         private JobFactoryClient() { }
 
+        static JobFactoryClient()
+        {
+            Instance = new JobFactoryClient();
+            SubscriptManager = new SubScriptionManager();
+
+            DisposeManager.RegisterInstance(SubscriptManager);
+        }
+
         /// <summary>
         /// 
         /// </summary>
-        public static JobFactoryClient Instance = new JobFactoryClient();
+        public static readonly JobFactoryClient Instance;
 
-        private static ISubScriptionManager _subscriptManager;
-        public ISubScriptionManager SubscriptManager
-        {
-            get
-            {
-                System.Threading.Interlocked.CompareExchange(ref _subscriptManager, new SubScriptionManager(), null);
-                return _subscriptManager;
-            }
-        }
+        public static readonly ISubScriptionManager SubscriptManager;
     }
 }

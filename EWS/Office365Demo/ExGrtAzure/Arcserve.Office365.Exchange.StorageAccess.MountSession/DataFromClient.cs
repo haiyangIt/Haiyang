@@ -76,5 +76,15 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession
         {
             throw new NotImplementedException();
         }
+
+        public bool IsItemValid(string itemChangeId, IFolderDataSync parentFolder)
+        {
+            return true;
+        }
+
+        public bool IsItemValid(IItemDataSync item, IFolderDataSync parentFolder)
+        {
+            return true;
+        }
     }
 }

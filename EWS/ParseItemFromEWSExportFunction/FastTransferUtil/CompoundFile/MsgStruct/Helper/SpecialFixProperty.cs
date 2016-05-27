@@ -22,7 +22,11 @@ namespace FastTransferUtil.CompoundFile.MsgStruct.Helper
 
     internal class SpecialPropertyUtil
     {
-        public static SpecialPropertyUtil Instance = new SpecialPropertyUtil();
+        static SpecialPropertyUtil()
+        {
+            Instance = new SpecialPropertyUtil();
+        }
+        public static readonly SpecialPropertyUtil Instance;
 
         public ISpecialValue CreateNewPropValue(int propertyTag, Int64 value)
         {
@@ -55,7 +59,7 @@ namespace FastTransferUtil.CompoundFile.MsgStruct.Helper
             sb.Append(property.PropTag.PropertyTag.ToString("X8"));
             sb.Append("].");
             sb.Append("Property Value:[");
-            foreach(var b in ((IFTTreeNode)property).Bytes)
+            foreach (var b in ((IFTTreeNode)property).Bytes)
             {
                 sb.Append(b.ToString("X2"));
                 sb.Append(" ");

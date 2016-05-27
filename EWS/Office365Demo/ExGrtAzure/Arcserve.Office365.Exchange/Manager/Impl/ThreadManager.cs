@@ -1,5 +1,6 @@
 ﻿using Arcserve.Office365.Exchange.Log;
 using Arcserve.Office365.Exchange.Manager.IF;
+using Arcserve.Office365.Exchange.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,25 +29,49 @@ namespace Arcserve.Office365.Exchange.Manager.Impl
         {
         }
 
+        private object _lockObj = new object();
+        private bool isExist = false;
         public void End()
         {
+            bool canGoOn = true;
+            using (_lockObj.LockWhile(() =>
+            {
+                if (isExist)
+                    canGoOn = false;
+                isExist = true;
+            }))
+            { }
+            if (!canGoOn)
+                return;
             LogFactory.LogInstance.WriteLog(ManagerName, LogLevel.DEBUG, string.Format("Manager [{0}] ending.", ManagerName));
             if (_allThread.Count > 0)
             {
                 LogFactory.LogInstance.WriteLog(ManagerName, LogLevel.DEBUG, string.Format("Manager [{0}] ending after [{1}] thread ended.", ManagerName, _allThread.Count));
                 AutoResetEvent[] allAutoResultEvent = new AutoResetEvent[_allThread.Count];
-                int index = 0;
-                foreach (var thread in _allThread)
+                try
                 {
-                    var autoResultEvent = new AutoResetEvent(false);
-                    allAutoResultEvent[index] = autoResultEvent;
-                    thread.Value.EndThread(autoResultEvent);
-                    index++;
+                    int index = 0;
+                    foreach (var thread in _allThread)
+                    {
+                        var autoResultEvent = new AutoResetEvent(false);
+                        allAutoResultEvent[index] = autoResultEvent;
+                        thread.Value.EndThread(autoResultEvent);
+                        index++;
+                    }
+                    WaitHandle.WaitAll(allAutoResultEvent);
                 }
-                WaitHandle.WaitAll(allAutoResultEvent);
-                foreach (var e in allAutoResultEvent)
+                finally
                 {
-                    e.Dispose();
+
+                    for (int i = 0; i < allAutoResultEvent.Length; i++)
+                    {
+                        var e = allAutoResultEvent[i];
+                        if (e != null)
+                        {
+                            e.Dispose();
+                            e = null;
+                        }
+                    }
                 }
             }
             LogFactory.LogInstance.WriteLog(ManagerName, LogLevel.DEBUG, string.Format("Manager [{0}] ended.", ManagerName));
@@ -59,29 +84,39 @@ namespace Arcserve.Office365.Exchange.Manager.Impl
 
         public IThreadObj NewThread(string threadName)
         {
-
+            IThreadObj result = null;
             // todo if any thread is idle, can return the thread.
             // now create new as a temp solution.
-            lock (_allThread)
+            using (_allThread.LockWhile(() =>
             {
                 LogFactory.LogInstance.WriteLog(ManagerName, LogLevel.DEBUG, string.Format("Manager [{0}] new thread with name [{1}].", ManagerName, threadName));
                 var obj = JobFactoryServer.Instance.NewThreadObj(threadName);
                 _allThread.Add(obj.ThreadName, obj);
                 LogFactory.LogInstance.WriteLog(ManagerName, LogLevel.DEBUG, string.Format("Manager [{0}] new thread finished with name [{1}].", ManagerName, obj.ThreadName));
-                return obj;
-            }
+                result = obj;
+            }))
+            { }
+            return result;
 
         }
         public IThreadObj StartThread(string threadName)
         {
-            lock (_allThread)
+            IThreadObj result = null;
+            using (_allThread.LockWhile(() =>
             {
                 LogFactory.LogInstance.WriteLog(ManagerName, LogLevel.DEBUG, string.Format("Manager [{0}] start thread with name [{1}].", ManagerName, threadName));
                 var obj = JobFactoryServer.Instance.NewThreadObj(threadName);
                 _allThread.Add(obj.ThreadName, obj);
                 LogFactory.LogInstance.WriteLog(ManagerName, LogLevel.DEBUG, string.Format("Manager [{0}] start thread finished with name [{1}].", ManagerName, obj.ThreadName));
-                return obj;
-            }
+                result = obj;
+            }))
+            { }
+            return result;
+        }
+
+        public void Dispose()
+        {
+            End();
         }
     }
 
@@ -186,7 +221,7 @@ namespace Arcserve.Office365.Exchange.Manager.Impl
 
         private void DoJob(IArcJob job, Operator oper)
         {
-            lock (_sync)
+            using (_sync.LockWhile(() =>
             {
                 var oldStatus = _state;
                 switch (oper)
@@ -272,9 +307,10 @@ namespace Arcserve.Office365.Exchange.Manager.Impl
                         throw new NotSupportedException("Not support the operator.");
                 }
 
-                LogFactory.LogInstance.WriteLog(ThreadName, LogLevel.DEBUG, "thread job state changed.", "Job [{0}] in thread [{1}] state change from [{2}] to [{3}].", 
+                LogFactory.LogInstance.WriteLog(ThreadName, LogLevel.DEBUG, "thread job state changed.", "Job [{0}] in thread [{1}] state change from [{2}] to [{3}].",
                     _job.JobId, ThreadName, oldStatus, _state);
-            }
+            }))
+            { }
         }
 
         private void JobEndedEvent(object sender, EventArgs e)

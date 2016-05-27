@@ -8,6 +8,9 @@ using System.Timers;
 
 namespace FTStreamUtil
 {
+    /// <summary>
+    /// todo modify.
+    /// </summary>
     public class LogWriter : IDisposable
     {
         [ThreadStatic]

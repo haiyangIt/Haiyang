@@ -26,19 +26,19 @@ namespace Arcserve.Office365.Exchange.Thread
 
         public void Report(string message)
         {
-            Debug.WriteLine(string.Format("Progress : {0}", message));
+            //Debug.WriteLine(string.Format("Progress : {0}", message));
             LogFactory.LogInstance.WriteLog(LogLevel.INFO, message);
         }
 
         public void Report(string format, params object[] args)
         {
-            Debug.WriteLine(string.Format("Progress : {0}", string.Format(format, args)));
+            //Debug.WriteLine(string.Format("Progress : {0}", string.Format(format, args)));
             LogFactory.LogInstance.WriteLog(LogLevel.INFO, "", format, args);
         }
 
         public void Report(double val, string message)
         {
-            Debug.WriteLine("Progress : {0}, message:{1}.", val, message);
+            //Debug.WriteLine("Progress : {0}, message:{1}.", val, message);
             LogFactory.LogInstance.WriteLog(LogLevel.INFO, message);
         }
     }

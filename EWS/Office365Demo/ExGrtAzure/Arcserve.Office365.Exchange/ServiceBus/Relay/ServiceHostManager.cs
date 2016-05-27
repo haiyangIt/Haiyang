@@ -15,6 +15,12 @@ namespace Arcserve.Office365.Exchange.ServiceBus.Relay
     public class ServiceHostManager : IManager
     {
         private ServiceHost _serviceHost;
+
+        public void Dispose()
+        {
+            End();
+        }
+
         public void End()
         {
             _serviceHost.Close();

@@ -46,7 +46,7 @@ namespace ManagerTest
         private void workfunc()
         {
             startEvent.WaitOne();
-            LogFactory.LogInstance.RegisterLogStream(new TestboxStreamProvider(this));
+            //LogFactory.LogInstance.RegisterLogStream(new TestboxStreamProvider(this));
             JobFactoryServer.OnStart();
             JobFactoryServer.Instance.ProgressManager.NewProgressEvent += ProgressManager_NewProgressEvent;
 
@@ -153,48 +153,48 @@ namespace ManagerTest
             job.CancelJob();
         }
 
-        public class TestboxStreamProvider : ILogStreamProvider
-        {
-            private Form1 _form;
-            private Guid _streamId = Guid.NewGuid();
-            public TestboxStreamProvider(Form1 form)
-            {
-                _form = form;
-            }
+        //public class TestboxStreamProvider : ILogStreamProvider
+        //{
+        //    private Form1 _form;
+        //    private Guid _streamId = Guid.NewGuid();
+        //    public TestboxStreamProvider(Form1 form)
+        //    {
+        //        _form = form;
+        //    }
 
-            public Guid StreamId
-            {
-                get
-                {
-                    return _streamId;
-                }
-            }
+        //    public Guid StreamId
+        //    {
+        //        get
+        //        {
+        //            return _streamId;
+        //        }
+        //    }
 
-            public object SyncObj
-            {
-                get
-                {
-                    return _form;
-                }
-            }
+        //    public object SyncObj
+        //    {
+        //        get
+        //        {
+        //            return _form;
+        //        }
+        //    }
 
-            public string GetTotalLog(DateTime date)
-            {
-                return _form.textBox1.Text;
-            }
+        //    public string GetTotalLog(DateTime date)
+        //    {
+        //        return _form.textBox1.Text;
+        //    }
 
-            public void Write(string information)
-            {
-                Debug.Write(information);
-                _form.AppendToTextbox1(information + "\r\n");
-            }
+        //    public void Write(string information)
+        //    {
+        //        Debug.Write(information);
+        //        _form.AppendToTextbox1(information + "\r\n");
+        //    }
 
-            public void WriteLine(string information)
-            {
-                Debug.WriteLine(information);
-                _form.AppendToTextbox1(information + "\r\n");
-            }
-        }
+        //    public void WriteLine(string information)
+        //    {
+        //        Debug.WriteLine(information);
+        //        _form.AppendToTextbox1(information + "\r\n");
+        //    }
+        //}
 
         private void AddLine_Click(object sender, EventArgs e)
         {

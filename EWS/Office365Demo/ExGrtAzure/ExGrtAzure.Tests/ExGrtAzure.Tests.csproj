@@ -34,6 +34,21 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Arcserve.Office365.Exchange.Data.Fakes">
+      <HintPath>FakesAssemblies\Arcserve.Office365.Exchange.Data.Fakes.dll</HintPath>
+    </Reference>
+    <Reference Include="Arcserve.Office365.Exchange.DataProtect.Interface.Fakes">
+      <HintPath>FakesAssemblies\Arcserve.Office365.Exchange.DataProtect.Interface.Fakes.dll</HintPath>
+    </Reference>
+    <Reference Include="Arcserve.Office365.Exchange.EwsApi.Fakes">
+      <HintPath>FakesAssemblies\Arcserve.Office365.Exchange.EwsApi.Fakes.dll</HintPath>
+    </Reference>
+    <Reference Include="Arcserve.Office365.Exchange.Fakes">
+      <HintPath>FakesAssemblies\Arcserve.Office365.Exchange.Fakes.dll</HintPath>
+    </Reference>
+    <Reference Include="Arcserve.Office365.Exchange.Storage.Interface.Fakes">
+      <HintPath>FakesAssemblies\Arcserve.Office365.Exchange.Storage.Interface.Fakes.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Azure.KeyVault.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Azure.KeyVault.Core.1.0.0\lib\net40\Microsoft.Azure.KeyVault.Core.dll</HintPath>
       <Private>True</Private>
@@ -54,6 +69,9 @@
     <Reference Include="Microsoft.Exchange.WebServices, Version=15.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\Microsoft\Exchange\Web Services\2.2\Microsoft.Exchange.WebServices.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.QualityTools.Testing.Fakes, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Microsoft.ServiceBus, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\WindowsAzure.ServiceBus.3.1.7\lib\net45-full\Microsoft.ServiceBus.dll</HintPath>
@@ -137,11 +155,18 @@
     <Compile Include="BatchPartitionTest.cs" />
     <Compile Include="ExportTest.cs" />
     <Compile Include="SyncBackupTest.cs" />
+    <Compile Include="CmdProcessCallTest.cs" />
+    <Compile Include="EwsServiceApiTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Fakes Include="Fakes\Arcserve.Office365.Exchange.DataProtect.Interface.fakes" />
+    <Fakes Include="Fakes\Arcserve.Office365.Exchange.fakes" />
+    <Fakes Include="Fakes\Arcserve.Office365.Exchange.Data.fakes" />
+    <Fakes Include="Fakes\Arcserve.Office365.Exchange.EwsApi.fakes" />
+    <Fakes Include="Fakes\Arcserve.Office365.Exchange.Storage.Interface.fakes" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -160,6 +185,10 @@
     <ProjectReference Include="..\Arcserve.Office365.Exchange.DataProtect.Interface\Arcserve.Office365.Exchange.DataProtect.Interface.csproj">
       <Project>{3537b177-88f3-440b-b114-5bcf98ca2220}</Project>
       <Name>Arcserve.Office365.Exchange.DataProtect.Interface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Arcserve.Office365.Exchange.DataProtect.Tool\Arcserve.Office365.Exchange.DataProtect.Tool.csproj">
+      <Project>{2b6fe67f-7982-4465-b4ba-db2957037053}</Project>
+      <Name>Arcserve.Office365.Exchange.DataProtect.Tool</Name>
     </ProjectReference>
     <ProjectReference Include="..\Arcserve.Office365.Exchange.Data\Arcserve.Office365.Exchange.Data.csproj">
       <Project>{177b7df7-ecaf-4bcc-9f26-77276893ba9f}</Project>
@@ -188,6 +217,10 @@
     <ProjectReference Include="..\Arcserve.Office365.Exchange.StorageAccess.MountSession\Arcserve.Office365.Exchange.StorageAccess.MountSession.csproj">
       <Project>{f8422c10-4ae8-47d4-92f0-11500e23c38c}</Project>
       <Name>Arcserve.Office365.Exchange.StorageAccess.MountSession</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Arcserve.Office365.Exchange.Tool\Arcserve.Office365.Exchange.Tool.csproj">
+      <Project>{392e7cbe-beba-4b46-9fb0-bee31c861085}</Project>
+      <Name>Arcserve.Office365.Exchange.Tool</Name>
     </ProjectReference>
     <ProjectReference Include="..\Arcserve.Office365.Exchange\Arcserve.Office365.Exchange.csproj">
       <Project>{9d0c2e9c-7582-4d61-bd19-39ae85684f7e}</Project>

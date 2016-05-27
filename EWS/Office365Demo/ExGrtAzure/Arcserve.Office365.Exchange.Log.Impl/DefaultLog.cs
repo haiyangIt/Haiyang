@@ -1,6 +1,7 @@
 ﻿using Arcserve.Office365.Exchange.Util;
 using Arcserve.Office365.Exchange.Util.Setting;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
@@ -14,55 +15,93 @@ namespace Arcserve.Office365.Exchange.Log.Impl
 {
     public class DefaultLog : ILog
     {
-        public DefaultLog()
+
+        private static object _lock = new object();
+        private LogToStreamManage _instance = null;
+        private LogToStreamManage Instance
         {
-            
-        }
-        
-
-        private ReaderWriterLockSlim LogStreamsProviderLock = new ReaderWriterLockSlim();
-
-        private Dictionary<Guid, ILogStreamProvider> LogStreamsProvider = new Dictionary<Guid, ILogStreamProvider>(2);
-
-        private void Check()
-        {
-            using (LogStreamsProviderLock.Read())
+            get
             {
-                if (LogStreamsProvider.Count == 0)
+                if (_instance == null)
                 {
-                    throw new NotSupportedException();
+                    using (_lock.LockWhile(() =>
+                    {
+                        if (_instance == null)
+                        {
+                            _instance = new LogToStreamManage(LogFolder, LogFileNameFormat, LogMaxRecordCount);
+                        }
+                    }))
+                    { }
                 }
+                return _instance;
             }
         }
 
-        private void Write(string logDetail)
+        protected virtual int LogMaxRecordCount
         {
-            if (!CloudConfig.Instance.IsLog)
+            get
+            {
+                return CloudConfig.Instance.LogFileMaxRecordCount;
+            }
+        }
+
+
+        protected virtual string LogFileNameFormat
+        {
+            get
+            {
+                return "{0}_{1}.txt";
+            }
+        }
+
+
+        private string _logFolder;
+        private string LogFolder
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_logFolder))
+                {
+                    string logFolder = CloudConfig.Instance.LogPath;
+                    if (string.IsNullOrEmpty(logFolder))
+                    {
+                        logFolder = AppDomain.CurrentDomain.BaseDirectory;
+                        logFolder = Path.Combine(logFolder, "Office365Log");
+                    }
+                    if (!Directory.Exists(logFolder))
+                    {
+                        Directory.CreateDirectory(logFolder);
+                    }
+                    _logFolder = logFolder;
+                    //var logPath = Path.Combine(logFolder, LogFileNameFormat);
+                    //_logPath = logPath;
+
+                }
+                return _logFolder;
+            }
+        }
+
+        protected virtual bool IsLog()
+        {
+            return CloudConfig.Instance.IsLog;
+        }
+
+        protected void Write(string logDetail)
+        {
+            if (!IsLog())
             {
                 return;
             }
-            using (LogStreamsProviderLock.Read())
-            {
-                foreach (var stream in LogStreamsProvider.Values)
-                {
-                    stream.WriteLine(logDetail);
-                }
-            }
+            Instance.WriteToLog(logDetail);
         }
 
         private void WriteLine(string logDetail)
         {
-            if (!CloudConfig.Instance.IsLog)
+            if (!IsLog())
             {
                 return;
             }
-            using (LogStreamsProviderLock.Read())
-            {
-                foreach (var stream in LogStreamsProvider.Values)
-                {
-                    stream.WriteLine(logDetail);
-                }
-            }
+            Instance.WriteToLog(logDetail);
         }
 
         public void WriteException(LogLevel level, string message, Exception exception, string exMsg)
@@ -98,18 +137,6 @@ namespace Arcserve.Office365.Exchange.Log.Impl
                 args.Length > 0 ? string.Format(format, args).RemoveRN() : format.RemoveRN());
         }
 
-        public string GetTotalLog(DateTime date)
-        {
-            using (LogStreamsProviderLock.Read())
-            {
-                foreach (var stream in LogStreamsProvider.Values)
-                {
-                    return stream.GetTotalLog(date);
-                }
-            }
-            return "Log file is not exist.";
-        }
-
         public void WriteLog(string module, LogLevel level, string message)
         {
             WriteLine(GetLogString(module, level, message));
@@ -143,7 +170,7 @@ namespace Arcserve.Office365.Exchange.Log.Impl
                         message.RemoveRN(),
                         curEx.Message.RemoveRN(),
                         curEx.HResult.ToString("X8"),
-                        curEx.StackTrace.RemoveRN(), curEx.GetType().FullName));
+                        curEx.StackTrace.RemoveRN(), curEx.GetType().FullName, exMsg));
 
                     curEx = curEx.InnerException;
                 }
@@ -160,7 +187,7 @@ namespace Arcserve.Office365.Exchange.Log.Impl
                     message.RemoveRN(),
                     ex.Message.RemoveRN(),
                     ex.HResult.ToString("X8"),
-                    ex.StackTrace.RemoveRN(), ex.GetType().FullName));
+                    ex.StackTrace.RemoveRN(), ex.GetType().FullName, exMsg));
 
             foreach (var innerEx in ex.Flatten().InnerExceptions)
             {
@@ -183,27 +210,13 @@ namespace Arcserve.Office365.Exchange.Log.Impl
                 args.Length > 0 ? string.Format(format, args).RemoveRN() : format.RemoveRN());
         }
 
-        public void RegisterLogStream(ILogStreamProvider stream)
-        {
-            using (LogStreamsProviderLock.Write())
-            {
-                LogStreamsProvider[stream.StreamId] = stream;
-            }
-        }
-
-        public void RemoveLogStream(ILogStreamProvider stream)
-        {
-            using (LogStreamsProviderLock.Write())
-            {
-                if (LogStreamsProvider.ContainsKey(stream.StreamId))
-                    LogStreamsProvider.Remove(stream.StreamId);
-            }
-        }
-
         public void Dispose()
         {
-            LogStreamsProviderLock.Dispose();
-            LogStreamsProviderLock = null;
+            if(_instance != null)
+            {
+                _instance.Dispose();
+                _instance = null;
+            }
         }
     }
     internal static class StringEx
@@ -212,6 +225,222 @@ namespace Arcserve.Office365.Exchange.Log.Impl
         {
             return message.Replace('\r', ' ').Replace('\n', ' ');
         }
+    }
+
+    internal class LogToStreamManage : ManageBaseForLog
+    {
+        private static object _lock = new object();
+        private int LogCount = 0;
+        private int _MaxLogCount = 500;
+        private int FileIndex = 0;
+        private string _logFolder;
+        private string _fileNameFormat;
+        private FileStream _fileStream = null;
+        private StreamWriter _writer = null;
+        private StreamWriter writer
+        {
+            get
+            {
+                if (_writer == null || LogCount > _MaxLogCount)
+                {
+                    using (_lock.LockWhile(() =>
+                    {
+                        if (LogCount > _MaxLogCount)
+                        {
+                            DoDispose();
+                            LogCount = 0;
+                        }
+
+                        if (_writer == null)
+                        {
+                            var filePath = string.Empty;
+                            do
+                            {
+                                filePath = Path.Combine(_logFolder, string.Format(_fileNameFormat, DateTime.Now.ToString("yyyyMMdd"), FileIndex++));
+                            } while (File.Exists(filePath));
+                            _fileStream = new FileStream(filePath, FileMode.Append, FileAccess.Write, FileShare.Read);
+                            _writer = new StreamWriter(_fileStream);
+                        }
+                    }))
+                    { }
+                }
+                return _writer;
+            }
+        }
+        public LogToStreamManage(string logFolder, string fileNameFormat, int fileMaxCount = 500) : base("LogToStream" + fileNameFormat)
+        {
+            _logFolder = logFolder;
+            _fileNameFormat = fileNameFormat;
+            _MaxLogCount = fileMaxCount;
+        }
+        
+        protected override void DoWriteLog(string msg)
+        {
+            Interlocked.Increment(ref LogCount);
+            writer.WriteLine(msg);
+            if (LogCount % 20 == 0)
+            {
+                writer.Flush();
+                _fileStream.Flush();
+                Trace.Flush();
+            }
+        }
+
+        protected override void DoDispose()
+        {
+            if (_writer != null)
+            {
+                _writer.Dispose();
+                Trace.WriteLine("writer Disposed");
+                _writer = null;
+
+            }
+            if (_fileStream != null)
+            {
+                _fileStream.Dispose();
+                Trace.WriteLine("_fileStream Disposed");
+                _fileStream = null;
+            }
+            Trace.Flush();
+        }
+
+        protected override void Flush()
+        {
+            writer.Flush();
+            _fileStream.Flush();
+            Trace.Flush();
+        }
+    }
+
+    internal abstract class ManageBaseForLog : IDisposable
+    {
+        private ConcurrentQueue<string> msgQueue = new ConcurrentQueue<string>();
+        private AutoResetEvent _logEvent = new AutoResetEvent(false);
+        private AutoResetEvent _endEvent = new AutoResetEvent(false);
+        private AutoResetEvent _endedEvent;
+        private AutoResetEvent[] events;
+        private object _lockObj = new object();
+        private System.Threading.Thread _logThread;
+        protected ManageBaseForLog(string threadName)
+        {
+            events = new AutoResetEvent[2] { _logEvent, _endEvent };
+            _logThread = new System.Threading.Thread(InternalWriteLog);
+            _logThread.Name = threadName;
+            _logThread.Start();
+        }
+
+        public void WriteToLog(string msg)
+        {
+            Trace.WriteLine(msg);
+            msgQueue.Enqueue(msg);
+            using (_lockObj.LockWhile(() =>
+            {
+                if (_logEvent != null)
+                {
+                    _logEvent.Set();
+                }
+            }))
+            { }
+        }
+
+
+        private void InternalWriteLog()
+        {
+            while (true)
+            {
+                var result = WaitHandle.WaitAny(events, 1000);
+                bool isBreak = false;
+                switch (result)
+                {
+                    case WaitHandle.WaitTimeout:
+                    case 0:
+                    case 1:
+                        if (result == 1)
+                            System.Threading.Thread.Sleep(5000);
+                        while (true)
+                        {
+                            try
+                            {
+                                string msg;
+                                bool hasElement = msgQueue.TryDequeue(out msg);
+                                if (hasElement)
+                                {
+                                    DoWriteLog(msg);
+                                }
+                                else
+                                    break;
+                            }
+                            catch (Exception e)
+                            {
+                                System.Diagnostics.Trace.TraceError(e.GetExceptionDetail());
+                            }
+                        }
+
+                        if (result == 1)
+                        {
+                            try
+                            {
+                                DoWriteLog("Log end.");
+                                isBreak = true;
+                            }
+                            catch (Exception e)
+                            {
+                                System.Diagnostics.Trace.TraceError(e.GetExceptionDetail());
+                            }
+                        }
+                        if (result == WaitHandle.WaitTimeout)
+                        {
+                            try
+                            {
+                                Flush();
+                            }
+                            catch (Exception ex1)
+                            {
+                                System.Diagnostics.Trace.TraceError(ex1.GetExceptionDetail());
+                            }
+                        }
+                        break;
+                }
+                if (isBreak)
+                    break;
+            }
+            Debug.WriteLine("Manager internal Dispose");
+            using (_lockObj.LockWhile(() =>
+            {
+                if (_logEvent != null)
+                {
+                    _logEvent.Dispose();
+                    _logEvent = null;
+                }
+                if (_endEvent != null)
+                {
+                    _endEvent.Dispose();
+                    _endEvent = null;
+                }
+
+            }))
+            { }
+            _endedEvent.Set();
+
+        }
+
+        protected abstract void DoWriteLog(string msg);
+        protected abstract void Flush();
+
+        public void Dispose()
+        {
+            _endEvent.Set();
+            _endedEvent = new AutoResetEvent(false);
+            Debug.WriteLine("Manager Dispose");
+            _endedEvent.WaitOne();
+            _endedEvent.Dispose();
+            _endedEvent = null;
+            DoDispose();
+            Debug.WriteLine("Manager Disposed");
+            Trace.Flush();
+        }
+
+        protected abstract void DoDispose();
     }
 
     //public class LogThreadManager
@@ -379,7 +608,7 @@ namespace Arcserve.Office365.Exchange.Log.Impl
     //    }
 
     //    private readonly Guid _streamKey = Guid.NewGuid();
-        
+
 
     //    public Guid StreamId
     //    {
@@ -416,39 +645,39 @@ namespace Arcserve.Office365.Exchange.Log.Impl
     //}
 
 
-    public class DebugOutput : ILogStreamProvider
-    {
-        public Guid StreamId
-        {
-            get
-            {
-                return _id;
-            }
-        }
+    //public class DebugOutput : ILogStreamProvider
+    //{
+    //    public Guid StreamId
+    //    {
+    //        get
+    //        {
+    //            return _id;
+    //        }
+    //    }
 
-        private Guid _id = Guid.NewGuid();
-        private object _syncObj = new object();
-        public object SyncObj
-        {
-            get
-            {
-                return _syncObj;
-            }
-        }
+    //    private Guid _id = Guid.NewGuid();
+    //    private object _syncObj = new object();
+    //    public object SyncObj
+    //    {
+    //        get
+    //        {
+    //            return _syncObj;
+    //        }
+    //    }
 
-        public string GetTotalLog(DateTime date)
-        {
-            return "";
-        }
+    //    public string GetTotalLog(DateTime date)
+    //    {
+    //        return "";
+    //    }
 
-        public void Write(string information)
-        {
-            Debug.Write(information);
-        }
+    //    public void Write(string information)
+    //    {
+    //        Debug.Write(information);
+    //    }
 
-        public void WriteLine(string information)
-        {
-            Debug.WriteLine(information);
-        }
-    }
+    //    public void WriteLine(string information)
+    //    {
+    //        Debug.WriteLine(information);
+    //    }
+    //}
 }

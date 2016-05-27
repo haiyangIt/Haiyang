@@ -10,28 +10,14 @@ namespace Arcserve.Office365.Exchange.Topaz
 {
     public class TopazManager
     {
+        static TopazManager()
+        {
+            Instance = new TopazManager();
+        }
         private TopazManager() { }
 
-        private static object _lockObj;
-        private static TopazManager _instance;
 
-        public static TopazManager Instance
-        {
-            get
-            {
-                if(_instance == null)
-                {
-                    _lockObj.LockWhile(() =>
-                    {
-                        if (_instance == null)
-                        {
-                            _instance = new TopazManager();
-                        }
-                    });
-                }
-                return _instance;
-            }
-        }
+        public static readonly TopazManager Instance;
 
         public ITransientErrorDetectionStrategy GetDetectionStrategy(RetryContext context)
         {

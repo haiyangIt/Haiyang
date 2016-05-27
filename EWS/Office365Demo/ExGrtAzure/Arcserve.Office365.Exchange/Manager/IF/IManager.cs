@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Arcserve.Office365.Exchange.Manager.IF
 {
-    public interface IManager
+    public interface IManager : IDisposable
     {
         void Start();
         void End();

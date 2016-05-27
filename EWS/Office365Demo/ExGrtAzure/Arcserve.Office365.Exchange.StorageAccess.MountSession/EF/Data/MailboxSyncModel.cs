@@ -51,7 +51,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data
             }
             set { }
         }
-        
+
         [NotMapped]
         public string Location
         {
@@ -62,11 +62,22 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data
             set { }
         }
 
+        private string _mailAddress;
         [MaxLength(255)]
         [EmailAddress]
         public string MailAddress
         {
-            get; set;
+            get
+            {
+                return _mailAddress;
+            }
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                    _mailAddress = string.Empty;
+                else
+                    _mailAddress = value.ToLower();
+            }
         }
 
         public string Name
@@ -96,4 +107,24 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data
             throw new NotImplementedException();
         }
     }
+
+    //[Table("MailboxSyncUpdate")]
+    //public class UpdateMailboxSyncModel : MailboxSyncModel { }
+
+    //[Table("MailboxSyncDelete")]
+    //public class DeleteMailboxSync
+    //{
+    //    [Key]
+    //    public string Id
+    //    {
+    //        get; set;
+    //    }
+
+    //    [MaxLength(255)]
+    //    [EmailAddress]
+    //    public string MailAddress
+    //    {
+    //        get; set;
+    //    }
+    //}
 }

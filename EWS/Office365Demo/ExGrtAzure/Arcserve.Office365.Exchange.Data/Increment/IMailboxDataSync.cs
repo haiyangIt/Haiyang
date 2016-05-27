@@ -14,10 +14,11 @@ namespace Arcserve.Office365.Exchange.Data.Increment
 
     public class MailboxDataSyncBase : IMailboxDataSync
     {
+        public MailboxDataSyncBase() { }
         public MailboxDataSyncBase(string displayName, string mailboxAddress)
         {
             DisplayName = displayName;
-            MailAddress = mailboxAddress;
+            MailAddress = mailboxAddress.ToLower();
         }
 
         public string ChangeKey
@@ -30,6 +31,7 @@ namespace Arcserve.Office365.Exchange.Data.Increment
             get; set;
         }
 
+       
         public string DisplayName
         {
             get; set;
@@ -57,9 +59,20 @@ namespace Arcserve.Office365.Exchange.Data.Increment
             get; set;
         }
 
+        private string _mailAddress;
         public string MailAddress
         {
-            get; private set;
+            get
+            {
+                return _mailAddress;
+            }
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                    _mailAddress = string.Empty;
+                else
+                    _mailAddress = value.ToLower();
+            }
         }
 
         public string Name

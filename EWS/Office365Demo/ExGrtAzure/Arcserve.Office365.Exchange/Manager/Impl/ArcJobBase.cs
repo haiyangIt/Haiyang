@@ -1,5 +1,6 @@
 ﻿using Arcserve.Office365.Exchange.Log;
 using Arcserve.Office365.Exchange.Manager.IF;
+using Arcserve.Office365.Exchange.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -86,7 +87,7 @@ namespace Arcserve.Office365.Exchange.Manager.Impl
 
         private void ChangeOperator(Operator oper)
         {
-            lock (SyncObj)
+            using (SyncObj.LockWhile(() =>
             {
                 var oldStatus = Status;
                 LogFactory.LogInstance.WriteLog(JobName, LogLevel.DEBUG, "ChangeOperator start", "Old Status:{0}, operator:{1}.", Status, oper);
@@ -217,7 +218,8 @@ namespace Arcserve.Office365.Exchange.Manager.Impl
                 }
 
                 LogFactory.LogInstance.WriteLog(JobName, LogLevel.DEBUG, "ChangeOperator end", "Old Status:{0}, New Status:{1}, operator:{2}.", oldStatus, Status, oper);
-            }
+            }))
+            { }
         }
 
         protected bool IsJobNeedCanceledOrEnded()

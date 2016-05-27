@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Arcserve.Office365.Exchange.Util;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Security;
@@ -14,9 +15,6 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Common
         private static object uaLock = new object();
         private static object urlLock = new object();
 
-        
-         
-
         public static bool ServerCertificateValidationCallback(
                     Object obj,
                     X509Certificate certificate,
@@ -29,22 +27,24 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Common
             if (request != null)
             {
                 // Check for allowed UserAgent
-                lock (CertificateValidationHelper.uaLock)
+                using (CertificateValidationHelper.uaLock.LockWhile(() =>
                 {
                     if (CertificateValidationHelper.allowedUserAgents.Contains(request.UserAgent))
                     {
                         result = true;
                     }
-                }
+                }))
+                { }
 
                 // Check for allowed Url
-                lock (CertificateValidationHelper.urlLock)
+                using (CertificateValidationHelper.urlLock.LockWhile(() =>
                 {
                     if (CertificateValidationHelper.allowedUrls.Contains(request.RequestUri))
                     {
                         result = true;
                     }
-                }
+                }))
+                { }
             }
 
             return result;

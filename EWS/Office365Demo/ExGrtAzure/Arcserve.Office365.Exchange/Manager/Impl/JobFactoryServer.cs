@@ -1,4 +1,5 @@
 ﻿using Arcserve.Office365.Exchange.Manager.IF;
+using Arcserve.Office365.Exchange.Util;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -14,42 +15,27 @@ namespace Arcserve.Office365.Exchange.Manager.Impl
     /// </summary>
     public class JobFactoryServer
     {
-        private JobFactoryServer() { }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public static JobFactoryServer Instance = new JobFactoryServer();
-
-        private static IJobManager _jobManager;
-        public IJobManager JobManager
+        static JobFactoryServer()
         {
-            get
-            {
-                System.Threading.Interlocked.CompareExchange(ref _jobManager, new JobManager(), null);
-                return _jobManager;
-            }
+            Instance = new JobFactoryServer();
         }
+        private JobFactoryServer() {
+            JobManager = new JobManager();
+            ProgressManager = new ProgressManager();
+            ThreadManager = new ThreadManager();
 
-        private static IProgressManager _progressManager;
-        public IProgressManager ProgressManager
-        {
-            get
-            {
-                System.Threading.Interlocked.CompareExchange(ref _progressManager, new ProgressManager(), null);
-                return _progressManager;
-            }
+            DisposeManager.RegisterInstance(ThreadManager);
+            DisposeManager.RegisterInstance(JobManager);
+            DisposeManager.RegisterInstance(ProgressManager);
         }
+        
+        public static readonly JobFactoryServer Instance;
 
-        private static IThreadManager _threadManager;
-        public IThreadManager ThreadManager
-        {
-            get
-            {
-                System.Threading.Interlocked.CompareExchange(ref _threadManager, new ThreadManager(), null);
-                return _threadManager;
-            }
-        }
+        public readonly IJobManager JobManager;
+
+        public readonly IProgressManager ProgressManager;
+
+        public readonly IThreadManager ThreadManager;
 
         public IThreadObj NewThreadObj()
         {

@@ -30,19 +30,19 @@ namespace ExGrtAzure.Tests
         [TestMethod]
         public void ExportLog()
         {
-            DateTime time = DateTime.Now;
-            var yesterday0413 = time.AddDays(0).Date;
-            var str = LogFactory.LogInstance.GetTotalLog(yesterday0413);
-            using (StreamWriter writer = new StreamWriter(time.ToString("yyyyMMddHHmmssfff") + "log.txt"))
-            {
-                writer.Write(str);
-            }
+            //DateTime time = DateTime.Now;
+            //var yesterday0413 = time.AddDays(0).Date;
+            //var str = LogFactory.LogInstance.GetTotalLog(yesterday0413);
+            //using (StreamWriter writer = new StreamWriter(time.ToString("yyyyMMddHHmmssfff") + "log.txt"))
+            //{
+            //    writer.Write(str);
+            //}
 
-            using (StreamWriter writer = new StreamWriter(time.ToString("yyyyMMddHHmmssfff") + "Tracelog.txt"))
-            {
-                str = LogFactory.EwsTraceLogInstance.GetTotalLog(yesterday0413);
-                writer.Write(str);
-            }
+            //using (StreamWriter writer = new StreamWriter(time.ToString("yyyyMMddHHmmssfff") + "Tracelog.txt"))
+            //{
+            //    str = LogFactory.EwsTraceLogInstance.GetTotalLog(yesterday0413);
+            //    writer.Write(str);
+            //}
 
         }
 
@@ -51,6 +51,9 @@ namespace ExGrtAzure.Tests
         {
             int i = 10;
             string test = string.Format("{0:X8},{0:X4},{0:X2}", i);
+            test = i.ToString("D8");
+            int max = int.MaxValue;
+            max += 1;
         }
 
         [TestMethod]

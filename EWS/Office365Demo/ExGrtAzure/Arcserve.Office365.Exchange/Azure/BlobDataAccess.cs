@@ -13,34 +13,27 @@ namespace Arcserve.Office365.Exchange.Azure
 {
     public class BlobDataAccess
     {
+        static BlobDataAccess()
+        {
+            ContainerValidKey = new HashSet<char>();
+            for (char controlLower = '0'; controlLower <= '9'; controlLower++)
+            {
+                ContainerValidKey.Add(controlLower);
+            }
+            for (char controlLower = 'a'; controlLower <= 'z'; controlLower++)
+            {
+                ContainerValidKey.Add(controlLower);
+            }
+            ContainerValidKey.Add(DashChar);
+        }
+
         public const string DashString = "-";
         public const char DashChar = '-';
         public static readonly char[] DashCharArray = DashString.ToCharArray();
 
-        private static HashSet<char> _containerValidKey;
-        private static HashSet<char> ContainerValidKey
-        {
-            get
-            {
-                if (_containerValidKey == null)
-                {
-                    _containerValidKey = new HashSet<char>();
-                    for (char controlLower = '0'; controlLower <= '9'; controlLower++)
-                    {
-                        _containerValidKey.Add(controlLower);
-                    }
-                    for (char controlLower = 'a'; controlLower <= 'z'; controlLower++)
-                    {
-                        _containerValidKey.Add(controlLower);
-                    }
-                    _containerValidKey.Add(DashChar);
+        private readonly static HashSet<char> ContainerValidKey;
 
-                }
-                return _containerValidKey;
-            }
-        }
 
-        
         /// <summary>
         /// 
         /// </summary>
@@ -240,7 +233,7 @@ namespace Arcserve.Office365.Exchange.Azure
             List<string> blobResult = new List<string>(blobNames.Count);
 
             StringBuilder sb = new StringBuilder(container.Uri.AbsoluteUri.Length + sasContainerToken.Length + 30);
-            foreach(var name in blobNames)
+            foreach (var name in blobNames)
             {
                 sb.Append(container.Uri.AbsoluteUri);
                 sb.Append("/");

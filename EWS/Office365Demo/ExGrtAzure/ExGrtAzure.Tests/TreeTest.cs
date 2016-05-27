@@ -4,6 +4,7 @@ using Arcserve.Office365.Exchange.Data.Increment;
 using Arcserve.Office365.Exchange.Data;
 using Arcserve.Office365.Exchange.Data.Mail;
 using System.Diagnostics;
+using Microsoft.Exchange.WebServices.Data;
 
 namespace ExGrtAzure.Tests
 {
@@ -163,6 +164,19 @@ namespace ExGrtAzure.Tests
         public string FolderId
         {
             get; set;
+        }
+
+        public FolderId FolderIdInExchange
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+
+            set
+            {
+                throw new NotImplementedException();
+            }
         }
 
         public string FolderType

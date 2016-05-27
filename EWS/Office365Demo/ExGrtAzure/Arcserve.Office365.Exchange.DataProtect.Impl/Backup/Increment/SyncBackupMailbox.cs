@@ -21,9 +21,9 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
         public IDataFromClient<IJobProgress> DataFromClient { get; set; }
         public OrganizationAdminInfo AdminInfo { get; internal set; }
         public string Organization { get; internal set; }
-        
 
-        public override Func<BackupFolderFlowTemplate> FuncNewFolderTemplate
+
+        protected override Func<BackupFolderFlowTemplate> FuncNewFolderTemplate
         {
             get
             {
@@ -37,7 +37,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
             }
         }
 
-        public override Func<string, ChangeCollection<FolderChange>> FuncGetChangedFolders
+        protected override Func<string, ChangeCollection<FolderChange>> FuncGetChangedFolders
         {
             get
             {
@@ -48,7 +48,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
             }
         }
 
-        public override Action ActionConnectExchangeService
+        protected override Action ActionConnectExchangeService
         {
             get
             {
@@ -59,9 +59,9 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
             }
         }
 
-        
 
-        public override Func<IMailboxDataSync, IEnumerable<IFolderDataSync>> FuncGetFoldersInLastCatalog
+
+        protected override Func<IMailboxDataSync, IEnumerable<IFolderDataSync>> FuncGetFoldersInLastCatalog
         {
             get
             {
@@ -71,9 +71,9 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
                 };
             }
         }
-        
 
-        public override Func<string, bool> FuncIsFolderInPlan
+
+        protected override Func<string, bool> FuncIsFolderInPlan
         {
             get
             {
@@ -83,9 +83,9 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
                 };
             }
         }
-        
 
-        public override Action<IMailboxDataSync> ActionUpdateMailbox
+
+        protected override Action<IMailboxDataSync> ActionUpdateMailbox
         {
             get
             {
@@ -96,7 +96,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
             }
         }
 
-        public override Func<IEnumerable<IFolderDataSync>, IEnumerable<IFolderDataSync>, FolderTree> FuncGetFolderTrees
+        protected override Func<IEnumerable<IFolderDataSync>, IEnumerable<IFolderDataSync>, FolderTree> FuncGetFolderTrees
         {
             get
             {
@@ -117,7 +117,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
             }
         }
 
-        public override Action<Folder> ActionLoadFolderProperties
+        protected override Action<Folder> ActionLoadFolderProperties
         {
             get
             {
@@ -133,7 +133,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
             get; set;
         }
 
-        public override Func<string, bool> FuncIsFolderClassValid
+        protected override Func<string, bool> FuncIsFolderClassValid
         {
             get
             {
@@ -143,9 +143,9 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
                 };
             }
         }
-        
 
-        public override void ForEachLoop(ICollection<IFolderDataSync> folders, Action<IFolderDataSync> DoEachFolderChange)
+
+        protected override void ForEachLoop(ICollection<IFolderDataSync> folders, Action<IFolderDataSync> DoEachFolderChange)
         {
             
             foreach(var folder in folders)

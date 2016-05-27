@@ -13,16 +13,50 @@ namespace Arcserve.Office365.Exchange.Util.Setting
 {
     public class CloudConfig
     {
+        static CloudConfig()
+        {
+            Instance = new CloudConfigCache();
+        }
+        public static readonly CloudConfig Instance;
 
-        public static CloudConfig Instance = new CloudConfigCache();
-
-        public virtual CloudStorageAccount StorageAccount
+        public virtual CloudStorageAccount StorageConnectStringRunning
         {
             get
             {
-                return CloudStorageAccount.Parse(CloudConfigurationManager.GetSetting("StorageConnectionStringRunning"));
+                if (ConfigurationManager.ConnectionStrings != null && ConfigurationManager.ConnectionStrings["StorageConnectionStringRunning"] != null)
+                {
+                    var connectStr =
+            ConfigurationManager.ConnectionStrings["StorageConnectionStringRunning"].ConnectionString;
+                    if (string.IsNullOrEmpty(connectStr))
+                    {
+                        return CloudStorageAccount.Parse(connectStr);
+                    }
+                }
+                return null;
+                
             }
-            protected set { }
+            set {
+
+            }
+        }
+
+        public virtual CloudStorageAccount StorageConnectString
+        {
+            get
+            {
+                if (ConfigurationManager.ConnectionStrings != null && ConfigurationManager.ConnectionStrings["StorageConnectionString"] != null)
+                {
+                    var connectStr =
+            ConfigurationManager.ConnectionStrings["StorageConnectionString"].ConnectionString;
+                    if (string.IsNullOrEmpty(connectStr))
+                    {
+                        return CloudStorageAccount.Parse(connectStr);
+                    }
+                }
+                return null;
+                
+            }
+            set { }
         }
 
         protected CloudConfig() { }
@@ -40,7 +74,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
                 //throw new NotImplementedException();
                 return CloudConfigurationManager.GetSetting("Organization");
             }
-            protected set { }
+            set { }
         }
 
         public virtual string DbDefaultConnectString
@@ -56,14 +90,27 @@ namespace Arcserve.Office365.Exchange.Util.Setting
                 //throw new NotImplementedException();
                 return CloudConfigurationManager.GetSetting("DefaultConnection");
             }
-            protected set { }
+            set { }
         }
 
 
-        public static bool IsRunningOnAzure()
+        public virtual bool IsRunningOnAzureOrStorageInAzure
         {
-            var isDebugAzure = CloudConfigurationManager.GetSetting("ForDebugAzure");
-            return !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME")) || isDebugAzure == "1";
+            get
+            {
+                var isDebugAzure = CloudConfigurationManager.GetSetting("ForDebugAzure");
+                return !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME")) || isDebugAzure == "1";
+            }
+            set { }
+        }
+
+        public virtual bool IsRunningOnAzure
+        {
+            get
+            {
+                return !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME"));
+            }
+            set { }
         }
 
         public virtual string LogPath
@@ -72,7 +119,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             {
                 return CloudConfigurationManager.GetSetting("LogPath");
             }
-            protected set { }
+            set { }
         }
 
         public virtual bool IsLog
@@ -81,7 +128,16 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             {
                 return CloudConfigurationManager.GetSetting("IsLog") == "1";
             }
-            protected set { }
+            set { }
+        }
+
+        public virtual bool IsEwsTraceLog
+        {
+            get
+            {
+                return CloudConfigurationManager.GetSetting("IsEwsTraceLog") == "1";
+            }
+            set { }
         }
 
         public virtual string ServiceBusConnectionString
@@ -90,7 +146,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             {
                 return CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.ConnectionString");
             }
-            protected set { }
+            set { }
         }
 
         public virtual string ServiceBusNameSpace
@@ -99,7 +155,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             {
                 return CloudConfigurationManager.GetSetting("ServiceBusNameSpace");
             }
-            protected set { }
+            set { }
         }
 
         public virtual string ServiceBusQueueName
@@ -108,7 +164,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             {
                 return CloudConfigurationManager.GetSetting("ServiceBusQueueName");
             }
-            protected set { }
+            set { }
         }
 
         public virtual int ServiceBusQueueMaxSize
@@ -120,7 +176,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
                     return 5120;
                 return result;
             }
-            protected set { }
+            set { }
         }
 
         public virtual int ServiceBusQueueTTL
@@ -132,7 +188,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
                     return 5;
                 return result;
             }
-            protected set { }
+            set { }
         }
 
         public virtual string ServiceBusTopicName
@@ -141,7 +197,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             {
                 return CloudConfigurationManager.GetSetting("ServiceBusTopicName");
             }
-            protected set { }
+            set { }
         }
 
         public virtual int ServiceBusTopicMaxSize
@@ -153,7 +209,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
                     return 5120;
                 return result;
             }
-            protected set { }
+            set { }
         }
 
         public virtual int ServiceBusTopicTTL
@@ -165,7 +221,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
                     return 5;
                 return result;
             }
-            protected set { }
+            set { }
         }
 
         public virtual string SubscriptionNameForAzure
@@ -174,7 +230,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             {
                 return CloudConfigurationManager.GetSetting("SubscriptionNameForScheduler");
             }
-            protected set { }
+            set { }
         }
 
         public virtual int ExportItemTimeOut
@@ -188,7 +244,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
                 }
                 return result * 1000;
             }
-            protected set { }
+            set { }
         }
 
         public virtual int RequestTimeOut
@@ -202,7 +258,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
                 }
                 return result * 1000;
             }
-            protected set { }
+            set { }
         }
 
         public virtual int MaxItemChangesReturn
@@ -216,7 +272,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
                 }
                 return result;
             }
-            protected set { }
+            set { }
         }
 
         public virtual bool IsRewriteDataIfReadFlagChanged
@@ -230,7 +286,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
                 }
                 return false;
             }
-            protected set { }
+            set { }
         }
 
         public virtual int BatchExportImportItemMaxCount
@@ -244,7 +300,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
                 }
                 return result;
             }
-            protected set { }
+            set { }
         }
 
         /// <summary>
@@ -265,7 +321,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
                 }
                 return result * 1024 * 1024;
             }
-            protected set { }
+            set { }
         }
 
         public virtual int SupportMaxSize
@@ -279,7 +335,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
                 }
                 return result * 1024 * 1024;
             }
-            protected set { }
+            set { }
         }
 
         public virtual int BatchExportImportMaxAddCount
@@ -293,7 +349,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
                 }
                 return result;
             }
-            protected set { }
+            set { }
         }
 
         public virtual int BatchExportImportSmallCountInPartition
@@ -307,7 +363,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
                 }
                 return result;
             }
-            protected set { }
+            set { }
         }
         public virtual int BatchExportImportLargeCountInPartition
         {
@@ -320,7 +376,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
                 }
                 return result;
             }
-            protected set { }
+            set { }
         }
 
         public virtual int BatchLoadPropertyItemCount
@@ -330,11 +386,11 @@ namespace Arcserve.Office365.Exchange.Util.Setting
                 int result = 0;
                 if (!int.TryParse(ConfigurationManager.AppSettings["BatchLoadPropertyItemCount"], out result))
                 {
-                    result = 10;
+                    result = 20;
                 }
                 return result;
             }
-            protected set { }
+            set { }
         }
 
         public virtual int LogFileMaxRecordCount
@@ -346,20 +402,46 @@ namespace Arcserve.Office365.Exchange.Util.Setting
                     return result;
                 return 500;
             }
-            protected set { }
+            set { }
         }
+
+        public virtual int BatchSaveToCatalogCount
+        {
+            get
+            {
+                int result = 30;
+                if (int.TryParse(ConfigurationManager.AppSettings["BatchSaveToCatalogCount"], out result))
+                    return result;
+                return 30;
+            }
+            set { }
+        }
+
+        public virtual bool IsTestForDemo
+        {
+            get
+            {
+                int result = 1;
+                if (int.TryParse(ConfigurationManager.AppSettings["IsTestForDemo"], out result))
+                    return result == 1;
+                return false;
+            }
+            set { }
+        }
+
+        public string WorkFolder { get; set; }
     }
 
     public class CloudConfigCache : CloudConfig
     {
-        public override CloudStorageAccount StorageAccount
+        public override CloudStorageAccount StorageConnectStringRunning
         {
-            get; protected set;
+            get; set;
         }
 
         internal CloudConfigCache()
         {
-            StorageAccount = base.StorageAccount;
+            StorageConnectStringRunning = base.StorageConnectStringRunning;
             DbConnectString = base.DbConnectString;
 
             DbDefaultConnectString = base.DbDefaultConnectString;
@@ -408,108 +490,136 @@ namespace Arcserve.Office365.Exchange.Util.Setting
 
             BatchLoadPropertyItemCount = base.BatchLoadPropertyItemCount;
             LogFileMaxRecordCount = base.LogFileMaxRecordCount;
+            IsRunningOnAzureOrStorageInAzure = base.IsRunningOnAzureOrStorageInAzure;
+            IsRunningOnAzure = base.IsRunningOnAzure;
+            StorageConnectString = base.StorageConnectString;
+
+            IsEwsTraceLog = base.IsEwsTraceLog;
+            IsTestForDemo = base.IsTestForDemo;
+            BatchSaveToCatalogCount = base.BatchSaveToCatalogCount;
+        }
+        public override bool IsTestForDemo
+        {
+            get; set;
+        }
+        public override int BatchSaveToCatalogCount
+        {
+            get; set;
+        }
+        public override bool IsRunningOnAzure
+        {
+            get; set;
+        }
+
+        public override bool IsEwsTraceLog
+        {
+            get; set;
+        }
+
+        public override CloudStorageAccount StorageConnectString
+        {
+            get; set;
         }
 
         public override int LogFileMaxRecordCount
         {
-            get; protected set;
+            get; set;
         }
 
         public override string DbConnectString
         {
-            get; protected set;
+            get; set;
         }
 
         public override string DbDefaultConnectString
         {
-            get; protected set;
+            get; set;
         }
 
 
-        public static bool IsRunningOnAzure()
+        public override bool IsRunningOnAzureOrStorageInAzure
         {
-            var isDebugAzure = CloudConfigurationManager.GetSetting("ForDebugAzure");
-            return !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME")) || isDebugAzure == "1";
+            get; set;
         }
 
         public override string LogPath
         {
-            get; protected set;
+            get; set;
         }
 
         public override bool IsLog
         {
-            get; protected set;
+            get; set;
         }
 
         public override string ServiceBusConnectionString
         {
-            get; protected set;
+            get; set;
         }
 
         public override string ServiceBusNameSpace
         {
-            get; protected set;
+            get; set;
         }
 
         public override string ServiceBusQueueName
         {
-            get; protected set;
+            get; set;
         }
 
         public override int ServiceBusQueueMaxSize
         {
-            get; protected set;
+            get; set;
         }
 
         public override int ServiceBusQueueTTL
         {
-            get; protected set;
+            get; set;
         }
 
         public override string ServiceBusTopicName
         {
-            get; protected set;
+            get; set;
         }
 
         public override int ServiceBusTopicMaxSize
         {
-            get; protected set;
+            get; set;
         }
 
         public override int ServiceBusTopicTTL
         {
-            get; protected set;
+            get; set;
         }
 
         public override string SubscriptionNameForAzure
         {
-            get; protected set;
+            get; set;
         }
 
         public override int ExportItemTimeOut
         {
-            get; protected set;
+            get; set;
         }
 
         public override int RequestTimeOut
         {
-            get; protected set;
+            get; set;
         }
 
         public override int MaxItemChangesReturn
         {
-            get; protected set;
+            get; set;
         }
 
         public override bool IsRewriteDataIfReadFlagChanged
         {
-            get; protected set;
+            get; set;
         }
 
         public override int BatchExportImportItemMaxCount
         {
-            get; protected set;
+            get; set;
         }
 
         /// <summary>
@@ -521,31 +631,31 @@ namespace Arcserve.Office365.Exchange.Util.Setting
 
         public override int BatchExportImportItemMaxSizeForSingleMB
         {
-            get; protected set;
+            get; set;
         }
 
         public override int SupportMaxSize
         {
-            get; protected set;
+            get; set;
         }
 
         public override int BatchExportImportMaxAddCount
         {
-            get; protected set;
+            get; set;
         }
 
         public override int BatchExportImportSmallCountInPartition
         {
-            get; protected set;
+            get; set;
         }
         public override int BatchExportImportLargeCountInPartition
         {
-            get; protected set;
+            get; set;
         }
 
         public override int BatchLoadPropertyItemCount
         {
-            get; protected set;
+            get; set;
         }
     }
 

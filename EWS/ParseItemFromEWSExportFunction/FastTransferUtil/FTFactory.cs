@@ -27,7 +27,12 @@ namespace FTStreamUtil
             //TypeMapping.Add(MAPIPropertyType.String, PropertyType.PT_BINARY);
         }
 
-        public static FTFactory Instance = new FTFactory();
+        static FTFactory()
+        {
+            Instance = new FTFactory();
+        }
+
+        public static readonly FTFactory Instance;
 
         public MessageContent CreateMessageContent()
         {
@@ -55,11 +60,11 @@ namespace FTStreamUtil
             {
                 return new FixPropValue(propertyTag);
             }
-            else if(PropertyTag.IsVarType(propertyTag))
+            else if (PropertyTag.IsVarType(propertyTag))
             {
                 return new VarPropValue(propertyTag);
             }
-            else if(PropertyTag.IsMultiType(propertyTag))
+            else if (PropertyTag.IsMultiType(propertyTag))
             {
                 return new MvPropValue(propertyTag);
             }
@@ -171,7 +176,7 @@ namespace FTStreamUtil
         internal IPropInfo CreatePropInfo(PropertyTag propertyTag)
         {
             var propId = propertyTag.PropId;
-            if(propId < 0x8000)
+            if (propId < 0x8000)
             {
                 return new TagPropId();
             }
@@ -238,8 +243,8 @@ namespace FTStreamUtil
                 return new DispId();
             else if (_x00Or01.Data == X00Or01.X01ForName)
                 return new Name();
-            else 
-                throw new ArgumentException(string.Format("X00or01 data {0} is wrong.",_x00Or01.Data));
+            else
+                throw new ArgumentException(string.Format("X00or01 data {0} is wrong.", _x00Or01.Data));
         }
 
         internal IDispIdOrName CreateDispIdOrNameBase(X00Or01 x00Or01)
@@ -247,7 +252,7 @@ namespace FTStreamUtil
             return new DispIdOrNameBase(x00Or01);
         }
 
-        
+
         //internal IPropValue CreateTransferUnit(byte[] buffer)
         //{
         //    FTTransferUnitBuild unitBuild = new FTTransferUnitBuild(buffer);
@@ -301,7 +306,7 @@ namespace FTStreamUtil
                 case (UInt16)PropertyType.PT_I8:
                 case (UInt16)PropertyType.PT_SYSTIME:
                 case (UInt16)PropertyType.PT_CLSID:
-                    return new MvFixedSizeValue(propertyTag ,propValueLength);
+                    return new MvFixedSizeValue(propertyTag, propValueLength);
 
                 case (UInt16)PropertyType.PT_BINARY:
                 case (UInt16)PropertyType.PT_SERVERID:

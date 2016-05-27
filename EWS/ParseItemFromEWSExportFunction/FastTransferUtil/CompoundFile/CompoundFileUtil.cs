@@ -16,7 +16,12 @@ namespace FastTransferUtil.CompoundFile
 {
     public class CompoundFileUtil
     {
-        public static CompoundFileUtil Instance = new CompoundFileUtil();
+        static CompoundFileUtil()
+        {
+            Instance = new CompoundFileUtil();
+        }
+
+        public static readonly CompoundFileUtil Instance;
 
         #region CompoundFileInMemory
         public IStorage CreateStorageInMemory(out ILockBytes lockBytes)
@@ -66,8 +71,6 @@ namespace FastTransferUtil.CompoundFile
                 comObj = default(T);
             }
         }
-
-
 
         public IStorage GetRootStorage(string name, bool isCreate)
         {

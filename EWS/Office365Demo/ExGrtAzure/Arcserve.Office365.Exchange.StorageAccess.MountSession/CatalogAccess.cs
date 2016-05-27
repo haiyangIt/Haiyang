@@ -10,6 +10,7 @@ using Arcserve.Office365.Exchange.Thread;
 using System.Threading;
 using Arcserve.Office365.Exchange.EwsApi.Increment;
 using Arcserve.Office365.Exchange.StorageAccess.MountSession.EF;
+using Arcserve.Office365.Exchange.Util.Setting;
 
 namespace Arcserve.Office365.Exchange.StorageAccess.MountSession
 {
@@ -18,14 +19,27 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession
         private string CatalogFile;
         private string LatestCatalogFile;
         private string StorageFolder;
-        private CatalogDbAccess _catalogDbAccess;
+        private ICatalogAccess<IJobProgress> _catalogDbAccess;
         private ExportItemWriter _exportItemWriter;
+
+        /// <summary>
+        /// Dispose. please use using.
+        /// </summary>
+        /// <param name="newCatalogFile"></param>
+        /// <param name="latestCatalogFile"></param>
+        /// <param name="storageFolder"></param>
+        /// <remarks>Dispose.</remarks>
         public CatalogAccess(string newCatalogFile, string latestCatalogFile, string storageFolder)
         {
             CatalogFile = newCatalogFile;
             LatestCatalogFile = latestCatalogFile;
             StorageFolder = storageFolder;
-            _catalogDbAccess = new CatalogDbAccess(newCatalogFile, latestCatalogFile);
+            if (CloudConfig.Instance.IsTestForDemo)
+            {
+                _catalogDbAccess = new CatalogTestAccess(newCatalogFile, latestCatalogFile);
+            }
+            else
+                _catalogDbAccess = new CatalogDbAccess(newCatalogFile, latestCatalogFile);
             _catalogDbAccess.CloneSyncContext(this);
             _exportItemWriter = new ExportItemWriter(storageFolder);
         }
@@ -86,10 +100,16 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession
 
         public void Dispose()
         {
-            if(_catalogDbAccess != null)
+            if (_catalogDbAccess != null)
             {
-                _catalogDbAccess.Dispose();
+                if (_catalogDbAccess is IDisposable)
+                    ((IDisposable)_catalogDbAccess).Dispose();
                 _catalogDbAccess = null;
+            }
+            if (_exportItemWriter != null)
+            {
+                _exportItemWriter.Dispose();
+                _exportItemWriter = null;
             }
         }
 

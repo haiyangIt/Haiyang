@@ -9,58 +9,43 @@ namespace Arcserve.Office365.Exchange.Azure
 { 
     public class TableDataAccess
     {
+        static TableDataAccess()
+        {
+            ValidTableNameCharactors = new HashSet<char>();
+            var number = "0123456789";
+            var alpha = "abcdefghijklmnopqrstuvwxyz";
+            foreach (char c in number)
+            {
+                ValidTableNameCharactors.Add(c);
+            }
+            foreach (char c in alpha)
+            {
+                ValidTableNameCharactors.Add(c);
+            }
+
+            List<char> invalidChar = new List<char>(0x4F);
+            for (char controlLower = '\u0000'; controlLower <= '\u001F'; controlLower++)
+            {
+                invalidChar.Add(controlLower);
+            }
+            for (char controlLower = '\u007F'; controlLower <= '\u009F'; controlLower++)
+            {
+                invalidChar.Add(controlLower);
+            }
+            invalidChar.Add('/');
+            invalidChar.Add('\\');
+            invalidChar.Add('#');
+            invalidChar.Add('?');
+
+            RowPartitionInvalidKey = new HashSet<char>(invalidChar);
+        }
+
         private CloudTableClient _tableClient;
 
-        private static HashSet<char> _validTableNameCharactors;
 
-        private static HashSet<char> ValidTableNameCharactors
-        {
-            get
-            {
-                if(_validTableNameCharactors == null)
-                {
-                    _validTableNameCharactors = new HashSet<char>();
-                    var number = "0123456789";
-                    var alpha = "abcdefghijklmnopqrstuvwxyz";
-                    foreach(char c in number)
-                    {
-                        _validTableNameCharactors.Add(c);
-                    }
-                    foreach(char c in alpha)
-                    {
-                        _validTableNameCharactors.Add(c);
-                    }
-                }
-                return _validTableNameCharactors;
-            }
-        }
+        private readonly static HashSet<char> ValidTableNameCharactors;
 
-        private static HashSet<char> _rowPartitionInvalidKey;
-        private static HashSet<char> RowPartitionInvalidKey
-        {
-            get
-            {
-                if(_rowPartitionInvalidKey == null)
-                {
-                    List<char> invalidChar = new List<char>(0x4F);
-                    for (char controlLower = '\u0000'; controlLower <= '\u001F'; controlLower++)
-                    {
-                        invalidChar.Add(controlLower);
-                    }
-                    for (char controlLower = '\u007F'; controlLower <= '\u009F'; controlLower++)
-                    {
-                        invalidChar.Add(controlLower);
-                    }
-                    invalidChar.Add('/');
-                    invalidChar.Add('\\');
-                    invalidChar.Add('#');
-                    invalidChar.Add('?');
-
-                    _rowPartitionInvalidKey = new HashSet<char>(invalidChar);
-                }
-                return _rowPartitionInvalidKey;
-            }
-        }
+        private readonly static HashSet<char> RowPartitionInvalidKey;
 
 
         public TableDataAccess(CloudTableClient tableClient)
@@ -101,7 +86,7 @@ namespace Arcserve.Office365.Exchange.Azure
 
             foreach(char c in rowKey)
             {
-                if(_rowPartitionInvalidKey.Contains(c))
+                if(RowPartitionInvalidKey.Contains(c))
                 {
                     throw new ArgumentException(string.Format("Invalid row/partition keys:{0}, can not contain charactor:{1}.", rowKey, (int)c));
                 }

@@ -9,11 +9,63 @@ namespace Arcserve.Office365.Exchange.Util
 {
     public class MD5Utility
     {
-        private static MD5 _md5 = MD5.Create();
+        private static object _lock = new object();
+        private static int _count = 0;
+        private static MD5 _md5;
+        private static MD5 Md5
+        {
+            get
+            {
+                using (_lock.LockWhile(() =>
+                {
+                    System.Threading.Interlocked.Increment(ref _count);
+                    if (_count > 1000)
+                    {
+                        Dispose();
+                    }
+
+                    if (_md5 == null)
+                    {
+                        _md5 = MD5.Create();
+                    }
+                }))
+                { };
+
+                return _md5;
+            }
+        }
+
+        private static void Dispose()
+        {
+            _count = 0;
+            if (_md5 != null)
+            {
+                _md5.Dispose();
+                _md5 = null;
+            }
+        }
 
         public static string ConvertToMd5(string data)
         {
-            byte[] md5Hash = _md5.ComputeHash(Encoding.UTF8.GetBytes(data));
+
+            try
+            {
+                return ConvertToMd5(Md5, data);
+            }
+            catch (Exception e)
+            {
+                using (_lock.LockWhile(() =>
+                {
+                    Dispose();
+                }))
+                { }
+                return ConvertToMd5(Md5, data);
+            }
+        }
+
+        private static string ConvertToMd5(MD5 md5, string data)
+        {
+            byte[] md5Hash = md5.ComputeHash(Encoding.UTF8.GetBytes(data));
 
             // Create a new Stringbuilder to collect the bytes
             // and create a string.

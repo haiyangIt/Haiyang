@@ -29,14 +29,17 @@ namespace Arcserve.Office365.Exchange.Manager.Impl
         {
             LogFactory.LogInstance.WriteLog(ManagerName, LogLevel.DEBUG, string.Format("Manager [{0}] adding job [{1}] [{2}].", ManagerName, job.JobId, job.JobName));
 
-            CheckOtherEventCanExecute();
+            if (!CheckOtherEventCanExecute())
+            {
+                return;
+            }
 
             using (_lockSlim.Write())
             {
                 _JobBuffer.Add(job.JobId, job);
             }
 
-            using(_JobBuffer.LockWhile(arcJobQueue.Enqueue, job))
+            using (_JobBuffer.LockWhile(arcJobQueue.Enqueue, job))
             {
 
             }
@@ -106,10 +109,16 @@ namespace Arcserve.Office365.Exchange.Manager.Impl
             }
         }
 
-        public void Dispose()
+        protected override void AfterEnd()
         {
-            _lockSlim.Dispose();
+            base.AfterEnd();
+            if (_lockSlim != null)
+            {
+                _lockSlim.Dispose();
+                _lockSlim = null;
+            }
         }
+
     }
 
     //public class JobManager : IJobManager

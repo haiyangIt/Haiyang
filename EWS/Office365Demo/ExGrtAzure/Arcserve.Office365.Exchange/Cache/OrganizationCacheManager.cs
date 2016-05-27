@@ -1,4 +1,5 @@
-﻿using Arcserve.Office365.Exchange.Util;
+﻿using Arcserve.Office365.Exchange.Manager;
+using Arcserve.Office365.Exchange.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,12 @@ namespace Arcserve.Office365.Exchange.Cache
 {
     public class OrganizationCacheManager : ICacheManager, IDisposable
     {
-        public static OrganizationCacheManager CacheManager = new OrganizationCacheManager();
+        static OrganizationCacheManager()
+        {
+            CacheManager = new OrganizationCacheManager();
+            DisposeManager.RegisterInstance(CacheManager);
+        }
+        public readonly static OrganizationCacheManager CacheManager;
 
         private static string GetName(string organization, string cacheName)
         {

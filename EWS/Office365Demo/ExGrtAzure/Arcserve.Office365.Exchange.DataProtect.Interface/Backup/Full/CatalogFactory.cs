@@ -15,47 +15,38 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface
 {
     public class CatalogFactory : FactoryBase
     {
-        private static CatalogFactory _instance;
-        public static CatalogFactory Instance
+        static CatalogFactory()
         {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new CatalogFactory();
-                    var sqlDbImplPath = Path.Combine(LibPath, AssemblyConfig.Instance.BinaryStorageAccessInAzure);
-                    var ewsServicePath = Path.Combine(LibPath, AssemblyConfig.Instance.BinaryExchangeEwsApi);
-                    var dataProtectPath = Path.Combine(LibPath, AssemblyConfig.Instance.BinaryDataProtectImplement);
+            Instance = new CatalogFactory();
+            var sqlDbImplPath = Path.Combine(LibPath, AssemblyConfig.Instance.BinaryStorageAccessInAzure);
+            var ewsServicePath = Path.Combine(LibPath, AssemblyConfig.Instance.BinaryExchangeEwsApi);
+            var dataProtectPath = Path.Combine(LibPath, AssemblyConfig.Instance.BinaryDataProtectImplement);
 
-                    _instance.EwsDataImplAssembly = Assembly.LoadFrom(sqlDbImplPath);
-                    _instance.EwsServiceImplAssembly = Assembly.LoadFrom(ewsServicePath);
-                    _instance.DataProtectImplAssembly = Assembly.LoadFrom(dataProtectPath);
-                }
-                return _instance;
-            }
+            Instance.EwsDataImplAssembly = Assembly.LoadFrom(sqlDbImplPath);
+            Instance.EwsServiceImplAssembly = Assembly.LoadFrom(ewsServicePath);
+            Instance.DataProtectImplAssembly = Assembly.LoadFrom(dataProtectPath);
+
+            _interfaceImplTypeNameDic = new Dictionary<Type, string>();
+            _interfaceImplTypeNameDic.Add(typeof(ICatalogDataAccess), AssemblyConfig.Instance.ICatalogDataAccessImplClass);
+            _interfaceImplTypeNameDic.Add(typeof(IDataConvert), AssemblyConfig.Instance.IDataConvertImplClass);
+
+            _interfaceImplTypeNameDic.Add(typeof(IMailbox), AssemblyConfig.Instance.IMailboxImplClass);
+            _interfaceImplTypeNameDic.Add(typeof(IFolder), AssemblyConfig.Instance.IFolderImplClass);
+            _interfaceImplTypeNameDic.Add(typeof(IItem), AssemblyConfig.Instance.IItemImplClass);
+
+            _interfaceImplTypeNameDic.Add(typeof(ICatalogService), AssemblyConfig.Instance.ICatalogServiceImplClass);
+            _interfaceImplTypeNameDic.Add(typeof(IFilterItem), AssemblyConfig.Instance.IFilterItemImplClass);
         }
-
+        public readonly static CatalogFactory Instance;
 
         private static Dictionary<Type, string> _interfaceImplTypeNameDic = null;
         protected override Dictionary<Type, string> InterfaceImplTypeNameDic
         {
             get
             {
-                if (_interfaceImplTypeNameDic == null)
-                {
-                    _interfaceImplTypeNameDic = new Dictionary<Type, string>();
-                    _interfaceImplTypeNameDic.Add(typeof(ICatalogDataAccess), AssemblyConfig.Instance.ICatalogDataAccessImplClass);
-                    _interfaceImplTypeNameDic.Add(typeof(IDataConvert), AssemblyConfig.Instance.IDataConvertImplClass);
-
-                    _interfaceImplTypeNameDic.Add(typeof(IMailbox), AssemblyConfig.Instance.IMailboxImplClass);
-                    _interfaceImplTypeNameDic.Add(typeof(IFolder), AssemblyConfig.Instance.IFolderImplClass);
-                    _interfaceImplTypeNameDic.Add(typeof(IItem), AssemblyConfig.Instance.IItemImplClass);
-
-                    _interfaceImplTypeNameDic.Add(typeof(ICatalogService), AssemblyConfig.Instance.ICatalogServiceImplClass);
-                    _interfaceImplTypeNameDic.Add(typeof(IFilterItem), AssemblyConfig.Instance.IFilterItemImplClass);
-                }
                 return _interfaceImplTypeNameDic;
             }
+            set { }
         }
 
         public ICatalogService NewCatalogService(string adminUserName, string adminUserPassword, string domainName, string organization)

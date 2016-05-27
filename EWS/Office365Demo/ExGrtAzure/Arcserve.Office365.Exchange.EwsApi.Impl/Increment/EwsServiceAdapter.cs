@@ -16,6 +16,37 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
 {
     public class EwsServiceAdapter : IEwsServiceAdapter<IJobProgress>
     {
+        static EwsServiceAdapter()
+        {
+            FolderPropertySet = new PropertySet(FolderSchema.DisplayName,
+                        FolderSchema.ParentFolderId,
+                        FolderSchema.ChildFolderCount,
+                        FolderSchema.FolderClass,
+                        FolderSchema.TotalCount);
+
+            ItemPropertySet = new PropertySet(ItemSchema.Subject,
+                        ItemSchema.DateTimeCreated,
+                        ItemSchema.ParentFolderId,
+                        ItemSchema.ItemClass,
+                        ItemSchema.Size,
+                        ItemSchema.HasAttachments);
+            EmailPropertySet = new PropertySet(ItemSchema.Subject,
+                        ItemSchema.DateTimeCreated,
+                        ItemSchema.ParentFolderId,
+                        ItemSchema.ItemClass,
+                        ItemSchema.Size,
+                        ItemSchema.HasAttachments,
+                        EmailMessageSchema.IsRead);
+
+        }
+
+        private static readonly PropertySet FolderPropertySet;
+
+        private static readonly PropertySet ItemPropertySet;
+
+        private static readonly PropertySet EmailPropertySet;
+
+
         public CancellationToken CancelToken
         {
             get; set;
@@ -31,6 +62,9 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
             get; set;
         }
 
+        /// <summary>
+        /// todo need to hide private;
+        /// </summary>
         private EwsBaseOperator _ewsOperator = new EwsLimitOperator();
 
         public ICollection<IMailboxDataSync> GetAllMailboxes(string adminUserName, string adminPassword)
@@ -74,31 +108,7 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
             throw new NotImplementedException();
         }
 
-        private static object _lockObj = new object();
-        private static PropertySet _folderPropertySet = null;
-        private static PropertySet FolderPropertySet
-        {
-            get
-            {
-                if (_folderPropertySet == null)
-                {
-                    using (_lockObj.LockWhile(() =>
-                    {
-                        if (_folderPropertySet == null)
-                        {
-                            _folderPropertySet = new PropertySet(FolderSchema.DisplayName,
-                        FolderSchema.ParentFolderId,
-                        FolderSchema.ChildFolderCount,
-                        FolderSchema.FolderClass,
-                        FolderSchema.TotalCount);
-                        }
-                    }))
-                    { }
 
-                }
-                return _folderPropertySet;
-            }
-        }
         public void LoadFolderProperties(Folder folder)
         {
             _ewsOperator.LoadFolderProperties(folder, FolderPropertySet);
@@ -130,57 +140,7 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
         //    throw new NotImplementedException();
         //}
 
-        private static PropertySet _itemPropertySet = null;
-        private static PropertySet ItemPropertySet
-        {
-            get
-            {
-                if (_itemPropertySet == null)
-                {
-                    using (_lockObj.LockWhile(() =>
-                    {
-                        if (_itemPropertySet == null)
-                        {
-                            _itemPropertySet = new PropertySet(ItemSchema.Subject,
-                        ItemSchema.DateTimeCreated,
-                        ItemSchema.ParentFolderId,
-                        ItemSchema.ItemClass,
-                        ItemSchema.Size,
-                        ItemSchema.HasAttachments);
-                        }
-                    }))
-                    { }
 
-                }
-                return _itemPropertySet;
-            }
-        }
-
-        private static PropertySet _emailPropertySet = null;
-        private static PropertySet EmailPropertySet
-        {
-            get
-            {
-                if (_emailPropertySet == null)
-                {
-                    using (_lockObj.LockWhile(() =>
-                    {
-                        if (_emailPropertySet == null)
-                        {
-                            _emailPropertySet = new PropertySet(ItemSchema.Subject,
-                        ItemSchema.DateTimeCreated,
-                        ItemSchema.ParentFolderId,
-                        ItemSchema.ItemClass,
-                        ItemSchema.Size,
-                        ItemSchema.HasAttachments,
-                        EmailMessageSchema.IsRead);
-                        }
-                    }))
-                    { }
-                }
-                return _emailPropertySet;
-            }
-        }
 
         public void LoadItemsProperties(IEnumerable<Item> items, ItemClass itemClass)
         {

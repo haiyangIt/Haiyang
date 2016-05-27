@@ -9,17 +9,12 @@ namespace Arcserve.Office365.Exchange.Cache
 {
     public class MailboxCacheManager : ICacheManager
     {
-        private static MailboxCacheManager _CacheManager;
-
-        public static MailboxCacheManager CacheManager
+        static MailboxCacheManager()
         {
-            get
-            {
-                if (_CacheManager == null)
-                    _CacheManager = new MailboxCacheManager();
-                return _CacheManager;
-            }
+            CacheManager = new MailboxCacheManager();
         }
+
+        public readonly static MailboxCacheManager CacheManager;
 
         public ICache NewCache(string mailboxAddress, string cacheName, Type cacheType)
         {

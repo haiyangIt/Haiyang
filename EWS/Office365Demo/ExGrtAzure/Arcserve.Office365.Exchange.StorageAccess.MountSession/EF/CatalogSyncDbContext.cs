@@ -24,7 +24,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
         {
             var fileName = Path.GetFileNameWithoutExtension(filePath);
             SqlConnectionStringBuilder sqlBuilder = new SqlConnectionStringBuilder();
-            sqlBuilder.InitialCatalog = fileName;
+            sqlBuilder.InitialCatalog = Path.GetFileNameWithoutExtension(filePath);
             sqlBuilder.DataSource = @"(LocalDb)\MSSQLLocalDB";
             sqlBuilder.AttachDBFilename = filePath;
             sqlBuilder.IntegratedSecurity = true;
@@ -43,5 +43,9 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
         public DbSet<MailboxSyncModel> Mailboxes { get; set; }
         public DbSet<FolderSyncModel> Folders { get; set; }
         public DbSet<ItemSyncModel> Items { get; set; }
+
+        public DbSet<MailboxSyncModel> UpdateMailboxes { get; set; }
+        public DbSet<FolderSyncModel> UpdateFolders { get; set; }
+        public DbSet<ItemSyncModel> UpdateItems { get; set; }
     }
 }

@@ -13,6 +13,10 @@ namespace Arcserve.Office365.Exchange
 {
     public abstract class FactoryBase
     {
+        static FactoryBase()
+        {
+
+        }
         protected FactoryBase() { }
 
         protected Assembly EwsDataImplAssembly = null;
@@ -22,7 +26,7 @@ namespace Arcserve.Office365.Exchange
 
         protected abstract Dictionary<Type, string> InterfaceImplTypeNameDic
         {
-            get;
+            get; set;
         }
 
         private static string _libPath;
@@ -104,24 +108,21 @@ namespace Arcserve.Office365.Exchange
         public static CloudStorageAccount GetStorageAccount()
         {
             if (!IsRunningOnAzureOrStorageInAzure())
-                return CloudStorageAccount.Parse(
-        ConfigurationManager.ConnectionStrings["StorageConnectionString"].ConnectionString);
+                return CloudConfig.Instance.StorageConnectString;
             else
             {
-                return CloudStorageAccount.Parse(
-        ConfigurationManager.ConnectionStrings["StorageConnectionStringRunning"].ConnectionString);
+                return CloudConfig.Instance.StorageConnectStringRunning;
             }
         }
 
         public static bool IsRunningOnAzureOrStorageInAzure()
         {
-            var isDebugAzure = ConfigurationManager.AppSettings["ForDebugAzure"];
-            return !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME")) || isDebugAzure == "1";
+            return CloudConfig.Instance.IsRunningOnAzureOrStorageInAzure;
         }
 
         public static bool IsRunningOnAzure()
         {
-            return !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME"));
+            return CloudConfig.Instance.IsRunningOnAzure;
         }
     }
 

@@ -15,27 +15,35 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface
 {
     public class RestoreFactory : FactoryBase
     {
-        private static RestoreFactory _instance;
-        public static RestoreFactory Instance
+        static RestoreFactory()
         {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new RestoreFactory();
-                    var sqlDbImplPath = Path.Combine(LibPath, AssemblyConfig.Instance.BinaryStorageAccessInAzure);
-                    var ewsServicePath = Path.Combine(LibPath, AssemblyConfig.Instance.BinaryExchangeEwsApi);
-                    var dataProtectPath = Path.Combine(LibPath, AssemblyConfig.Instance.BinaryDataProtectImplement);
-                    var dataPath = Path.Combine(LibPath, AssemblyConfig.Instance.BinaryDataImplement);
+            Instance = new RestoreFactory();
+            var sqlDbImplPath = Path.Combine(LibPath, AssemblyConfig.Instance.BinaryStorageAccessInAzure);
+            var ewsServicePath = Path.Combine(LibPath, AssemblyConfig.Instance.BinaryExchangeEwsApi);
+            var dataProtectPath = Path.Combine(LibPath, AssemblyConfig.Instance.BinaryDataProtectImplement);
+            var dataPath = Path.Combine(LibPath, AssemblyConfig.Instance.BinaryDataImplement);
 
-                    _instance.EwsDataImplAssembly = Assembly.LoadFrom(sqlDbImplPath);
-                    _instance.EwsServiceImplAssembly = Assembly.LoadFrom(ewsServicePath);
-                    _instance.DataProtectImplAssembly = Assembly.LoadFrom(dataProtectPath);
-                    _instance.DataImplAssembly = Assembly.LoadFrom(dataPath);
-                }
-                return _instance;
-            }
+            Instance.EwsDataImplAssembly = Assembly.LoadFrom(sqlDbImplPath);
+            Instance.EwsServiceImplAssembly = Assembly.LoadFrom(ewsServicePath);
+            Instance.DataProtectImplAssembly = Assembly.LoadFrom(dataProtectPath);
+            Instance.DataImplAssembly = Assembly.LoadFrom(dataPath);
+
+            Instance._interfaceImplTypeNameDic = new Dictionary<Type, string>(8);
+            Instance._interfaceImplTypeNameDic.Add(typeof(IQueryCatalogDataAccess), AssemblyConfig.Instance.IQueryCatalogDataAccessImplClass);
+            Instance._interfaceImplTypeNameDic.Add(typeof(IDataConvertFromDb), AssemblyConfig.Instance.IDataConvertFromDbImplClass);
+            Instance._interfaceImplTypeNameDic.Add(typeof(ICatalogJob), AssemblyConfig.Instance.ICatalogJobImplClass);
+
+            Instance._interfaceImplTypeNameDic.Add(typeof(IMailbox), AssemblyConfig.Instance.IMailboxImplClass);
+            Instance._interfaceImplTypeNameDic.Add(typeof(IFolder), AssemblyConfig.Instance.IFolderImplClass);
+            Instance._interfaceImplTypeNameDic.Add(typeof(IItem), AssemblyConfig.Instance.IItemImplClass);
+            Instance._interfaceImplTypeNameDic.Add(typeof(IRestoreDestination), AssemblyConfig.Instance.IRestoreDestinationImplClass);
+            Instance._interfaceImplTypeNameDic.Add(typeof(IRestoreDestinationEx), AssemblyConfig.Instance.IRestoreDestinationExImplClass);
+
+
+            Instance._interfaceImplTypeNameDic.Add(typeof(IRestoreService), AssemblyConfig.Instance.IRestoreServiceImplClass);
+            Instance._interfaceImplTypeNameDic.Add(typeof(IRestoreServiceEx), AssemblyConfig.Instance.IRestoreServiceExImplClass);
         }
+        public readonly static RestoreFactory Instance;
 
         private Assembly DataImplAssembly { get; set; }
         private Dictionary<Type, string> _interfaceImplTypeNameDic;
@@ -43,26 +51,9 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface
         {
             get
             {
-                if (_interfaceImplTypeNameDic == null)
-                {
-                    _interfaceImplTypeNameDic = new Dictionary<Type, string>(8);
-                    _interfaceImplTypeNameDic.Add(typeof(IQueryCatalogDataAccess), AssemblyConfig.Instance.IQueryCatalogDataAccessImplClass);
-                    _interfaceImplTypeNameDic.Add(typeof(IDataConvertFromDb), AssemblyConfig.Instance.IDataConvertFromDbImplClass);
-                    _interfaceImplTypeNameDic.Add(typeof(ICatalogJob), AssemblyConfig.Instance.ICatalogJobImplClass);
-
-                    _interfaceImplTypeNameDic.Add(typeof(IMailbox), AssemblyConfig.Instance.IMailboxImplClass);
-                    _interfaceImplTypeNameDic.Add(typeof(IFolder), AssemblyConfig.Instance.IFolderImplClass);
-                    _interfaceImplTypeNameDic.Add(typeof(IItem), AssemblyConfig.Instance.IItemImplClass);
-                    _interfaceImplTypeNameDic.Add(typeof(IRestoreDestination), AssemblyConfig.Instance.IRestoreDestinationImplClass);
-                    _interfaceImplTypeNameDic.Add(typeof(IRestoreDestinationEx), AssemblyConfig.Instance.IRestoreDestinationExImplClass);
-
-
-                    _interfaceImplTypeNameDic.Add(typeof(IRestoreService), AssemblyConfig.Instance.IRestoreServiceImplClass);
-                    _interfaceImplTypeNameDic.Add(typeof(IRestoreServiceEx), AssemblyConfig.Instance.IRestoreServiceExImplClass);
-                }
-
                 return _interfaceImplTypeNameDic;
             }
+            set { }
         }
 
         public IRestoreService NewRestoreService(string adminUserName, string adminPassword, string domainName, string organizationName)

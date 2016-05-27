@@ -12,37 +12,29 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface
 {
     public class PlanFactory : FactoryBase
     {
-        private static PlanFactory _instance;
-        public static PlanFactory Instance {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new PlanFactory();
-                    var sqlDbImplPath = Path.Combine(LibPath, AssemblyConfig.Instance.BinaryStorageAccessInAzure);
-                    var ewsServicePath = Path.Combine(LibPath, AssemblyConfig.Instance.BinaryExchangeEwsApi);
-                    var dataProtectPath = Path.Combine(LibPath, AssemblyConfig.Instance.BinaryDataProtectImplement);
+        static PlanFactory()
+        {
+            Instance = new PlanFactory();
+        }
+        private PlanFactory()
+        {
+            var sqlDbImplPath = Path.Combine(LibPath, AssemblyConfig.Instance.BinaryStorageAccessInAzure);
+            var ewsServicePath = Path.Combine(LibPath, AssemblyConfig.Instance.BinaryExchangeEwsApi);
+            var dataProtectPath = Path.Combine(LibPath, AssemblyConfig.Instance.BinaryDataProtectImplement);
 
-                    _instance.EwsDataImplAssembly = Assembly.LoadFrom(sqlDbImplPath);
-                    _instance.EwsServiceImplAssembly = Assembly.LoadFrom(ewsServicePath);
-                    _instance.DataProtectImplAssembly = Assembly.LoadFrom(dataProtectPath);
-                }
-                return _instance;
-            }
+            EwsDataImplAssembly = Assembly.LoadFrom(sqlDbImplPath);
+            EwsServiceImplAssembly = Assembly.LoadFrom(ewsServicePath);
+            DataProtectImplAssembly = Assembly.LoadFrom(dataProtectPath);
+
+            InterfaceImplTypeNameDic = new Dictionary<Type, string>();
+            InterfaceImplTypeNameDic.Add(typeof(IPlanDataAccess), AssemblyConfig.Instance.IPlanDataAccessImplClass);
         }
 
-        private static Dictionary<Type, string> _interfaceImplTypeNameDic = null;
+        public static readonly PlanFactory Instance;
+
         protected override Dictionary<Type, string> InterfaceImplTypeNameDic
         {
-            get
-            {
-                if (_interfaceImplTypeNameDic == null)
-                {
-                    _interfaceImplTypeNameDic = new Dictionary<Type, string>();
-                    _interfaceImplTypeNameDic.Add(typeof(IPlanDataAccess), AssemblyConfig.Instance.IPlanDataAccessImplClass);
-                }
-                return _interfaceImplTypeNameDic;
-            }
+            get; set;
         }
         public IPlanDataAccess NewPlanDataAccess(string organization)
         {

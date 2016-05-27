@@ -1,5 +1,6 @@
 ﻿using Arcserve.Office365.Exchange.Manager.IF;
 using Arcserve.Office365.Exchange.ServiceBus;
+using Arcserve.Office365.Exchange.Util;
 using Arcserve.Office365.Exchange.Util.Setting;
 using Microsoft.Azure;
 using Microsoft.ServiceBus.Messaging;
@@ -56,7 +57,7 @@ namespace Arcserve.Office365.Exchange.Manager.Impl
 
         private void DisposeSubscriptInInternalThread()
         {
-            lock (_sync)
+            using (_sync.LockWhile(() =>
             {
                 while (_disposeQueue.Count > 0)
                 {
@@ -68,12 +69,13 @@ namespace Arcserve.Office365.Exchange.Manager.Impl
                         val.ReleaseSubscription();
                     }
                 }
-            }
+            }))
+            { }
         }
 
         private void AddCallbackInInternalThread()
         {
-            lock (_sync)
+            using (_sync.LockWhile(() =>
             {
                 while (_addingQueue.Count > 0)
                 {
@@ -87,14 +89,15 @@ namespace Arcserve.Office365.Exchange.Manager.Impl
                     }
                     val.AddCallback(item);
                 }
-            }
+            }))
+            { }
         }
 
         private void RemoveCallbackInInternalThread()
         {
-            lock (_sync)
+            using (_sync.LockWhile(() =>
             {
-                while(_removeQueue.Count > 0)
+                while (_removeQueue.Count > 0)
                 {
                     var item = _removeQueue.Dequeue();
                     SubScriptionClientManager val;
@@ -103,40 +106,48 @@ namespace Arcserve.Office365.Exchange.Manager.Impl
                         val.RemoveCallback(item.ThreadId);
                     }
                 }
-            }
+            }))
+            { }
         }
 
         public void AddListener(string subscriptFilterInfo, Action<IProgressInfo> callback)
         {
-            CheckOtherEventCanExecute();
+            if (!CheckOtherEventCanExecute())
+                return;
 
-            lock (_sync)
+            using (_sync.LockWhile(() =>
             {
                 SubScriptionCallback temp = new SubScriptionCallback(subscriptFilterInfo, callback);
                 _addingQueue.Enqueue(temp);
-            }
+            }))
+            { }
 
             TriggerOtherEvent(AddCallbackEventIndex);
         }
 
         public void RemoveListener(string subscriptionFilter)
         {
-            CheckOtherEventCanExecute();
-            lock (_sync)
+            if (!CheckOtherEventCanExecute())
+                return;
+
+            using (_sync.LockWhile(() =>
             {
                 _removeQueue.Enqueue(SubScriptionCallback.GetSubScriptionCallbackForRemove(subscriptionFilter));
-            }
+            }))
+            { }
 
             TriggerOtherEvent(RemoveCallbackEventIndex);
         }
 
         public void DisposeSubScript(string subscriptionFilter)
         {
-            CheckOtherEventCanExecute();
-            lock (_sync)
+            if (!CheckOtherEventCanExecute())
+                return;
+            using (_sync.LockWhile(() =>
             {
                 _disposeQueue.Enqueue(subscriptionFilter);
-            }
+            }))
+            { }
             TriggerOtherEvent(DisposeSubscriptEventIndex);
         }
 
@@ -181,28 +192,30 @@ namespace Arcserve.Office365.Exchange.Manager.Impl
 
             public void AddCallback(SubScriptionCallback callback)
             {
-                lock (CallbackList)
+                using (CallbackList.LockWhile(() =>
                 {
-                    if(!CallbackList.ContainsKey(callback.ThreadId))
+                    if (!CallbackList.ContainsKey(callback.ThreadId))
                     {
                         CallbackList.Add(callback.ThreadId, callback);
-                        if(_latestTopicHelper != null)
+                        if (_latestTopicHelper != null)
                         {
                             callback.Callback.Invoke(_latestTopicHelper.ProgressInfo);
                         }
                     }
-                }
+                }))
+                { }
             }
 
             public void RemoveCallback(int threadId)
             {
-                lock (CallbackList)
+                using (CallbackList.LockWhile(() =>
                 {
                     if (CallbackList.ContainsKey(threadId))
                     {
                         CallbackList.Remove(threadId);
                     }
-                }
+                }))
+                { }
             }
 
             private void CreateClient()
@@ -236,7 +249,7 @@ namespace Arcserve.Office365.Exchange.Manager.Impl
                     }
                     Interlocked.Exchange<TopicHelper>(ref _latestTopicHelper, topicHelper);
                     message.Complete();
-                    
+
                 }
                 catch (Exception e)
                 {

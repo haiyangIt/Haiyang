@@ -302,7 +302,10 @@ namespace FTStreamUtil.FTStream
         public void Dispose()
         {
             if (_reader != null)
+            {
                 _reader.Dispose();
+                _reader = null;
+            }
         }
 
         public bool IsEnd

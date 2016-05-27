@@ -13,4 +13,22 @@ namespace Arcserve.Office365.Exchange.Data.Account
         public string UserDomain { get; set; }
         public string OrganizationName { get; set; }
     }
+
+    public static class OrganizationExtension
+    {
+        public static string GetOrganization(this string mailAddress)
+        {
+            var address = mailAddress.Replace(".com", "");
+            address = address.Replace(".cn", "");
+            address = address.Replace(".net", "");
+
+            int dotPlace = address.IndexOf("@");
+            if (dotPlace < 0)
+                throw new ArgumentException("Invalid mail addresss.");
+
+
+            address = address.Substring(dotPlace + 1, address.Length - dotPlace - 1);
+            return address.Replace(".", "_");
+        }
+    }
 }

@@ -23,7 +23,7 @@ namespace WebRoleUI.Controllers
 
         public JsonResult TestIsInAzure()
         {
-            if (CloudConfig.IsRunningOnAzure())
+            if (CloudConfig.Instance.IsRunningOnAzure)
                 return Json("");
             else
                 throw new InvalidOperationException("the method FactoryBase.IsRunningOnAzure may be wrong.");
@@ -83,8 +83,7 @@ namespace WebRoleUI.Controllers
         public JsonResult TestDownloadLog()
         {
             var log = LogFactory.LogInstance;
-            var result = log.GetTotalLog(DateTime.Now);
-            return Json(new { Log = result });
+            return Json(new {  });
         }
     }
 }

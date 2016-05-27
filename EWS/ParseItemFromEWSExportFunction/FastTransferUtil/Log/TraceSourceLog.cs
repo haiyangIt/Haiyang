@@ -8,7 +8,7 @@ namespace FTStreamParse.Log
 {
     public class TraceSourceLog : ITraceLog
     {
-        private static TraceSource _traceSource = new TraceSource("ArcserveTrace");
+        private readonly static TraceSource _traceSource = new TraceSource("ArcserveTrace");
         public void WriteError(string message)
         {
             _traceSource.TraceEvent(TraceEventType.Error, 0, message);

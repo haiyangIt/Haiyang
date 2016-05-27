@@ -17,9 +17,9 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
         public ICatalogAccess<IJobProgress> CatalogAccess { get; set; }
         public IEwsServiceAdapter<IJobProgress> EwsServiceAdapter { get; set; }
         public IDataFromClient<IJobProgress> DataFromClient { get; set; }
-        
 
-        public override Func<FolderId, string, ChangeCollection<ItemChange>> FuncGetChangedItems
+
+        protected override Func<FolderId, string, ChangeCollection<ItemChange>> FuncGetChangedItems
         {
             get
             {
@@ -30,7 +30,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
             }
         }
 
-        public override Func<BackupItemFlow> FuncNewBackupItem
+        protected override Func<BackupItemFlow> FuncNewBackupItem
         {
             get
             {
@@ -44,7 +44,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
             }
         }
 
-        public override Action<IFolderDataSync> ActionAddFolderToCatalog
+        protected override Action<IFolderDataSync> ActionAddFolderToCatalog
         {
             get
             {

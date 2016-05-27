@@ -3,6 +3,7 @@ using Arcserve.Office365.Exchange.Manager.IF;
 using Arcserve.Office365.Exchange.Util;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -45,24 +46,31 @@ namespace Arcserve.Office365.Exchange.Manager.Impl
             bool isLoop = true;
             while (isLoop)
             {
-                var waitResult = WaitHandle.WaitAny(events, WaitTimeOut); // waittimeout: loop to try get the new thread.
+                try
+                {
+                    var waitResult = WaitHandle.WaitAny(events, WaitTimeOut); // waittimeout: loop to try get the new thread.
 
-                if (waitResult == EndEventIndex)
-                {
-                    isLoop = false;
+                    if (waitResult == EndEventIndex)
+                    {
+                        isLoop = false;
 
+                    }
+                    else if (waitResult >= 0 && waitResult < EndEventIndex)
+                    {
+                        MethodWhenOtherEventTriggered(waitResult);
+                    }
+                    else if (waitResult == WaitHandle.WaitTimeout)
+                    {
+                        MethodWhenTimeOutTriggerd();
+                    }
+                    else
+                    {
+                        throw new NotSupportedException("Invalid wait result");
+                    }
                 }
-                else if (waitResult >= 0 && waitResult < EndEventIndex)
+                catch (Exception e)
                 {
-                    MethodWhenOtherEventTriggered(waitResult);
-                }
-                else if (waitResult == WaitHandle.WaitTimeout)
-                {
-                    MethodWhenTimeOutTriggerd();
-                }
-                else
-                {
-                    throw new NotSupportedException();
+                    LogFactory.LogInstance.WriteException(ManagerName, LogLevel.ERR, "Internal loop exception", e, e.Message);
                 }
             }
             endWaitingEvent.Set();
@@ -72,12 +80,20 @@ namespace Arcserve.Office365.Exchange.Manager.Impl
 
         protected abstract void MethodWhenTimeOutTriggerd();
 
-        protected void CheckOtherEventCanExecute()
+        protected bool CheckOtherEventCanExecute()
         {
-            if (Interlocked.CompareExchange(ref isExited, 1, 1) == 1)
+            bool isInEnding = false;
+            using (_lockObj.LockWhile(() =>
             {
-                throw new ThreadStateException(ManagerName + " exited, can't execute.");
-            }
+                isInEnding = isExited > 0;
+            }))
+            { }
+
+            return !isInEnding;
+            //if (isInEnding)
+            //{
+            //    //throw new ThreadStateException(ManagerName + " exited, can't execute.");
+            //}
         }
 
         protected void TriggerOtherEvent(int eventIndex)
@@ -99,10 +115,23 @@ namespace Arcserve.Office365.Exchange.Manager.Impl
 
         public void End()
         {
+            bool isInEnding = false;
+            using (_lockObj.LockWhile(() =>
+            {
+                if (isExited > 0)
+                    isInEnding = true;
+                isExited++;
+            }))
+            { }
+
+            if (isInEnding)
+            {
+                return;
+            }
+
             LogFactory.LogInstance.WriteLog(ManagerName, LogLevel.DEBUG, string.Format("Manager [{0}] ending.", ManagerName));
 
             BeforeEnd();
-            Interlocked.Exchange(ref isExited, 1);
             endEvent.Set();
             endWaitingEvent.WaitOne();
 
@@ -128,9 +157,25 @@ namespace Arcserve.Office365.Exchange.Manager.Impl
         protected virtual void BeforeStart() { }
         protected virtual void AfterStart() { }
 
+        private bool IsStart = false;
         public void Start()
         {
-            LogFactory.LogInstance.WriteLog(ManagerName, LogLevel.DEBUG, string.Format("Manager [{0}] starting.", ManagerName));
+            bool isGoOn = true;
+            using (_lockObj.LockWhile(() =>
+             {
+                 if (IsStart)
+                 {
+                     isGoOn = false;
+                 }
+                 IsStart = true;
+             }))
+            { }
+            if (!isGoOn)
+                return;
+            if (LogFactory.IsInited)
+                LogFactory.LogInstance.WriteLog(ManagerName, LogLevel.DEBUG, string.Format("Manager [{0}] starting.", ManagerName));
+            else
+                Trace.TraceInformation(string.Format("Manager [{0}] starting.", ManagerName));
 
             BeforeStart();
             var internalRunning = JobFactoryServer.Instance.ThreadManager.StartThread("Thread" + ManagerName);
@@ -138,7 +183,15 @@ namespace Arcserve.Office365.Exchange.Manager.Impl
             internalRunning.Run(jobManagerInternalJob);
             AfterStart();
 
-            LogFactory.LogInstance.WriteLog(ManagerName, LogLevel.DEBUG, string.Format("Manager [{0}] started.", ManagerName));
+            if (LogFactory.IsInited)
+                LogFactory.LogInstance.WriteLog(ManagerName, LogLevel.DEBUG, string.Format("Manager [{0}] started.", ManagerName));
+            else
+                Trace.TraceInformation(string.Format("Manager [{0}] started.", ManagerName));
+        }
+
+        public virtual void Dispose()
+        {
+            End();
         }
     }
 }

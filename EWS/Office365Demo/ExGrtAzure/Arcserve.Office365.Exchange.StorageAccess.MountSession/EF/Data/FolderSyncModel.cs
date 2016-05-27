@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Arcserve.Office365.Exchange.Data;
 using Arcserve.Office365.Exchange.Data.Mail;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.Exchange.WebServices.Data;
 
 namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data
 {
@@ -104,11 +105,17 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data
             get; set;
         }
 
-        
+        [NotMapped]
+        public FolderId FolderIdInExchange
+        {
+            get; set;
+        }
 
         public IFolderData Clone()
         {
             throw new NotImplementedException();
         }
     }
+    
+
 }

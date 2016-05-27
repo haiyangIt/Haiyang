@@ -17,29 +17,37 @@ namespace Arcserve.Office365.Exchange.Util
         private LinkedList<T> _lists;
         public void Enqueue(T item)
         {
-            lock (_lists)
+            using (_lists.LockWhile(() =>
             {
                 _lists.AddFirst(item);
-            }
+            }))
+            { }
         }
         public T Dequeue()
         {
-            lock (_lists)
+            T temp = default(T);
+            using (_lists.LockWhile(() =>
             {
                 if (_lists.Count == 0)
-                    return default(T);
+                {
+                    temp = default(T);
+                    return;
+                }
                 var result = _lists.Last;
                 _lists.RemoveLast();
-                return result.Value;
-            }
+                temp = result.Value;
+            }))
+            { }
+            return temp;
         }
 
         public void EnqueueLast(T item)
         {
-            lock (_lists)
+            using (_lists.LockWhile(() =>
             {
                 _lists.AddLast(item);
-            }
+            }))
+            { }
         }
 
         public int Count
@@ -81,30 +89,45 @@ namespace Arcserve.Office365.Exchange.Util
 
         public void Clear()
         {
-            lock (_lists)
+            using (_lists.LockWhile(() =>
             {
                 _lists.Clear();
-            }
+            }))
+            { }
         }
 
         public void CopyTo(Array array, int index)
         {
-            lock (_lists)
+            using (_lists.LockWhile(() =>
             {
                 T[] des = new T[Count - index];
                 _lists.CopyTo(des, index);
                 des.CopyTo(array, index);
-            }
+            }))
+            { }
         }
 
         public IEnumerator GetEnumerator()
         {
-            return _lists.GetEnumerator();
+            IEnumerator result = null;
+            using (_lists.LockWhile(() =>
+            {
+                result = _lists.GetEnumerator();
+            }))
+            { }
+            return result;
+
         }
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
-            return _lists.GetEnumerator();
+            IEnumerator<T> result = null;
+            using (_lists.LockWhile(() =>
+            {
+                result = _lists.GetEnumerator();
+            }))
+            { }
+            return result;
         }
     }
 }

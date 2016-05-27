@@ -7,16 +7,26 @@ using System.Threading.Tasks;
 using Arcserve.Office365.Exchange.Data.Increment;
 using System.IO;
 using Arcserve.Office365.Exchange.Util;
+using Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data;
+using System.Collections.Concurrent;
+using Arcserve.Office365.Exchange.Util.Setting;
+using Arcserve.Office365.Exchange.Log;
 
 namespace Arcserve.Office365.Exchange.StorageAccess.MountSession
 {
     public class ExportItemWriter : IExportItemsOper, IDisposable
     {
+
         private Dictionary<string, FileStream> _itemFileStream = new Dictionary<string, FileStream>();
         private string _workFolder;
         public ExportItemWriter(string workFolder)
         {
-            _workFolder = workFolder;
+            if (!string.IsNullOrEmpty(CloudConfig.Instance.WorkFolder))
+            {
+                _workFolder = CloudConfig.Instance.WorkFolder;
+            }
+            else
+                _workFolder = workFolder;
         }
 
         public void Dispose()
@@ -26,7 +36,6 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession
                 if (keyValue.Value != null)
                 {
                     keyValue.Value.Dispose();
-                    _itemFileStream[keyValue.Key] = null;
                 }
             }
         }
@@ -44,18 +53,28 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession
 
             if (!_itemFileStream.TryGetValue(item.ItemId, out fileStream))
             {
-                using (_itemFileStream.LockWhile(() =>
-                {
-                    if (!_itemFileStream.TryGetValue(item.ItemId, out fileStream))
+                var file = item.GetFilePath(_workFolder);
+                var folder = Path.GetDirectoryName(file);
+                try {
+                    if (!Directory.Exists(folder))
                     {
-                        var folder = CreateDirectory(_workFolder, item);
-                        var file = Path.Combine(folder, string.Format("{0}.bin", item.GetFileName()));
 
-                        fileStream = new FileStream(file, FileMode.CreateNew);
-                        _itemFileStream.Add(item.ItemId, fileStream);
+                        Directory.CreateDirectory(folder);
                     }
-                }))
-                { }
+
+                    if (File.Exists(file))
+                    {
+                        File.Delete(file);
+                    }
+                }
+                catch(Exception e)
+                {
+                    LogFactory.LogInstance.WriteException(LogLevel.ERR, "Create file error", e, string.Format("Directory:[{0}] File:[{1}]", folder, file));
+                    throw new ArgumentException(string.Format("Directory:[{0}] File:[{1}]", folder, file), e);
+                }
+
+                fileStream = new FileStream(file, FileMode.CreateNew);
+                _itemFileStream.Add(item.ItemId, fileStream);
             }
             fileStream.Write(buffer, 0, length);
         }
@@ -97,6 +116,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession
             {
                 fileStream.Dispose();
                 fileStream = null;
+                _itemFileStream.Remove(item.ItemId);
             }
 
         }

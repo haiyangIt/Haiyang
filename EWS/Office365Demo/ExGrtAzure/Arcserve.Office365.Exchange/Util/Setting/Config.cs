@@ -10,9 +10,15 @@ namespace Arcserve.Office365.Exchange.Util.Setting
 {
     public class Config
     {
-        public readonly static Config Instance = new Config();
-        public readonly static RestoreConfig RestoreCfgInstance = new RestoreConfig();
-        public readonly static MailConfig MailConfigInstance = new MailConfig();
+        static Config()
+        {
+            Instance = new Config();
+            RestoreCfgInstance = new RestoreConfig();
+            MailConfigInstance = new MailConfig();
+        }
+        public readonly static Config Instance;
+        public readonly static RestoreConfig RestoreCfgInstance;
+        public readonly static MailConfig MailConfigInstance;
         private Config() { }
 
 
@@ -121,5 +127,5 @@ namespace Arcserve.Office365.Exchange.Util.Setting
         }
     }
 
-    
+
 }

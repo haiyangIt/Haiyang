@@ -256,7 +256,7 @@ namespace ExGrtAzure.Tests
 
         [TestMethod]
         public void WriteAllItemToFile()
-        {
+        {   
             if (File.Exists("ItemIds.txt"))
                 return;
 

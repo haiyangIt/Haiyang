@@ -1,4 +1,5 @@
-﻿using Arcserve.Office365.Exchange.Util;
+﻿using Arcserve.Office365.Exchange.Manager;
+using Arcserve.Office365.Exchange.Util;
 using Arcserve.Office365.Exchange.Util.Setting;
 using System;
 using System.Collections.Generic;
@@ -11,32 +12,23 @@ namespace Arcserve.Office365.Exchange.Log
 {
     public class LogFactory : FactoryBase
     {
-        private static object _lock = new object();
-        private static LogFactory _instance = null;
-        private static LogFactory Instance
+        static LogFactory()
         {
-            get
-            {
-                if (_instance == null)
-                {
-                    using (_lock.LockWhile(() =>
+            Instance = CreateFactory();
+            LogInstance = Instance._logInstance;
+            EwsTraceLogInstance = Instance._ewsTraceLogInstance;
 
-                    {
-                        if (_instance == null)
-                        {
-                            _instance = CreateFactory();
-                        }
-                    }))
-                    { }
-                }
-                return _instance;
-            }
+            DisposeManager.RegisterInstance(LogInstance);
+            DisposeManager.RegisterInstance(EwsTraceLogInstance);
+            IsInited = true;
         }
+        private static readonly LogFactory Instance;
+        public static readonly bool IsInited = false;
 
         private static LogFactory CreateFactory()
         {
             var result = new LogFactory();
-            string logImplAssemblyPath = Path.Combine(LibPath, "LogImpl.dll");
+            string logImplAssemblyPath = Path.Combine(LibPath, "Arcserve.Office365.Exchange.Log.Impl.dll");
             result.LogImplAssembly = Assembly.LoadFrom(logImplAssemblyPath);
 
             result._logInstance = result.CreateLogInstance();
@@ -45,22 +37,10 @@ namespace Arcserve.Office365.Exchange.Log
         }
 
         private ILog _logInstance;
-        public static ILog LogInstance
-        {
-            get
-            {
-                return Instance._logInstance;
-            }
-        }
+        public readonly static ILog LogInstance;
 
         private ILog _ewsTraceLogInstance;
-        public static ILog EwsTraceLogInstance
-        {
-            get
-            {
-                return Instance._ewsTraceLogInstance;
-            }
-        }
+        public readonly static ILog EwsTraceLogInstance;
 
         protected override Dictionary<Type, string> InterfaceImplTypeNameDic
         {
@@ -68,6 +48,7 @@ namespace Arcserve.Office365.Exchange.Log
             {
                 throw new NotSupportedException();
             }
+            set { }
         }
 
 
@@ -77,7 +58,6 @@ namespace Arcserve.Office365.Exchange.Log
             if (!IsRunningOnAzureOrStorageInAzure())
             {
                 result = (ILog)(CreateTypeWithName<ILog>(LogImplAssembly, "Arcserve.Office365.Exchange.Log.Impl.DefaultLog"));
-                result.RegisterLogStream(new LogToStreamManage(LogFolder, LogFileNameFormat, LogMaxRecordCount));
             }
             else
             {
@@ -86,49 +66,7 @@ namespace Arcserve.Office365.Exchange.Log
             return result;
         }
 
-        private int LogMaxRecordCount
-        {
-            get
-            {
-                return CloudConfig.Instance.LogFileMaxRecordCount;
-            }
-        }
-
-
-        private string LogFileNameFormat
-        {
-            get
-            {
-                return "{0}_{1}.txt";
-            }
-        }
-
-
-        private string _logFolder;
-        private string LogFolder
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_logFolder))
-                {
-                    string logFolder = CloudConfig.Instance.LogPath;
-                    if (string.IsNullOrEmpty(logFolder))
-                    {
-                        logFolder = AppDomain.CurrentDomain.BaseDirectory;
-                        logFolder = Path.Combine(logFolder, "Log");
-                    }
-                    if (!Directory.Exists(logFolder))
-                    {
-                        Directory.CreateDirectory(logFolder);
-                    }
-                    _logFolder = logFolder;
-                    //var logPath = Path.Combine(logFolder, LogFileNameFormat);
-                    //_logPath = logPath;
-
-                }
-                return _logFolder;
-            }
-        }
+        
 
         private ILog CreateEWSLogInstance()
         {
@@ -136,7 +74,6 @@ namespace Arcserve.Office365.Exchange.Log
             if (!IsRunningOnAzureOrStorageInAzure())
             {
                 result = (ILog)(CreateTypeWithName<ILog>(LogImplAssembly, "Arcserve.Office365.Exchange.Log.Impl.DefaultEwsTraceLog"));
-                result.RegisterLogStream(new LogToStreamManage(LogFolder, EwsLogFileName, LogMaxRecordCount));
             }
             else
             {

@@ -63,7 +63,7 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Common
 
             ewsServiceArgument.EwsUrl = null;
             ExchangeService service = null;
-            TimeZoneInfo oTimeZone = null;
+            TimeZoneInfo oTimeZone = TimeZoneInfo.Utc;
             if (ewsServiceArgument.SelectedTimeZoneId != null)
             {
                 if (ewsServiceArgument.OverrideTimezone == true)

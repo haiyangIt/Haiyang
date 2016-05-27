@@ -125,7 +125,8 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
 
         public virtual ChangeCollection<FolderChange> SyncFolderHierarchy(string lastSyncStatus)
         {
-            return service.SyncFolderHierarchy(BasePropertySet.IdOnly, lastSyncStatus);
+            var rootFolder = FolderBind(WellKnownFolderName.MsgFolderRoot, BasePropertySet.IdOnly);
+            return service.SyncFolderHierarchy(rootFolder.Id, BasePropertySet.IdOnly, lastSyncStatus);
         }
 
         public virtual Folder FolderBind(WellKnownFolderName name, PropertySet propertySet)

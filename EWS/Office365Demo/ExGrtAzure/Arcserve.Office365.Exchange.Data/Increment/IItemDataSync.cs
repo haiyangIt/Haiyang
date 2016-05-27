@@ -1,6 +1,8 @@
 ﻿using Arcserve.Office365.Exchange.Data.Mail;
+using Arcserve.Office365.Exchange.Util;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,11 +15,5 @@ namespace Arcserve.Office365.Exchange.Data.Increment
         string MailboxAddress { get; set; }
     }
 
-    public static class IItemDataSyncExtension
-    {
-        public static string GetFileName(this IItemDataSync item)
-        {
-            return string.Format("{0}_{1}.bin", item.DisplayName.GetValidFileName(), item.CreateTime.Value.Ticks);
-        }
-    }
+    
 }

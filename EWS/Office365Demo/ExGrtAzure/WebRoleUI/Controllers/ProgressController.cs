@@ -54,7 +54,7 @@ namespace WebRoleUI.Controllers
         public void UpdateProgressAsync(string jobId)
         {
             var filter = TopicHelper.GetFilterByJobId(jobId);
-            JobFactoryClient.Instance.SubscriptManager.AddListener(filter, TopicMessageReceivedCallback);
+            JobFactoryClient.SubscriptManager.AddListener(filter, TopicMessageReceivedCallback);
         }
 
         private void TopicMessageReceivedCallback(IProgressInfo message)

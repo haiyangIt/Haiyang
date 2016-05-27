@@ -8,8 +8,8 @@ namespace FTStreamUtil.FTStream
 {
     public class FTStreamWriter : IFTStreamWriter , IDisposable
     {
-        private readonly BinaryWriter _writer;
-        private readonly Stream _stream;
+        private BinaryWriter _writer;
+        private Stream _stream;
         public FTStreamWriter(byte[] buffer)
         {
             _stream = new MemoryStream(buffer);
@@ -131,7 +131,10 @@ namespace FTStreamUtil.FTStream
             if (_writer != null)
             {
                 _writer.Close();
+                _writer = null;
                 _stream.Close();
+                _stream.Dispose();
+                _stream = null;
             }
         }
     }

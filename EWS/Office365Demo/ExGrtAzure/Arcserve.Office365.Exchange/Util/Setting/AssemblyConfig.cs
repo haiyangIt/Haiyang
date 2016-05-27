@@ -8,7 +8,11 @@ namespace Arcserve.Office365.Exchange.Util.Setting
 {
     public class AssemblyConfig
     {
-        public static AssemblyConfig Instance = new AssemblyConfig();
+        static AssemblyConfig()
+        {
+            Instance = new AssemblyConfig();
+        }
+        public static readonly AssemblyConfig Instance;
 
         public virtual string BinaryStorageAccessInAzure
         {

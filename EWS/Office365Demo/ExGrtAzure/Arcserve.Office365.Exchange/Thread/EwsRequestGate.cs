@@ -1,4 +1,5 @@
 ﻿using Arcserve.Office365.Exchange.Log;
+using Arcserve.Office365.Exchange.Manager;
 using Arcserve.Office365.Exchange.Topaz;
 using Arcserve.Office365.Exchange.Util;
 using System;
@@ -13,31 +14,23 @@ namespace Arcserve.Office365.Exchange.Thread
 {
     public class EwsRequestGate : IDisposable
     {
-        private static object _lockObj = new object();
-        private static EwsRequestGate _instance;
-        public static EwsRequestGate Instance
+        static EwsRequestGate()
         {
-            get
-            {
-                if (_instance == null)
-                {
-                    using (_lockObj.LockWhile(() =>
-                    {
-                        if (_instance == null)
-                        {
-                            _instance = new EwsRequestGate();
-                        }
-                    }))
-                    { }
-                }
-                return _instance;
-            }
+            Instance = new EwsRequestGate();
+
+            DisposeManager.RegisterInstance(Instance);
         }
+        private static readonly object _lockObj = new object();
+        public static readonly EwsRequestGate Instance;
 
         private ManualResetEventSlim manualReset = new ManualResetEventSlim(true);
+        private object _lockManual = new object();
         public void Enter()
         {
-            manualReset.Wait();
+            if (manualReset != null)
+            {
+                manualReset.Wait();
+            }
         }
 
         ConcurrentDictionary<Type, OperationForFailBeforeRun> _actions = new ConcurrentDictionary<Type, OperationForFailBeforeRun>();
@@ -117,12 +110,19 @@ namespace Arcserve.Office365.Exchange.Thread
 
         public void Open()
         {
-            manualReset.Set();
+            if (manualReset != null)
+            {
+                manualReset.Set();
+            }
         }
 
         public void Dispose()
         {
-            manualReset.Dispose();
+            if (manualReset != null)
+            {
+                manualReset.Dispose();
+                manualReset = null;
+            }
         }
     }
 

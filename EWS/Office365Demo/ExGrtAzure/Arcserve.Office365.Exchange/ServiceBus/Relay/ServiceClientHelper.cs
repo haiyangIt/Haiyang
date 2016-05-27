@@ -9,7 +9,11 @@ namespace Arcserve.Office365.Exchange.ServiceBus.Relay
 {
     public class ServiceClientHelper : ILogSolver
     {
-        public static ServiceClientHelper Instance = new ServiceClientHelper();
+        static ServiceClientHelper()
+        {
+            Instance = new ServiceClientHelper();
+        }
+        public readonly static ServiceClientHelper Instance;
 
         private ServiceClientHelper() { }
 

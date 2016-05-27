@@ -13,7 +13,7 @@ namespace Arcserve.Office365.Exchange.Util
         {
 
         }
-        
+
         public void Restart()
         {
             now = DateTime.Now;
@@ -25,19 +25,64 @@ namespace Arcserve.Office365.Exchange.Util
             return result;
         }
 
+        private TimeSpan GetTotalTimeSpan()
+        {
+            TimeSpan result = new TimeSpan(0);
+            foreach (var t in EachSuspendTime)
+            {
+                result += t;
+            }
+            return result;
+        }
+
         public double EndBySecond()
         {
-            return (DateTime.Now - now).TotalSeconds;
+            EachSuspendTime.Add(DateTime.Now - now);
+            return GetTotalTimeSpan().TotalSeconds;
         }
 
         public double EndByHour()
         {
-            return (DateTime.Now - now).TotalHours;
+            EachSuspendTime.Add(DateTime.Now - now);
+            return GetTotalTimeSpan().TotalHours;
         }
 
         public double EndByMinute()
         {
-            return (DateTime.Now - now).TotalMinutes;
+            EachSuspendTime.Add(DateTime.Now - now);
+            return GetTotalTimeSpan().TotalMinutes;
         }
+
+        public void Suspend()
+        {
+            var end = DateTime.Now;
+            EachSuspendTime.Add(end - now);
+        }
+        public void Suspend(bool isRecord)
+        {
+            var end = DateTime.Now;
+            if (isRecord)
+                EachSuspendTime.Add(end - now);
+        }
+
+        public void Reset()
+        {
+            now = DateTime.Now;
+            EachSuspendTime.Clear();
+        }
+        public void Resume()
+        {
+            now = DateTime.Now;
+        }
+
+        public void DoForEachTimeSpan(Action<TimeSpan> action)
+        {
+            foreach (var t in EachSuspendTime)
+            {
+                action(t);
+            }
+        }
+
+        public List<TimeSpan> EachSuspendTime = new List<TimeSpan>();
     }
 }

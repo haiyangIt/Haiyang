@@ -134,6 +134,7 @@
     <Compile Include="Log\LogLevel.cs" />
     <Compile Include="Manager\Data\ProgressArgs.cs" />
     <Compile Include="Manager\Data\ProtectProgressInfo.cs" />
+    <Compile Include="Manager\DisposeManager.cs" />
     <Compile Include="Manager\IF\IArcJob.cs" />
     <Compile Include="Manager\IF\IJobManager.cs" />
     <Compile Include="Manager\IF\IManager.cs" />

@@ -7,7 +7,11 @@ namespace Arcserve.Office365.Exchange.EwsApi
 {
     public class EWSSetting
     {
-        public static EWSSetting Instance = new EWSSetting();
+        static EWSSetting()
+        {
+            Instance = new EWSSetting();
+        }
+        public readonly static EWSSetting Instance;
 
         protected EWSSetting()
         {

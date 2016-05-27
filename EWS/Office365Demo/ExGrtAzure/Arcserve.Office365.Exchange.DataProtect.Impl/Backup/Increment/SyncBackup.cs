@@ -15,6 +15,7 @@ using System.Management.Automation.Runspaces;
 using Arcserve.Office365.Exchange.Data.Mail;
 using Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment;
 using Arcserve.Office365.Exchange.Util;
+using Arcserve.Office365.Exchange.Util.Setting;
 
 namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
 {
@@ -32,7 +33,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
         public IDataFromClient<IJobProgress> DataFromClient { get; set; }
         public DateTime JobStartTime { get; }
 
-        public override Func<ICollection<IMailboxDataSync>> FuncGetAllMailboxFromExchange
+        protected override Func<ICollection<IMailboxDataSync>> FuncGetAllMailboxFromExchange
         {
             get
             {
@@ -43,7 +44,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
             }
         }
 
-        public override Func<ICatalogJob> FuncGetLatestCatalogJob
+        protected override Func<ICatalogJob> FuncGetLatestCatalogJob
         {
             get
             {
@@ -55,7 +56,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
         }
 
 
-        public override Func<ICatalogJob, IEnumerable<IMailboxDataSync>> FuncGetAllMailboxFromLastCatalog
+        protected override Func<ICatalogJob, IEnumerable<IMailboxDataSync>> FuncGetAllMailboxFromLastCatalog
         {
             get
             {
@@ -66,7 +67,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
             }
         }
 
-        public override Func<ICollection<IMailboxDataSync>> FuncGetAllMailboxFromPlan
+        protected override Func<ICollection<IMailboxDataSync>> FuncGetAllMailboxFromPlan
         {
             get
             {
@@ -77,10 +78,46 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
             }
         }
 
-        public override Func<ICollection<IMailboxDataSync>, ICollection<IMailboxDataSync>, ICollection<IMailboxDataSync>> FuncGetIntersectionMailboxCollection
+        protected override Func<ICollection<IMailboxDataSync>, ICollection<IMailboxDataSync>, ICollection<IMailboxDataSync>> FuncGetIntersectionMailboxCollection
         {
             get
             {
+                if (CloudConfig.Instance.IsTestForDemo)
+                {
+                    return (mailboxInExchange, mailboxInPlan) =>
+                    {
+                        var result = new List<IMailboxDataSync>(mailboxInExchange.Count);
+
+                        var dicExchange = new Dictionary<string, IMailboxDataSync>();
+                        foreach (var item in mailboxInExchange)
+                        {
+                            dicExchange.Add(item.MailAddress, item);
+                        }
+
+                        var dicPlan = new Dictionary<string, IMailboxDataSync>();
+                        foreach (var item in mailboxInPlan)
+                        {
+                            dicPlan.Add(item.MailAddress, item);
+                        }
+
+                        foreach (var key in dicExchange.Keys)
+                        {
+                            if (dicPlan.ContainsKey(key))
+                            {
+                                result.Add(dicExchange[key]);
+                            }
+                        }
+
+                        var temp = new List<IMailboxDataSync>(result.Count);
+                        foreach (var item in result)
+                        {
+                            temp.Add(DataConvert.Convert(item));
+                        }
+
+                        return temp;
+                    };
+                }
+
                 return (mailboxInExchange, mailboxInPlan) =>
                 {
                     var result = new List<IMailboxDataSync>(mailboxInExchange.Count);
@@ -101,7 +138,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
                     {
                         if (dicPlan.ContainsKey(key))
                         {
-                            result.Add(dicPlan[key]);
+                            result.Add(dicExchange[key]);
                         }
                     }
 
@@ -116,8 +153,31 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
             }
         }
 
+        protected override Action<ICollection<IMailboxDataSync>, IEnumerable<IMailboxDataSync>> ActionSetMailboxSyncStatus
+        {
+            get
+            {
+                return (validMailboxes, mailboxInLastCatalog) =>
+                {
+                    Dictionary<string, string> mailboxSyncDic = new Dictionary<string, string>();
+                    foreach (var mailbox in mailboxInLastCatalog)
+                    {
+                        mailboxSyncDic.Add(mailbox.Id, mailbox.SyncStatus);
+                    }
 
-        public override Action<ICollection<IMailboxDataSync>> AddMailboxToCurrentCatalog
+                    string syncStatus = string.Empty;
+                    foreach (var mailbox in validMailboxes)
+                    {
+                        if (mailboxSyncDic.TryGetValue(mailbox.Id, out syncStatus))
+                        {
+                            mailbox.SyncStatus = syncStatus;
+                        }
+                    }
+                };
+            }
+        }
+
+        protected override Action<ICollection<IMailboxDataSync>> AddMailboxToCurrentCatalog
         {
             get
             {
@@ -129,7 +189,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
         }
 
 
-        public override Func<BackupMailboxFlowTemplate> FuncNewMailboxTemplate
+        protected override Func<BackupMailboxFlowTemplate> FuncNewMailboxTemplate
         {
             get
             {
@@ -150,13 +210,16 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
             get; set;
         }
 
-        public override void ForEachLoop(ICollection<IMailboxDataSync> items, Action<IMailboxDataSync> DoEachMailbox)
+        protected override void ForEachLoop(ICollection<IMailboxDataSync> items, Action<IMailboxDataSync> DoEachMailbox)
         {
             foreach (var mailbox in items)
             {
                 DoEachMailbox(mailbox);
             }
         }
-        
+
+        public override void Dispose()
+        {
+        }
     }
 }

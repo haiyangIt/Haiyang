@@ -63,7 +63,7 @@ namespace Arcserve.Office365.Exchange.Data.Mail
             if (_itemClassDic.TryGetValue(itemClass, out result))
                 return result;
 
-            else if (itemClass.IndexOf("IPM.Appointment") >= 0)
+            else if (itemClass.IndexOf("IPM.Appointment") >= 0 || itemClass == "IPM.Schedule.Meeting.Request")
                 return ItemClass.Appointment;
 
             else
@@ -148,34 +148,18 @@ namespace Arcserve.Office365.Exchange.Data.Mail
 
     public static class FolderClassUtil
     {
-        private static HashSet<string> _validFolderType;
+        static FolderClassUtil()
+        {
+            ValidFolderType = new HashSet<string>();
+            ValidFolderType.Add("IPF.Note");
+            ValidFolderType.Add("IPF.Appointment");
+            ValidFolderType.Add("IPF.Contact");
+            ValidFolderType.Add("IPF.Task");
+        }
 
         public static readonly string DefaultFolderType = FolderDataBaseDefault.FolderDefaultType;
 
-        private static object _lockObj = new object();
-
-        private static HashSet<string> ValidFolderType
-        {
-            get
-            {
-                if (_validFolderType == null)
-                {
-                    using (_lockObj.LockWhile(() =>
-                    {
-                        if (_validFolderType == null)
-                        {
-                            _validFolderType = new HashSet<string>();
-                            _validFolderType.Add("IPF.Note");
-                            _validFolderType.Add("IPF.Appointment");
-                            _validFolderType.Add("IPF.Contact");
-                            _validFolderType.Add("IPF.Task");
-                        }
-                    }))
-                    { }
-                }
-                return _validFolderType;
-            }
-        }
+        private static readonly HashSet<string> ValidFolderType;
 
         private readonly static Dictionary<string, FolderClass> _folderClassDic = new Dictionary<string, FolderClass>()
         {

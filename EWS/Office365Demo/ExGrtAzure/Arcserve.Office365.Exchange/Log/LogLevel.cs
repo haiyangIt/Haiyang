@@ -17,23 +17,16 @@ namespace Arcserve.Office365.Exchange.Log
 
     public class LogLevelHelper
     {
-        private static Dictionary<LogLevel, string> _Dic;
-        private static Dictionary<LogLevel, string> Dic
+        static LogLevelHelper()
         {
-            get
-            {
-                if(_Dic == null)
-                {
-                    _Dic = new Dictionary<LogLevel, string>(8);
-                    _Dic[LogLevel.COM] = "C";
-                    _Dic[LogLevel.ERR] = "E";
-                    _Dic[LogLevel.WARN] = "W";
-                    _Dic[LogLevel.INFO] = "I";
-                    _Dic[LogLevel.DEBUG] = "D";
-                }
-                return _Dic;
-            }
+            Dic = new Dictionary<LogLevel, string>(8);
+            Dic[LogLevel.COM] = "C";
+            Dic[LogLevel.ERR] = "E";
+            Dic[LogLevel.WARN] = "W";
+            Dic[LogLevel.INFO] = "I";
+            Dic[LogLevel.DEBUG] = "D";
         }
+        private static readonly Dictionary<LogLevel, string> Dic;
         public static string GetLevelString(LogLevel level)
         {
             return Dic[level];

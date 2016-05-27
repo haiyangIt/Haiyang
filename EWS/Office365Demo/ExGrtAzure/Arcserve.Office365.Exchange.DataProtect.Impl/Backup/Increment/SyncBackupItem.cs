@@ -26,7 +26,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
             });
         }
 
-        public override Action<IEnumerable<IItemDataSync>> ActionAddItemsToCatalog
+        protected override Action<IEnumerable<IItemDataSync>> ActionAddItemsToCatalog
         {
             get
             {
@@ -38,7 +38,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
         }
 
 
-        public override Func<IEnumerable<IItemDataSync>, int> FuncWriteItemsToStorage
+        protected override Func<IEnumerable<IItemDataSync>, int> FuncWriteItemsToStorage
         {
             get
             {
@@ -66,7 +66,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
             get; set;
         }
 
-        public override Action<IEnumerable<Item>, ItemClass> ActionLoadPropertyForItems
+        protected override Action<IEnumerable<Item>, ItemClass> ActionLoadPropertyForItems
         {
             get
             {
@@ -90,7 +90,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
             get; set;
         }
 
-        public override Action<IItemDataSync> ActionAddItemToCatalog
+        protected override Action<IItemDataSync> ActionAddItemToCatalog
         {
             get
             {
@@ -101,7 +101,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
             }
         }
 
-        public override Func<IEnumerable<string>, IEnumerable<IItemDataSync>> FuncGetItemsFromCatalog
+        protected override Func<IEnumerable<string>, IEnumerable<IItemDataSync>> FuncGetItemsFromCatalog
         {
             get
             {
@@ -112,13 +112,54 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
             }
         }
 
-        public override Func<string, IEnumerable<IItemDataSync>> FuncGetItemsByParentFolderIdFromCatalog
+        protected override Func<string, IEnumerable<IItemDataSync>> FuncGetItemsByParentFolderIdFromCatalog
         {
             get
             {
                 return (parentFolderId) =>
                 {
                     return CatalogAccess.GetItemsByParentFolderIdFromCatalog(parentFolderId);
+                };
+            }
+        }
+
+        protected override Func<IEnumerable<IItemDataSync>, IEnumerable<IItemDataSync>> FuncRemoveInvalidItem
+        {
+            get
+            {
+                return (items) =>
+                {
+                    var result = new List<IItemDataSync>(items.Count());
+                    foreach (var item in items)
+                    {
+                        if (DataFromClient.IsItemValid(item, ParentFolder))
+                        {
+                            result.Add(item);
+                        }
+                    }
+                    return result;
+                };
+            }
+        }
+
+        protected override Func<string, bool> FuncIsItemChangeValid
+        {
+            get
+            {
+                return (itemChangeId) =>
+                {
+                    return DataFromClient.IsItemValid(itemChangeId, ParentFolder);
+                };
+            }
+        }
+
+        protected override Func<IItemDataSync, bool> FuncIsItemValid
+        {
+            get
+            {
+                return (item) =>
+                {
+                    return DataFromClient.IsItemValid(item, ParentFolder);
                 };
             }
         }
@@ -149,6 +190,8 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
                 {
                     outPut = result;
                     result = new List<ItemChange>(_loadPropertyMaxCount);
+                    _dicItemChangs[itemClass] = result;
+
                     isGet = true;
                 }
             }))

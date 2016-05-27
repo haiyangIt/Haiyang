@@ -1,5 +1,6 @@
 ﻿using Arcserve.Office365.Exchange.Manager.Data;
 using Arcserve.Office365.Exchange.Manager.IF;
+using Arcserve.Office365.Exchange.Util;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -27,12 +28,16 @@ namespace Arcserve.Office365.Exchange.Manager.Impl
 
         public void AddProgress(IProgressInfo progressInfo)
         {
-            CheckOtherEventCanExecute();
+            if (!CheckOtherEventCanExecute())
+            {
+                return;
+            }
 
-            lock (addingProgress)
+            using (addingProgress.LockWhile(() =>
             {
                 addingProgress.Enqueue(progressInfo);
-            }
+            }))
+            { }
 
             TriggerOtherEvent(0);
         }
@@ -54,34 +59,41 @@ namespace Arcserve.Office365.Exchange.Manager.Impl
 
         private void AddingProgress()
         {
-            lock (addingProgress)
+            using (addingProgress.LockWhile(() =>
             {
-                while(addingProgress.Count > 0)
+                while (addingProgress.Count > 0)
                 {
                     var info = addingProgress.Dequeue();
                     _progressCache.Add(info);
                     ProgressArgs args = new ProgressArgs(info);
-                    if(NewProgressEvent != null)
+                    if (NewProgressEvent != null)
                     {
                         try
                         {
                             NewProgressEvent.Invoke(this, args);
                         }
-                        catch(Exception e)
+                        catch (Exception e)
                         {
                             // todo log;
                         }
                     }
                 }
-            }
+            }))
+            { }
         }
 
-        
+
     }
 
     public class OrganizationProgressManager : ManagerBase
     {
-        public static OrganizationProgressManager Instance = new OrganizationProgressManager();
+        static OrganizationProgressManager()
+        {
+            Instance = new OrganizationProgressManager();
+
+            DisposeManager.RegisterInstance(Instance);
+        }
+        public static readonly OrganizationProgressManager Instance;
 
         private OrganizationProgressManager() : base()
         {
@@ -101,15 +113,19 @@ namespace Arcserve.Office365.Exchange.Manager.Impl
 
         public string GetLatestProgressInfo(string organization)
         {
-            lock (_progress)
+            var temp = string.Empty;
+            using (_progress.LockWhile(() =>
             {
                 List<IProgressInfo> result = null;
                 if (!_organizationProgress.TryGetValue(organization, out result))
                 {
-                    return string.Empty;
+                    temp = string.Empty;
                 }
-                return JobFactoryServer.Convert(result.Last());
-            }
+                else
+                    temp = JobFactoryServer.Convert(result.Last());
+            }))
+            { }
+            return temp;
         }
 
         protected override void MethodWhenOtherEventTriggered(int index)
@@ -124,13 +140,13 @@ namespace Arcserve.Office365.Exchange.Manager.Impl
 
         private void AddProgress()
         {
-            lock (_progress)
+            using (_progress.LockWhile(() =>
             {
-                while(_progress.Count > 0)
+                while (_progress.Count > 0)
                 {
                     var temp = _progress.Dequeue();
                     List<IProgressInfo> result = null;
-                    if(!_organizationProgress.TryGetValue(temp.Organization, out result))
+                    if (!_organizationProgress.TryGetValue(temp.Organization, out result))
                     {
                         result = new List<IProgressInfo>();
                         _organizationProgress.Add(temp.Organization, result);
@@ -138,7 +154,8 @@ namespace Arcserve.Office365.Exchange.Manager.Impl
 
                     result.Add(temp);
                 }
-            }
+            }))
+            { }
         }
 
         protected override void BeforeStart()
@@ -148,12 +165,14 @@ namespace Arcserve.Office365.Exchange.Manager.Impl
 
         private void ProgressManagerNewProgressEvent(object sender, ProgressArgs e)
         {
-            CheckOtherEventCanExecute();
+            if (!CheckOtherEventCanExecute())
+                return;
 
-            lock (_progress)
+            using (_progress.LockWhile(() =>
             {
                 _progress.Enqueue(e.ProgressInfo);
-            }
+            }))
+            { }
 
             TriggerOtherEvent(0);
         }

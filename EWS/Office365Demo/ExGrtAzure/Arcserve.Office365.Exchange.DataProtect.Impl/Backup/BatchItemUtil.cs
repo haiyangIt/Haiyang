@@ -76,7 +76,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup
                 return false;
             }
 
-            int avgSize = TotalSize / (TotalCount * SmallCountInPartition / (LargeCountInPartition + SmallCountInPartition));
+            int avgSize = TotalSize * (LargeCountInPartition + SmallCountInPartition) / (TotalCount * SmallCountInPartition);
 
             Debug.Write(string.Format("\r\nTotalSize:{1},TotalCount:{2}, AvgSize: {0}\r\n ", avgSize, TotalSize, TotalCount));
 

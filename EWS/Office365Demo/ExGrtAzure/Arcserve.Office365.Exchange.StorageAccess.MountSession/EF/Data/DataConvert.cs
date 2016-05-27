@@ -24,7 +24,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data
                 {
                     Id = mailbox.Id,
                     DisplayName = mailbox.DisplayName,
-                    MailAddress = mailbox.MailAddress,
+                    MailAddress = mailbox.MailAddress.ToLower(),
                     SyncStatus = mailbox.SyncStatus.ConvertNullToEmpty(),
                     ChildFolderCount = mailbox.ChildFolderCount,
                     Name = mailbox.Name
@@ -61,6 +61,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data
                 SyncStatus = string.Empty,
                 IsRead = true
             };
+            result.Location = result.GetFileName(parentFolder.Location.GetFolderDisplays());
             if (itemClass == ItemClass.Message)
             {
                 result.IsRead = ((EmailMessage)item).IsRead;
@@ -83,7 +84,8 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data
                 ChildItemCount = folder.TotalCount,
                 ChildFolderCount = folder.ChildFolderCount,
                 Location = string.Empty,
-                SyncStatus = string.Empty 
+                SyncStatus = string.Empty,
+                FolderIdInExchange = folder.Id 
             };
 
             return result;
@@ -148,6 +150,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data
                 return result;
             }
         }
+        
     }
 
     public static class StringNullConvert

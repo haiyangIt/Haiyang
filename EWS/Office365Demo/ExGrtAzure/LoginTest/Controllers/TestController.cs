@@ -22,7 +22,7 @@ namespace LoginTest.Controllers
 
         public JsonResult TestIsInAzure()
         {
-            if (CloudConfig.IsRunningOnAzure())
+            if (CloudConfig.Instance.IsRunningOnAzure)
                 return Json("");
             else
                 throw new InvalidOperationException("the method FactoryBase.IsRunningOnAzure may be wrong.");
@@ -82,8 +82,8 @@ namespace LoginTest.Controllers
         public JsonResult TestDownloadLog()
         {
             var log = LogFactory.LogInstance;
-            var result = log.GetTotalLog(DateTime.Now);
-            return Json(new { Log = result });
+            //var result = log.GetTotalLog(DateTime.Now);
+            return Json(new { /*Log = result */});
         }
     }
 }
