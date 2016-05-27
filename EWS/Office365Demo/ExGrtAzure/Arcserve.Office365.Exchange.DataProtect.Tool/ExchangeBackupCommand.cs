@@ -1,0 +1,263 @@
+﻿using Arcserve.Office365.Exchange.Data;
+using Arcserve.Office365.Exchange.Data.Account;
+using Arcserve.Office365.Exchange.Data.Increment;
+using Arcserve.Office365.Exchange.Data.Mail;
+using Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment;
+using Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment;
+using Arcserve.Office365.Exchange.EwsApi.Impl.Increment;
+using Arcserve.Office365.Exchange.Log;
+using Arcserve.Office365.Exchange.Manager;
+using Arcserve.Office365.Exchange.StorageAccess.MountSession;
+using Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data;
+using Arcserve.Office365.Exchange.Thread;
+using Arcserve.Office365.Exchange.Tool.Framework;
+using Arcserve.Office365.Exchange.Util;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Arcserve.Office365.Exchange.Tool
+{
+    /// <summary>
+    /// Arcserve.Office365.Exchange.Tool.exe -JobType:ExchangeBackup -AdminUserName:user -AdminPassword:psw -Mailboxes:user@consto.com -WorkFolder:"E:\abc" -ItemCount:4
+    /// </summary>
+    [ArcserveCommand("ExchangeBackup")]
+    public class ExchangeBackupCommand : ArcServeCommand
+    {
+        public ExchangeBackupCommand(CommandArgs args) : base(args) { }
+
+        [CommandArgument("AdminUserName", "Please specify the job type. like: -AdminUserName:user.", true)]
+        public ArgInfo AdminUserName { get; set; }
+
+        [CommandArgument("AdminPassword", "Please specify the job type. like: -AdminPassword:user.", true)]
+        public ArgInfo AdminPassword { get; set; }
+
+        [CommandArgument("Mailboxes", "Please specify the job type. like: -Mailboxes:user@arcserve.com.", true)]
+        public ArgInfo Mailboxes { get; set; }
+
+        [CommandArgument("FolderCount")]
+        public ArgInfo FolderCount { get; set; }
+
+        [CommandArgument("ItemCount")]
+        public ArgInfo ItemCount { get; set; }
+
+        [CommandArgument("WorkFolder", "Please specify the work folder, like:-WorkFolder:E:\\myFolder", true)]
+        public ArgInfo WorkFolder { get; set; }
+
+        private int? _FolderCount
+        {
+            get
+            {
+                int result = 0;
+                if (FolderCount != null && int.TryParse(FolderCount.Value, out result))
+                {
+                    return result;
+                }
+                return null;
+            }
+        }
+
+        private int? _ItemCountInEachFolder
+        {
+            get
+            {
+                int result = 0;
+                if (ItemCount != null && int.TryParse(ItemCount.Value, out result))
+                {
+                    return result;
+                }
+                return null;
+            }
+        }
+
+        public static string CommandName
+        {
+            get
+            {
+                return "ExchangeBackup";
+            }
+        }
+
+        private static char[] mailboxSplit = ";".ToCharArray();
+        public List<string> MailboxList
+        {
+            get
+            {
+                var result = new List<string>(Mailboxes.Value.Split(mailboxSplit, StringSplitOptions.RemoveEmptyEntries));
+                return result;
+            }
+        }
+
+        protected override string DoExcute()
+        {
+            FullBackup();
+            return string.Empty;
+        }
+
+        private void FullBackup()
+        {
+            try
+            {
+                using (SyncBackup backupFlow = new SyncBackup())
+                {
+                    using (var catalogAccess = new CatalogAccess("", "", WorkFolder.Value))
+                    {
+                        TaskSyncContextBase taskSyncContextBase = new TaskSyncContextBase();
+                        backupFlow.InitTaskSyncContext(taskSyncContextBase);
+
+                        backupFlow.DataFromClient = new DataFromClient(_FolderCount, _ItemCountInEachFolder, MailboxList);
+                        backupFlow.DataFromClient.InitTaskSyncContext(taskSyncContextBase);
+
+                        backupFlow.CatalogAccess = catalogAccess;
+                        backupFlow.CatalogAccess.InitTaskSyncContext(taskSyncContextBase);
+                        backupFlow.EwsServiceAdapter = new EwsServiceAdapter();
+                        backupFlow.EwsServiceAdapter.InitTaskSyncContext(taskSyncContextBase);
+                        backupFlow.DataConvert = new DataConvert();
+                        backupFlow.AdminInfo = new Arcserve.Office365.Exchange.Data.Account.OrganizationAdminInfo()
+                        {
+                            OrganizationName = AdminUserName.Value.GetOrganization(),
+                            UserName = AdminUserName.Value,
+                            UserPassword = AdminPassword.Value
+                        };
+                        backupFlow.BackupSync();
+                    }
+                }
+            }
+            finally
+            {
+                
+            }
+        }
+    }
+
+    public class DataFromClient : IDataFromClient<IJobProgress>
+    {
+        public DataFromClient(int? folderCount, int? itemCount, List<string> mailboxes)
+        {
+            FolderCount = folderCount;
+            ItemCount = itemCount;
+            Mailboxes = mailboxes;
+        }
+
+        private List<string> Mailboxes;
+        private int? ItemCount = null;
+        public CancellationToken CancelToken
+        {
+            get; set;
+        }
+
+        public IJobProgress Progress
+        {
+            get; set;
+        }
+
+        public TaskScheduler Scheduler
+        {
+            get; set;
+        }
+
+        public ICollection<IMailboxDataSync> GetAllMailboxes()
+        {
+            var result = new List<IMailboxDataSync>(Mailboxes.Count);
+            foreach (var mailbox in Mailboxes)
+            {
+                result.Add(new MailboxDataSyncBase() { MailAddress = mailbox });
+            }
+            return result;
+        }
+
+        public Task<ICollection<IMailboxDataSync>> GetAllMailboxesAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+
+        public ICatalogJob GetLatestCatalogJob()
+        {
+            return null;
+        }
+
+        public Task<ICatalogJob> GetLatestCatalogJobAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void InitTaskSyncContext(ITaskSyncContext<IJobProgress> mainContext)
+        {
+            this.CloneSyncContext(mainContext);
+        }
+
+        public bool IsFolderClassValid(string folderClass)
+        {
+            return FolderClassUtil.IsFolderValid(folderClass);
+        }
+
+        private int? FolderCount = null;
+        private int _dealtFolderCount = 0;
+        public bool IsFolderInPlan(string uniqueFolderId)
+        {
+            if (FolderCount.HasValue)
+            {
+                _dealtFolderCount++;
+                if (_dealtFolderCount <= FolderCount)
+                    return true;
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        public Task<bool> IsFolderInPlanAsync(string uniqueFolderId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool IsItemValid(IItemDataSync item, IFolderDataSync parentFolder)
+        {
+            return IsItemValid(item.ItemId, parentFolder.FolderId);
+        }
+
+        Dictionary<string, HashSet<string>> _folderItemCount = new Dictionary<string, HashSet<string>>();
+        private bool IsItemValid(string itemId, string parentId)
+        {
+            bool returnResult = false;
+            if (ItemCount.HasValue)
+            {
+                using (_folderItemCount.LockWhile(() =>
+                {
+                    HashSet<string> result = null;
+                    if (!_folderItemCount.TryGetValue(parentId, out result))
+                    {
+                        result = new HashSet<string>();
+                        _folderItemCount.Add(parentId, result);
+                    }
+
+                    if (result.Count > ItemCount)
+                    {
+                        returnResult = false;
+                    }
+                    else
+                        returnResult = true;
+                    if (!result.Contains(itemId))
+                        result.Add(itemId);
+                }))
+                { }
+                return returnResult;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        public bool IsItemValid(string itemChangeId, IFolderDataSync parentFolder)
+        {
+            return IsItemValid(itemChangeId, parentFolder.FolderId);
+        }
+    }
+}

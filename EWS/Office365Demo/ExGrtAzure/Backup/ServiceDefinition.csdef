@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ServiceDefinition name="Office365Protect" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceDefinition" schemaVersion="2015-04.2.6">
+  <WebRole name="WebRoleUI" vmsize="Small">
+    <Sites>
+      <Site name="Web">
+        <Bindings>
+          <Binding name="Endpoint1" endpointName="Endpoint1" />
+        </Bindings>
+      </Site>
+    </Sites>
+    <ConfigurationSettings>
+      <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" />
+      <Setting name="Microsoft.ServiceBus.ConnectionString" />
+      <Setting name="ForDebugAzure" />
+      <!--Subscription Name for Azure-->
+      <Setting name="SubscriptionNameForScheduler" />
+      <!--Service Bus Config-->
+      <Setting name="ServiceBusNameSpace"/>
+      <!--Queue-->
+      <!--minute in value-->
+      <Setting name="ServiceBusQueueTTL" />
+      <!--MB in value-->
+      <Setting name="ServiceBusQueueMaxSize" />
+      <Setting name="ServiceBusQueueName" />
+      <!--Topic-->
+      <!--minute in value-->
+      <Setting name="ServiceBusTopicTTL" />
+      <!--MB in value-->
+      <Setting name="ServiceBusTopicMaxSize"/>
+      <Setting name="ServiceBusTopicName"/>
+
+      <!--Storage Connection String-->
+      <!--<Setting name="StorageConnectionString"  />-->
+      <Setting name="StorageConnectionStringRunning" />
+      <!--Db Connection String-->
+      <Setting name="DefaultConnection" />
+      <Setting name="Organization"  />
+
+      <!--following is only in local-->
+      <Setting name="LogPath" />
+    </ConfigurationSettings>
+    <Endpoints>
+      <InputEndpoint name="Endpoint1" protocol="http" port="80" />
+    </Endpoints>
+  </WebRole>
+  <WorkerRole name="WorkerRoleWithSBQueue" vmsize="Small">
+    <ConfigurationSettings>
+      <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" />
+      <Setting name="Microsoft.ServiceBus.ConnectionString" />
+      <Setting name="ForDebugAzure" />
+      <!--Subscription Name for Azure-->
+      <Setting name="SubscriptionNameForScheduler" />
+      <!--Service Bus Config-->
+      <Setting name="ServiceBusNameSpace"/>
+      <!--Queue-->
+      <!--minute in value-->
+      <Setting name="ServiceBusQueueTTL" />
+      <!--MB in value-->
+      <Setting name="ServiceBusQueueMaxSize" />
+      <Setting name="ServiceBusQueueName" />
+      <!--Topic-->
+      <!--minute in value-->
+      <Setting name="ServiceBusTopicTTL" />
+      <!--MB in value-->
+      <Setting name="ServiceBusTopicMaxSize"/>
+      <Setting name="ServiceBusTopicName"/>
+
+      <!--Storage Connection String-->
+      <!--<Setting name="StorageConnectionString"  />-->
+      <Setting name="StorageConnectionStringRunning" />
+      <!--Db Connection String-->
+      <Setting name="DefaultConnection" />
+      <Setting name="Organization"  />
+
+      <!--following is only in local-->
+      <Setting name="LogPath" />
+    </ConfigurationSettings>
+  </WorkerRole>
+</ServiceDefinition>
