@@ -153,7 +153,7 @@ namespace Arcserve.Office365.Exchange.Log.Impl
         }
 
         private const string TimeFormat = "yyyy-MM-dd HH:mm:ss";
-        public static string GetExceptionString(string module ,LogLevel level, string message, Exception exception, string exMsg)
+        public static string GetExceptionString(string module ,LogLevel level, string message, Exception exception, string exMsg, int innerLevel = 0)
         {
             StringBuilder sb = new StringBuilder();
             var curEx = exception;
@@ -161,11 +161,11 @@ namespace Arcserve.Office365.Exchange.Log.Impl
             {
                 if (curEx is AggregateException)
                 {
-                    sb.AppendLine(GetAggrateException(module, level, message, curEx as AggregateException, exMsg));
+                    sb.AppendLine(GetAggrateException(module, level, message, curEx as AggregateException, exMsg, innerLevel));
                 }
                 else
                 {
-                    sb.AppendLine(string.Join(blank, DateTime.Now.ToString(TimeFormat), module, System.Threading.Thread.CurrentThread.ManagedThreadId.ToString("D4"), Task.CurrentId.HasValue ? Task.CurrentId.Value.ToString("D4") : "0000",
+                    sb.AppendLine(string.Join(blank,  DateTime.Now.ToString(TimeFormat), innerLevel.ToString(string.Format("D{0}", innerLevel * 2)), module, System.Threading.Thread.CurrentThread.ManagedThreadId.ToString("D4"), Task.CurrentId.HasValue ? Task.CurrentId.Value.ToString("D4") : "0000",
                         LogLevelHelper.GetLevelString(level),
                         message.RemoveRN(),
                         curEx.Message.RemoveRN(),
@@ -173,16 +173,17 @@ namespace Arcserve.Office365.Exchange.Log.Impl
                         curEx.StackTrace.RemoveRN(), curEx.GetType().FullName, exMsg));
 
                     curEx = curEx.InnerException;
+                    innerLevel += 1;
                 }
             }
             sb.AppendLine();
             return sb.ToString();
         }
 
-        internal static string GetAggrateException(string module, LogLevel level, string message, AggregateException ex, string exMsg)
+        internal static string GetAggrateException(string module, LogLevel level, string message, AggregateException ex, string exMsg, int innerLevel = 0)
         {
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine(string.Join(blank, module, DateTime.Now.ToString(TimeFormat), System.Threading.Thread.CurrentThread.ManagedThreadId.ToString("D4"), Task.CurrentId.HasValue ? Task.CurrentId.Value.ToString("D4") : "0000",
+            sb.AppendLine(string.Join(blank, module, DateTime.Now.ToString(TimeFormat), innerLevel.ToString(string.Format("D{0}", innerLevel * 2)), System.Threading.Thread.CurrentThread.ManagedThreadId.ToString("D4"), Task.CurrentId.HasValue ? Task.CurrentId.Value.ToString("D4") : "0000",
                     LogLevelHelper.GetLevelString(level),
                     message.RemoveRN(),
                     ex.Message.RemoveRN(),
@@ -191,7 +192,7 @@ namespace Arcserve.Office365.Exchange.Log.Impl
 
             foreach (var innerEx in ex.Flatten().InnerExceptions)
             {
-                sb.AppendLine(GetExceptionString(module, level, message, ex, exMsg));
+                sb.AppendLine(GetExceptionString(module, level, message, ex, exMsg, innerLevel + 1));
             }
             return sb.ToString();
         }

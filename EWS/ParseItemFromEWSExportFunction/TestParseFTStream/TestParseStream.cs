@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
-using FTStreamUtil.FTStream;
+using Arcserve.Exchange.FastTransferUtil.FTStream;
 using System.Collections.Generic;
 using FTStreamUtil;
 using System.Diagnostics;

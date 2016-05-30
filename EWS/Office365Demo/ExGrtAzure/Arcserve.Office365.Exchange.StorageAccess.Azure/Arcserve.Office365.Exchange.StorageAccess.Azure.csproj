@@ -101,7 +101,7 @@
     <Compile Include="SqlServerTypes\Loader.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\ParseItemFromEWSExportFunction\FastTransferUtil\Arcserve.Exchange.FastTransferUtil.csproj">
+    <ProjectReference Include="..\Arcserve.Exchange.FastTransferUtil\Arcserve.Exchange.FastTransferUtil.csproj">
       <Project>{724571a8-bf45-4efe-ab1e-bb065201513b}</Project>
       <Name>Arcserve.Exchange.FastTransferUtil</Name>
     </ProjectReference>

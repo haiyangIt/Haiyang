@@ -12,7 +12,7 @@ using Arcserve.Office365.Exchange.Data.Mail;
 using Arcserve.Office365.Exchange.DataProtect.Interface;
 using Arcserve.Office365.Exchange.Util;
 using Arcserve.Office365.Exchange.Util.Setting;
-using FastTransferUtil.CompoundFile;
+using Arcserve.Exchange.FastTransferUtil.CompoundFile;
 
 namespace Arcserve.Office365.Exchange.StorageAccess.Azure
 {

@@ -29,7 +29,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Tool
                 LogFactory.LogInstance.WriteLog(LogLevel.DEBUG, "args", "arg {0}", arg);
             }
 
-            System.Threading.Thread.Sleep(20000);
+            //System.Threading.Thread.Sleep(20000);
             //return;
             try
             {
