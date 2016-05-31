@@ -55,6 +55,23 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
             }
         }
 
+        protected override Action<IFolderDataSync> ActionUpdateFolderToCatalog { get
+            {
+                return (folder) =>
+                {
+                    CatalogAccess.UpdateFolderToCatalog(folder);
+                };
+            }
+        }
+        protected override Action<IFolderDataSync> ActionUpdateFolderStatusToCatalog { get
+            {
+                return (folder) =>
+                {
+                    CatalogAccess.UpdateFolderSyncStatusToCatalog(folder);
+                };
+            }
+        }
+
         public IDataConvert DataConvert
         {
             get; set;

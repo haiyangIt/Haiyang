@@ -54,7 +54,7 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
             return ss;
         }
 
-        public virtual ICollection<IMailboxDataSync> GetAllMailbox(string adminName, string adminPassword)
+        public virtual ICollection<IMailboxDataSync> GetAllMailbox(string adminName, string adminPassword, IEnumerable<string> mailboxes)
         {
             const string liveIDConnectionUri = "https://outlook.office365.com/PowerShell-LiveID";
             const string schemaUri = "http://schemas.microsoft.com/powershell/Microsoft.Exchange";
@@ -72,6 +72,19 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
 
                     Command CommandGetMailbox = new Command("Get-Mailbox");
                     CommandGetMailbox.Parameters.Add("RecipientTypeDetails", "UserMailbox");
+                    if (mailboxes != null && mailboxes.Count() > 0)
+                    {
+                        StringBuilder sb = new StringBuilder();
+                        sb.Append("{");
+                        const string Or = " -or ";
+                        foreach(var m in mailboxes)
+                        {
+                            sb.Append(" (PrimarySmtpAddress -eq ").Append("\"").Append(m).Append("\")").Append(Or);
+                        }
+                        sb.Length -= Or.Length;
+                        sb.Append(" }");
+                        CommandGetMailbox.Parameters.Add("Filter", sb.ToString());
+                    }
                     pipe.Commands.Add(CommandGetMailbox);
 
                     var props = new string[] { "Name", "DisplayName", "UserPrincipalName", "Guid" };
@@ -369,11 +382,11 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
     {
         public EwsLimitOperator() : base() { }
 
-        public override ICollection<IMailboxDataSync> GetAllMailbox(string adminName, string adminPassword)
+        public override ICollection<IMailboxDataSync> GetAllMailbox(string adminName, string adminPassword, IEnumerable<string> mailboxes)
         {
             return TryFunc(() =>
             {
-                return base.GetAllMailbox(adminName, adminPassword);
+                return base.GetAllMailbox(adminName, adminPassword, mailboxes);
             }, "GetAllMailbox");
         }
         public override Folder FolderBind(WellKnownFolderName name, PropertySet propertySet)

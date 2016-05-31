@@ -16,7 +16,6 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession
 {
     public class CatalogAccess : ICatalogAccess<IJobProgress>, IDisposable
     {
-        private string CatalogFile;
         private string LatestCatalogFile;
         private string StorageFolder;
         private ICatalogAccess<IJobProgress> _catalogDbAccess;
@@ -29,17 +28,16 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession
         /// <param name="latestCatalogFile"></param>
         /// <param name="storageFolder"></param>
         /// <remarks>Dispose.</remarks>
-        public CatalogAccess(string newCatalogFile, string latestCatalogFile, string storageFolder)
+        public CatalogAccess(string newCatalogFolder, string latestCatalogFile, string storageFolder, string organizationName)
         {
-            CatalogFile = newCatalogFile;
             LatestCatalogFile = latestCatalogFile;
             StorageFolder = storageFolder;
             if (CloudConfig.Instance.IsTestForDemo)
             {
-                _catalogDbAccess = new CatalogTestAccess(newCatalogFile, latestCatalogFile);
+                _catalogDbAccess = new CatalogTestAccess(newCatalogFolder, latestCatalogFile, organizationName);
             }
             else
-                _catalogDbAccess = new CatalogDbAccess(newCatalogFile, latestCatalogFile);
+                _catalogDbAccess = new CatalogDbAccess(newCatalogFolder, latestCatalogFile, organizationName);
             _catalogDbAccess.CloneSyncContext(this);
             _exportItemWriter = new ExportItemWriter(storageFolder);
         }
@@ -66,7 +64,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession
 
         public Task AddFolderToCatalogAsync(IFolderDataSync folder)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public void AddItemsToCatalog(IEnumerable<IItemDataSync> items)
@@ -76,7 +74,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession
 
         public Task AddItemsToCatalogAsync(IEnumerable<IItemDataSync> items)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public void AddItemToCatalog(IItemDataSync item)
@@ -85,7 +83,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession
         }
         public Task AddItemToCatalogAsync(IItemDataSync item)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public void AddMailboxesToCatalog(IEnumerable<IMailboxDataSync> mailboxes)
@@ -95,7 +93,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession
 
         public Task AddMailboxesToCatalogAsync(IEnumerable<IMailboxDataSync> mailboxes)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public void Dispose()
@@ -121,7 +119,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession
 
         public Task<IEnumerable<IFolderDataSync>> GetFoldersFromLatestCatalogAsync(IMailboxDataSync mailboxData)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public IEnumerable<IItemDataSync> GetItemsByParentFolderIdFromCatalog(string parentFolderId)
@@ -131,7 +129,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession
 
         public Task<IEnumerable<IItemDataSync>> GetItemsByParentFolderIdFromCatalogAsync(string parentFolderId)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public IEnumerable<IItemDataSync> GetItemsFromLatestCatalog(IEnumerable<string> itemIds)
@@ -141,7 +139,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession
 
         public Task<IEnumerable<IItemDataSync>> GetItemsFromLatestCatalogAsync(IEnumerable<string> itemIds)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public IEnumerable<IMailboxDataSync> GetMailboxesFromLatestCatalog(DateTime currentJobStartTime)
@@ -156,12 +154,12 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession
 
         public Task<IEnumerable<IMailboxDataSync>> GetMailboxesFromLatestCatalogAsync(DateTime currentJobStartTime)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public Task<IEnumerable<IMailboxDataSync>> GetMailboxFromLatestCatalogAsync(ICatalogJob catalogJob)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public void InitTaskSyncContext(ITaskSyncContext<IJobProgress> mainContext)
@@ -175,14 +173,14 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession
             return _catalogDbAccess.IsItemContentExist(itemId);
         }
 
-        public void UpdateMailbox(IMailboxDataSync mailbox)
+        public void UpdateMailboxSyncToCatalog(IMailboxDataSync mailbox)
         {
-            _catalogDbAccess.UpdateMailbox(mailbox);
+            _catalogDbAccess.UpdateMailboxSyncToCatalog(mailbox);
         }
 
         public Task UpdateMailboxAsync(IMailboxDataSync mailbox)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public void WriteBufferToStorage(IItemDataSync item, byte[] buffer, int length)
@@ -197,6 +195,101 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession
         public void ExportItemError(EwsResponseException ewsResponseError)
         {
             _exportItemWriter.ExportItemError(ewsResponseError);
+        }
+
+        public void DeleteItemsToCatalog(IEnumerable<string> itemIds)
+        {
+            _catalogDbAccess.DeleteItemsToCatalog(itemIds);
+        }
+
+        public Task DeleteItemsToCatalogAsync(IEnumerable<string> itemIds)
+        {
+            throw new NotSupportedException();
+        }
+
+        public void UpdateFolderToCatalog(IFolderDataSync folder)
+        {
+            _catalogDbAccess.UpdateFolderToCatalog(folder);
+        }
+
+        public Task UpdateFolderToCatalogAsync(IFolderDataSync folder)
+        {
+            throw new NotSupportedException();
+        }
+
+        public void UpdateFolderSyncStatusToCatalog(IFolderDataSync folder)
+        {
+            _catalogDbAccess.UpdateFolderSyncStatusToCatalog(folder);
+        }
+
+        public Task UpdateFolderSyncStatusToCatalogAsync(IFolderDataSync folder)
+        {
+            throw new NotSupportedException();
+        }
+
+        public void UpdateItemsToCatalog(IEnumerable<IItemDataSync> items)
+        {
+            _catalogDbAccess.UpdateItemsToCatalog(items);
+        }
+
+        public Task UpdateItemsToCatalogAsync(IEnumerable<IItemDataSync> items)
+        {
+            throw new NotSupportedException();
+        }
+
+        public Task UpdateMailboxSyncToCatalogAsync(IMailboxDataSync mailbox)
+        {
+            throw new NotSupportedException();
+        }
+
+        public void DeleteFolderToCatalog(string folderId)
+        {
+            _catalogDbAccess.DeleteFolderToCatalog(folderId);
+        }
+
+        public Task DeleteFolderToCatalogAsync(string folderId)
+        {
+            throw new NotSupportedException();
+        }
+
+        public void UpdateMailboxToCatalog(ICollection<IMailboxDataSync> mailboxes)
+        {
+            _catalogDbAccess.UpdateMailboxToCatalog(mailboxes);
+        }
+
+        public Task UpdateMailboxToCatalogAsync(ICollection<IMailboxDataSync> mailboxes)
+        {
+            throw new NotSupportedException();
+        }
+
+        public void DeleteMailboxToCatalog(ICollection<IMailboxDataSync> mailboxes)
+        {
+            _catalogDbAccess.DeleteMailboxToCatalog(mailboxes);
+        }
+
+        public Task DeleteMailboxToCatalogAsync(ICollection<IMailboxDataSync> mailboxes)
+        {
+            throw new NotSupportedException();
+        }
+
+        public void UpdateMailboxToCatalog(IMailboxDataSync mailbox)
+        {
+            _catalogDbAccess.UpdateMailboxToCatalog(mailbox);
+        }
+
+        public Task UpdateMailboxToCatalogAsync(IMailboxDataSync mailbox)
+        {
+            throw new NotSupportedException();
+        }
+
+        public void AddMailboxesToCatalog(IMailboxDataSync mailbox)
+        {
+            _catalogDbAccess.AddMailboxesToCatalog(mailbox);
+        }
+
+        public Task AddMailboxesToCatalogAsync(IMailboxDataSync mailbox)
+        {
+            throw new NotSupportedException();
         }
     }
 }

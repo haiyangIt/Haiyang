@@ -37,6 +37,27 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
             }
         }
 
+        protected override Action<IEnumerable<string>> ActionDeleteItemsToCatalog
+        {
+            get
+            {
+                return (itemIds) =>
+                {
+                    CatalogAccess.DeleteItemsToCatalog(itemIds);
+                };
+            }
+        }
+        protected override Action<IEnumerable<IItemDataSync>> ActionUpdateItemsToCatalog
+        {
+            get
+            {
+                return (items) =>
+                {
+                    CatalogAccess.UpdateItemsToCatalog(items);
+                };
+            }
+        }
+
 
         protected override Func<IEnumerable<IItemDataSync>, int> FuncWriteItemsToStorage
         {
@@ -49,7 +70,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
             }
         }
 
-       
+
 
         public ICatalogAccess<IJobProgress> CatalogAccess
         {
@@ -76,7 +97,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
                 };
             }
         }
-        
+
         protected override bool IsRewriteDataIfReadFlagChanged
         {
             get
@@ -201,10 +222,9 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
             return isGet;
         }
 
-        protected override bool CheckCanBatchDelete(ItemChange itemChange, ItemClass itemClass, out ICollection<ItemChange> batchItems)
+        protected override bool CheckCanBatchDelete(ItemChange itemChange, out ICollection<ItemChange> batchItems)
         {
-            batchItems = null;
-            return false;
+            throw new NotImplementedException();
         }
 
         private List<ItemChange> _dicItemReadChangs = new List<ItemChange>();
@@ -232,6 +252,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
         {
             return CheckCanBatch(itemChange, itemClass, out batchItems);
         }
+
 
         protected override bool CheckCanWriteToStorage(IItemDataSync item, out IEnumerable<IEnumerable<IItemDataSync>> items)
         {

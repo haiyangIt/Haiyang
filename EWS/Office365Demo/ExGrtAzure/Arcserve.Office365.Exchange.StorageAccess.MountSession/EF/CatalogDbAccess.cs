@@ -22,11 +22,30 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
         private CatalogSyncDbContext _updateContext;
         private CatalogSyncDbContext _queryContext = null;
         private DataConvert _dataConvert;
-        public CatalogDbAccess(string newCatalogFile, string lastCatalogFile)
+        public CatalogDbAccess(string newCatalogFolder, string lastCatalogFile, string organizationName)
         {
-            _updateContext = new CatalogSyncDbContext(newCatalogFile);
-            if (!string.IsNullOrEmpty(lastCatalogFile))
+            if (!Directory.Exists(newCatalogFolder))
+            {
+                Directory.CreateDirectory(newCatalogFolder);
+            }
+
+            string fileName = string.Empty;
+            string newCatalogFileName = string.Empty;
+            if (!string.IsNullOrEmpty(lastCatalogFile) && File.Exists(lastCatalogFile))
+            {
+                fileName = Path.GetFileName(lastCatalogFile);
+                newCatalogFileName = Path.Combine(newCatalogFolder, fileName);
+                File.Copy(lastCatalogFile, newCatalogFileName);
                 _queryContext = new CatalogSyncDbContext(lastCatalogFile);
+            }
+            else
+            {
+                fileName = string.Format("Catalog_{0}", MD5Utility.ConvertToMd5(organizationName));
+                newCatalogFileName = Path.Combine(newCatalogFolder, fileName);
+            }
+
+            _updateContext = new CatalogSyncDbContext(newCatalogFileName);
+
             _dataConvert = new DataConvert();
         }
 
@@ -96,7 +115,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         public Task AddMailboxesToCatalogAsync(IEnumerable<IMailboxDataSync> mailboxes)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public IEnumerable<IFolderDataSync> GetFoldersFromLatestCatalog(IMailboxDataSync mailboxData)
@@ -109,7 +128,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         public Task<IEnumerable<IFolderDataSync>> GetFoldersFromLatestCatalogAsync(IMailboxDataSync mailboxData)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public void InitTaskSyncContext(ITaskSyncContext<IJobProgress> mainContext)
@@ -131,7 +150,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
                 _updateContext.Dispose();
                 _updateContext = null;
             }
-            if(_queryContext != null)
+            if (_queryContext != null)
             {
                 _queryContext.Dispose();
                 _queryContext = null;
@@ -142,7 +161,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
         public void AddItemsToCatalog(IEnumerable<IItemDataSync> items)
         {
             var result = _dataConvert.ConvertToItemModel(items);
-            foreach(var i in result)
+            foreach (var i in result)
             {
                 itemsIdHash.Add(i.ItemId);
             }
@@ -152,7 +171,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         public Task AddItemsToCatalogAsync(IEnumerable<IItemDataSync> items)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
 
@@ -164,7 +183,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         public Task AddFolderToCatalogAsync(IFolderDataSync folder)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public void AddItemToCatalog(IItemDataSync item)
@@ -174,7 +193,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
         }
         public Task AddItemToCatalogAsync(IItemDataSync item)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public IEnumerable<IItemDataSync> GetItemsFromLatestCatalog(IEnumerable<string> itemIds)
@@ -188,7 +207,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         public Task<IEnumerable<IItemDataSync>> GetItemsFromLatestCatalogAsync(IEnumerable<string> itemIds)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public IEnumerable<IItemDataSync> GetItemsByParentFolderIdFromCatalog(string parentFolderId)
@@ -202,19 +221,22 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         public Task<IEnumerable<IItemDataSync>> GetItemsByParentFolderIdFromCatalogAsync(string parentFolderId)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
-        public void UpdateMailbox(IMailboxDataSync mailbox)
+        public void UpdateMailboxSyncToCatalog(IMailboxDataSync mailbox)
         {
             DoSaveChanges();
-            _updateContext.Entry(mailbox as MailboxSyncModel).State = System.Data.Entity.EntityState.Modified;
-            SaveChanges();
+            var mailboxInfo = (from m in _updateContext.Mailboxes where m.Id == mailbox.Id select m).FirstOrDefault();
+            if (mailboxInfo == null)
+                throw new ArgumentException("mailbox is not in catalog.");
+            mailboxInfo.SyncStatus = mailbox.SyncStatus;
+            _updateContext.SaveChanges();
         }
 
         public Task UpdateMailboxAsync(IMailboxDataSync mailbox)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public IEnumerable<IMailboxDataSync> GetMailboxesFromLatestCatalog(ICatalogJob catalogJob)
@@ -227,7 +249,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         public Task<IEnumerable<IMailboxDataSync>> GetMailboxFromLatestCatalogAsync(ICatalogJob catalogJob)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public IEnumerable<IMailboxDataSync> GetMailboxesFromLatestCatalog(DateTime currentJobStartTime)
@@ -240,20 +262,187 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         public Task<IEnumerable<IMailboxDataSync>> GetMailboxesFromLatestCatalogAsync(DateTime currentJobStartTime)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public void WriteBufferToStorage(IItemDataSync itemId, byte[] buffer, int length)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public void WriteComplete(IItemDataSync itemId)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public void ExportItemError(EwsResponseException ewsResponseError)
+        {
+            throw new NotSupportedException();
+        }
+
+        public void DeleteItemsToCatalog(IEnumerable<string> itemIds)
+        {
+            foreach (var i in itemIds)
+            {
+                var item = (from m in _updateContext.Items where m.ItemId == i select m).FirstOrDefault();
+                if (item != null)
+                {
+                    _updateContext.Items.Remove(item);
+                }
+            }
+            _updateContext.SaveChanges();
+        }
+
+        public Task DeleteItemsToCatalogAsync(IEnumerable<string> itemIds)
+        {
+            throw new NotSupportedException();
+        }
+
+        public void UpdateFolderToCatalog(IFolderDataSync folder)
+        {
+            var folderInfo = (from m in _updateContext.Folders where m.FolderId == folder.FolderId select m).FirstOrDefault();
+            if (folderInfo == null)
+                throw new ArgumentException("mailbox is not in catalog.");
+            folderInfo.Clone(folder);
+            _updateContext.SaveChanges();
+        }
+
+        public Task UpdateFolderToCatalogAsync(IFolderDataSync folder)
+        {
+            throw new NotSupportedException();
+        }
+
+        public void UpdateFolderSyncStatusToCatalog(IFolderDataSync folder)
+        {
+            var folderInfo = (from m in _updateContext.Folders where m.FolderId == folder.FolderId select m).FirstOrDefault();
+            if (folderInfo == null)
+                throw new ArgumentException("mailbox is not in catalog.");
+            folderInfo.SyncStatus = folder.SyncStatus;
+            _updateContext.SaveChanges();
+        }
+
+        public Task UpdateFolderSyncStatusToCatalogAsync(IFolderDataSync folder)
+        {
+            throw new NotSupportedException();
+        }
+
+        public void UpdateItemsToCatalog(IEnumerable<IItemDataSync> items)
+        {
+            foreach (var item in items)
+            {
+                var itemInDb = (from i in _updateContext.Items where i.ItemId == item.ItemId select i).FirstOrDefault();
+                itemInDb.Clone(item);
+            }
+            _updateContext.SaveChanges();
+        }
+
+        public Task UpdateItemsToCatalogAsync(IEnumerable<IItemDataSync> items)
+        {
+            throw new NotSupportedException();
+        }
+
+        public Task UpdateMailboxSyncToCatalogAsync(IMailboxDataSync mailbox)
+        {
+            throw new NotSupportedException();
+        }
+
+        public void DeleteFolderToCatalog(string folderId)
+        {
+            var folder = (from m in _updateContext.Folders where m.FolderId == folderId select m).FirstOrDefault();
+            if (folder != null)
+            {
+                _updateContext.Folders.Remove(folder);
+                _updateContext.SaveChanges();
+            }
+
+            var items = (from m in _updateContext.Items where m.ParentFolderId == folderId select m);
+            if(items.Count() > 0)
+            {
+                foreach(var i in items)
+                {
+                    _updateContext.Items.Remove(i);
+                }
+                _updateContext.SaveChanges();
+            }
+        }
+
+        public Task DeleteFolderToCatalogAsync(string folderId)
+        {
+            throw new NotSupportedException();
+        }
+
+        public void UpdateMailboxToCatalog(ICollection<IMailboxDataSync> mailboxes)
+        {
+            foreach (var mailbox in mailboxes)
+            {
+                UpdateMailboxToCatalog(mailbox);
+            }
+        }
+
+        public Task UpdateMailboxToCatalogAsync(ICollection<IMailboxDataSync> mailboxes)
+        {
+            throw new NotSupportedException();
+        }
+
+        public void DeleteMailboxToCatalog(ICollection<IMailboxDataSync> mailboxes)
+        {
+            foreach (var mailbox in mailboxes)
+            {
+                var mailboxInDb = (from m in _updateContext.Mailboxes where m.Id == mailbox.Id select m).FirstOrDefault();
+                if (mailboxInDb != null)
+                {
+                    _updateContext.Mailboxes.Remove(mailboxInDb);
+                }
+
+                var folders = (from m in _updateContext.Folders where m.MailboxAddress == mailbox.MailAddress select m);
+                if (folders.Count() > 0)
+                {
+                    foreach (var folder in folders)
+                    {
+                        _updateContext.Folders.Remove(folder);
+
+                        var items = (from m in _updateContext.Items where m.ParentFolderId == folder.FolderId select m);
+                        if (items.Count() > 0)
+                        {
+                            foreach (var i in items)
+                            {
+                                _updateContext.Items.Remove(i);
+                            }
+                            _updateContext.SaveChanges();
+                        }
+                    }
+                }
+            }
+            _updateContext.SaveChanges();
+        }
+
+        public Task DeleteMailboxToCatalogAsync(ICollection<IMailboxDataSync> mailboxes)
+        {
+            throw new NotSupportedException();
+        }
+
+        public void UpdateMailboxToCatalog(IMailboxDataSync mailbox)
+        {
+            var mailboxInDb = (from m in _updateContext.Mailboxes where m.Id == mailbox.Id select m).FirstOrDefault();
+            if (mailboxInDb != null)
+            {
+                mailboxInDb.Clone(mailbox);
+                _updateContext.SaveChanges();
+            }
+        }
+
+        public Task UpdateMailboxToCatalogAsync(IMailboxDataSync mailbox)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AddMailboxesToCatalog(IMailboxDataSync mailbox)
+        {
+            _updateContext.Mailboxes.Add(mailbox as MailboxSyncModel);
+            SaveChanges();
+        }
+
+        public Task AddMailboxesToCatalogAsync(IMailboxDataSync mailbox)
         {
             throw new NotImplementedException();
         }
@@ -264,7 +453,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
         private CatalogSyncDbContext _updateContext;
         private CatalogSyncDbContext _queryContext = null;
         private DataConvert _dataConvert;
-        public CatalogTestAccess(string newCatalogFile, string lastCatalogFile)
+        public CatalogTestAccess(string newCatalogFile, string lastCatalogFile, string organizationName)
         {
         }
 
@@ -282,16 +471,16 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
         {
             get; set;
         }
-        
+
         private void SaveChanges()
         {
-          
+
         }
-        
+
 
         public void AddMailboxesToCatalog(IEnumerable<IMailboxDataSync> mailboxes)
         {
-           
+
         }
 
         public Task AddMailboxesToCatalogAsync(IEnumerable<IMailboxDataSync> mailboxes)
@@ -325,7 +514,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         public void Dispose()
         {
-            
+
             if (_updateContext != null)
             {
                 _updateContext.Dispose();
@@ -341,7 +530,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
         private HashSet<string> itemsIdHash = new HashSet<string>();
         public void AddItemsToCatalog(IEnumerable<IItemDataSync> items)
         {
-            
+
         }
 
         public Task AddItemsToCatalogAsync(IEnumerable<IItemDataSync> items)
@@ -352,7 +541,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         public void AddFolderToCatalog(IFolderDataSync folder)
         {
-           
+
         }
 
         public Task AddFolderToCatalogAsync(IFolderDataSync folder)
@@ -362,7 +551,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         public void AddItemToCatalog(IItemDataSync item)
         {
-            
+
         }
         public Task AddItemToCatalogAsync(IItemDataSync item)
         {
@@ -397,9 +586,9 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
             throw new NotImplementedException();
         }
 
-        public void UpdateMailbox(IMailboxDataSync mailbox)
+        public void UpdateMailboxSyncToCatalog(IMailboxDataSync mailbox)
         {
-            
+
         }
 
         public Task UpdateMailboxAsync(IMailboxDataSync mailbox)
@@ -444,6 +633,101 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
         }
 
         public void ExportItemError(EwsResponseException ewsResponseError)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteItemsToCatalog(IEnumerable<string> itemIds)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task DeleteItemsToCatalogAsync(IEnumerable<string> itemIds)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UpdateFolderToCatalog(IFolderDataSync folder)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateFolderToCatalogAsync(IFolderDataSync folder)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UpdateFolderSyncStatusToCatalog(IFolderDataSync folder)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateFolderSyncStatusToCatalogAsync(IFolderDataSync folder)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UpdateItemsToCatalog(IEnumerable<IItemDataSync> items)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateItemsToCatalogAsync(IEnumerable<IItemDataSync> items)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateMailboxSyncToCatalogAsync(IMailboxDataSync mailbox)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteFolderToCatalog(string folderId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task DeleteFolderToCatalogAsync(string folderId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UpdateMailboxToCatalog(ICollection<IMailboxDataSync> mailboxes)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateMailboxToCatalogAsync(ICollection<IMailboxDataSync> mailboxes)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteMailboxToCatalog(ICollection<IMailboxDataSync> mailboxes)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task DeleteMailboxToCatalogAsync(ICollection<IMailboxDataSync> mailboxes)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UpdateMailboxToCatalog(IMailboxDataSync mailbox)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateMailboxToCatalogAsync(IMailboxDataSync mailbox)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AddMailboxesToCatalog(IMailboxDataSync mailbox)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task AddMailboxesToCatalogAsync(IMailboxDataSync mailbox)
         {
             throw new NotImplementedException();
         }

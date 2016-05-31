@@ -115,6 +115,20 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data
         {
             throw new NotImplementedException();
         }
+
+        public void Clone(IFolderDataSync source)
+        {
+            this.ChangeKey = source.ChangeKey;
+            this.ChildFolderCount = source.ChildFolderCount;
+            this.ChildItemCount = source.ChildItemCount;
+            this.DisplayName = ((IFolderDataBase)source).DisplayName;
+            this.FolderType = source.FolderType;
+            this.Location = source.Location;
+            this.MailboxAddress = source.MailboxAddress;
+            this.MailboxId = source.MailboxId;
+            this.ParentFolderId = source.ParentFolderId;
+            this.SyncStatus = source.SyncStatus;
+        }
     }
     
 

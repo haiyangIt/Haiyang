@@ -85,13 +85,22 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
         }
 
 
-        protected override Action<IMailboxDataSync> ActionUpdateMailbox
+        protected override Action<IMailboxDataSync> ActionUpdateMailboxSyncToCatalog
         {
             get
             {
                 return (mailbox) =>
                 {
-                    CatalogAccess.UpdateMailbox(mailbox);
+                    CatalogAccess.UpdateMailboxSyncToCatalog(mailbox);
+                };
+            }
+        }
+
+        protected override Action<string> ActionDeleteFolderToCatalog { get
+            {
+                return (folderId) =>
+                {
+                    CatalogAccess.DeleteFolderToCatalog(folderId);
                 };
             }
         }
@@ -144,13 +153,34 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
             }
         }
 
+        protected override Action<IMailboxDataSync> ActionUpdateMailboxToCatalog
+        {
+            get
+            {
+                return (mailbox) =>
+                {
+                    CatalogAccess.UpdateMailboxToCatalog(mailbox);
+                };
+            }
+        }
 
-        protected override void ForEachLoop(ICollection<IFolderDataSync> folders, Action<IFolderDataSync> DoEachFolderChange)
+        protected override Action<IMailboxDataSync> ActionAddMailboxToCatalog
+        {
+            get
+            {
+                return (mailbox) =>
+                {
+                    CatalogAccess.AddMailboxesToCatalog(mailbox);
+                };
+            }
+        }
+
+        protected override void ForEachLoop(ICollection<IFolderDataSync> folders, ItemUADStatus itemStatus, Action<IFolderDataSync, ItemUADStatus> DoEachFolderChange)
         {
             
             foreach(var folder in folders)
             {
-                DoEachFolderChange(folder);
+                DoEachFolderChange(folder, itemStatus);
             }
         }
     }

@@ -23,28 +23,19 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
         void AddItemsToCatalog(IEnumerable<IItemDataSync> items);
         System.Threading.Tasks.Task AddItemsToCatalogAsync(IEnumerable<IItemDataSync> items);
 
-        //void DeleteItemsToCatalog(IEnumerable<Item> items);
-        //System.Threading.Tasks.Task DeleteItemsToCatalogAsync(IEnumerable<Item> items);
-
         bool IsItemContentExist(string itemId);
 
         void AddMailboxesToCatalog(IEnumerable<IMailboxDataSync> mailboxes);
         System.Threading.Tasks.Task AddMailboxesToCatalogAsync(IEnumerable<IMailboxDataSync> mailboxes);
+        void DeleteItemsToCatalog(IEnumerable<string> itemIds);
+        System.Threading.Tasks.Task DeleteItemsToCatalogAsync(IEnumerable<string> itemIds);
 
-        //void UpdateItems(IEnumerable<Item> items);
-        //System.Threading.Tasks.Task UpdateItemsAsync(IEnumerable<Item> items);
-
-        //void DeleteMailboxesToCatalog(ICollection<IMailboxDataSync> mailboxes);
-        //System.Threading.Tasks.Task DeleteMailboxesToCatalogAsync(ICollection<IMailboxDataSync> mailboxes);
-
-        //void UpdateReadFlagItems(IEnumerable<Item> itemsWithReadFlagChange);
-        //System.Threading.Tasks.Task UpdateReadFlagItemsAsync(IEnumerable<Item> itemsWithReadFlagChange);
-
-        //void DeleteFolderToCatalog(Folder folder);
-        //System.Threading.Tasks.Task DeleteFolderToCatalogAsync(Folder folder);
-
-        //void WriteItemsToStorage(IEnumerable<ItemDatas> items);
-        //System.Threading.Tasks.Task WriteItemsToStorageAsync(IEnumerable<ItemDatas> items);
+        void UpdateFolderToCatalog(IFolderDataSync folder);
+        System.Threading.Tasks.Task UpdateFolderToCatalogAsync(IFolderDataSync folder);
+        void UpdateFolderSyncStatusToCatalog(IFolderDataSync folder);
+        System.Threading.Tasks.Task UpdateFolderSyncStatusToCatalogAsync(IFolderDataSync folder);
+        void UpdateItemsToCatalog(IEnumerable<IItemDataSync> items);
+        System.Threading.Tasks.Task UpdateItemsToCatalogAsync(IEnumerable<IItemDataSync> items);
 
         IEnumerable<IFolderDataSync> GetFoldersFromLatestCatalog(IMailboxDataSync mailboxData);
         Task<IEnumerable<IFolderDataSync>> GetFoldersFromLatestCatalogAsync(IMailboxDataSync mailboxData);
@@ -56,21 +47,17 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
         Task<IEnumerable<IItemDataSync>> GetItemsFromLatestCatalogAsync(IEnumerable<string> itemIds);
         IEnumerable<IItemDataSync> GetItemsByParentFolderIdFromCatalog(string parentFolderId);
         Task<IEnumerable<IItemDataSync>> GetItemsByParentFolderIdFromCatalogAsync(string parentFolderId);
-        void UpdateMailbox(IMailboxDataSync mailbox);
-        System.Threading.Tasks.Task UpdateMailboxAsync(IMailboxDataSync mailbox);
-
-        /// <summary>
-        /// Update folder by folderChange type
-        /// </summary>
-        /// <param name="folderChange"></param>
-        /// <returns>last catalog folder sync status.</returns>
-        //string UpdateFolderByChangeType(FolderChange folderChange);
-        //Task<string> UpdateFolderByChangeTypeAsync(FolderChange folderChange);
-
-        //void UpdateFolderSyncStatus(FolderId folderId, string newSyncStatus);
-        //System.Threading.Tasks.Task UpdateFolderSyncStatusAsync(FolderId folderId, string newSyncStatus);
-
-        //string GetFolderLastSyncStatusFromLatestCatalog(string folderId);
-        //Task<string> GetFolderLastSyncStatusFromLatestCatalogAsync(string folderId);
+        void UpdateMailboxSyncToCatalog(IMailboxDataSync mailbox);
+        System.Threading.Tasks.Task UpdateMailboxSyncToCatalogAsync(IMailboxDataSync mailbox);
+        void DeleteFolderToCatalog(string folderId);
+        System.Threading.Tasks.Task DeleteFolderToCatalogAsync(string folderId);
+        void UpdateMailboxToCatalog(ICollection<IMailboxDataSync> mailboxes);
+        System.Threading.Tasks.Task UpdateMailboxToCatalogAsync(ICollection<IMailboxDataSync> mailboxes);
+        void DeleteMailboxToCatalog(ICollection<IMailboxDataSync> mailboxes);
+        System.Threading.Tasks.Task DeleteMailboxToCatalogAsync(ICollection<IMailboxDataSync> mailboxes);
+        void UpdateMailboxToCatalog(IMailboxDataSync mailbox);
+        System.Threading.Tasks.Task UpdateMailboxToCatalogAsync(IMailboxDataSync mailbox);
+        void AddMailboxesToCatalog(IMailboxDataSync mailbox);
+        System.Threading.Tasks.Task AddMailboxesToCatalogAsync(IMailboxDataSync mailbox);
     }
 }

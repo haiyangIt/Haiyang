@@ -79,7 +79,7 @@ namespace ExGrtAzure.Tests
                 DeleteDirectory(workFolder);
                 using (SyncBackup backupFlow = new SyncBackup())
                 {
-                    using (var catalogAccess = new CatalogAccess("", "", workFolder))
+                    using (var catalogAccess = new CatalogAccess("", "", workFolder, "arcserve"))
                     {
                         TaskSyncContextBase taskSyncContextBase = new TaskSyncContextBase();
                         backupFlow.InitTaskSyncContext(taskSyncContextBase);
@@ -124,7 +124,7 @@ namespace ExGrtAzure.Tests
                 ClearEnv(newCatalogInfo);
                 using (SyncBackup backupFlow = new SyncBackup())
                 {
-                    using (var catalogAccess = new CatalogAccess(newCatalogInfo.CatalogFilePath, oldCatalogInfo.CatalogFilePath, newCatalogInfo.DataFolder))
+                    using (var catalogAccess = new CatalogAccess(newCatalogInfo.CatalogFilePath, oldCatalogInfo.CatalogFilePath, newCatalogInfo.DataFolder, "arcserve"))
                     {
                         TaskSyncContextBase taskSyncContextBase = new TaskSyncContextBase();
                         backupFlow.InitTaskSyncContext(taskSyncContextBase);

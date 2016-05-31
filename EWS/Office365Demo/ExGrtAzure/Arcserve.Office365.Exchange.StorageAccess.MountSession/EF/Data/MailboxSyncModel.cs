@@ -24,7 +24,8 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data
         {
             get; set;
         }
-
+        
+        [NotMapped]
         public int ChildFolderCount
         {
             get; set;
@@ -105,6 +106,17 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data
         public IMailboxData Clone()
         {
             throw new NotImplementedException();
+        }
+
+        public void Clone(IMailboxDataSync source)
+        {
+            DisplayName = source.DisplayName;
+            ChangeKey = source.ChangeKey;
+            this.ChildFolderCount = source.ChildFolderCount;
+            this.MailAddress = source.MailAddress;
+            this.RootFolderId = source.RootFolderId;
+            this.SyncStatus = source.SyncStatus;
+            this.Name = source.Name;
         }
     }
 

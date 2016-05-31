@@ -103,7 +103,7 @@ namespace Arcserve.Office365.Exchange.Tool
             {
                 using (SyncBackup backupFlow = new SyncBackup())
                 {
-                    using (var catalogAccess = new CatalogAccess("", "", WorkFolder.Value))
+                    using (var catalogAccess = new CatalogAccess("", "", WorkFolder.Value, AdminUserName.Value.GetOrganization()))
                     {
                         TaskSyncContextBase taskSyncContextBase = new TaskSyncContextBase();
                         backupFlow.InitTaskSyncContext(taskSyncContextBase);

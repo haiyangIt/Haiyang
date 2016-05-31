@@ -29,7 +29,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
         /// <summary>
         /// get all mailbox from exchange
         /// </summary>
-        protected abstract Func<ICollection<IMailboxDataSync>> FuncGetAllMailboxFromExchange { get; }
+        protected abstract Func<IEnumerable<string>, ICollection<IMailboxDataSync>> FuncGetAllMailboxFromExchange { get; }
         /// <summary>
         /// get last catalog job information
         /// </summary>
@@ -44,18 +44,20 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
         /// </summary>
         protected abstract Func<ICollection<IMailboxDataSync>, ICollection<IMailboxDataSync>, ICollection<IMailboxDataSync>> FuncGetIntersectionMailboxCollection { get; }
 
-        protected abstract Action<ICollection<IMailboxDataSync>, IEnumerable<IMailboxDataSync>> ActionSetMailboxSyncStatus { get; }
+        protected abstract Func<ICollection<IMailboxDataSync>, IEnumerable<IMailboxDataSync>, IDictionary<ItemUADStatus, ICollection<IMailboxDataSync>>> FuncGetMailboxUAD { get; }
         /// <summary>
         /// add mailbox to catalog.
         /// </summary>
         protected abstract Action<ICollection<IMailboxDataSync>> AddMailboxToCurrentCatalog { get; }
 
+        protected abstract Action<ICollection<IMailboxDataSync>> UpdateMailboxToCurrentCatalog { get; }
+        protected abstract Action<ICollection<IMailboxDataSync>> DeleteMailboxToCurrentCatalog { get; }
         /// <summary>
         /// 
         /// </summary>
         /// <param name="items"></param>
         /// <param name="DoEachMailbox"></param>
-        protected abstract void ForEachLoop(ICollection<IMailboxDataSync> items, Action<IMailboxDataSync> DoEachMailbox);
+        protected abstract void ForEachLoop(ICollection<IMailboxDataSync> items, ItemUADStatus uadStatus, Action<IMailboxDataSync, ItemUADStatus> DoEachMailbox);
 
         protected abstract Func<BackupMailboxFlowTemplate> FuncNewMailboxTemplate { get; }
 
@@ -94,38 +96,44 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
                 var pCounter = PerformanceCounter.Start();
                 Progress.Report("Generate catalog {0} Start.", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"));
 
-                var mailboxesInExchange = FuncGetAllMailboxFromExchange();
                 var mailboxesInPlan = FuncGetAllMailboxFromPlan();
+                var mailboxesInExchange = FuncGetAllMailboxFromExchange(from m in mailboxesInPlan select m.MailAddress);
+                
                 var catalogJob = FuncGetLatestCatalogJob();
                 var mailboxesInLastCatalog = FuncGetAllMailboxFromLastCatalog(catalogJob);
 
                 var mailboxesValid = FuncGetIntersectionMailboxCollection(mailboxesInExchange, mailboxesInPlan);
-                ActionSetMailboxSyncStatus(mailboxesValid, mailboxesInLastCatalog);
+                var mailboxesUAD = FuncGetMailboxUAD(mailboxesValid, mailboxesInLastCatalog);
 
-                AddMailboxToCurrentCatalog(mailboxesValid);
+                DeleteMailboxToCurrentCatalog(mailboxesUAD[ItemUADStatus.Delete]);
+
+                // AddMailboxToCurrentCatalog(mailboxesValid);
                 TotalMailboxCount = mailboxesValid.Count;
                 // todo test case: if a mailbox delete and a new mailbox whose name is same as deleted mailbox create. how to generate catalog.
 
-                ForEachLoop(mailboxesValid, (mailbox) =>
+                foreach (var mailboxesItem in mailboxesUAD)
                 {
-                    Interlocked.Increment(ref DealedMailboxCount);
-                    Progress.Report(0.01 * DealedMailboxCount / TotalMailboxCount);
+                    ForEachLoop(mailboxesItem.Value, mailboxesItem.Key, (mailbox, uadStatus) =>
+                    {
+                        Interlocked.Increment(ref DealedMailboxCount);
+                        Progress.Report(0.01 * DealedMailboxCount / TotalMailboxCount);
 
-                    var mailboxFlowTemplate = FuncNewMailboxTemplate();
-                    mailboxFlowTemplate.MailboxInfo = mailbox;
+                        var mailboxFlowTemplate = FuncNewMailboxTemplate();
+                        mailboxFlowTemplate.MailboxInfo = mailbox;
 
-                    var pCounter1 = PerformanceCounter.Start();
-                    Progress.Report("Mailbox {0} Start.", mailbox.DisplayName);
-                    mailboxFlowTemplate.BackupSync();
-                    Progress.Report("Mailbox {0} End, Total folder count:{2},  total item count:{3}, total item size:{4}, TotalTime {1}h.",
-                        mailbox.DisplayName, pCounter1.EndByHour(), mailboxFlowTemplate.TotalDealedFolderCount, mailboxFlowTemplate.TotalDealedItemCount, mailboxFlowTemplate.TotalDealedItemSize);
+                        var pCounter1 = PerformanceCounter.Start();
+                        Progress.Report("Mailbox {0} Start.", mailbox.DisplayName);
+                        mailboxFlowTemplate.BackupSync(uadStatus);
+                        Progress.Report("Mailbox {0} End, Total folder count:{2},  total item count:{3}, total item size:{4}, TotalTime {1}h.",
+                            mailbox.DisplayName, pCounter1.EndByHour(), mailboxFlowTemplate.TotalDealedFolderCount, mailboxFlowTemplate.TotalDealedItemCount, mailboxFlowTemplate.TotalDealedItemSize);
 
-                    Interlocked.Add(ref CompletedItemCount, mailboxFlowTemplate.TotalDealedItemCount);
-                    Interlocked.Add(ref CompletedItemSize, mailboxFlowTemplate.TotalDealedItemSize);
-                    Interlocked.Add(ref CompletedFolderCount, mailboxFlowTemplate.TotalDealedFolderCount);
-                    Interlocked.Increment(ref CompletedMailboxCount);
+                        Interlocked.Add(ref CompletedItemCount, mailboxFlowTemplate.TotalDealedItemCount);
+                        Interlocked.Add(ref CompletedItemSize, mailboxFlowTemplate.TotalDealedItemSize);
+                        Interlocked.Add(ref CompletedFolderCount, mailboxFlowTemplate.TotalDealedFolderCount);
+                        Interlocked.Increment(ref CompletedMailboxCount);
 
-                });
+                    });
+                }
 
                 var endByHour = pCounter.EndByHour();
                 Progress.Report("Generate catalog {0} End, Total mailbox count:{5}, Total folder count:{2},  total item count:{3}, total item size:{4}, TotalTime {1}h. Speed:{6}G/H",
@@ -137,6 +145,14 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
         }
 
         public abstract void Dispose();
+    }
+
+    public enum ItemUADStatus
+    {
+        None = 0,
+        Update = 1,
+        Add = 2,
+        Delete = 3
     }
 
     public abstract class BackupMailboxFlowTemplate : ITaskSyncContext<IJobProgress>
@@ -155,10 +171,15 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
 
         protected abstract Func<string, bool> FuncIsFolderClassValid { get; }
 
-        protected abstract Action<IMailboxDataSync> ActionUpdateMailbox { get; }
+        protected abstract Action<IMailboxDataSync> ActionUpdateMailboxSyncToCatalog { get; }
+        protected abstract Action<IMailboxDataSync> ActionUpdateMailboxToCatalog { get; }
+        protected abstract Action<IMailboxDataSync> ActionAddMailboxToCatalog { get; }
+
         protected abstract Action<EwsWSData.Folder> ActionLoadFolderProperties { get; }
 
-        protected abstract void ForEachLoop(ICollection<IFolderDataSync> folders, Action<IFolderDataSync> DoEachFolderChange);
+        protected abstract Action<string> ActionDeleteFolderToCatalog { get; }
+
+        protected abstract void ForEachLoop(ICollection<IFolderDataSync> folders, ItemUADStatus itemStatus, Action<IFolderDataSync, ItemUADStatus> DoEachFolderChange);
 
         public abstract IDataConvert DataConvert { get; set; }
 
@@ -186,7 +207,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
         public long TotalDealedItemSize = 0;
         public int TotalDealedFolderCount = 0;
 
-        public void BackupSync()
+        public void BackupSync(ItemUADStatus uadStatus)
         {
             try
             {
@@ -216,6 +237,13 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
                 List<EwsWSData.FolderChange> validFolders = new List<Microsoft.Exchange.WebServices.Data.FolderChange>();
                 HashSet<string> deleteFolders = new HashSet<string>();
                 List<IFolderDataSync> addOrUpdateFolders = new List<IFolderDataSync>();
+                Dictionary<ItemUADStatus, List<IFolderDataSync>> folderDataChangeUAD = new Dictionary<ItemUADStatus, List<IFolderDataSync>>(4)
+                {
+                    {ItemUADStatus.Add, new List<IFolderDataSync>() },
+                    {ItemUADStatus.Update, new List<IFolderDataSync>() },
+                     {ItemUADStatus.None, new List<IFolderDataSync>() }
+                };
+
 
                 var pCounter = PerformanceCounter.Start();
                 Progress.Report("Get Folder Change {0} Start.", MailboxInfo.MailAddress);
@@ -232,6 +260,11 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
                     {
                         if (FuncIsFolderInPlan(folderChange.Folder.Id.UniqueId))
                         {
+                            if (folderChange.ChangeType == EwsWSData.ChangeType.Delete)
+                            {
+                                ActionDeleteFolderToCatalog(folderChange.FolderId.UniqueId);
+                                continue;
+                            }
                             ActionLoadFolderProperties(folderChange.Folder);
 
                             if (!FuncIsFolderClassValid(folderChange.Folder.FolderClass))
@@ -244,6 +277,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
                             {
                                 case EwsWSData.ChangeType.Create:
                                     folderData = DataConvert.Convert(folderChange.Folder, MailboxInfo);
+                                    folderDataChangeUAD[ItemUADStatus.Add].Add(folderData);
                                     addOrUpdateFolders.Add(folderData);
                                     folderDealed.Add(folderChange.FolderId.UniqueId);
                                     break;
@@ -251,6 +285,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
                                 case Microsoft.Exchange.WebServices.Data.ChangeType.Update:
                                     folderData = DataConvert.Convert(folderChange.Folder, MailboxInfo);
                                     folderData.SyncStatus = foldersInDic[folderChange.Folder.Id.UniqueId].SyncStatus;
+                                    folderDataChangeUAD[ItemUADStatus.Update].Add(folderData);
                                     addOrUpdateFolders.Add(folderData);
                                     folderDealed.Add(folderChange.FolderId.UniqueId);
                                     break;
@@ -274,7 +309,22 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
                 var folderTree = FuncGetFolderTrees(foldersInLastCatalog, addOrUpdateFolders);
 
                 MailboxInfo.SyncStatus = lastSyncStatus;
-                ActionUpdateMailbox(MailboxInfo);
+
+                switch (uadStatus)
+                {
+                    case ItemUADStatus.None:
+                        ActionUpdateMailboxSyncToCatalog(MailboxInfo);
+                        break;
+                    case ItemUADStatus.Update:
+                        ActionUpdateMailboxToCatalog(MailboxInfo);
+                        break;
+                    case ItemUADStatus.Add:
+                        ActionAddMailboxToCatalog(MailboxInfo);
+                        break;
+                    default:
+                        throw new NotSupportedException();
+
+                }
 
                 List<IFolderDataSync> otherNeedDealedFolder = new List<IFolderDataSync>();
                 foreach (var folder in foldersInLastCatalog)
@@ -285,26 +335,26 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
                     }
                 }
 
-                if (otherNeedDealedFolder.Count != 0 || addOrUpdateFolders.Count != 0)
-                {
-                    List<IFolderDataSync> totalFolders = new List<IFolderDataSync>(addOrUpdateFolders.Count + otherNeedDealedFolder.Count);
-                    totalFolders.AddRange(addOrUpdateFolders);
-                    totalFolders.AddRange(otherNeedDealedFolder);
+                folderDataChangeUAD[ItemUADStatus.None].AddRange(otherNeedDealedFolder);
 
-                    ForEachLoop(totalFolders, (folder) =>
+
+                foreach (var folderItems in folderDataChangeUAD)
+                {
+                    ForEachLoop(folderItems.Value, folderItems.Key, (folder, itemStatus) =>
                     {
                         var folderTemplate = FuncNewFolderTemplate();
                         folderTemplate.FolderTree = folderTree;
 
                         var pCounter1 = PerformanceCounter.Start();
                         Progress.Report("  Folder {0} Start.", folder.Location);
-                        folderTemplate.BackupSync(folder);
+                        folderTemplate.BackupSync(folder, itemStatus);
                         Progress.Report("  Folder {0} End, TotalTime {1}s.", folder.Location, pCounter1.EndBySecond());
                         Interlocked.Add(ref TotalDealedItemCount, folderTemplate.TotalDealedItemCount);
                         Interlocked.Add(ref TotalDealedItemSize, folderTemplate.TotalDealedItemSize);
                         Interlocked.Increment(ref TotalDealedFolderCount);
                     });
                 }
+
             }
             finally
             {
@@ -325,6 +375,8 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
         /// </summary>
         /// 
         protected abstract Action<IFolderDataSync> ActionAddFolderToCatalog { get; }
+        protected abstract Action<IFolderDataSync> ActionUpdateFolderToCatalog { get; }
+        protected abstract Action<IFolderDataSync> ActionUpdateFolderStatusToCatalog { get; }
 
 
         protected abstract Func<EwsWSData.FolderId, string, EwsWSData.ChangeCollection<EwsWSData.ItemChange>> FuncGetChangedItems { get; }
@@ -333,17 +385,30 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
 
         public long TotalDealedItemSize = 0;
         public int TotalDealedItemCount = 0;
-        public void BackupSync(IFolderDataSync folder)
+        public void BackupSync(IFolderDataSync folder, ItemUADStatus itemStatus)
         {
             try
             {
                 var lastSyncStatus = BackupItemsSync(folder, folder.SyncStatus);
                 folder.SyncStatus = lastSyncStatus;
-                ActionAddFolderToCatalog(folder);
+
+                switch (itemStatus)
+                {
+                    case ItemUADStatus.None:
+                        ActionUpdateFolderStatusToCatalog(folder);
+                        break;
+                    case ItemUADStatus.Update:
+                        ActionUpdateFolderToCatalog(folder);
+                        break;
+                    case ItemUADStatus.Delete:
+                        throw new ArgumentException("Can't deal delete items.");
+                    case ItemUADStatus.Add:
+                        ActionAddFolderToCatalog(folder);
+                        break;
+                }
             }
             finally
             {
-
             }
         }
 
@@ -481,11 +546,11 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
 
         private void DealDelete(EwsWSData.ItemChange itemChange)
         {
-            //ICollection<EwsWSData.ItemChange> items = null;
-            //if (CheckCanBatchDelete(itemChange, out items))
-            //{
-            //    BatchDeleteItems(items);
-            //}
+            ICollection<EwsWSData.ItemChange> items = null;
+            if (CheckCanBatchDelete(itemChange, out items))
+            {
+                BatchDeleteItems(items);
+            }
         }
 
 
@@ -493,6 +558,8 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
         protected abstract Action<IEnumerable<EwsWSData.Item>, ItemClass> ActionLoadPropertyForItems { get; }
         protected abstract Func<IEnumerable<IItemDataSync>, int> FuncWriteItemsToStorage { get; }
         protected abstract Action<IEnumerable<IItemDataSync>> ActionAddItemsToCatalog { get; }
+        protected abstract Action<IEnumerable<string>> ActionDeleteItemsToCatalog { get; }
+        protected abstract Action<IEnumerable<IItemDataSync>> ActionUpdateItemsToCatalog { get; }
         protected abstract Action<IItemDataSync> ActionAddItemToCatalog { get; }
         protected abstract Func<IEnumerable<string>, IEnumerable<IItemDataSync>> FuncGetItemsFromCatalog { get; }
         protected abstract Func<string, IEnumerable<IItemDataSync>> FuncGetItemsByParentFolderIdFromCatalog { get; }
@@ -502,7 +569,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
 
         protected abstract bool CheckCanBatchAdded(EwsWSData.ItemChange itemChange, ItemClass itemClass, out ICollection<EwsWSData.ItemChange> batchItems);
         protected abstract bool CheckCanBatchUpdate(EwsWSData.ItemChange itemChange, ItemClass itemClass, out ICollection<EwsWSData.ItemChange> batchItems);
-        protected abstract bool CheckCanBatchDelete(EwsWSData.ItemChange itemChange, ItemClass itemClass, out ICollection<EwsWSData.ItemChange> batchItems);
+        protected abstract bool CheckCanBatchDelete(EwsWSData.ItemChange itemChange, out ICollection<EwsWSData.ItemChange> batchItems);
         protected abstract bool CheckCanBatchReadChange(EwsWSData.ItemChange itemChange, ItemClass itemClass, out ICollection<EwsWSData.ItemChange> batchItems);
 
         protected abstract Dictionary<ItemClass, List<EwsWSData.ItemChange>> GetLeftBatchAdded();
@@ -571,8 +638,8 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
         }
         protected virtual void BatchDeleteItems(ICollection<EwsWSData.ItemChange> batchItems)
         {
-            //var items = from item in batchItems select item.Item;
-            //ActionDeleteItemsToCatalog(items);
+            var itemIds = from item in batchItems select item.Item.Id.UniqueId;
+            ActionDeleteItemsToCatalog(itemIds);
         }
         protected virtual void BatchUpdate(ICollection<EwsWSData.ItemChange> batchItems, ItemClass itemClass)
         {
@@ -583,7 +650,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
             IEnumerable<IItemDataSync> itemDatas = DataConvert.Convert(items, ParentFolder);
 
             itemDatas = FuncRemoveInvalidItem(itemDatas);
-            ActionAddItemsToCatalog(itemDatas);
+            ActionUpdateItemsToCatalog(itemDatas);
             BatchWriteItemToStorage(itemDatas);
             var itemCount = itemDatas.Count();
             Interlocked.Add(ref TotalDealedItemCount, itemCount);
@@ -599,7 +666,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
             var items = from item in batchItems select item.Item;
             var ids = from item in batchItems select item.ItemId.UniqueId;
             var itemToIsRead = new Dictionary<string, bool>(batchItems.Count);
-            foreach(var itemChange in batchItems)
+            foreach (var itemChange in batchItems)
             {
                 itemToIsRead.Add(itemChange.ItemId.UniqueId, itemChange.IsRead);
             }

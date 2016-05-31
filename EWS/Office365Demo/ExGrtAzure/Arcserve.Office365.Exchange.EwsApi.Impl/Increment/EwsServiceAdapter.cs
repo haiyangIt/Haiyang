@@ -67,14 +67,14 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
         /// </summary>
         private EwsBaseOperator _ewsOperator = new EwsLimitOperator();
 
-        public ICollection<IMailboxDataSync> GetAllMailboxes(string adminUserName, string adminPassword)
+        public ICollection<IMailboxDataSync> GetAllMailboxes(string adminUserName, string adminPassword, IEnumerable<string> mailboxes)
         {
-            var result = _ewsOperator.GetAllMailbox(adminUserName, adminPassword);
+            var result = _ewsOperator.GetAllMailbox(adminUserName, adminPassword, mailboxes);
             Progress.Report("Getting all mailboxes in exchange completed, total {0} mailboxes.", result.Count);
             return result;
         }
 
-        public async Task<ICollection<IMailboxDataSync>> GetAllMailboxesAsync(string adminUserName, string adminPassword)
+        public async Task<ICollection<IMailboxDataSync>> GetAllMailboxesAsync(string adminUserName, string adminPassword, IEnumerable<string> mailboxes)
         {
             throw new NotImplementedException();
         }

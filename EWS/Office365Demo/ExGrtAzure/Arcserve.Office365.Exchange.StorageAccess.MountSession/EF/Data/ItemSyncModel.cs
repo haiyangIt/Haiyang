@@ -95,6 +95,21 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data
         {
             throw new NotImplementedException();
         }
+
+        public void Clone(IItemDataSync source)
+        {
+            this.ActualSize = source.ActualSize;
+            this.ChangeKey = source.ChangeKey;
+            this.CreateTime = source.CreateTime;
+            this.DisplayName = source.DisplayName;
+            this.IsRead = source.IsRead;
+            this.ItemClass = source.ItemClass;
+            this.Location = source.Location;
+            this.MailboxAddress = source.MailboxAddress;
+            this.ParentFolderId = source.ParentFolderId;
+            this.Size = source.Size;
+            this.SyncStatus = source.SyncStatus;
+        }
     }
 
     public static class IItemDataSyncExtension

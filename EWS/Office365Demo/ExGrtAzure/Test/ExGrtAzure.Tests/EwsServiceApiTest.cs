@@ -129,63 +129,18 @@ namespace ExGrtAzure.Tests
                 Debug.WriteLine(" {0} time cost {1}", e.Message, e.StackTrace);
             }
         }
-
+        
         [TestMethod]
-        public void TestInt()
+        public void TestGetMailbox()
         {
-            int i = 0;
-            string abc = i.ToString(string.Format("D{0}", i * 2 + 3));
-            i++;
-            abc = i.ToString(string.Format("D{0}", i * 2));
-
-            i++;
-            abc = i.ToString(string.Format("D{0}", i * 2));
-
-            i++;
-            abc = i.ToString(string.Format("D{0}", i * 2));
-
-            i++;
-            abc = i.ToString(string.Format("D{0}", i * 2));
-
-            i++;
-            abc = i.ToString(string.Format("D{0}", i * 2));
-        }
-
-        [TestMethod]
-        public void TestCreateDirectory()
-        {
-            var invalidChar = Path.InvalidPathChars;
-            foreach (var cha in invalidChar)
+            EwsServiceAdapter adpapter = CreatAdapter();
+            var org = new Arcserve.Office365.Exchange.Data.Account.OrganizationAdminInfo()
             {
-                Debug.Write((byte)cha);
-                Debug.Write("  ");
-                Debug.WriteLine(cha);
-
-            }
-
-
-            //            System.Management.ManagementObjectSearcher ms =
-            //new System.Management.ManagementObjectSearcher("SELECT * FROM Win32_DiskDrive");
-            //            foreach (ManagementObject mo in ms.Get())
-            //            {
-            //                var st = mo.ToString();
-            //                st = mo.Path.Path;
-            //                st = mo.ClassPath.Path;
-            //            }
-
-            FileIOPermission f = new FileIOPermission(FileIOPermissionAccess.AllAccess, @"\\?\Volume{3bbc2451-1d97-11e4-be66-806e6f6e6963}");
-            f.Demand();
-            try
-            {
-                //DirectoryInfo info = new DirectoryInfo(@"\\?\Volume{3bbc2451-1d97-11e4-be66-806e6f6e6963}");
-                
-                
-                var result = Directory.GetFiles(@"\\?\Volume{3bbc2451-1d97-11e4-be66-806e6f6e6963}\mytestFolder");
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine(e.Message);
-            }
+                OrganizationName = "arcserve",
+                UserName = "devO365admin@arcservemail.onmicrosoft.com",
+                UserPassword = "JackyMao1!"
+            };
+            var mailboxes = adpapter.GetAllMailboxes(org.UserName, org.UserPassword, new List<string>(2) { "haiyang.ling@arcserve.com", "shiqiang.li@arcserve.com" });
         }
     }
 }

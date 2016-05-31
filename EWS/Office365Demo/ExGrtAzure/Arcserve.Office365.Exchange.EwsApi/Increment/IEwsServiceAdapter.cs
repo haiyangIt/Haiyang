@@ -16,8 +16,8 @@ namespace Arcserve.Office365.Exchange.EwsApi.Increment
         Task<string> GetExchangeServiceAsync(string mailbox, OrganizationAdminInfo adminInfo);
         string GetExchangeService(string mailbox, OrganizationAdminInfo adminInfo);
 
-        Task<ICollection<IMailboxDataSync>> GetAllMailboxesAsync(string adminUserName, string adminPassword);
-        ICollection<IMailboxDataSync> GetAllMailboxes(string adminUserName, string adminPassword);
+        Task<ICollection<IMailboxDataSync>> GetAllMailboxesAsync(string adminUserName, string adminPassword, IEnumerable<string> mailboxes);
+        ICollection<IMailboxDataSync> GetAllMailboxes(string adminUserName, string adminPassword, IEnumerable<string> mailboxes);
 
         ChangeCollection<FolderChange> SyncFolderHierarchy(string lastSyncStatus);
         Task<ChangeCollection<FolderChange>> SyncFoldersAsync(string lastSyncStatus);

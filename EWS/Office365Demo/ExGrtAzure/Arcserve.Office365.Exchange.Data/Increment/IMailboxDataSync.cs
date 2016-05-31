@@ -107,4 +107,25 @@ namespace Arcserve.Office365.Exchange.Data.Increment
             return Clone();
         }
     }
+
+    public static class MailboxDataSyncExtension
+    {
+        public static bool IsDataEqual(this IMailboxDataSync obj1, IMailboxDataSync obj2)
+        {
+            if(object.ReferenceEquals(obj1, obj2))
+            {
+                return true;
+            }
+
+            return obj1.ChangeKey == obj2.ChangeKey &&
+                obj1.ChildFolderCount == obj2.ChildFolderCount &&
+                obj1.DisplayName == obj2.DisplayName &&
+                obj1.MailAddress == obj2.MailAddress &&
+                obj1.Id == obj2.Id &&
+                obj1.Location == obj2.Location &&
+                obj1.Name == obj2.Name &&
+                obj1.RootFolderId == obj2.RootFolderId &&
+                obj1.SyncStatus == obj2.SyncStatus;
+        }
+    }
 }

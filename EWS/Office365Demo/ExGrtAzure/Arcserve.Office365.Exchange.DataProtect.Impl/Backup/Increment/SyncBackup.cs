@@ -33,13 +33,13 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
         public IDataFromClient<IJobProgress> DataFromClient { get; set; }
         public DateTime JobStartTime { get; }
 
-        protected override Func<ICollection<IMailboxDataSync>> FuncGetAllMailboxFromExchange
+        protected override Func<IEnumerable<string>, ICollection<IMailboxDataSync>> FuncGetAllMailboxFromExchange
         {
             get
             {
-                return () =>
+                return (mailboxes) =>
                 {
-                    return EwsServiceAdapter.GetAllMailboxes(AdminInfo.UserName, AdminInfo.UserPassword);
+                    return EwsServiceAdapter.GetAllMailboxes(AdminInfo.UserName, AdminInfo.UserPassword, mailboxes);
                 };
             }
         }
@@ -143,7 +143,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
                     }
 
                     var temp = new List<IMailboxDataSync>(result.Count);
-                    foreach(var item in result)
+                    foreach (var item in result)
                     {
                         temp.Add(DataConvert.Convert(item));
                     }
@@ -153,26 +153,55 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
             }
         }
 
-        protected override Action<ICollection<IMailboxDataSync>, IEnumerable<IMailboxDataSync>> ActionSetMailboxSyncStatus
+        protected override Func<ICollection<IMailboxDataSync>, IEnumerable<IMailboxDataSync>, IDictionary<ItemUADStatus, ICollection<IMailboxDataSync>>> FuncGetMailboxUAD
         {
             get
             {
+
                 return (validMailboxes, mailboxInLastCatalog) =>
                 {
-                    Dictionary<string, string> mailboxSyncDic = new Dictionary<string, string>();
+                    Dictionary<ItemUADStatus, ICollection<IMailboxDataSync>> result = new Dictionary<ItemUADStatus, ICollection<IMailboxDataSync>>()
+                    {
+                        {ItemUADStatus.Add, new List<IMailboxDataSync>() },
+                        {ItemUADStatus.Delete, new List<IMailboxDataSync>() },
+                        {ItemUADStatus.Update, new List<IMailboxDataSync>() },
+                        {ItemUADStatus.None, new List<IMailboxDataSync>() }
+                    };
+                    Dictionary<string, IMailboxDataSync> mailboxSyncDic = new Dictionary<string, IMailboxDataSync>();
                     foreach (var mailbox in mailboxInLastCatalog)
                     {
-                        mailboxSyncDic.Add(mailbox.Id, mailbox.SyncStatus);
+                        mailboxSyncDic.Add(mailbox.Id, mailbox);
                     }
 
-                    string syncStatus = string.Empty;
+                    IMailboxDataSync temp = null;
                     foreach (var mailbox in validMailboxes)
                     {
-                        if (mailboxSyncDic.TryGetValue(mailbox.Id, out syncStatus))
+                        if (mailboxSyncDic.TryGetValue(mailbox.Id, out temp))
                         {
-                            mailbox.SyncStatus = syncStatus;
+                            mailbox.SyncStatus = temp.SyncStatus;
+
+                            if (mailbox.IsDataEqual(temp))
+                            {
+                                result[ItemUADStatus.None].Add(mailbox);
+                            }
+                            else
+                            {
+                                result[ItemUADStatus.Update].Add(mailbox);
+                            }
+                            
+                            mailboxSyncDic.Remove(mailbox.Id);
+                        }
+                        else
+                        {
+                            result[ItemUADStatus.Add].Add(mailbox);
                         }
                     }
+
+                    foreach (var mailbox in mailboxInLastCatalog)
+                    {
+                        result[ItemUADStatus.Delete].Add(mailbox);
+                    }
+                    return result;
                 };
             }
         }
@@ -184,6 +213,27 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
                 return (mailboxes) =>
                 {
                     CatalogAccess.AddMailboxesToCatalog(mailboxes);
+                };
+            }
+        }
+
+        protected override Action<ICollection<IMailboxDataSync>> UpdateMailboxToCurrentCatalog
+        {
+            get
+            {
+                return (mailboxes) =>
+                {
+                    CatalogAccess.UpdateMailboxToCatalog(mailboxes);
+                };
+            }
+        }
+        protected override Action<ICollection<IMailboxDataSync>> DeleteMailboxToCurrentCatalog
+        {
+            get
+            {
+                return (mailboxes) =>
+                {
+                    CatalogAccess.DeleteMailboxToCatalog(mailboxes);
                 };
             }
         }
@@ -210,11 +260,11 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
             get; set;
         }
 
-        protected override void ForEachLoop(ICollection<IMailboxDataSync> items, Action<IMailboxDataSync> DoEachMailbox)
+        protected override void ForEachLoop(ICollection<IMailboxDataSync> items, ItemUADStatus uadStatus, Action<IMailboxDataSync, ItemUADStatus> DoEachMailbox)
         {
             foreach (var mailbox in items)
             {
-                DoEachMailbox(mailbox);
+                DoEachMailbox(mailbox, uadStatus);
             }
         }
 
