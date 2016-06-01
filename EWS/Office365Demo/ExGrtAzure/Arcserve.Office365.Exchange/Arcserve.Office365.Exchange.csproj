@@ -46,10 +46,6 @@
       <HintPath>..\packages\Microsoft.Data.Services.Client.5.7.0\lib\net40\Microsoft.Data.Services.Client.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Exchange.WebServices, Version=15.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Microsoft\Exchange\Web Services\2.2\Microsoft.Exchange.WebServices.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Practices.EnterpriseLibrary.Common, Version=6.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\EnterpriseLibrary.Common.6.0.1304.0\lib\NET45\Microsoft.Practices.EnterpriseLibrary.Common.dll</HintPath>
       <Private>True</Private>
@@ -64,26 +60,6 @@
     </Reference>
     <Reference Include="Microsoft.Practices.TransientFaultHandling.Core, Version=5.1.1209.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\TransientFaultHandling.Core.5.1.1209.1\lib\NET4\Microsoft.Practices.TransientFaultHandling.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Practices.Unity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=6d32ff45e0ccc69f, processorArchitecture=MSIL">
-      <HintPath>..\packages\Unity.4.0.1\lib\net45\Microsoft.Practices.Unity.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Practices.Unity.Configuration, Version=4.0.0.0, Culture=neutral, PublicKeyToken=6d32ff45e0ccc69f, processorArchitecture=MSIL">
-      <HintPath>..\packages\Unity.4.0.1\lib\net45\Microsoft.Practices.Unity.Configuration.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Practices.Unity.Interception, Version=4.0.0.0, Culture=neutral, PublicKeyToken=6d32ff45e0ccc69f, processorArchitecture=MSIL">
-      <HintPath>..\packages\Unity.Interception.4.0.1\lib\Net45\Microsoft.Practices.Unity.Interception.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Practices.Unity.Interception.Configuration, Version=4.0.0.0, Culture=neutral, PublicKeyToken=6d32ff45e0ccc69f, processorArchitecture=MSIL">
-      <HintPath>..\packages\Unity.Interception.4.0.1\lib\Net45\Microsoft.Practices.Unity.Interception.Configuration.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Practices.Unity.RegistrationByConvention, Version=4.0.0.0, Culture=neutral, PublicKeyToken=6d32ff45e0ccc69f, processorArchitecture=MSIL">
-      <HintPath>..\packages\Unity.4.0.1\lib\net45\Microsoft.Practices.Unity.RegistrationByConvention.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.ServiceBus, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -121,14 +97,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ArcJob\IJobBaseInfo.cs" />
-    <Compile Include="ArcJob\TaskType.cs" />
-    <Compile Include="Azure\BlobDataAccess.cs" />
-    <Compile Include="Azure\TableDataAccess.cs" />
-    <Compile Include="Cache\ICache.cs" />
-    <Compile Include="Cache\MailboxCacheManager.cs" />
-    <Compile Include="Cache\OrganizationCacheManager.cs" />
     <Compile Include="FactoryBase.cs" />
+    <Compile Include="Log\Impl\DefaultEwsTraceLog.cs" />
+    <Compile Include="Log\Impl\DefaultLog.cs" />
+    <Compile Include="Log\Impl\LogToBlob.cs" />
     <Compile Include="Log\LogFactory.cs" />
     <Compile Include="Log\ILog.cs" />
     <Compile Include="Log\LogLevel.cs" />
@@ -140,32 +112,20 @@
     <Compile Include="Manager\IF\IManager.cs" />
     <Compile Include="Manager\IF\IProgressInfo.cs" />
     <Compile Include="Manager\IF\IProgressManager.cs" />
-    <Compile Include="Manager\IF\ISubScriptionManager.cs" />
     <Compile Include="Manager\IF\IThreadManager.cs" />
     <Compile Include="Manager\Impl\ArcJobBase.cs" />
-    <Compile Include="Manager\Impl\JobFactoryClient.cs" />
     <Compile Include="Manager\Impl\JobFactoryServer.cs" />
     <Compile Include="Manager\Impl\JobManager.cs" />
     <Compile Include="Manager\Impl\ManagerBase.cs" />
     <Compile Include="Manager\Impl\ProgressInfoBase.cs" />
     <Compile Include="Manager\Impl\ProgressManager.cs" />
-    <Compile Include="Manager\Impl\SubScriptionManager.cs" />
     <Compile Include="Manager\Impl\ThreadManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ServiceBus\AzureServiceBusHelper.cs" />
-    <Compile Include="ServiceBus\Relay\ILogSolver.cs" />
-    <Compile Include="ServiceBus\Relay\LogSolver.cs" />
-    <Compile Include="ServiceBus\Relay\ServiceClientHelper.cs" />
-    <Compile Include="ServiceBus\Relay\ServiceHostManager.cs" />
-    <Compile Include="ServiceBus\TopicHelper.cs" />
     <Compile Include="Thread\EwsRequestGate.cs" />
     <Compile Include="Thread\ITaskSyncContext.cs" />
     <Compile Include="Thread\IJobProgress.cs" />
-    <Compile Include="Thread\TaskSyncContextBase.cs" />
     <Compile Include="Thread\ThreadData.cs" />
     <Compile Include="Topaz\OperatorCtrlBase.cs" />
-    <Compile Include="Topaz\RetryContext.cs" />
-    <Compile Include="Topaz\TopazManager.cs" />
     <Compile Include="Util\Deque.cs" />
     <Compile Include="Util\MD5Utility.cs" />
     <Compile Include="Util\PerformanceCounter.cs" />
@@ -179,7 +139,6 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="Util\Setting\ProtectConfig.cs" />
     <Compile Include="Util\TreeNode.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -44,25 +44,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Backup\Increment\AsyncBackup.cs" />
     <Compile Include="Backup\Increment\BackupFlowTemplate.cs" />
     <Compile Include="Backup\Increment\ICatalogAccess.cs" />
     <Compile Include="Backup\Increment\IDataConvert.cs" />
     <Compile Include="Backup\Increment\IDataFromClient.cs" />
     <Compile Include="Backup\Increment\IExchangeAccess.cs" />
     <Compile Include="Backup\Increment\IFilterItemWithFolderAsync.cs" />
-    <Compile Include="CatalogException.cs" />
-    <Compile Include="Backup\Full\CatalogFactory.cs" />
-    <Compile Include="Backup\Full\ICatalogService.cs" />
-    <Compile Include="Backup\Full\IDataConvert.cs" />
-    <Compile Include="IDataConvertFromDb.cs" />
-    <Compile Include="IFilterItem.cs" />
-    <Compile Include="IRestoreDestination.cs" />
-    <Compile Include="IRestoreService.cs" />
-    <Compile Include="IServiceContext.cs" />
-    <Compile Include="PlanFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RestoreFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Arcserve.Office365.Exchange.Data\Arcserve.Office365.Exchange.Data.csproj">
@@ -72,10 +60,6 @@
     <ProjectReference Include="..\Arcserve.Office365.Exchange.EwsApi\Arcserve.Office365.Exchange.EwsApi.csproj">
       <Project>{0ddbd2b6-de8b-43bf-87ef-d93428a74948}</Project>
       <Name>Arcserve.Office365.Exchange.EwsApi</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Arcserve.Office365.Exchange.StorageAccess.Interface\Arcserve.Office365.Exchange.StorageAccess.Interface.csproj">
-      <Project>{b5778470-0cb3-425a-8368-74ff0866e8c0}</Project>
-      <Name>Arcserve.Office365.Exchange.StorageAccess.Interface</Name>
     </ProjectReference>
     <ProjectReference Include="..\Arcserve.Office365.Exchange\Arcserve.Office365.Exchange.csproj">
       <Project>{9d0c2e9c-7582-4d61-bd19-39ae85684f7e}</Project>

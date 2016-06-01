@@ -359,7 +359,26 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
             OperatorCtrlBase.DoActionWithRetryTimeOut(() =>
             {
                 operation.Invoke();
-            }, operationName);
+            }, operationName, IsExceptionNeedSuspendRequest);
+        }
+
+        private static string[] FindArray = new string[]
+        {
+            "An existing connection was forcibly closed by the remote host",
+            "The underlying connection was closed",
+            "The mailbox database is temporarily unavailable",
+            "The connection was closed."
+        };
+
+        private static bool IsExceptionNeedSuspendRequest(Exception e)
+        {
+            return ((e is ServiceRequestException) ||
+                (e is WebException) ||
+                (e is SocketException) ||
+                (e is ServiceResponseException) ||
+                (e is IOException)) && (
+                    FindArray.Any(e.Message.Contains)
+                );
         }
 
         protected T TryFunc<T>(Func<T> operation, string operationName)
@@ -368,7 +387,7 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
             OperatorCtrlBase.DoActionWithRetryTimeOut(() =>
             {
                 result = operation.Invoke();
-            }, operationName);
+            }, operationName, IsExceptionNeedSuspendRequest);
             return result;
         }
 

@@ -14,13 +14,13 @@ namespace Arcserve.Office365.Exchange.Data.Mail
         {
             if (itemBase.ItemKind != ItemKind.Item)
                 throw new ArgumentException("Type is wrong.", "itemBase");
-            if (itemBase is LoadedTreeItem)
-            {
-                var str = ((LoadedTreeItem)itemBase).ItemData;
+            //if (itemBase is LoadedTreeItem)
+            //{
+            //    var str = ((LoadedTreeItem)itemBase).ItemData;
 
-                ItemModel item = JsonConvert.DeserializeObject<ItemModel>(str);
-                return item.ItemClass;
-            }
+            //    ItemModel item = JsonConvert.DeserializeObject<ItemModel>(str);
+            //    return item.ItemClass;
+            //}
             else if (itemBase is IItemData)
             {
                 return ((IItemData)itemBase).ItemClass;
@@ -199,12 +199,12 @@ namespace Arcserve.Office365.Exchange.Data.Mail
         {
             if (itemBase.ItemKind != ItemKind.Folder)
                 throw new ArgumentException("Type is wrong.", "itemBase");
-            if (itemBase is LoadedTreeItem)
-            {
-                var str = ((LoadedTreeItem)itemBase).ItemData;
-                FolderModel item = JsonConvert.DeserializeObject<FolderModel>(str);
-                return item.FolderType;
-            }
+            //if (itemBase is LoadedTreeItem)
+            //{
+            //    var str = ((LoadedTreeItem)itemBase).ItemData;
+            //    FolderModel item = JsonConvert.DeserializeObject<FolderModel>(str);
+            //    return item.FolderType;
+            //}
             else if (itemBase is IFolderData)
             {
                 return ((IFolderData)itemBase).FolderType;
@@ -278,12 +278,12 @@ namespace Arcserve.Office365.Exchange.Data.Mail
         {
             if (itemBase.ItemKind != ItemKind.Mailbox)
                 throw new ArgumentException("Type is wrong.", "itemBase");
-            if (itemBase is LoadedTreeItem)
-            {
-                var str = ((LoadedTreeItem)itemBase).ItemData;
-                MailClass item = JsonConvert.DeserializeObject<MailClass>(str);
-                return item;
-            }
+            //if (itemBase is LoadedTreeItem)
+            //{
+            //    var str = ((LoadedTreeItem)itemBase).ItemData;
+            //    MailClass item = JsonConvert.DeserializeObject<MailClass>(str);
+            //    return item;
+            //}
             else if (itemBase is IMailboxData)
             {
                 return itemBase as IMailboxData;

@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using EwsWSData = Microsoft.Exchange.WebServices.Data;
-using EwsWS = Microsoft.Exchange.WebServices;
 using Arcserve.Office365.Exchange.Thread;
 using Arcserve.Office365.Exchange.Data.Account;
 using Arcserve.Office365.Exchange.EwsApi.Increment;

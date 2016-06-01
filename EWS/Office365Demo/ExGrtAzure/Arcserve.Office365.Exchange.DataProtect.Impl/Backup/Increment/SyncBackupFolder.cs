@@ -19,7 +19,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment
         public IDataFromClient<IJobProgress> DataFromClient { get; set; }
 
 
-        protected override Func<FolderId, string, ChangeCollection<ItemChange>> FuncGetChangedItems
+        protected override Func<string, string, ChangeCollection<ItemChange>> FuncGetChangedItems
         {
             get
             {

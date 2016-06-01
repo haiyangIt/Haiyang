@@ -110,10 +110,6 @@
       <Project>{0ddbd2b6-de8b-43bf-87ef-d93428a74948}</Project>
       <Name>Arcserve.Office365.Exchange.EwsApi</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Arcserve.Office365.Exchange.StorageAccess.Interface\Arcserve.Office365.Exchange.StorageAccess.Interface.csproj">
-      <Project>{b5778470-0cb3-425a-8368-74ff0866e8c0}</Project>
-      <Name>Arcserve.Office365.Exchange.StorageAccess.Interface</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\Arcserve.Office365.Exchange\Arcserve.Office365.Exchange.csproj">
       <Project>{9d0c2e9c-7582-4d61-bd19-39ae85684f7e}</Project>
       <Name>Arcserve.Office365.Exchange</Name>

@@ -2,8 +2,6 @@
 using System.Net;
 using Microsoft.Exchange.WebServices.Data;
 using Arcserve.Office365.Exchange.Log;
-using Arcserve.Office365.Exchange.EwsApi.Impl.Impl;
-using Arcserve.Office365.Exchange.Cache;
 
 namespace Arcserve.Office365.Exchange.EwsApi.Impl.Common
 {

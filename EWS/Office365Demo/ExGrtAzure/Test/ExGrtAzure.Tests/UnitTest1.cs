@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-using EwsFrame;
 using System.Threading;
 using System.Reflection;
 using System.Diagnostics;
@@ -15,12 +14,10 @@ using Microsoft.WindowsAzure.Storage;
 using Arcserve.Office365.Exchange.Log;
 using Arcserve.Office365.Exchange.Util;
 using Arcserve.Office365.Exchange.DataProtect.Interface;
-using Arcserve.Office365.Exchange.DataProtect.Impl.Context;
 using Arcserve.Office365.Exchange;
 using Arcserve.Office365.Exchange.Util.Setting;
 using Arcserve.Office365.Exchange.Data.Mail;
 using Arcserve.Office365.Exchange.Data;
-using Arcserve.Office365.Exchange.ArcJob;
 
 namespace ExGrtAzure.Tests
 {
@@ -87,11 +84,11 @@ namespace ExGrtAzure.Tests
         [TestMethod]
         public void ResetBlobData()
         {
-            var directory = AppDomain.CurrentDomain.BaseDirectory;
-            directory = Path.Combine(directory, "..\\..\\..\\lib");
-            CatalogFactory.LibPath = directory;
-            IServiceContext context = ServiceContext.NewServiceContext("haiyang.ling@arcserve.com", "", "", "Arcserve", TaskType.Catalog);
-            throw new NotImplementedException();
+            //var directory = AppDomain.CurrentDomain.BaseDirectory;
+            //directory = Path.Combine(directory, "..\\..\\..\\lib");
+            //CatalogFactory.LibPath = directory;
+            //IServiceContext context = ServiceContext.NewServiceContext("haiyang.ling@arcserve.com", "", "", "Arcserve", TaskType.Catalog);
+            //throw new NotImplementedException();
             // todo context.CurrentContext.CurrentMailbox = "haiyang.ling@arcserve.com";
             //var dataAccess = ServiceContext.GetDataAccessInstance(TaskType.Catalog, context.Argument, "Arcserve");
             //dataAccess.ResetAllStorage();
@@ -216,69 +213,69 @@ namespace ExGrtAzure.Tests
         [TestMethod]
         public void TestTree()
         {
-            var directory = AppDomain.CurrentDomain.BaseDirectory;
-            directory = Path.Combine(directory, "..\\..\\..\\lib");
-            var dataProtectPath = Path.Combine(directory, "DataProtectImpl.dll");
-            var DataProtectImplAssembly = Assembly.LoadFrom(dataProtectPath);
-            Type type = DataProtectImplAssembly.GetType("DataProtectImpl.RestoreServiceBase.TreeNode");
+            //var directory = AppDomain.CurrentDomain.BaseDirectory;
+            //directory = Path.Combine(directory, "..\\..\\..\\lib");
+            //var dataProtectPath = Path.Combine(directory, "DataProtectImpl.dll");
+            //var DataProtectImplAssembly = Assembly.LoadFrom(dataProtectPath);
+            //Type type = DataProtectImplAssembly.GetType("DataProtectImpl.RestoreServiceBase.TreeNode");
 
-            var rootFolderId = "1";
-            var folderLevel11 = new FolderData() { ParentFolderId = rootFolderId, FolderId = "11", DisplayName = "Display-11" };
-            var folderLevel111 = new FolderData() { ParentFolderId = folderLevel11.FolderId, FolderId = "111", DisplayName = "Display-111" };
-            var folderLevel112 = new FolderData() { ParentFolderId = folderLevel11.FolderId, FolderId = "112", DisplayName = "Display-112" };
-            var folderLevel113 = new FolderData() { ParentFolderId = folderLevel11.FolderId, FolderId = "113", DisplayName = "Display-113" };
-            var folderLevel1121 = new FolderData() { ParentFolderId = folderLevel112.FolderId, FolderId = "1121", DisplayName = "Display-1121" };
-            var folderLevel1131 = new FolderData() { ParentFolderId = folderLevel113.FolderId, FolderId = "1131", DisplayName = "Display-1131" };
-            var folderLevel1132 = new FolderData() { ParentFolderId = folderLevel113.FolderId, FolderId = "1132", DisplayName = "Display-1132" };
-            var folderLevel1133 = new FolderData() { ParentFolderId = folderLevel113.FolderId, FolderId = "1133", DisplayName = "Display-1133" };
-            var folderLevel12 = new FolderData() { ParentFolderId = rootFolderId, FolderId = "12", DisplayName = "Display-12" };
-            var folderLevel121 = new FolderData() { ParentFolderId = folderLevel12.FolderId, FolderId = "121", DisplayName = "Display-121" };
-            var folderLevel122 = new FolderData() { ParentFolderId = folderLevel12.FolderId, FolderId = "122", DisplayName = "Display-122" };
-            var folderLevel1211 = new FolderData() { ParentFolderId = folderLevel121.FolderId, FolderId = "1211", DisplayName = "Display-1211" };
-            var folderLevel1212 = new FolderData() { ParentFolderId = folderLevel121.FolderId, FolderId = "1212", DisplayName = "Display-1212" };
+            //var rootFolderId = "1";
+            //var folderLevel11 = new FolderData() { ParentFolderId = rootFolderId, FolderId = "11", DisplayName = "Display-11" };
+            //var folderLevel111 = new FolderData() { ParentFolderId = folderLevel11.FolderId, FolderId = "111", DisplayName = "Display-111" };
+            //var folderLevel112 = new FolderData() { ParentFolderId = folderLevel11.FolderId, FolderId = "112", DisplayName = "Display-112" };
+            //var folderLevel113 = new FolderData() { ParentFolderId = folderLevel11.FolderId, FolderId = "113", DisplayName = "Display-113" };
+            //var folderLevel1121 = new FolderData() { ParentFolderId = folderLevel112.FolderId, FolderId = "1121", DisplayName = "Display-1121" };
+            //var folderLevel1131 = new FolderData() { ParentFolderId = folderLevel113.FolderId, FolderId = "1131", DisplayName = "Display-1131" };
+            //var folderLevel1132 = new FolderData() { ParentFolderId = folderLevel113.FolderId, FolderId = "1132", DisplayName = "Display-1132" };
+            //var folderLevel1133 = new FolderData() { ParentFolderId = folderLevel113.FolderId, FolderId = "1133", DisplayName = "Display-1133" };
+            //var folderLevel12 = new FolderData() { ParentFolderId = rootFolderId, FolderId = "12", DisplayName = "Display-12" };
+            //var folderLevel121 = new FolderData() { ParentFolderId = folderLevel12.FolderId, FolderId = "121", DisplayName = "Display-121" };
+            //var folderLevel122 = new FolderData() { ParentFolderId = folderLevel12.FolderId, FolderId = "122", DisplayName = "Display-122" };
+            //var folderLevel1211 = new FolderData() { ParentFolderId = folderLevel121.FolderId, FolderId = "1211", DisplayName = "Display-1211" };
+            //var folderLevel1212 = new FolderData() { ParentFolderId = folderLevel121.FolderId, FolderId = "1212", DisplayName = "Display-1212" };
 
-            var folderLevel1212_Path = new List<IFolderDataBase>() {
-                new FolderDataBaseDefault() { DisplayName = folderLevel12.DisplayName },
-                new FolderDataBaseDefault() { DisplayName = folderLevel121.DisplayName },
-                new FolderDataBaseDefault() { DisplayName = folderLevel1212.DisplayName }
-            };
-            var folderLevel11_Path = new List<IFolderDataBase>() { new FolderDataBaseDefault() { DisplayName = folderLevel11.DisplayName } };
+            //var folderLevel1212_Path = new List<IFolderDataBase>() {
+            //    new FolderDataBaseDefault() { DisplayName = folderLevel12.DisplayName },
+            //    new FolderDataBaseDefault() { DisplayName = folderLevel121.DisplayName },
+            //    new FolderDataBaseDefault() { DisplayName = folderLevel1212.DisplayName }
+            //};
+            //var folderLevel11_Path = new List<IFolderDataBase>() { new FolderDataBaseDefault() { DisplayName = folderLevel11.DisplayName } };
 
-            var folderLevel12_AllChildFolderId = new List<string>() {
-                folderLevel12.FolderId,
-                folderLevel121.FolderId,
-                folderLevel122.FolderId,
-                folderLevel1211.FolderId
-            , folderLevel1212.FolderId};
+            //var folderLevel12_AllChildFolderId = new List<string>() {
+            //    folderLevel12.FolderId,
+            //    folderLevel121.FolderId,
+            //    folderLevel122.FolderId,
+            //    folderLevel1211.FolderId
+            //, folderLevel1212.FolderId};
 
-            List<IFolderData> allFolder = new List<IFolderData>()
-            {
-                 folderLevel11,
-                 folderLevel111,
-                 folderLevel112 ,
-                 folderLevel113 ,
-                 folderLevel1121 ,
-                 folderLevel1131,
-                 folderLevel1132,
-                 folderLevel1133 ,
-                 folderLevel12,
-                 folderLevel121,
-                 folderLevel122 ,
-                 folderLevel1211,
-                 folderLevel1212
-            };
+            //List<IFolderData> allFolder = new List<IFolderData>()
+            //{
+            //     folderLevel11,
+            //     folderLevel111,
+            //     folderLevel112 ,
+            //     folderLevel113 ,
+            //     folderLevel1121 ,
+            //     folderLevel1131,
+            //     folderLevel1132,
+            //     folderLevel1133 ,
+            //     folderLevel12,
+            //     folderLevel121,
+            //     folderLevel122 ,
+            //     folderLevel1211,
+            //     folderLevel1212
+            //};
 
-            var rootNode = TreeNode.CreateTree(allFolder);
-            List<string> allFolderIds = TreeNode.GetAllFoldersAndChildFolders(rootNode, "12");
+            //var rootNode = TreeNode.CreateTree(allFolder);
+            //List<string> allFolderIds = TreeNode.GetAllFoldersAndChildFolders(rootNode, "12");
 
-            var dic = TreeNode.GetEachFolderPath(rootNode);
+            //var dic = TreeNode.GetEachFolderPath(rootNode);
 
-            var path1212 = dic["1212"];
-            var path11 = dic["11"];
+            //var path1212 = dic["1212"];
+            //var path11 = dic["11"];
 
-            AssertList(allFolderIds, folderLevel12_AllChildFolderId, false);
-            AssertList(path1212, folderLevel1212_Path, true);
-            AssertList(path11, folderLevel11_Path, true);
+            //AssertList(allFolderIds, folderLevel12_AllChildFolderId, false);
+            //AssertList(path1212, folderLevel1212_Path, true);
+            //AssertList(path11, folderLevel11_Path, true);
         }
 
         private void AssertList(List<IFolderDataBase> left1, List<IFolderDataBase> right1, bool isEqualByOrder)

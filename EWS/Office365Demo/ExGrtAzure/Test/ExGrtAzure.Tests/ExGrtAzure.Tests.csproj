@@ -46,9 +46,6 @@
     <Reference Include="Arcserve.Office365.Exchange.Fakes">
       <HintPath>FakesAssemblies\Arcserve.Office365.Exchange.Fakes.dll</HintPath>
     </Reference>
-    <Reference Include="Arcserve.Office365.Exchange.Storage.Interface.Fakes">
-      <HintPath>FakesAssemblies\Arcserve.Office365.Exchange.Storage.Interface.Fakes.dll</HintPath>
-    </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
       <Private>True</Private>
@@ -180,10 +177,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Arcserve.Office365.Exchange.Data.Impl\Arcserve.Office365.Exchange.Data.Impl.csproj">
-      <Project>{ab28d2e3-0def-4767-aa00-38129d147aa9}</Project>
-      <Name>Arcserve.Office365.Exchange.Data.Impl</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\Arcserve.Office365.Exchange.DataProtect.Impl\Arcserve.Office365.Exchange.DataProtect.Impl.csproj">
       <Project>{fd9aa43b-8db4-413c-bc80-fbeec07d5237}</Project>
       <Name>Arcserve.Office365.Exchange.DataProtect.Impl</Name>
@@ -207,18 +200,6 @@
     <ProjectReference Include="..\..\Arcserve.Office365.Exchange.EwsApi\Arcserve.Office365.Exchange.EwsApi.csproj">
       <Project>{0ddbd2b6-de8b-43bf-87ef-d93428a74948}</Project>
       <Name>Arcserve.Office365.Exchange.EwsApi</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Arcserve.Office365.Exchange.Log.Impl\Arcserve.Office365.Exchange.Log.Impl.csproj">
-      <Project>{42ee52e2-03b8-49ca-979c-e7055f7f3008}</Project>
-      <Name>Arcserve.Office365.Exchange.Log.Impl</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Arcserve.Office365.Exchange.StorageAccess.Azure\Arcserve.Office365.Exchange.StorageAccess.Azure.csproj">
-      <Project>{38448010-96fd-4312-8dc8-ffd12e56f053}</Project>
-      <Name>Arcserve.Office365.Exchange.StorageAccess.Azure</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Arcserve.Office365.Exchange.StorageAccess.Interface\Arcserve.Office365.Exchange.StorageAccess.Interface.csproj">
-      <Project>{b5778470-0cb3-425a-8368-74ff0866e8c0}</Project>
-      <Name>Arcserve.Office365.Exchange.StorageAccess.Interface</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Arcserve.Office365.Exchange.StorageAccess.MountSession\Arcserve.Office365.Exchange.StorageAccess.MountSession.csproj">
       <Project>{f8422c10-4ae8-47d4-92f0-11500e23c38c}</Project>

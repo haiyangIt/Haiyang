@@ -34,19 +34,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcserve.Office365.Exchange
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcserve.Office365.Exchange.DataProtect.Interface", "Arcserve.Office365.Exchange.DataProtect.Interface\Arcserve.Office365.Exchange.DataProtect.Interface.csproj", "{3537B177-88F3-440B-B114-5BCF98CA2220}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcserve.Office365.Exchange.StorageAccess.Interface", "Arcserve.Office365.Exchange.StorageAccess.Interface\Arcserve.Office365.Exchange.StorageAccess.Interface.csproj", "{B5778470-0CB3-425A-8368-74FF0866E8C0}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcserve.Office365.Exchange.EwsApi", "Arcserve.Office365.Exchange.EwsApi\Arcserve.Office365.Exchange.EwsApi.csproj", "{0DDBD2B6-DE8B-43BF-87EF-D93428A74948}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcserve.Office365.Exchange.DataProtect.Impl", "Arcserve.Office365.Exchange.DataProtect.Impl\Arcserve.Office365.Exchange.DataProtect.Impl.csproj", "{FD9AA43B-8DB4-413C-BC80-FBEEC07D5237}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcserve.Office365.Exchange.Log.Impl", "Arcserve.Office365.Exchange.Log.Impl\Arcserve.Office365.Exchange.Log.Impl.csproj", "{42EE52E2-03B8-49CA-979C-E7055F7F3008}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcserve.Office365.Exchange.EwsApi.Impl", "Arcserve.Office365.Exchange.EwsApi.Impl\Arcserve.Office365.Exchange.EwsApi.Impl.csproj", "{BE1ACE64-73D6-4CE2-A848-EFB204C958F8}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcserve.Office365.Exchange.StorageAccess.Azure", "Arcserve.Office365.Exchange.StorageAccess.Azure\Arcserve.Office365.Exchange.StorageAccess.Azure.csproj", "{38448010-96FD-4312-8DC8-FFD12E56F053}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcserve.Office365.Exchange.Data.Impl", "Arcserve.Office365.Exchange.Data.Impl\Arcserve.Office365.Exchange.Data.Impl.csproj", "{AB28D2E3-0DEF-4767-AA00-38129D147AA9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcserve.Office365.Exchange.StorageAccess.MountSession", "Arcserve.Office365.Exchange.StorageAccess.MountSession\Arcserve.Office365.Exchange.StorageAccess.MountSession.csproj", "{F8422C10-4AE8-47D4-92F0-11500E23C38C}"
 EndProject
@@ -92,10 +84,6 @@ Global
 		{3537B177-88F3-440B-B114-5BCF98CA2220}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3537B177-88F3-440B-B114-5BCF98CA2220}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3537B177-88F3-440B-B114-5BCF98CA2220}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B5778470-0CB3-425A-8368-74FF0866E8C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B5778470-0CB3-425A-8368-74FF0866E8C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B5778470-0CB3-425A-8368-74FF0866E8C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B5778470-0CB3-425A-8368-74FF0866E8C0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0DDBD2B6-DE8B-43BF-87EF-D93428A74948}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0DDBD2B6-DE8B-43BF-87EF-D93428A74948}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0DDBD2B6-DE8B-43BF-87EF-D93428A74948}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -104,22 +92,10 @@ Global
 		{FD9AA43B-8DB4-413C-BC80-FBEEC07D5237}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FD9AA43B-8DB4-413C-BC80-FBEEC07D5237}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FD9AA43B-8DB4-413C-BC80-FBEEC07D5237}.Release|Any CPU.Build.0 = Release|Any CPU
-		{42EE52E2-03B8-49CA-979C-E7055F7F3008}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{42EE52E2-03B8-49CA-979C-E7055F7F3008}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{42EE52E2-03B8-49CA-979C-E7055F7F3008}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{42EE52E2-03B8-49CA-979C-E7055F7F3008}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BE1ACE64-73D6-4CE2-A848-EFB204C958F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BE1ACE64-73D6-4CE2-A848-EFB204C958F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BE1ACE64-73D6-4CE2-A848-EFB204C958F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BE1ACE64-73D6-4CE2-A848-EFB204C958F8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{38448010-96FD-4312-8DC8-FFD12E56F053}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{38448010-96FD-4312-8DC8-FFD12E56F053}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{38448010-96FD-4312-8DC8-FFD12E56F053}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{38448010-96FD-4312-8DC8-FFD12E56F053}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AB28D2E3-0DEF-4767-AA00-38129D147AA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AB28D2E3-0DEF-4767-AA00-38129D147AA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AB28D2E3-0DEF-4767-AA00-38129D147AA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AB28D2E3-0DEF-4767-AA00-38129D147AA9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F8422C10-4AE8-47D4-92F0-11500E23C38C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F8422C10-4AE8-47D4-92F0-11500E23C38C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F8422C10-4AE8-47D4-92F0-11500E23C38C}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -182,13 +158,9 @@ Global
 		{9D0C2E9C-7582-4D61-BD19-39AE85684F7E} = {2D4C5DEA-3522-4C5B-A1C4-65376131C0B8}
 		{177B7DF7-ECAF-4BCC-9F26-77276893BA9F} = {2D4C5DEA-3522-4C5B-A1C4-65376131C0B8}
 		{3537B177-88F3-440B-B114-5BCF98CA2220} = {2D4C5DEA-3522-4C5B-A1C4-65376131C0B8}
-		{B5778470-0CB3-425A-8368-74FF0866E8C0} = {2D4C5DEA-3522-4C5B-A1C4-65376131C0B8}
 		{0DDBD2B6-DE8B-43BF-87EF-D93428A74948} = {2D4C5DEA-3522-4C5B-A1C4-65376131C0B8}
 		{FD9AA43B-8DB4-413C-BC80-FBEEC07D5237} = {A401AF48-549D-4F0F-8E29-200229C96030}
-		{42EE52E2-03B8-49CA-979C-E7055F7F3008} = {A401AF48-549D-4F0F-8E29-200229C96030}
 		{BE1ACE64-73D6-4CE2-A848-EFB204C958F8} = {A401AF48-549D-4F0F-8E29-200229C96030}
-		{38448010-96FD-4312-8DC8-FFD12E56F053} = {A401AF48-549D-4F0F-8E29-200229C96030}
-		{AB28D2E3-0DEF-4767-AA00-38129D147AA9} = {2D4C5DEA-3522-4C5B-A1C4-65376131C0B8}
 		{F8422C10-4AE8-47D4-92F0-11500E23C38C} = {A401AF48-549D-4F0F-8E29-200229C96030}
 		{392E7CBE-BEBA-4B46-9FB0-BEE31C861085} = {A401AF48-549D-4F0F-8E29-200229C96030}
 		{2B6FE67F-7982-4465-B4BA-DB2957037053} = {A401AF48-549D-4F0F-8E29-200229C96030}
@@ -204,7 +176,7 @@ Global
 		{5DB68818-EDA4-42DF-8565-A17FE2AD763E} = {32AB61D8-ED46-45C4-9E91-DF5FDAE7849B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		EnterpriseLibraryConfigurationToolBinariesPath = packages\TransientFaultHandling.Core.5.1.1209.0\lib\NET4;packages\Unity.2.1.505.0\lib\NET35;packages\Unity.Interception.2.1.505.0\lib\NET35;packages\EnterpriseLibrary.Common.5.0.505.0\lib\NET35;packages\EnterpriseLibrary.WindowsAzure.TransientFaultHandling.5.1.1212.0\lib\NET4;packages\EnterpriseLibrary.WindowsAzure.TransientFaultHandling.5.1.1212.0\DesignTime;packages\TransientFaultHandling.Core.5.1.1209.1\lib\NET4
 		EnterpriseLibraryConfigurationToolBinariesPathV6 = packages\EnterpriseLibrary.Common.6.0.1304.0\lib\NET45
+		EnterpriseLibraryConfigurationToolBinariesPath = packages\TransientFaultHandling.Core.5.1.1209.0\lib\NET4;packages\Unity.2.1.505.0\lib\NET35;packages\Unity.Interception.2.1.505.0\lib\NET35;packages\EnterpriseLibrary.Common.5.0.505.0\lib\NET35;packages\EnterpriseLibrary.WindowsAzure.TransientFaultHandling.5.1.1212.0\lib\NET4;packages\EnterpriseLibrary.WindowsAzure.TransientFaultHandling.5.1.1212.0\DesignTime;packages\TransientFaultHandling.Core.5.1.1209.1\lib\NET4
 	EndGlobalSection
 EndGlobal

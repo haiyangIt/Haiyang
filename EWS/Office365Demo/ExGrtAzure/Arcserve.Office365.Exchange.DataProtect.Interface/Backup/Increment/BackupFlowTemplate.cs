@@ -379,7 +379,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
         protected abstract Action<IFolderDataSync> ActionUpdateFolderStatusToCatalog { get; }
 
 
-        protected abstract Func<EwsWSData.FolderId, string, EwsWSData.ChangeCollection<EwsWSData.ItemChange>> FuncGetChangedItems { get; }
+        protected abstract Func<string, string, EwsWSData.ChangeCollection<EwsWSData.ItemChange>> FuncGetChangedItems { get; }
 
         protected abstract Func<BackupItemFlow> FuncNewBackupItem { get; }
 
@@ -426,7 +426,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment
             Progress.Report("  Folder {0} items changed  Start.", folder.Location);
             do
             {
-                itemChanges = FuncGetChangedItems(folder.FolderIdInExchange, lastSyncStatus);
+                itemChanges = FuncGetChangedItems(folder.FolderId, lastSyncStatus);
                 lastSyncStatus = itemChanges.SyncState;
 
                 if (itemChanges.Count == 0)

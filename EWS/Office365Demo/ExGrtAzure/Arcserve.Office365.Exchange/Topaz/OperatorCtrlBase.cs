@@ -2,7 +2,6 @@
 using Arcserve.Office365.Exchange.Thread;
 using Arcserve.Office365.Exchange.Util;
 using Arcserve.Office365.Exchange.Util.Setting;
-using Microsoft.Exchange.WebServices.Data;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -46,33 +45,18 @@ namespace Arcserve.Office365.Exchange.Topaz
 
         public static long OperationCount = 0;
 
-        public static void DoActionWithRetryTimeOut(Action operation, string operationName)
+        public static void DoActionWithRetryTimeOut(Action operation, string operationName, Func<Exception, bool> funcIsExceptionNeedSuspendRequest)
         {
-            var operatorCtrl = NewOperatorCtrlBase(operationName);
+            var operatorCtrl = NewOperatorCtrlBase(operationName, funcIsExceptionNeedSuspendRequest);
             Interlocked.Increment(ref OperationCount);
             operatorCtrl.DoAction(operation);
         }
 
-        private static string[] FindArray = new string[]
-        {
-            "An existing connection was forcibly closed by the remote host",
-            "The underlying connection was closed",
-            "The mailbox database is temporarily unavailable",
-            "The connection was closed."
-        };
+        
 
-        private static bool IsExceptionNeedSuspendRequest(Exception e)
-        {
-            return ((e is ServiceRequestException) ||
-                (e is WebException) ||
-                (e is SocketException) ||
-                (e is ServiceResponseException) ||
-                (e is IOException)) && (
-                    FindArray.Any(e.Message.Contains)
-                );
-        }
+        
 
-        private static OperatorCtrlBase NewOperatorCtrlBase(string operationName)
+        private static OperatorCtrlBase NewOperatorCtrlBase(string operationName, Func<Exception, bool> funcIsExceptionNeedSuspendRequest)
         {
             var b = new OperatorCtrlBaseImpl(operationName);
             var timeOut = new TimeOutOperatorCtrl(b, operationName);
@@ -84,7 +68,7 @@ namespace Arcserve.Office365.Exchange.Topaz
                 (e) =>
                 {
                     var type = e.GetType();
-                    if (IsExceptionNeedSuspendRequest(e))
+                    if (funcIsExceptionNeedSuspendRequest(e))
                     {
                         EwsRequestGate.Instance.Close(new KeyValuePair<Type, OperationForFailBeforeRun>(type, new OperationForFailBeforeRun(60,
                             () =>
