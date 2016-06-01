@@ -142,5 +142,28 @@ namespace ExGrtAzure.Tests
             };
             var mailboxes = adpapter.GetAllMailboxes(org.UserName, org.UserPassword, new List<string>(2) { "haiyang.ling@arcserve.com", "shiqiang.li@arcserve.com" });
         }
+
+        [TestMethod]
+        public void TestBindFolder()
+        {
+            EwsServiceAdapter adpapter = CreatAdapter();
+            var org = new Arcserve.Office365.Exchange.Data.Account.OrganizationAdminInfo()
+            {
+                OrganizationName = "arcserve",
+                UserName = "devO365admin@arcservemail.onmicrosoft.com",
+                UserPassword = "JackyMao1!"
+            };
+            adpapter.GetExchangeService("haiyang.ling@arcserve.com", org);
+            var result = adpapter.SyncFolderHierarchy(string.Empty);
+            foreach(var folder in result)
+            {
+                adpapter.LoadFolderProperties(folder.Folder);
+                
+                if (folder.Folder.Id.FolderName.HasValue)
+                {
+                    Debug.WriteLine(folder.FolderId.FolderName.Value);
+                }
+            }
+        }
     }
 }

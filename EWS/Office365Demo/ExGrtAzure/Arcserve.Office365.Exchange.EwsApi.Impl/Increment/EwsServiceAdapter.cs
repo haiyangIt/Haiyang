@@ -22,7 +22,8 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
                         FolderSchema.ParentFolderId,
                         FolderSchema.ChildFolderCount,
                         FolderSchema.FolderClass,
-                        FolderSchema.TotalCount);
+                        FolderSchema.TotalCount,
+                        FolderSchema.WellKnownFolderName);
 
             ItemPropertySet = new PropertySet(ItemSchema.Subject,
                         ItemSchema.DateTimeCreated,
