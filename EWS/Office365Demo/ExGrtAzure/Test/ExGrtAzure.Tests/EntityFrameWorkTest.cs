@@ -7,6 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace ExGrtAzure.Tests
 {
@@ -235,6 +236,43 @@ namespace ExGrtAzure.Tests
                     Debug.WriteLine(m.MailAddress);
                 }
             }
+        }
+
+        [TestMethod]
+        public void MultiThreadUpdate()
+        {
+            var catalogWithInitCatalog = Path.Combine(MdfDbFolder, "MultiThreadTest");
+            if (!Directory.Exists(catalogWithInitCatalog))
+            {
+                Directory.CreateDirectory(catalogWithInitCatalog);
+            }
+            var file = Path.Combine(catalogWithInitCatalog, string.Format("{0}.mdf", DateTime.Now.ToString("yyyyMMddHHmmss")));
+            CatalogSyncDbContext context = new CatalogSyncDbContext(file);
+
+            Parallel.For(0, 2, (index) =>
+             {
+                 Thread.Sleep(index * 1000);
+
+                 try
+                 {
+                     MailboxSyncModel model = new MailboxSyncModel()
+                     {
+                         Id = DateTime.Now.ToString("yyyyMMddHHmmss"),
+                         DisplayName = "test",
+                         MailAddress = string.Format("test{0}@arcserve.com", DateTime.Now.ToString("yyyyMMddHHmmss")),
+                         SyncStatus = string.Empty,
+                         Name = "test"
+
+                     };
+                     context.Mailboxes.Add(model);
+                     context.SaveChanges();
+                 }
+                 catch(Exception e)
+                 {
+
+                 }
+             });
+            
         }
 
     }
