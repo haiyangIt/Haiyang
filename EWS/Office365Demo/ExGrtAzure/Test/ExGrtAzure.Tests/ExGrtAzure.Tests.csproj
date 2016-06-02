@@ -219,10 +219,6 @@
       <Project>{f8422c10-4ae8-47d4-92f0-11500e23c38c}</Project>
       <Name>Arcserve.Office365.Exchange.StorageAccess.MountSession</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Arcserve.Office365.Exchange.Tool\Arcserve.Office365.Exchange.Tool.csproj">
-      <Project>{392e7cbe-beba-4b46-9fb0-bee31c861085}</Project>
-      <Name>Arcserve.Office365.Exchange.Tool</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\Arcserve.Office365.Exchange\Arcserve.Office365.Exchange.csproj">
       <Project>{9d0c2e9c-7582-4d61-bd19-39ae85684f7e}</Project>
       <Name>Arcserve.Office365.Exchange</Name>

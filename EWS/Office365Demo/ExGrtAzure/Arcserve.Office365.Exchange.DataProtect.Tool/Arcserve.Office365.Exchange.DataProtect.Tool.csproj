@@ -118,6 +118,7 @@
     <Compile Include="Framework\ArcserveCommandAttribute.cs" />
     <Compile Include="Framework\ArgParser.cs" />
     <Compile Include="Framework\ArgumentInToolException.cs" />
+    <Compile Include="GetAllMailboxCommand.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resource1.Designer.cs">
