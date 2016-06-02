@@ -1,5 +1,6 @@
 ﻿using Arcserve.Office365.Exchange.EwsApi;
 using Arcserve.Office365.Exchange.EwsApi.Impl.Common;
+using Arcserve.Office365.Exchange.EwsApi.Interface;
 using Arcserve.Office365.Exchange.Log;
 using Arcserve.Office365.Exchange.Manager.Data;
 using Arcserve.Office365.Exchange.Manager.IF;
@@ -203,8 +204,8 @@ namespace ManagerTest
 
         private void Init_Click(object sender, EventArgs e)
         {
-            currentService = GetExchangeService();
-            WriteAllItemToFile();
+            //currentService = GetExchangeService();
+            //WriteAllItemToFile();
         }
 
         private async void TestAsync_Click(object sender, EventArgs e)
@@ -240,60 +241,60 @@ namespace ManagerTest
 
         private ExchangeService currentService;
 
-        private ExchangeService GetExchangeService()
-        {
-            string mailbox = "haiyang.ling@arcserve.com";
-            string userName = "haiyang.ling@arcserve.com";
-            string password = "LhyWrf4$4";
-            EwsServiceArgument argument = new EwsServiceArgument();
-            argument.UseDefaultCredentials = false;
-            argument.ServiceCredential = new System.Net.NetworkCredential(userName, password);
-            argument.RequestedExchangeVersion = ExchangeVersion.Exchange2013_SP1;
-            argument.EwsUrl = new Uri("https://outlook.office365.com/EWS/Exchange.asmx");
-            var ewsService = EwsProxyFactory.CreateExchangeService(argument, mailbox);
-            return ewsService;
-        }
-        public void WriteAllItemToFile()
-        {
-            if (File.Exists("ItemIds.txt"))
-                return;
+        //private ExchangeService GetExchangeService()
+        //{
+        //    string mailbox = "haiyang.ling@arcserve.com";
+        //    string userName = "haiyang.ling@arcserve.com";
+        //    string password = "LhyWrf4$4";
+        //    EwsServiceArgument argument = new EwsServiceArgument();
+        //    argument.UseDefaultCredentials = false;
+        //    argument.ServiceCredential = new System.Net.NetworkCredential(userName, password);
+        //    argument.RequestedExchangeVersion = ExchangeVersion.Exchange2013_SP1;
+        //    argument.EwsUrl = new Uri("https://outlook.office365.com/EWS/Exchange.asmx");
+        //    var ewsService = EwsProxyFactory.CreateExchangeService(argument, mailbox);
+        //    return ewsService;
+        //}
+        //public void WriteAllItemToFile()
+        //{
+        //    if (File.Exists("ItemIds.txt"))
+        //        return;
 
-            //currentService = GetExchangeService();
-            var ewsService = currentService;
-            SearchFilter filter = new SearchFilter.IsEqualTo(FolderSchema.DisplayName, "05Study");
-            var result = currentService.FindFolders(WellKnownFolderName.Inbox, filter, new FolderView(10));
+        //    //currentService = GetExchangeService();
+        //    var ewsService = currentService;
+        //    SearchFilter filter = new SearchFilter.IsEqualTo(FolderSchema.DisplayName, "05Study");
+        //    var result = currentService.FindFolders(WellKnownFolderName.Inbox, filter, new FolderView(10));
 
-            var folder = result.FirstOrDefault();
+        //    var folder = result.FirstOrDefault();
 
-            //currentService.SyncFolderItems(folder.Id, PropertySet.IdOnly, null, 10, SyncFolderItemsScope.NormalItems, string.Empty);
+        //    //currentService.SyncFolderItems(folder.Id, PropertySet.IdOnly, null, 10, SyncFolderItemsScope.NormalItems, string.Empty);
 
-            List<string> itemIds = new List<string>(20);
-            bool hasMoreChanges = false;
-            var lastSync = string.Empty;
-            do
-            {
-                var itemChanges = currentService.SyncFolderItems(folder.Id, PropertySet.IdOnly, null, 10, SyncFolderItemsScope.NormalItems, lastSync); 
-                hasMoreChanges = itemChanges.MoreChangesAvailable;
+        //    List<string> itemIds = new List<string>(20);
+        //    bool hasMoreChanges = false;
+        //    var lastSync = string.Empty;
+        //    do
+        //    {
+        //        var itemChanges = currentService.SyncFolderItems(folder.Id, PropertySet.IdOnly, null, 10, SyncFolderItemsScope.NormalItems, lastSync); 
+        //        hasMoreChanges = itemChanges.MoreChangesAvailable;
 
-                if (itemChanges.Count > 0)
-                {
-                    var changeItems = from i in itemChanges select i.Item;
+        //        if (itemChanges.Count > 0)
+        //        {
+        //            var changeItems = from i in itemChanges select i.Item;
 
-                    foreach (var change in itemChanges)
-                    {
-                        itemIds.Add(change.ItemId.UniqueId);
-                    }
-                }
-                lastSync = itemChanges.SyncState;
-            } while (hasMoreChanges);
+        //            foreach (var change in itemChanges)
+        //            {
+        //                itemIds.Add(change.ItemId.UniqueId);
+        //            }
+        //        }
+        //        lastSync = itemChanges.SyncState;
+        //    } while (hasMoreChanges);
 
-            using (StreamWriter writer = new StreamWriter("ItemIds.txt"))
-            {
-                writer.Write(JsonConvert.SerializeObject(itemIds));
-            }
+        //    using (StreamWriter writer = new StreamWriter("ItemIds.txt"))
+        //    {
+        //        writer.Write(JsonConvert.SerializeObject(itemIds));
+        //    }
 
 
-        }
+        //}
 
         private List<string> ReadAllItemIds()
         {

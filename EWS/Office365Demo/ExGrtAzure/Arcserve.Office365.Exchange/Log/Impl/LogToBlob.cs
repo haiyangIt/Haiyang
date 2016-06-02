@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Arcserve.Office365.Exchange.Log.Impl
 {
-    public class LogToBlob : DefaultLog
+    internal class LogToBlob : DefaultLog
     {
         public LogToBlob()
         {
@@ -128,7 +128,7 @@ namespace Arcserve.Office365.Exchange.Log.Impl
     //    }
     //}
 
-    public class LogToBlobEwsTrace : LogToBlob
+    internal class LogToBlobEwsTrace : LogToBlob
     {
         public LogToBlobEwsTrace() : base()
         {

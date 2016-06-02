@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Arcserve.Office365.Exchange.DataProtect.Impl.Backup;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Arcserve.Office365.Exchange.Util;
 
 namespace ExGrtAzure.Tests
 {
@@ -306,7 +307,7 @@ namespace ExGrtAzure.Tests
             var smallArray = InitSmall4_22Arrays();
             var largeArray = InitLarge4_9Arrays();
             {
-                BatchItemUtil<Item> b = new BatchItemUtil<Item>((item) => { return item.Size; }, 40, 100, 3, 5);
+                CollectionPatitionUtil<Item> b = new CollectionPatitionUtil<Item>((item) => { return item.Size; }, 40, 100, 3, 5);
             }
         }
 
@@ -378,7 +379,7 @@ namespace ExGrtAzure.Tests
             int largePartitionCount = 3;
             int maxRequestSize = 40;
             int batchAddCount = 30;
-            BatchItemUtil<Item> batchItemUtil = new BatchItemUtil<Item>((item) => { return item.Size; },
+            CollectionPatitionUtil<Item> batchItemUtil = new CollectionPatitionUtil<Item>((item) => { return item.Size; },
                 batchAddCount, maxRequestSize, smallPartitionCount, largePartitionCount);
 
             Random sizeRandom = new Random();
@@ -627,7 +628,7 @@ namespace ExGrtAzure.Tests
             int smallPartitionCount = 7;
             int largePartitionCount = 3;
             {
-                BatchItemUtil<Item> b = new BatchItemUtil<Item>((item) => { return item.Size; }, 40, 100, smallPartitionCount, largePartitionCount);
+                CollectionPatitionUtil<Item> b = new CollectionPatitionUtil<Item>((item) => { return item.Size; }, 40, 100, smallPartitionCount, largePartitionCount);
                 OutPutArray(smallArray, largeArray);
 
             }
@@ -658,7 +659,7 @@ namespace ExGrtAzure.Tests
             int largePartitionCount = 3;
             int maxCount = smallPartitionCount + largePartitionCount;
             {
-                BatchItemUtil<Item> b = new BatchItemUtil<Item>((item) => { return item.Size; }, 40, 100, smallPartitionCount, largePartitionCount);
+                CollectionPatitionUtil<Item> b = new CollectionPatitionUtil<Item>((item) => { return item.Size; }, 40, 100, smallPartitionCount, largePartitionCount);
                 OutPutArray(smallArray, largeArray);
 
             }
@@ -689,7 +690,7 @@ namespace ExGrtAzure.Tests
             int largePartitionCount = 4;
             int maxCount = smallPartitionCount + largePartitionCount;
             {
-                BatchItemUtil<Item> b = new BatchItemUtil<Item>((item) => { return item.Size; },  40, 100, smallPartitionCount, largePartitionCount);
+                CollectionPatitionUtil<Item> b = new CollectionPatitionUtil<Item>((item) => { return item.Size; },  40, 100, smallPartitionCount, largePartitionCount);
                 OutPutArray(smallArray, largeArray);
 
             }
@@ -722,7 +723,7 @@ namespace ExGrtAzure.Tests
             int largePartitionCount = 2;
             int maxCount = smallPartitionCount + largePartitionCount;
             {
-                BatchItemUtil<Item> b = new BatchItemUtil<Item>((item) => { return item.Size; },  40, 100, smallPartitionCount, largePartitionCount);
+                CollectionPatitionUtil<Item> b = new CollectionPatitionUtil<Item>((item) => { return item.Size; },  40, 100, smallPartitionCount, largePartitionCount);
                 OutPutArray(smallArray, largeArray);
 
             }
@@ -751,7 +752,7 @@ namespace ExGrtAzure.Tests
             int largePartitionCount = 3;
             int maxCount = smallPartitionCount + largePartitionCount;
             {
-                BatchItemUtil<Item> b = new BatchItemUtil<Item>((item) => { return item.Size; },  40, 100, smallPartitionCount, largePartitionCount);
+                CollectionPatitionUtil<Item> b = new CollectionPatitionUtil<Item>((item) => { return item.Size; },  40, 100, smallPartitionCount, largePartitionCount);
                 OutPutArray(smallArray, largeArray);
 
             }
@@ -784,7 +785,7 @@ namespace ExGrtAzure.Tests
             int largePartitionCount = 3;
             int maxCount = smallPartitionCount + largePartitionCount;
             {
-                BatchItemUtil<Item> b = new BatchItemUtil<Item>((item) => { return item.Size; },  40, 100, smallPartitionCount, largePartitionCount);
+                CollectionPatitionUtil<Item> b = new CollectionPatitionUtil<Item>((item) => { return item.Size; },  40, 100, smallPartitionCount, largePartitionCount);
                 OutPutArray(smallArray, largeArray);
 
             }
@@ -816,7 +817,7 @@ namespace ExGrtAzure.Tests
             int largePartitionCount = 4;
             int maxCount = smallPartitionCount + largePartitionCount;
             {
-                BatchItemUtil<Item> b = new BatchItemUtil<Item>((item) => { return item.Size; },  40, 100, smallPartitionCount, largePartitionCount);
+                CollectionPatitionUtil<Item> b = new CollectionPatitionUtil<Item>((item) => { return item.Size; },  40, 100, smallPartitionCount, largePartitionCount);
                 OutPutArray(smallArray, largeArray);
             }
         }
@@ -848,7 +849,7 @@ namespace ExGrtAzure.Tests
             int largePartitionCount = 2;
             int maxCount = smallPartitionCount + largePartitionCount;
             {
-                BatchItemUtil<Item> b = new BatchItemUtil<Item>((item) => { return item.Size; },  40, 100, smallPartitionCount, largePartitionCount);
+                CollectionPatitionUtil<Item> b = new CollectionPatitionUtil<Item>((item) => { return item.Size; },  40, 100, smallPartitionCount, largePartitionCount);
                 OutPutArray(smallArray, largeArray);
             }
         }

@@ -2,9 +2,11 @@
 using Arcserve.Office365.Exchange.Data.Account;
 using Arcserve.Office365.Exchange.Data.Increment;
 using Arcserve.Office365.Exchange.Data.Mail;
-using Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment;
-using Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment;
+using Arcserve.Office365.Exchange.DataProtect.Impl;
+using Arcserve.Office365.Exchange.DataProtect.Impl.Backup;
+using Arcserve.Office365.Exchange.DataProtect.Interface.Backup;
 using Arcserve.Office365.Exchange.EwsApi.Impl.Increment;
+using Arcserve.Office365.Exchange.EwsApi.Interface;
 using Arcserve.Office365.Exchange.Log;
 using Arcserve.Office365.Exchange.Manager;
 using Arcserve.Office365.Exchange.StorageAccess.MountSession;
@@ -101,34 +103,32 @@ namespace Arcserve.Office365.Exchange.Tool
         {
             try
             {
-                using (SyncBackup backupFlow = new SyncBackup())
+                using (var catalogAccess = new CatalogAccess("", "", WorkFolder.Value, AdminUserName.Value.GetOrganization()))
                 {
-                    using (var catalogAccess = new CatalogAccess("", "", WorkFolder.Value, AdminUserName.Value.GetOrganization()))
+                    var taskSyncContextBase = DataProtectFactory.Instance.NewDefaultTaskSyncContext();
+                    catalogAccess.InitTaskSyncContext(taskSyncContextBase);
+                    var dataFromClient = new DataFromClient(_FolderCount, _ItemCountInEachFolder, MailboxList);
+                    dataFromClient.InitTaskSyncContext(taskSyncContextBase);
+                    var ewsServiceAdapter = EwsFactory.Instance.NewEwsAdapter();
+                    ewsServiceAdapter.InitTaskSyncContext(taskSyncContextBase);
+                    var dataConvert = new DataConvert();
+                    var adminInfo = new Arcserve.Office365.Exchange.Data.Account.OrganizationAdminInfo()
                     {
-                        TaskSyncContextBase taskSyncContextBase = new TaskSyncContextBase();
+                        OrganizationName = AdminUserName.Value.GetOrganization(),
+                        UserName = AdminUserName.Value,
+                        UserPassword = AdminPassword.Value
+                    };
+
+                    using (var backupFlow = DataProtectFactory.Instance.NewBackupInstance(catalogAccess, ewsServiceAdapter, dataFromClient, dataConvert, adminInfo))
+                    {
                         backupFlow.InitTaskSyncContext(taskSyncContextBase);
-
-                        backupFlow.DataFromClient = new DataFromClient(_FolderCount, _ItemCountInEachFolder, MailboxList);
-                        backupFlow.DataFromClient.InitTaskSyncContext(taskSyncContextBase);
-
-                        backupFlow.CatalogAccess = catalogAccess;
-                        backupFlow.CatalogAccess.InitTaskSyncContext(taskSyncContextBase);
-                        backupFlow.EwsServiceAdapter = new EwsServiceAdapter();
-                        backupFlow.EwsServiceAdapter.InitTaskSyncContext(taskSyncContextBase);
-                        backupFlow.DataConvert = new DataConvert();
-                        backupFlow.AdminInfo = new Arcserve.Office365.Exchange.Data.Account.OrganizationAdminInfo()
-                        {
-                            OrganizationName = AdminUserName.Value.GetOrganization(),
-                            UserName = AdminUserName.Value,
-                            UserPassword = AdminPassword.Value
-                        };
                         backupFlow.BackupSync();
                     }
                 }
             }
             finally
             {
-                
+
             }
         }
     }

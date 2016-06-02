@@ -33,6 +33,24 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Arcserve.Office365.Exchange.Data.Fakes">
       <HintPath>FakesAssemblies\Arcserve.Office365.Exchange.Data.Fakes.dll</HintPath>
@@ -192,10 +210,6 @@
     <ProjectReference Include="..\..\Arcserve.Office365.Exchange.Data\Arcserve.Office365.Exchange.Data.csproj">
       <Project>{177b7df7-ecaf-4bcc-9f26-77276893ba9f}</Project>
       <Name>Arcserve.Office365.Exchange.Data</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Arcserve.Office365.Exchange.EwsApi.Impl\Arcserve.Office365.Exchange.EwsApi.Impl.csproj">
-      <Project>{be1ace64-73d6-4ce2-a848-efb204c958f8}</Project>
-      <Name>Arcserve.Office365.Exchange.EwsApi.Impl</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Arcserve.Office365.Exchange.EwsApi\Arcserve.Office365.Exchange.EwsApi.csproj">
       <Project>{0ddbd2b6-de8b-43bf-87ef-d93428a74948}</Project>

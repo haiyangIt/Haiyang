@@ -1,14 +1,14 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment;
-using Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment;
+using Arcserve.Office365.Exchange.DataProtect.Interface.Backup;
+using Arcserve.Office365.Exchange.DataProtect.Impl.Backup;
 using Arcserve.Office365.Exchange.StorageAccess.MountSession;
 using Arcserve.Office365.Exchange.EwsApi.Impl.Increment;
 using Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data;
 using Arcserve.Office365.Exchange.Manager;
 using System.IO;
 using Arcserve.Office365.Exchange.Thread;
-using Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment.Fakes;
+using Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Fakes;
 using Arcserve.Office365.Exchange.Data.Increment;
 using System.Collections.Generic;
 using Arcserve.Office365.Exchange.Data;
@@ -20,6 +20,8 @@ using System.Threading.Tasks;
 using System.Threading;
 using Microsoft.Exchange.WebServices.Data;
 using Arcserve.Office365.Exchange.Util.Setting;
+using Arcserve.Office365.Exchange.DataProtect.Impl;
+using Arcserve.Office365.Exchange.EwsApi.Interface;
 
 namespace ExGrtAzure.Tests
 {
@@ -77,27 +79,25 @@ namespace ExGrtAzure.Tests
             {
                 var workFolder = "E:\\10Test\\01O365Test\\Catalog10";
                 DeleteDirectory(workFolder);
-                using (SyncBackup backupFlow = new SyncBackup())
+                using (var catalogAccess = new CatalogAccess("", "", workFolder, "arcserve"))
                 {
-                    using (var catalogAccess = new CatalogAccess("", "", workFolder, "arcserve"))
+                    var taskSyncContextBase = DataProtectFactory.Instance.NewDefaultTaskSyncContext();
+                    var dataClient = new DataFromClient(null, 4); 
+                    dataClient.InitTaskSyncContext(taskSyncContextBase);
+                    catalogAccess.InitTaskSyncContext(taskSyncContextBase);
+
+                    var ewsAdapter = EwsFactory.Instance.NewEwsAdapter();
+                    ewsAdapter.InitTaskSyncContext(taskSyncContextBase);
+                    var dataConvert = new DataConvert(); 
+                    var adminInfo = new Arcserve.Office365.Exchange.Data.Account.OrganizationAdminInfo()
                     {
-                        TaskSyncContextBase taskSyncContextBase = new TaskSyncContextBase();
+                        OrganizationName = "arcserve",
+                        UserName = "devO365admin@arcservemail.onmicrosoft.com",
+                        UserPassword = "JackyMao1!"
+                    };
+                    using (var backupFlow = DataProtectFactory.Instance.NewBackupInstance(catalogAccess, ewsAdapter, dataClient, dataConvert, adminInfo))
+                    {
                         backupFlow.InitTaskSyncContext(taskSyncContextBase);
-
-                        backupFlow.DataFromClient = new DataFromClient(null, 4);
-                        backupFlow.DataFromClient.InitTaskSyncContext(taskSyncContextBase);
-
-                        backupFlow.CatalogAccess = catalogAccess;
-                        backupFlow.CatalogAccess.InitTaskSyncContext(taskSyncContextBase);
-                        backupFlow.EwsServiceAdapter = new EwsServiceAdapter();
-                        backupFlow.EwsServiceAdapter.InitTaskSyncContext(taskSyncContextBase);
-                        backupFlow.DataConvert = new DataConvert();
-                        backupFlow.AdminInfo = new Arcserve.Office365.Exchange.Data.Account.OrganizationAdminInfo()
-                        {
-                            OrganizationName = "arcserve",
-                            UserName = "devO365admin@arcservemail.onmicrosoft.com",
-                            UserPassword = "JackyMao1!"
-                        };
                         backupFlow.BackupSync();
                     }
                 }
@@ -122,26 +122,25 @@ namespace ExGrtAzure.Tests
                 var newCatalogInfo = GetNewCatalogFile();
                 var oldCatalogInfo = GetOldCatalogFile();
                 ClearEnv(newCatalogInfo);
-                using (SyncBackup backupFlow = new SyncBackup())
+                using (var catalogAccess = new CatalogAccess(newCatalogInfo.CatalogFilePath, oldCatalogInfo.CatalogFilePath, newCatalogInfo.DataFolder, "arcserve"))
                 {
-                    using (var catalogAccess = new CatalogAccess(newCatalogInfo.CatalogFilePath, oldCatalogInfo.CatalogFilePath, newCatalogInfo.DataFolder, "arcserve"))
-                    {
-                        TaskSyncContextBase taskSyncContextBase = new TaskSyncContextBase();
-                        backupFlow.InitTaskSyncContext(taskSyncContextBase);
-                        backupFlow.DataFromClient = GetDataFromClient();
-                        backupFlow.DataFromClient.InitTaskSyncContext(taskSyncContextBase);
+                    var taskSyncContextBase = DataProtectFactory.Instance.NewDefaultTaskSyncContext();
+                    var dataClient = new DataFromClient(null, 4);
+                    dataClient.InitTaskSyncContext(taskSyncContextBase);
+                    catalogAccess.InitTaskSyncContext(taskSyncContextBase);
 
-                        backupFlow.CatalogAccess = catalogAccess;
-                        backupFlow.CatalogAccess.InitTaskSyncContext(taskSyncContextBase);
-                        backupFlow.EwsServiceAdapter = new EwsServiceAdapter();
-                        backupFlow.EwsServiceAdapter.InitTaskSyncContext(taskSyncContextBase);
-                        backupFlow.DataConvert = new DataConvert();
-                        backupFlow.AdminInfo = new Arcserve.Office365.Exchange.Data.Account.OrganizationAdminInfo()
-                        {
-                            OrganizationName = "arcserve",
-                            UserName = "devO365admin@arcservemail.onmicrosoft.com",
-                            UserPassword = "JackyMao1!"
-                        };
+                    var ewsAdapter = EwsFactory.Instance.NewEwsAdapter();
+                    ewsAdapter.InitTaskSyncContext(taskSyncContextBase);
+                    var dataConvert = new DataConvert();
+                    var adminInfo = new Arcserve.Office365.Exchange.Data.Account.OrganizationAdminInfo()
+                    {
+                        OrganizationName = "arcserve",
+                        UserName = "devO365admin@arcservemail.onmicrosoft.com",
+                        UserPassword = "JackyMao1!"
+                    };
+                    using (var backupFlow = DataProtectFactory.Instance.NewBackupInstance(catalogAccess, ewsAdapter, dataClient, dataConvert, adminInfo))
+                    {
+                        backupFlow.InitTaskSyncContext(taskSyncContextBase);
                         backupFlow.BackupSync();
                     }
                 }

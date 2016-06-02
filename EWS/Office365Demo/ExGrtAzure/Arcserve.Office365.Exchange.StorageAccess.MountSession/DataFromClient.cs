@@ -1,4 +1,4 @@
-﻿using Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment;
+﻿using Arcserve.Office365.Exchange.DataProtect.Interface.Backup;
 using Arcserve.Office365.Exchange.Thread;
 using System;
 using System.Collections.Generic;

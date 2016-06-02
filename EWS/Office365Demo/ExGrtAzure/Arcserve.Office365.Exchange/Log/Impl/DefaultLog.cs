@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Arcserve.Office365.Exchange.Log.Impl
 {
-    public class DefaultLog : ILog
+    internal class DefaultLog : ILog
     {
 
         private static object _lock = new object();

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Arcserve.Office365.Exchange.Data.Increment;
 using Microsoft.Exchange.WebServices.Data;
-using Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment;
+using Arcserve.Office365.Exchange.DataProtect.Interface.Backup;
 using Arcserve.Office365.Exchange.Data.Mail;
 
 namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data

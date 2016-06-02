@@ -1,4 +1,4 @@
-﻿using Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment;
+﻿using Arcserve.Office365.Exchange.DataProtect.Interface.Backup;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +8,6 @@ using Arcserve.Office365.Exchange.Data;
 using Arcserve.Office365.Exchange.Data.Increment;
 using Arcserve.Office365.Exchange.Thread;
 using System.Threading;
-using Arcserve.Office365.Exchange.EwsApi.Increment;
 using Arcserve.Office365.Exchange.StorageAccess.MountSession.EF;
 using Arcserve.Office365.Exchange.Util.Setting;
 

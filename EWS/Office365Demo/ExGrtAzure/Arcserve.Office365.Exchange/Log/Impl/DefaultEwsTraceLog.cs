@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Arcserve.Office365.Exchange.Log.Impl
 {
-    public class DefaultEwsTraceLog : DefaultLog
+    internal class DefaultEwsTraceLog : DefaultLog
     {
         public DefaultEwsTraceLog() : base()
         {

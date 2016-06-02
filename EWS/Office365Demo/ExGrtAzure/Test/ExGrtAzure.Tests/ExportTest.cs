@@ -9,6 +9,7 @@ using System.IO;
 using System.Xml.Linq;
 using System.Diagnostics;
 using System.Text;
+using Arcserve.Office365.Exchange.EwsApi.Interface;
 
 namespace ExGrtAzure.Tests
 {

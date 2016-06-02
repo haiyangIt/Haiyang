@@ -8,21 +8,24 @@ using System.Diagnostics;
 using Arcserve.Office365.Exchange.Data.Increment;
 using System.Collections.Generic;
 using Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data;
-using Arcserve.Office365.Exchange.DataProtect.Interface.Backup.Increment;
-using Arcserve.Office365.Exchange.DataProtect.Impl.Backup.Increment;
+using Arcserve.Office365.Exchange.DataProtect.Interface.Backup;
+using Arcserve.Office365.Exchange.DataProtect.Impl.Backup;
 using System.IO;
 using System.Management;
 using System.Security.Permissions;
+using Arcserve.Office365.Exchange.Thread;
+using Arcserve.Office365.Exchange.EwsApi.Interface;
+using Arcserve.Office365.Exchange.DataProtect.Impl;
 
 namespace ExGrtAzure.Tests
 {
     [TestClass]
     public class EwsServiceApiTest
     {
-        private EwsServiceAdapter CreatAdapter()
+        private IEwsServiceAdapter<IJobProgress> CreatAdapter()
         {
-            TaskSyncContextBase taskSyncContextBase = new TaskSyncContextBase();
-            EwsServiceAdapter adpapter = new EwsServiceAdapter();
+            ITaskSyncContext<IJobProgress> taskSyncContextBase = DataProtectFactory.Instance.NewDefaultTaskSyncContext();
+            IEwsServiceAdapter<IJobProgress> adpapter = EwsFactory.Instance.NewEwsAdapter();
             adpapter.InitTaskSyncContext(taskSyncContextBase);
             return adpapter;
         }
@@ -44,7 +47,7 @@ namespace ExGrtAzure.Tests
 
         private void TestSyncItemsTime()
         {
-            EwsServiceAdapter adpapter = CreatAdapter();
+            IEwsServiceAdapter<IJobProgress> adpapter = CreatAdapter();
             adpapter.GetExchangeService("haiyang.ling@arcserve.com", new Arcserve.Office365.Exchange.Data.Account.OrganizationAdminInfo()
             {
                 OrganizationName = "arcserve",
@@ -81,7 +84,7 @@ namespace ExGrtAzure.Tests
         public void TestSyncFolder()
         {
             try {
-                EwsServiceAdapter adpapter = CreatAdapter();
+                IEwsServiceAdapter<IJobProgress> adpapter = CreatAdapter();
 
                 adpapter.GetExchangeService("haiyang.ling@arcserve.com", new Arcserve.Office365.Exchange.Data.Account.OrganizationAdminInfo()
                 {
@@ -133,7 +136,7 @@ namespace ExGrtAzure.Tests
         [TestMethod]
         public void TestGetMailbox()
         {
-            EwsServiceAdapter adpapter = CreatAdapter();
+            IEwsServiceAdapter<IJobProgress> adpapter = CreatAdapter();
             var org = new Arcserve.Office365.Exchange.Data.Account.OrganizationAdminInfo()
             {
                 OrganizationName = "arcserve",
@@ -146,7 +149,7 @@ namespace ExGrtAzure.Tests
         [TestMethod]
         public void TestBindFolder()
         {
-            EwsServiceAdapter adpapter = CreatAdapter();
+            var adpapter = CreatAdapter();
             var org = new Arcserve.Office365.Exchange.Data.Account.OrganizationAdminInfo()
             {
                 OrganizationName = "arcserve",

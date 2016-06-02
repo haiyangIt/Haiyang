@@ -19,35 +19,35 @@ namespace ExGrtAzure.Tests
     [TestClass]
     public class SyncTest
     {
-        [TestMethod]
-        public void SyncInit()
-        {
-            string mailbox = "userInDb1@linha06.com";
-            string userName = "linha06\\userindb1";
-            string password = "123.com";
-            EwsServiceArgument argument = new EwsServiceArgument();
-            argument.UseDefaultCredentials = false;
-            argument.ServiceCredential = new System.Net.NetworkCredential(userName, password);
-            argument.RequestedExchangeVersion = ExchangeVersion.Exchange2013_SP1;
-            argument.EwsUrl = new Uri("https://linha06-ex.linha06.com/EWS/Exchange.asmx");
-            var ewsService = EwsProxyFactory.CreateExchangeService(argument, mailbox);
-            var latestSyncState = MailboxSyncState.GetLatestSyncStatus();
-            DealWholeMailbox(ewsService, latestSyncState);
-        }
+        //[TestMethod]
+        //public void SyncInit()
+        //{
+        //    string mailbox = "userInDb1@linha06.com";
+        //    string userName = "linha06\\userindb1";
+        //    string password = "123.com";
+        //    EwsServiceArgument argument = new EwsServiceArgument();
+        //    argument.UseDefaultCredentials = false;
+        //    argument.ServiceCredential = new System.Net.NetworkCredential(userName, password);
+        //    argument.RequestedExchangeVersion = ExchangeVersion.Exchange2013_SP1;
+        //    argument.EwsUrl = new Uri("https://linha06-ex.linha06.com/EWS/Exchange.asmx");
+        //    var ewsService = EwsProxyFactory.CreateExchangeService(argument, mailbox);
+        //    var latestSyncState = MailboxSyncState.GetLatestSyncStatus();
+        //    DealWholeMailbox(ewsService, latestSyncState);
+        //}
 
-        private ExchangeService GetExchangeService()
-        {
-            string mailbox = "userInDb1@linha06.com";
-            string userName = "linha06\\userindb1";
-            string password = "123.com";
-            EwsServiceArgument argument = new EwsServiceArgument();
-            argument.UseDefaultCredentials = false;
-            argument.ServiceCredential = new System.Net.NetworkCredential(userName, password);
-            argument.RequestedExchangeVersion = ExchangeVersion.Exchange2013_SP1;
-            argument.EwsUrl = new Uri("https://linha06-ex.linha06.com/EWS/Exchange.asmx");
-            var ewsService = EwsProxyFactory.CreateExchangeService(argument, mailbox);
-            return ewsService;
-        }
+        //private ExchangeService GetExchangeService()
+        //{
+        //    string mailbox = "userInDb1@linha06.com";
+        //    string userName = "linha06\\userindb1";
+        //    string password = "123.com";
+        //    EwsServiceArgument argument = new EwsServiceArgument();
+        //    argument.UseDefaultCredentials = false;
+        //    argument.ServiceCredential = new System.Net.NetworkCredential(userName, password);
+        //    argument.RequestedExchangeVersion = ExchangeVersion.Exchange2013_SP1;
+        //    argument.EwsUrl = new Uri("https://linha06-ex.linha06.com/EWS/Exchange.asmx");
+        //    var ewsService = EwsProxyFactory.CreateExchangeService(argument, mailbox);
+        //    return ewsService;
+        //}
 
         string indent1 = "|-";
         string indent2 = "  |-";
@@ -254,47 +254,47 @@ namespace ExGrtAzure.Tests
             MailboxSyncState newState = MailboxSyncState.DeserializeFromJson(json);
         }
 
-        [TestMethod]
-        public void WriteAllItemToFile()
-        {   
-            if (File.Exists("ItemIds.txt"))
-                return;
+        //[TestMethod]
+        //public void WriteAllItemToFile()
+        //{   
+        //    if (File.Exists("ItemIds.txt"))
+        //        return;
 
-            currentService = GetExchangeService();
-            var ewsService = currentService;
-            SearchFilter filter = new SearchFilter.IsEqualTo(FolderSchema.DisplayName, "05Study");
-            var result = currentService.FindFolders(WellKnownFolderName.Inbox, filter, new FolderView(10));
+        //    currentService = GetExchangeService();
+        //    var ewsService = currentService;
+        //    SearchFilter filter = new SearchFilter.IsEqualTo(FolderSchema.DisplayName, "05Study");
+        //    var result = currentService.FindFolders(WellKnownFolderName.Inbox, filter, new FolderView(10));
 
-            var folder = result.FirstOrDefault();
+        //    var folder = result.FirstOrDefault();
 
-            currentService.SyncFolderItems(folder.Id, PropertySet.IdOnly, null, 10, SyncFolderItemsScope.NormalItems, string.Empty);
+        //    currentService.SyncFolderItems(folder.Id, PropertySet.IdOnly, null, 10, SyncFolderItemsScope.NormalItems, string.Empty);
 
-            List<string> itemIds = new List<string>(20);
-            bool hasMoreChanges = false;
-            do
-            {
-                var itemChanges = currentService.SyncFolderItems(folder.Id, PropertySet.IdOnly, null, 10, SyncFolderItemsScope.NormalItems, string.Empty); ;
-                hasMoreChanges = itemChanges.MoreChangesAvailable;
+        //    List<string> itemIds = new List<string>(20);
+        //    bool hasMoreChanges = false;
+        //    do
+        //    {
+        //        var itemChanges = currentService.SyncFolderItems(folder.Id, PropertySet.IdOnly, null, 10, SyncFolderItemsScope.NormalItems, string.Empty); ;
+        //        hasMoreChanges = itemChanges.MoreChangesAvailable;
                 
-                if (itemChanges.Count > 0)
-                {
-                    var changeItems = from i in itemChanges select i.Item;
+        //        if (itemChanges.Count > 0)
+        //        {
+        //            var changeItems = from i in itemChanges select i.Item;
                     
-                    foreach (var change in itemChanges)
-                    {
-                        itemIds.Add(change.ItemId.UniqueId);
-                    }
-                }
+        //            foreach (var change in itemChanges)
+        //            {
+        //                itemIds.Add(change.ItemId.UniqueId);
+        //            }
+        //        }
 
-            } while (hasMoreChanges);
+        //    } while (hasMoreChanges);
 
-            using(StreamWriter writer = new StreamWriter("ItemIds.txt"))
-            {
-                writer.Write(JsonConvert.SerializeObject(itemIds));
-            }
+        //    using(StreamWriter writer = new StreamWriter("ItemIds.txt"))
+        //    {
+        //        writer.Write(JsonConvert.SerializeObject(itemIds));
+        //    }
 
 
-        }
+        //}
 
         private List<string> ReadAllItemIds()
         {
@@ -307,17 +307,17 @@ namespace ExGrtAzure.Tests
 
         private ExchangeService currentService;
         [TestMethod]
-        public void TestParallelPerformance()
-        {
-            currentService = GetExchangeService();
+        //public void TestParallelPerformance()
+        //{
+        //    currentService = GetExchangeService();
 
-            Thread.Sleep(5000);
+        //    Thread.Sleep(5000);
 
-            var result = TestAsync();
-            result.Wait();
+        //    var result = TestAsync();
+        //    result.Wait();
 
-            TestParallel();
-        }
+        //    TestParallel();
+        //}
 
         private void TestAsyncThread()
         {
