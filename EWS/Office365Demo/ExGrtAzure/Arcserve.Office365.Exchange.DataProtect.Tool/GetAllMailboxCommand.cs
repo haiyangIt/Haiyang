@@ -110,4 +110,20 @@ namespace Arcserve.Office365.Exchange.Tool
             return ss;
         }
     }
+
+    public class Mailbox
+    {
+        public string Name { get; set; }
+        public string DisplayName { get; set; }
+        public string MailAddress { get; set; }
+        public string Id { get; set; }
+
+        public Mailbox() { }
+
+        public Mailbox(string displayName, string mailAddress)
+        {
+            DisplayName = displayName;
+            MailAddress = mailAddress;
+        }
+    }
 }
