@@ -1,5 +1,4 @@
 ﻿using Arcserve.Office365.Exchange.Util.Setting;
-using Microsoft.WindowsAzure.Storage;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -105,15 +104,15 @@ namespace Arcserve.Office365.Exchange
             return Activator.CreateInstance(dataAccessImplType, constructParams);
         }
 
-        public static CloudStorageAccount GetStorageAccount()
-        {
-            if (!IsRunningOnAzureOrStorageInAzure())
-                return CloudConfig.Instance.StorageConnectString;
-            else
-            {
-                return CloudConfig.Instance.StorageConnectStringRunning;
-            }
-        }
+        //public static CloudStorageAccount GetStorageAccount()
+        //{
+        //    if (!IsRunningOnAzureOrStorageInAzure())
+        //        return CloudConfig.Instance.StorageConnectString;
+        //    else
+        //    {
+        //        return CloudConfig.Instance.StorageConnectStringRunning;
+        //    }
+        //}
 
         public static bool IsRunningOnAzureOrStorageInAzure()
         {

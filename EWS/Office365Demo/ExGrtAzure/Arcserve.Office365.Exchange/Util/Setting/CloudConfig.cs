@@ -1,5 +1,4 @@
 ﻿using Microsoft.Azure;
-using Microsoft.WindowsAzure.Storage;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -19,45 +18,45 @@ namespace Arcserve.Office365.Exchange.Util.Setting
         }
         public static readonly CloudConfig Instance;
 
-        public virtual CloudStorageAccount StorageConnectStringRunning
-        {
-            get
-            {
-                if (ConfigurationManager.ConnectionStrings != null && ConfigurationManager.ConnectionStrings["StorageConnectionStringRunning"] != null)
-                {
-                    var connectStr =
-            ConfigurationManager.ConnectionStrings["StorageConnectionStringRunning"].ConnectionString;
-                    if (string.IsNullOrEmpty(connectStr))
-                    {
-                        return CloudStorageAccount.Parse(connectStr);
-                    }
-                }
-                return null;
+        //public virtual CloudStorageAccount StorageConnectStringRunning
+        //{
+        //    get
+        //    {
+        //        if (ConfigurationManager.ConnectionStrings != null && ConfigurationManager.ConnectionStrings["StorageConnectionStringRunning"] != null)
+        //        {
+        //            var connectStr =
+        //    ConfigurationManager.ConnectionStrings["StorageConnectionStringRunning"].ConnectionString;
+        //            if (string.IsNullOrEmpty(connectStr))
+        //            {
+        //                return CloudStorageAccount.Parse(connectStr);
+        //            }
+        //        }
+        //        return null;
                 
-            }
-            set {
+        //    }
+        //    set {
 
-            }
-        }
+        //    }
+        //}
 
-        public virtual CloudStorageAccount StorageConnectString
-        {
-            get
-            {
-                if (ConfigurationManager.ConnectionStrings != null && ConfigurationManager.ConnectionStrings["StorageConnectionString"] != null)
-                {
-                    var connectStr =
-            ConfigurationManager.ConnectionStrings["StorageConnectionString"].ConnectionString;
-                    if (string.IsNullOrEmpty(connectStr))
-                    {
-                        return CloudStorageAccount.Parse(connectStr);
-                    }
-                }
-                return null;
+        //public virtual CloudStorageAccount StorageConnectString
+        //{
+        //    get
+        //    {
+        //        if (ConfigurationManager.ConnectionStrings != null && ConfigurationManager.ConnectionStrings["StorageConnectionString"] != null)
+        //        {
+        //            var connectStr =
+        //    ConfigurationManager.ConnectionStrings["StorageConnectionString"].ConnectionString;
+        //            if (string.IsNullOrEmpty(connectStr))
+        //            {
+        //                return CloudStorageAccount.Parse(connectStr);
+        //            }
+        //        }
+        //        return null;
                 
-            }
-            set { }
-        }
+        //    }
+        //    set { }
+        //}
 
         protected CloudConfig() { }
 
@@ -434,14 +433,14 @@ namespace Arcserve.Office365.Exchange.Util.Setting
 
     public class CloudConfigCache : CloudConfig
     {
-        public override CloudStorageAccount StorageConnectStringRunning
-        {
-            get; set;
-        }
+        //public override CloudStorageAccount StorageConnectStringRunning
+        //{
+        //    get; set;
+        //}
 
         internal CloudConfigCache()
         {
-            StorageConnectStringRunning = base.StorageConnectStringRunning;
+            //StorageConnectStringRunning = base.StorageConnectStringRunning;
             DbConnectString = base.DbConnectString;
 
             DbDefaultConnectString = base.DbDefaultConnectString;
@@ -492,7 +491,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             LogFileMaxRecordCount = base.LogFileMaxRecordCount;
             IsRunningOnAzureOrStorageInAzure = base.IsRunningOnAzureOrStorageInAzure;
             IsRunningOnAzure = base.IsRunningOnAzure;
-            StorageConnectString = base.StorageConnectString;
+            //StorageConnectString = base.StorageConnectString;
 
             IsEwsTraceLog = base.IsEwsTraceLog;
             IsTestForDemo = base.IsTestForDemo;
@@ -516,10 +515,10 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             get; set;
         }
 
-        public override CloudStorageAccount StorageConnectString
-        {
-            get; set;
-        }
+        //public override CloudStorageAccount StorageConnectString
+        //{
+        //    get; set;
+        //}
 
         public override int LogFileMaxRecordCount
         {
