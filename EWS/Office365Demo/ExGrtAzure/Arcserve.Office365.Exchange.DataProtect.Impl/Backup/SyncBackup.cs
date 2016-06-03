@@ -18,11 +18,11 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup
         }
 
         public OrganizationAdminInfo AdminInfo { get; set; }
-        public string Organization { get; }
+        public string Organization { get; private set; }
         public ICatalogAccess<IJobProgress> CatalogAccess { get; set; }
         public IEwsServiceAdapter<IJobProgress> EwsServiceAdapter { get; set; }
         public IDataFromClient<IJobProgress> DataFromClient { get; set; }
-        public DateTime JobStartTime { get; }
+        public DateTime JobStartTime { get; private set; }
 
         protected override Func<IEnumerable<string>, ICollection<IMailboxDataSync>> FuncGetAllMailboxFromExchange
         {
