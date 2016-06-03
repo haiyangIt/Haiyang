@@ -26,7 +26,8 @@ namespace Arcserve.Office365.Exchange.DataProtect.Tool
             LogFactory.LogInstance.WriteLog(LogLevel.DEBUG, "config file", "file path {0}", AppDomain.CurrentDomain.SetupInformation.ConfigurationFile);
             foreach(var arg in args)
             {
-                LogFactory.LogInstance.WriteLog(LogLevel.DEBUG, "args", "arg {0}", arg);
+                if (arg.ToLower().IndexOf("password") < 0)
+                    LogFactory.LogInstance.WriteLog(LogLevel.DEBUG, "args", "arg {0}", arg);
             }
 
             //System.Threading.Thread.Sleep(20000);
