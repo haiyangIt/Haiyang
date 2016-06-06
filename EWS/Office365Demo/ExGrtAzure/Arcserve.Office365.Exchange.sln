@@ -1,23 +1,23 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+# Visual Studio 2013
+VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcserve.Exchange.FastTransferUtil", "Arcserve.Exchange.FastTransferUtil\Arcserve.Exchange.FastTransferUtil.csproj", "{1128AB0B-8937-41DB-8634-BB0D7D31BA1D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcserve.Exchange.FastTransferUtil", "Arcserve.Exchange.FastTransferUtil\Arcserve.Exchange.FastTransferUtil.csproj", "{C9772BC6-1490-4F35-AEC1-FD9D6ECAD194}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcserve.Office365.Exchange", "Arcserve.Office365.Exchange\Arcserve.Office365.Exchange.csproj", "{091BE226-22A9-437F-A44E-E63EA37D61AE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcserve.Office365.Exchange", "Arcserve.Office365.Exchange\Arcserve.Office365.Exchange.csproj", "{454462CC-DAE8-48AB-B609-8EC07666F715}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcserve.Office365.Exchange.Data", "Arcserve.Office365.Exchange.Data\Arcserve.Office365.Exchange.Data.csproj", "{76BC0300-0C9E-4F80-84A1-EDF349DFE8DB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcserve.Office365.Exchange.Data", "Arcserve.Office365.Exchange.Data\Arcserve.Office365.Exchange.Data.csproj", "{2F89D7DA-1138-4E24-BED3-CAAF1DF77465}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcserve.Office365.Exchange.EwsApi", "Arcserve.Office365.Exchange.EwsApi\Arcserve.Office365.Exchange.EwsApi.csproj", "{610BAF8F-C727-42BA-806A-6EFD39B6E9E1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcserve.Office365.Exchange.DataProtect.Interface", "Arcserve.Office365.Exchange.DataProtect.Interface\Arcserve.Office365.Exchange.DataProtect.Interface.csproj", "{6F4D7EBE-74C0-4992-A95C-7CADB41F3590}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcserve.Office365.Exchange.DataProtect.Interface", "Arcserve.Office365.Exchange.DataProtect.Interface\Arcserve.Office365.Exchange.DataProtect.Interface.csproj", "{82B3A345-1C18-4AC4-ABE9-BDF8A7CB05CA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcserve.Office365.Exchange.EwsApi", "Arcserve.Office365.Exchange.EwsApi\Arcserve.Office365.Exchange.EwsApi.csproj", "{B732DC73-83AF-4884-9D61-2661F7EE7E5F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcserve.Office365.Exchange.DataProtect.Impl", "Arcserve.Office365.Exchange.DataProtect.Impl\Arcserve.Office365.Exchange.DataProtect.Impl.csproj", "{DAB6476A-689B-463C-A162-ABB89822FE54}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcserve.Office365.Exchange.DataProtect.Impl", "Arcserve.Office365.Exchange.DataProtect.Impl\Arcserve.Office365.Exchange.DataProtect.Impl.csproj", "{052F2D28-5E70-4D99-8E87-097357477B85}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcserve.Office365.Exchange.StorageAccess.MountSession", "Arcserve.Office365.Exchange.StorageAccess.MountSession\Arcserve.Office365.Exchange.StorageAccess.MountSession.csproj", "{F463AADE-A362-4DB5-B9D5-ACFD2CD3EE03}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcserve.Office365.Exchange.StorageAccess.MountSession", "Arcserve.Office365.Exchange.StorageAccess.MountSession\Arcserve.Office365.Exchange.StorageAccess.MountSession.csproj", "{B8023674-7877-41A0-8CA4-FD34509EB28B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcserve.Office365.Exchange.DataProtect.Tool", "Arcserve.Office365.Exchange.DataProtect.Tool\Arcserve.Office365.Exchange.DataProtect.Tool.csproj", "{39D66200-6207-457A-9920-6AC9467B0AC7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcserve.Office365.Exchange.DataProtect.Tool", "Arcserve.Office365.Exchange.DataProtect.Tool\Arcserve.Office365.Exchange.DataProtect.Tool.csproj", "{49BEE1FB-0140-4770-865F-92DB6871B5D2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,38 +25,38 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1128AB0B-8937-41DB-8634-BB0D7D31BA1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1128AB0B-8937-41DB-8634-BB0D7D31BA1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1128AB0B-8937-41DB-8634-BB0D7D31BA1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1128AB0B-8937-41DB-8634-BB0D7D31BA1D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{091BE226-22A9-437F-A44E-E63EA37D61AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{091BE226-22A9-437F-A44E-E63EA37D61AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{091BE226-22A9-437F-A44E-E63EA37D61AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{091BE226-22A9-437F-A44E-E63EA37D61AE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{76BC0300-0C9E-4F80-84A1-EDF349DFE8DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{76BC0300-0C9E-4F80-84A1-EDF349DFE8DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{76BC0300-0C9E-4F80-84A1-EDF349DFE8DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{76BC0300-0C9E-4F80-84A1-EDF349DFE8DB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{610BAF8F-C727-42BA-806A-6EFD39B6E9E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{610BAF8F-C727-42BA-806A-6EFD39B6E9E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{610BAF8F-C727-42BA-806A-6EFD39B6E9E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{610BAF8F-C727-42BA-806A-6EFD39B6E9E1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{82B3A345-1C18-4AC4-ABE9-BDF8A7CB05CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{82B3A345-1C18-4AC4-ABE9-BDF8A7CB05CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{82B3A345-1C18-4AC4-ABE9-BDF8A7CB05CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{82B3A345-1C18-4AC4-ABE9-BDF8A7CB05CA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DAB6476A-689B-463C-A162-ABB89822FE54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DAB6476A-689B-463C-A162-ABB89822FE54}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DAB6476A-689B-463C-A162-ABB89822FE54}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DAB6476A-689B-463C-A162-ABB89822FE54}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F463AADE-A362-4DB5-B9D5-ACFD2CD3EE03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F463AADE-A362-4DB5-B9D5-ACFD2CD3EE03}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F463AADE-A362-4DB5-B9D5-ACFD2CD3EE03}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F463AADE-A362-4DB5-B9D5-ACFD2CD3EE03}.Release|Any CPU.Build.0 = Release|Any CPU
-		{39D66200-6207-457A-9920-6AC9467B0AC7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{39D66200-6207-457A-9920-6AC9467B0AC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{39D66200-6207-457A-9920-6AC9467B0AC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{39D66200-6207-457A-9920-6AC9467B0AC7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C9772BC6-1490-4F35-AEC1-FD9D6ECAD194}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9772BC6-1490-4F35-AEC1-FD9D6ECAD194}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C9772BC6-1490-4F35-AEC1-FD9D6ECAD194}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9772BC6-1490-4F35-AEC1-FD9D6ECAD194}.Release|Any CPU.Build.0 = Release|Any CPU
+		{454462CC-DAE8-48AB-B609-8EC07666F715}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{454462CC-DAE8-48AB-B609-8EC07666F715}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{454462CC-DAE8-48AB-B609-8EC07666F715}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{454462CC-DAE8-48AB-B609-8EC07666F715}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F89D7DA-1138-4E24-BED3-CAAF1DF77465}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F89D7DA-1138-4E24-BED3-CAAF1DF77465}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F89D7DA-1138-4E24-BED3-CAAF1DF77465}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F89D7DA-1138-4E24-BED3-CAAF1DF77465}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F4D7EBE-74C0-4992-A95C-7CADB41F3590}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F4D7EBE-74C0-4992-A95C-7CADB41F3590}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F4D7EBE-74C0-4992-A95C-7CADB41F3590}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F4D7EBE-74C0-4992-A95C-7CADB41F3590}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B732DC73-83AF-4884-9D61-2661F7EE7E5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B732DC73-83AF-4884-9D61-2661F7EE7E5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B732DC73-83AF-4884-9D61-2661F7EE7E5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B732DC73-83AF-4884-9D61-2661F7EE7E5F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{052F2D28-5E70-4D99-8E87-097357477B85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{052F2D28-5E70-4D99-8E87-097357477B85}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{052F2D28-5E70-4D99-8E87-097357477B85}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{052F2D28-5E70-4D99-8E87-097357477B85}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8023674-7877-41A0-8CA4-FD34509EB28B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8023674-7877-41A0-8CA4-FD34509EB28B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8023674-7877-41A0-8CA4-FD34509EB28B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8023674-7877-41A0-8CA4-FD34509EB28B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{49BEE1FB-0140-4770-865F-92DB6871B5D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49BEE1FB-0140-4770-865F-92DB6871B5D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49BEE1FB-0140-4770-865F-92DB6871B5D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49BEE1FB-0140-4770-865F-92DB6871B5D2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
