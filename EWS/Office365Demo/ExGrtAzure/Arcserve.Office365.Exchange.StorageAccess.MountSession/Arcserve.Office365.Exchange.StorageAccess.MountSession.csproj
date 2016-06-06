@@ -4,14 +4,13 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F8422C10-4AE8-47D4-92F0-11500E23C38C}</ProjectGuid>
+    <ProjectGuid>{F463AADE-A362-4DB5-B9D5-ACFD2CD3EE03}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Arcserve.Office365.Exchange.StorageAccess.MountSession</RootNamespace>
     <AssemblyName>Arcserve.Office365.Exchange.StorageAccess.MountSession</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -21,7 +20,6 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -30,45 +28,6 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x64\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>bin\x64\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x86\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <OutputPath>bin\x86\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
@@ -111,19 +70,19 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Arcserve.Office365.Exchange.DataProtect.Interface\Arcserve.Office365.Exchange.DataProtect.Interface.csproj">
-      <Project>{3537b177-88f3-440b-b114-5bcf98ca2220}</Project>
+      <Project>{82b3a345-1c18-4ac4-abe9-bdf8a7cb05ca}</Project>
       <Name>Arcserve.Office365.Exchange.DataProtect.Interface</Name>
     </ProjectReference>
     <ProjectReference Include="..\Arcserve.Office365.Exchange.Data\Arcserve.Office365.Exchange.Data.csproj">
-      <Project>{177b7df7-ecaf-4bcc-9f26-77276893ba9f}</Project>
+      <Project>{76bc0300-0c9e-4f80-84a1-edf349dfe8db}</Project>
       <Name>Arcserve.Office365.Exchange.Data</Name>
     </ProjectReference>
     <ProjectReference Include="..\Arcserve.Office365.Exchange.EwsApi\Arcserve.Office365.Exchange.EwsApi.csproj">
-      <Project>{0ddbd2b6-de8b-43bf-87ef-d93428a74948}</Project>
+      <Project>{610baf8f-c727-42ba-806a-6efd39b6e9e1}</Project>
       <Name>Arcserve.Office365.Exchange.EwsApi</Name>
     </ProjectReference>
     <ProjectReference Include="..\Arcserve.Office365.Exchange\Arcserve.Office365.Exchange.csproj">
-      <Project>{9d0c2e9c-7582-4d61-bd19-39ae85684f7e}</Project>
+      <Project>{091be226-22a9-437f-a44e-e63ea37d61ae}</Project>
       <Name>Arcserve.Office365.Exchange</Name>
     </ProjectReference>
   </ItemGroup>

@@ -4,14 +4,13 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{0DDBD2B6-DE8B-43BF-87EF-D93428A74948}</ProjectGuid>
+    <ProjectGuid>{610BAF8F-C727-42BA-806A-6EFD39B6E9E1}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Arcserve.Office365.Exchange.EwsApi</RootNamespace>
     <AssemblyName>Arcserve.Office365.Exchange.EwsApi</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -21,7 +20,6 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -30,45 +28,6 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x64\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>bin\x64\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x86\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <OutputPath>bin\x86\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Exchange.WebServices, Version=15.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -102,40 +61,32 @@
     <Compile Include="Impl\Common\ExportUploadHelper.cs" />
     <Compile Include="Impl\Common\FileHelper.cs" />
     <Compile Include="Impl\Common\ValidationCallbackHelper.cs" />
-    <Compile Include="Interface\EwsFactory.cs" />
-    <Compile Include="Interface\EwsServiceArgument.cs" />
-    <Compile Include="Interface\EWSSetting.cs" />
-    <Compile Include="Interface\EwsServiceExtension.cs" />
     <Compile Include="Impl\EwsBaseOperator.cs" />
     <Compile Include="Impl\EwsServiceAdapter.cs" />
+    <Compile Include="Interface\EwsFactory.cs" />
+    <Compile Include="Interface\EwsServiceArgument.cs" />
+    <Compile Include="Interface\EwsServiceExtension.cs" />
+    <Compile Include="Interface\EWSSetting.cs" />
     <Compile Include="Interface\IEwsServiceAdapter.cs" />
     <Compile Include="Interface\IExportItemsOper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Resource\TemplateEwsRequests.Designer.cs">
-      <DependentUpon>TemplateEwsRequests.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
+    <Compile Include="Resource\TemplateEwsRequests.Designer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resource\TemplateEwsRequests.resx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Arcserve.Office365.Exchange.Data\Arcserve.Office365.Exchange.Data.csproj">
-      <Project>{177b7df7-ecaf-4bcc-9f26-77276893ba9f}</Project>
+      <Project>{76bc0300-0c9e-4f80-84a1-edf349dfe8db}</Project>
       <Name>Arcserve.Office365.Exchange.Data</Name>
     </ProjectReference>
     <ProjectReference Include="..\Arcserve.Office365.Exchange\Arcserve.Office365.Exchange.csproj">
-      <Project>{9d0c2e9c-7582-4d61-bd19-39ae85684f7e}</Project>
+      <Project>{091be226-22a9-437f-a44e-e63ea37d61ae}</Project>
       <Name>Arcserve.Office365.Exchange</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resource\TemplateEwsRequests.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>TemplateEwsRequests.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

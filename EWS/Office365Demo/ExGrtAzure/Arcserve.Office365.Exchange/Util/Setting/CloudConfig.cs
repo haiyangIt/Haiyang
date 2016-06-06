@@ -171,7 +171,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             get
             {
                 int result = 0;
-                if (!int.TryParse(ConfigurationManager.AppSettings["ServiceBusQueueTTL"], out result))
+                if (!int.TryParse(CloudConfigurationManager.GetSetting("ServiceBusQueueTTL"), out result))
                     return 5120;
                 return result;
             }
@@ -183,7 +183,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             get
             {
                 int result = 0;
-                if (!int.TryParse(ConfigurationManager.AppSettings["ServiceBusQueueTTL"], out result))
+                if (!int.TryParse(CloudConfigurationManager.GetSetting("ServiceBusQueueTTL"), out result))
                     return 5;
                 return result;
             }
@@ -204,7 +204,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             get
             {
                 int result = 0;
-                if (!int.TryParse(ConfigurationManager.AppSettings["ServiceBusTopicMaxSize"], out result))
+                if (!int.TryParse(CloudConfigurationManager.GetSetting("ServiceBusTopicMaxSize"), out result))
                     return 5120;
                 return result;
             }
@@ -216,7 +216,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             get
             {
                 int result = 0;
-                if (!int.TryParse(ConfigurationManager.AppSettings["ServiceBusTopicTTL"], out result))
+                if (!int.TryParse(CloudConfigurationManager.GetSetting("ServiceBusTopicTTL"), out result))
                     return 5;
                 return result;
             }
@@ -237,7 +237,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             get
             {
                 int result = 0;
-                if (!int.TryParse(ConfigurationManager.AppSettings["ExportItemTimeOut"], out result))
+                if (!int.TryParse(CloudConfigurationManager.GetSetting("ExportItemTimeOut"), out result))
                 {
                     result = 120;
                 }
@@ -251,7 +251,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             get
             {
                 int result = 0;
-                if (!int.TryParse(ConfigurationManager.AppSettings["RequestTimeOut"], out result))
+                if (!int.TryParse(CloudConfigurationManager.GetSetting("RequestTimeOut"), out result))
                 {
                     result = 120;
                 }
@@ -265,7 +265,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             get
             {
                 int result = 0;
-                if (!int.TryParse(ConfigurationManager.AppSettings["MaxItemChangesReturn"], out result))
+                if (!int.TryParse(CloudConfigurationManager.GetSetting("MaxItemChangesReturn"), out result))
                 {
                     result = 10;
                 }
@@ -279,7 +279,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             get
             {
                 bool result = false;
-                if (bool.TryParse(ConfigurationManager.AppSettings["IsRewriteDataIfReadFlagChanged"], out result))
+                if (bool.TryParse(CloudConfigurationManager.GetSetting("IsRewriteDataIfReadFlagChanged"), out result))
                 {
                     return result;
                 }
@@ -293,7 +293,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             get
             {
                 int result = 0;
-                if (!int.TryParse(ConfigurationManager.AppSettings["BatchExportImportItemMaxCount"], out result))
+                if (!int.TryParse(CloudConfigurationManager.GetSetting("BatchExportImportItemMaxCount"), out result))
                 {
                     result = 10;
                 }
@@ -314,7 +314,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             get
             {
                 int result = 0;
-                if (!int.TryParse(ConfigurationManager.AppSettings["BatchExportImportItemMaxSizeForSingleMB"], out result))
+                if (!int.TryParse(CloudConfigurationManager.GetSetting("BatchExportImportItemMaxSizeForSingleMB"), out result))
                 {
                     result = 10;
                 }
@@ -328,7 +328,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             get
             {
                 int result = 0;
-                if (!int.TryParse(ConfigurationManager.AppSettings["SupportMaxSize"], out result))
+                if (!int.TryParse(CloudConfigurationManager.GetSetting("SupportMaxSize"), out result))
                 {
                     result = 15;
                 }
@@ -342,7 +342,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             get
             {
                 int result = 0;
-                if (!int.TryParse(ConfigurationManager.AppSettings["BatchExportImportMaxAddCount"], out result))
+                if (!int.TryParse(CloudConfigurationManager.GetSetting("BatchExportImportMaxAddCount"), out result))
                 {
                     result = 50;
                 }
@@ -356,7 +356,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             get
             {
                 int result = 0;
-                if (!int.TryParse(ConfigurationManager.AppSettings["BatchExportImportSmallCountInPartition"], out result))
+                if (!int.TryParse(CloudConfigurationManager.GetSetting("BatchExportImportSmallCountInPartition"), out result))
                 {
                     result = 7;
                 }
@@ -369,7 +369,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             get
             {
                 int result = 0;
-                if (!int.TryParse(ConfigurationManager.AppSettings["BatchExportImportLargeCountInPartition"], out result))
+                if (!int.TryParse(CloudConfigurationManager.GetSetting("BatchExportImportLargeCountInPartition"), out result))
                 {
                     result = 3;
                 }
@@ -383,7 +383,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             get
             {
                 int result = 0;
-                if (!int.TryParse(ConfigurationManager.AppSettings["BatchLoadPropertyItemCount"], out result))
+                if (!int.TryParse(CloudConfigurationManager.GetSetting("BatchLoadPropertyItemCount"), out result))
                 {
                     result = 20;
                 }
@@ -397,7 +397,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             get
             {
                 int result = 500;
-                if (int.TryParse(ConfigurationManager.AppSettings["LogFileMaxRecordCount"], out result))
+                if (int.TryParse(CloudConfigurationManager.GetSetting("LogFileMaxRecordCount"), out result))
                     return result;
                 return 500;
             }
@@ -409,7 +409,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             get
             {
                 int result = 30;
-                if (int.TryParse(ConfigurationManager.AppSettings["BatchSaveToCatalogCount"], out result))
+                if (int.TryParse(CloudConfigurationManager.GetSetting("BatchSaveToCatalogCount"), out result))
                     return result;
                 return 30;
             }
@@ -421,7 +421,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             get
             {
                 int result = 1;
-                if (int.TryParse(ConfigurationManager.AppSettings["IsTestForDemo"], out result))
+                if (int.TryParse(CloudConfigurationManager.GetSetting("IsTestForDemo"), out result))
                     return result == 1;
                 return false;
             }
@@ -668,12 +668,12 @@ namespace Arcserve.Office365.Exchange.Util.Setting
     //            //using (StreamWriter writer = new StreamWriter("E:\\Log.txt", true))
     //            //{
     //            //    writer.Write(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-    //            //    writer.WriteLine(string.Format("ConnectString:{0}", ConfigurationManager.AppSettings["Organization"]));
+    //            //    writer.WriteLine(string.Format("ConnectString:{0}", CloudConfigurationManager.GetSetting("Organization"]));
     //            //    writer.WriteLine(this.GetType().FullName);
     //            //    writer.WriteLine(AppDomain.CurrentDomain.SetupInformation.ConfigurationFile);
     //            //}
     //            //throw new NotImplementedException();
-    //            return ConfigurationManager.AppSettings["Organization"];
+    //            return CloudConfigurationManager.GetSetting("Organization"];
     //        }
     //    }
 
@@ -684,12 +684,12 @@ namespace Arcserve.Office365.Exchange.Util.Setting
     //            //using (StreamWriter writer = new StreamWriter("E:\\Log.txt", true))
     //            //{
     //            //    writer.Write(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-    //            //    writer.WriteLine(string.Format("ConnectString:{0}", ConfigurationManager.AppSettings["DefaultConnection"]));
+    //            //    writer.WriteLine(string.Format("ConnectString:{0}", CloudConfigurationManager.GetSetting("DefaultConnection"]));
     //            //    writer.WriteLine(this.GetType().FullName);
     //            //    writer.WriteLine(AppDomain.CurrentDomain.SetupInformation.ConfigurationFile);
     //            //}
     //            //throw new NotImplementedException();
-    //            return ConfigurationManager.AppSettings["DefaultConnection"];
+    //            return CloudConfigurationManager.GetSetting("DefaultConnection"];
     //        }
     //    }
 
@@ -698,7 +698,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
     //    {
     //        get
     //        {
-    //            return ConfigurationManager.AppSettings["LogPath"];
+    //            return CloudConfigurationManager.GetSetting("LogPath"];
     //        }
     //    }
 
@@ -706,7 +706,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
     //    {
     //        get
     //        {
-    //            return ConfigurationManager.AppSettings["Microsoft.ServiceBus.ConnectionString"];
+    //            return CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.ConnectionString"];
     //        }
     //    }
 
@@ -714,7 +714,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
     //    {
     //        get
     //        {
-    //            return ConfigurationManager.AppSettings["ServiceBusNameSpace"];
+    //            return CloudConfigurationManager.GetSetting("ServiceBusNameSpace"];
     //        }
     //    }
 
@@ -722,7 +722,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
     //    {
     //        get
     //        {
-    //            return ConfigurationManager.AppSettings["ServiceBusQueueName"];
+    //            return CloudConfigurationManager.GetSetting("ServiceBusQueueName"];
     //        }
     //    }
 
@@ -730,7 +730,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
     //    {
     //        get
     //        {
-    //            return Convert.ToInt32(ConfigurationManager.AppSettings["ServiceBusQueueMaxSize"]);
+    //            return Convert.ToInt32(CloudConfigurationManager.GetSetting("ServiceBusQueueMaxSize"]);
     //        }
     //    }
 
@@ -738,7 +738,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
     //    {
     //        get
     //        {
-    //            return Convert.ToInt32(ConfigurationManager.AppSettings["ServiceBusQueueTTL"]);
+    //            return Convert.ToInt32(CloudConfigurationManager.GetSetting("ServiceBusQueueTTL"]);
     //        }
     //    }
 
@@ -746,7 +746,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
     //    {
     //        get
     //        {
-    //            return ConfigurationManager.AppSettings["ServiceBusTopicName"];
+    //            return CloudConfigurationManager.GetSetting("ServiceBusTopicName"];
     //        }
     //    }
 
@@ -754,7 +754,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
     //    {
     //        get
     //        {
-    //            return Convert.ToInt32(ConfigurationManager.AppSettings["ServiceBusTopicMaxSize"]);
+    //            return Convert.ToInt32(CloudConfigurationManager.GetSetting("ServiceBusTopicMaxSize"]);
     //        }
     //    }
 
@@ -762,7 +762,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
     //    {
     //        get
     //        {
-    //            return Convert.ToInt32(ConfigurationManager.AppSettings["ServiceBusTopicTTL"]);
+    //            return Convert.ToInt32(CloudConfigurationManager.GetSetting("ServiceBusTopicTTL"]);
     //        }
     //    }
 
@@ -770,7 +770,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
     //    {
     //        get
     //        {
-    //            return ConfigurationManager.AppSettings["SubscriptionNameForScheduler"];
+    //            return CloudConfigurationManager.GetSetting("SubscriptionNameForScheduler"];
     //        }
     //    }
     //}
