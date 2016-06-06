@@ -30,6 +30,18 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Arcserve.Office365.Exchange">
+      <HintPath>..\packages\Arcserve_Office365_dll\Arcserve.Office365.Exchange.dll</HintPath>
+    </Reference>
+    <Reference Include="Arcserve.Office365.Exchange.Data">
+      <HintPath>..\packages\Arcserve_Office365_dll\Arcserve.Office365.Exchange.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="Arcserve.Office365.Exchange.DataProtect.Interface">
+      <HintPath>..\packages\Arcserve_Office365_dll\Arcserve.Office365.Exchange.DataProtect.Interface.dll</HintPath>
+    </Reference>
+    <Reference Include="Arcserve.Office365.Exchange.EwsApi">
+      <HintPath>..\packages\Arcserve_Office365_dll\Arcserve.Office365.Exchange.EwsApi.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Exchange.WebServices, Version=15.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Exchange.WebServices.2.2\lib\40\Microsoft.Exchange.WebServices.dll</HintPath>
       <Private>True</Private>
@@ -56,27 +68,12 @@
     <Compile Include="TaskSyncContextBase.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Arcserve.Office365.Exchange.DataProtect.Interface\Arcserve.Office365.Exchange.DataProtect.Interface.csproj">
-      <Project>{6f4d7ebe-74c0-4992-a95c-7cadb41f3590}</Project>
-      <Name>Arcserve.Office365.Exchange.DataProtect.Interface</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Arcserve.Office365.Exchange.Data\Arcserve.Office365.Exchange.Data.csproj">
-      <Project>{2f89d7da-1138-4e24-bed3-caaf1df77465}</Project>
-      <Name>Arcserve.Office365.Exchange.Data</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Arcserve.Office365.Exchange.EwsApi\Arcserve.Office365.Exchange.EwsApi.csproj">
-      <Project>{b732dc73-83af-4884-9d61-2661f7ee7e5f}</Project>
-      <Name>Arcserve.Office365.Exchange.EwsApi</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Arcserve.Office365.Exchange\Arcserve.Office365.Exchange.csproj">
-      <Project>{454462cc-dae8-48ab-b609-8ec07666f715}</Project>
-      <Name>Arcserve.Office365.Exchange</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy  "$(ProjectDir)$(OutDir)*" "$(SolutionDir)packages\Arcserve_Office365_dll" /s /i /y</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
