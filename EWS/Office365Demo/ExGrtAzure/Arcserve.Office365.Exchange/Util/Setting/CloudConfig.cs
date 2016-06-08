@@ -428,7 +428,15 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             set { }
         }
 
-        public string WorkFolder { get; set; }
+        public virtual string WorkFolder { get; set; }
+        public virtual int SuspendRequestTimeAfterThrowSpecificException { get {
+                int result = 30;
+                if (int.TryParse(CloudConfigurationManager.GetSetting("SuspendRequestTimeAfterThrowSpecificException"), out result))
+                    return result;
+                return 30;
+            }
+            set { }
+        }
     }
 
     public class CloudConfigCache : CloudConfig
@@ -496,6 +504,18 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             IsEwsTraceLog = base.IsEwsTraceLog;
             IsTestForDemo = base.IsTestForDemo;
             BatchSaveToCatalogCount = base.BatchSaveToCatalogCount;
+            WorkFolder = base.WorkFolder;
+            SuspendRequestTimeAfterThrowSpecificException = base.SuspendRequestTimeAfterThrowSpecificException;
+
+        }
+        public override string WorkFolder
+        {
+            get; set;
+        }
+
+        public override int SuspendRequestTimeAfterThrowSpecificException
+        {
+            get; set;
         }
         public override bool IsTestForDemo
         {

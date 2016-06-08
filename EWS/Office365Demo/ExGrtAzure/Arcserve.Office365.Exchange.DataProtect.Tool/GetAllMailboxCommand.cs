@@ -9,35 +9,33 @@ using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
+using Arcserve.Office365.Exchange.DataProtect.Tool.Result;
+using Arcserve.Office365.Exchange.DataProtect.Tool.Resource;
+using System.Management.Automation.Remoting;
 
 namespace Arcserve.Office365.Exchange.Tool
 {
     public class GetAllMailboxCommand : ArcServeCommand
     {
         public const string CommandName = "GetAllMailbox";
-        [CommandArgument("AdminUserName", "Please specify the job type. like: -AdminUserName:user.", true)]
+        [CommandArgument("AdminUserName", "Please specify the administartor. like: -AdminUserName:user.", true)]
         public ArgInfo AdminUserName { get; set; }
-        [CommandArgument("AdminPassword", "Please specify the job type. like: -AdminPassword:user.", true)]
+        [CommandArgument("AdminPassword", "Please specify the password. like: -AdminPassword:userpassword.", true)]
         public ArgInfo AdminPassword { get; set; }
-        
+
         public GetAllMailboxCommand(CommandArgs args) : base(args)
         {
 
         }
 
-        protected override string DoExcute()
+        protected override ResultBase DoExcute()
         {
             var result = GetAllMailbox(AdminUserName.Value, AdminPassword.Value);
-            XmlSerializer s = new XmlSerializer(typeof(List<Mailbox>));
-            StringBuilder sb = new StringBuilder();
-            using (StringWriter writer = new StringWriter(sb))
-            {
-                s.Serialize(writer, result);
-            }
-            return sb.ToString();
+
+            return new GetAllMailboxResult(result);
         }
 
-        private static ICollection<Mailbox> GetAllMailbox(string adminName, string adminPassword)
+        private static MailboxList GetAllMailbox(string adminName, string adminPassword)
         {
             const string liveIDConnectionUri = "https://outlook.office365.com/PowerShell-LiveID";
             const string schemaUri = "http://schemas.microsoft.com/powershell/Microsoft.Exchange";
@@ -66,7 +64,7 @@ namespace Arcserve.Office365.Exchange.Tool
                     runspace.Open();
 
                     var information = pipe.Invoke();
-                    List<Mailbox> result = new List<Mailbox>(information.Count);
+                    MailboxList result = new MailboxList(information.Count);
                     string displayName = string.Empty;
                     string address = string.Empty;
                     string name = string.Empty;
@@ -109,8 +107,34 @@ namespace Arcserve.Office365.Exchange.Tool
             }
             return ss;
         }
+
+        protected override ResultBase GetErrorResultBase(Exception e)
+        {
+            if (e is PSRemotingTransportException)
+            {
+                if (e.HResult == -2146233087)
+                {
+                    if (((PSRemotingTransportException)e).ErrorCode == -2144108103)
+                    {
+                        return new GetAllMailboxResult(ResMessage.NetworkInvalid);
+                    }
+                    else if (((PSRemotingTransportException)e).ErrorCode == -2144108102)
+                    {
+                        return new GetAllMailboxResult(ResMessage.NetworkUnStable);
+                    }
+                }
+            }
+
+            return new GetAllMailboxResult(e.Message);
+        }
+
+        protected override ResultBase GetInvalidUserPsw()
+        {
+            return new GetAllMailboxResult(ResMessage.UserNamePswInvalid);
+        }
     }
 
+    [Serializable]
     public class Mailbox
     {
         public string Name { get; set; }
@@ -125,5 +149,13 @@ namespace Arcserve.Office365.Exchange.Tool
             DisplayName = displayName;
             MailAddress = mailAddress;
         }
+    }
+
+    [Serializable]
+    public class MailboxList : List<Mailbox>
+    {
+        public MailboxList(int capacity) : base(capacity) { }
+
+        public MailboxList() : base() { }
     }
 }

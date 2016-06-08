@@ -8,8 +8,8 @@ namespace Arcserve.Office365.Exchange.Tool.Framework
 {
     class ArgumentInToolException : Exception
     {
-        public ArgumentInToolException(string message) : base(message) { }
+        public ArgumentInToolException(string message) : base(string.Format("Program error: {0}.", message)) { }
 
-        public ArgumentInToolException(string message, Exception innerException) : base(message, innerException) { }
+        public ArgumentInToolException(string message, Exception innerException) : base(string.Format("Program error: {0}.", message), innerException) { }
     }
 }

@@ -79,6 +79,17 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup
             }
         }
 
+        protected override Func<IFolderDataSync, bool> FuncIsFolderValid
+        {
+            get
+            {
+                return (folder) =>
+                {
+                    return DataFromClient.IsFolderInPlan(folder);
+                };
+            }
+        }
+
 
         protected override Action<IMailboxDataSync> ActionUpdateMailboxSyncToCatalog
         {

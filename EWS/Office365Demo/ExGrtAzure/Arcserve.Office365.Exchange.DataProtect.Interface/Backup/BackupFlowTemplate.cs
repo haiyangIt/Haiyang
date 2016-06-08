@@ -169,6 +169,8 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup
 
         protected abstract Func<string, bool> FuncIsFolderInPlan { get; }
 
+        protected abstract Func<IFolderDataSync, bool> FuncIsFolderValid { get; }
+
         protected abstract Func<string, bool> FuncIsFolderClassValid { get; }
 
         protected abstract Action<IMailboxDataSync> ActionUpdateMailboxSyncToCatalog { get; }
@@ -277,17 +279,24 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup
                             {
                                 case EwsWSData.ChangeType.Create:
                                     folderData = DataConvert.Convert(folderChange.Folder, MailboxInfo);
-                                    folderDataChangeUAD[ItemUADStatus.Add].Add(folderData);
-                                    addOrUpdateFolders.Add(folderData);
-                                    folderDealed.Add(folderChange.FolderId.UniqueId);
+                                    if (FuncIsFolderValid(folderData))
+                                    {
+                                        folderDataChangeUAD[ItemUADStatus.Add].Add(folderData);
+                                        addOrUpdateFolders.Add(folderData);
+                                        folderDealed.Add(folderChange.FolderId.UniqueId);
+                                    }
                                     break;
                                 case Microsoft.Exchange.WebServices.Data.ChangeType.ReadFlagChange:
                                 case Microsoft.Exchange.WebServices.Data.ChangeType.Update:
                                     folderData = DataConvert.Convert(folderChange.Folder, MailboxInfo);
-                                    folderData.SyncStatus = foldersInDic[folderChange.Folder.Id.UniqueId].SyncStatus;
-                                    folderDataChangeUAD[ItemUADStatus.Update].Add(folderData);
-                                    addOrUpdateFolders.Add(folderData);
-                                    folderDealed.Add(folderChange.FolderId.UniqueId);
+                                    if (FuncIsFolderValid(folderData))
+                                    {
+                                        
+                                        folderData.SyncStatus = foldersInDic[folderChange.Folder.Id.UniqueId].SyncStatus;
+                                        folderDataChangeUAD[ItemUADStatus.Update].Add(folderData);
+                                        addOrUpdateFolders.Add(folderData);
+                                        folderDealed.Add(folderChange.FolderId.UniqueId);
+                                    }
                                     break;
                                 case Microsoft.Exchange.WebServices.Data.ChangeType.Delete:
                                     if (foldersInDic.ContainsKey(folderChange.Folder.Id.UniqueId))

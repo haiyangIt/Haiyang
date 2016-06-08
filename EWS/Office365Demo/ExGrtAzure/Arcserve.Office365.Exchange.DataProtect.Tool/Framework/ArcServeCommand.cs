@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Arcserve.Office365.Exchange.DataProtect.Tool.Resource;
+using Arcserve.Office365.Exchange.DataProtect.Tool.Result;
+using Arcserve.Office365.Exchange.Log;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -21,23 +24,7 @@ namespace Arcserve.Office365.Exchange.Tool.Framework
         public ArgInfo JobType { get; set; }
 
         public const string CommandType = "JobType";
-
-
-
-        //public static ArcServeCommand CheckArgument(string[] args)
-        //{
-        //    var argDic = ArgParser.Parser(args);
-        //    return CheckArgument(argDic);
-        //}
-
-        //public static ArcServeCommand CheckArgument(CommandArgs args)
-        //{
-        //    ArgInfo outV;
-        //    if (!args.TryGetValue(CommandType, out outV))
-        //        throw new ArgumentInToolException("Please specify the job type. like: -JobType:GetAllMailbox.");
-        //    var type = outV.Value;
-        //    return AllCommand[type].Invoke(args);
-        //}
+        
 
         protected virtual void CheckArgument()
         {
@@ -63,44 +50,38 @@ namespace Arcserve.Office365.Exchange.Tool.Framework
 
         }
 
-        protected abstract string DoExcute();
-        public void Execute(TextWriter output)
+        protected abstract ResultBase DoExcute();
+        protected abstract ResultBase GetErrorResultBase(Exception e);
+        protected abstract ResultBase GetInvalidUserPsw();
+        public ResultBase Execute()
         {
             try
             {
                 CheckArgument();
-                var result = DoExcute();
-                output.WriteLine("Success");
-                output.WriteLine(result);
+                return DoExcute();
             }
             catch (ArgumentInToolException e)
             {
-                output.WriteLine("Error");
-                output.WriteLine(e.Message);
+                LogFactory.LogInstance.WriteException(LogLevel.ERR, string.Format("execute command {0} error", JobType), e, e.Message);
+                return GetErrorResultBase(e);
             }
             catch (PSRemotingTransportException e)
             {
                 if (e.HResult == -2146233087 && e.ErrorCode == -2144108477)
                 {
-                    output.WriteLine("Error");
-                    output.WriteLine("The admin user name or password is not valid.");
-                    output.WriteLine(e.Message);
-                    output.WriteLine(e.GetType().FullName);
-                    output.WriteLine(e.StackTrace);
+                    LogFactory.LogInstance.WriteException(LogLevel.ERR, string.Format("execute command {0} error", JobType), e, e.Message);
+                    return GetInvalidUserPsw();
                 }
                 else
                 {
-                    output.WriteLine("Error");
-                    output.WriteLine(e.Message);
-                    output.WriteLine(e.GetType().FullName);
-                    output.WriteLine(e.StackTrace);
+                    LogFactory.LogInstance.WriteException(LogLevel.ERR, string.Format("execute command {0} error", JobType), e, e.Message);
+                    return GetErrorResultBase(e);
                 }
             }
             catch (Exception e)
             {
-                output.WriteLine("Error");
-                output.WriteLine(e.Message);
-                output.WriteLine(e.StackTrace);
+                LogFactory.LogInstance.WriteException(LogLevel.ERR, string.Format("execute command {0} error", JobType), e, e.Message);
+                return GetErrorResultBase(e);
             }
         }
     }
@@ -116,18 +97,30 @@ namespace Arcserve.Office365.Exchange.Tool.Framework
 
         private static Dictionary<string, Func<CommandArgs, ArcServeCommand>> AllCommand = new Dictionary<string, Func<CommandArgs, ArcServeCommand>>
         {
-            {ExchangeBackupCommand.CommandName, (args) => {return new ExchangeBackupCommand(args); } }
+            {ExchangeBackupCommand.CommandName, (args) => {return new ExchangeBackupCommand(args); } },
+             {GetAllMailboxCommand.CommandName, (args) => {return new GetAllMailboxCommand(args); } }
         };
 
         public ArcServeCommand GetArcserveCommand()
         {
             CheckArgument();
             var type = JobType.Value;
-            return AllCommand[type].Invoke(_Args);
+
+            var result = AllCommand[type].Invoke(_Args);
+            return result;
         }
 
+        protected override ResultBase DoExcute()
+        {
+            throw new NotImplementedException();
+        }
 
-        protected override string DoExcute()
+        protected override ResultBase GetErrorResultBase(Exception e)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override ResultBase GetInvalidUserPsw()
         {
             throw new NotImplementedException();
         }

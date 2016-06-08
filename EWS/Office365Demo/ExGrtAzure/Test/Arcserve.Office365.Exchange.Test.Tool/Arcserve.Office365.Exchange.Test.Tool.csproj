@@ -73,6 +73,24 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Arcserve.Office365.Exchange">
+      <HintPath>..\..\packages\Arcserve_Office365_dll\Arcserve.Office365.Exchange.dll</HintPath>
+    </Reference>
+    <Reference Include="Arcserve.Office365.Exchange.Data">
+      <HintPath>..\..\packages\Arcserve_Office365_dll\Arcserve.Office365.Exchange.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="Arcserve.Office365.Exchange.DataProtect.Impl">
+      <HintPath>..\..\packages\Arcserve_Office365_dll\Arcserve.Office365.Exchange.DataProtect.Impl.dll</HintPath>
+    </Reference>
+    <Reference Include="Arcserve.Office365.Exchange.DataProtect.Interface">
+      <HintPath>..\..\packages\Arcserve_Office365_dll\Arcserve.Office365.Exchange.DataProtect.Interface.dll</HintPath>
+    </Reference>
+    <Reference Include="Arcserve.Office365.Exchange.EwsApi">
+      <HintPath>..\..\packages\Arcserve_Office365_dll\Arcserve.Office365.Exchange.EwsApi.dll</HintPath>
+    </Reference>
+    <Reference Include="Arcserve.Office365.Exchange.StorageAccess.MountSession">
+      <HintPath>..\..\packages\Arcserve_Office365_dll\Arcserve.Office365.Exchange.StorageAccess.MountSession.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />

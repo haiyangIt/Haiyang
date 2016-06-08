@@ -77,7 +77,7 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
                         StringBuilder sb = new StringBuilder();
                         sb.Append("{");
                         const string Or = " -or ";
-                        foreach(var m in mailboxes)
+                        foreach (var m in mailboxes)
                         {
                             sb.Append(" (PrimarySmtpAddress -eq ").Append("\"").Append(m).Append("\")").Append(Or);
                         }
@@ -133,7 +133,21 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
 
         public virtual void LoadFolderProperties(Folder folder, PropertySet folderPropertySet)
         {
-            folder.Load(folderPropertySet);
+            try
+            {
+                folder.Load(folderPropertySet);
+            }
+            catch (ArgumentException e)
+            {
+                if (e.Message.IndexOf("Requested value 'clutter' was not found") >= 0)
+                {
+                    PropertySet set = new PropertySet(folderPropertySet);
+                    set.Remove(FolderSchema.WellKnownFolderName);
+                    folder.Load(set);
+                }
+                else
+                    throw e;
+            }
         }
 
         public virtual ChangeCollection<FolderChange> SyncFolderHierarchy(string lastSyncStatus)

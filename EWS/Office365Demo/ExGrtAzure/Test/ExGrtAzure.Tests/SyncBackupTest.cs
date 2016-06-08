@@ -122,10 +122,10 @@ namespace ExGrtAzure.Tests
                 var newCatalogInfo = GetNewCatalogFile();
                 var oldCatalogInfo = GetOldCatalogFile();
                 ClearEnv(newCatalogInfo);
-                using (var catalogAccess = new CatalogAccess(newCatalogInfo.CatalogFilePath, oldCatalogInfo.CatalogFilePath, newCatalogInfo.DataFolder, "arcserve"))
+                using (var catalogAccess = new CatalogAccess(newCatalogInfo.WorkFolder, oldCatalogInfo.CatalogFilePath, newCatalogInfo.DataFolder, "arcserve"))
                 {
                     var taskSyncContextBase = DataProtectFactory.Instance.NewDefaultTaskSyncContext();
-                    var dataClient = new DataFromClient(null, 4);
+                    var dataClient = new DataFromClientFilterFolderByDisplayName();
                     dataClient.InitTaskSyncContext(taskSyncContextBase);
                     catalogAccess.InitTaskSyncContext(taskSyncContextBase);
 
@@ -240,6 +240,7 @@ namespace ExGrtAzure.Tests
 
     public class DataFromClient : IDataFromClient<IJobProgress>
     {
+        protected DataFromClient() { }
         public DataFromClient(int? folderCount, int? itemCount)
         {
             FolderCount = folderCount;
@@ -302,7 +303,7 @@ namespace ExGrtAzure.Tests
 
         private int? FolderCount = null;
         private int _dealtFolderCount = 0;
-        public bool IsFolderInPlan(string uniqueFolderId)
+        public virtual bool IsFolderInPlan(string uniqueFolderId)
         {
             if (FolderCount.HasValue)
             {
@@ -322,7 +323,7 @@ namespace ExGrtAzure.Tests
             throw new NotImplementedException();
         }
 
-        public bool IsItemValid(IItemDataSync item, IFolderDataSync parentFolder)
+        public virtual bool IsItemValid(IItemDataSync item, IFolderDataSync parentFolder)
         {
             return IsItemValid(item.ItemId, parentFolder.FolderId);
         }
@@ -368,9 +369,41 @@ namespace ExGrtAzure.Tests
             }
         }
 
-        public bool IsItemValid(string itemChangeId, IFolderDataSync parentFolder)
+        public virtual bool IsItemValid(string itemChangeId, IFolderDataSync parentFolder)
         {
             return IsItemValid(itemChangeId, parentFolder.FolderId);
+        }
+
+        public virtual bool IsFolderInPlan(IFolderDataSync folderData)
+        {
+            return true;
+        }
+    }
+
+    public class DataFromClientFilterFolderByDisplayName : DataFromClient
+    {
+        public override bool IsFolderInPlan(string uniqueFolderId)
+        {
+            return true;
+        }
+
+        public override bool IsItemValid(IItemDataSync item, IFolderDataSync parentFolder)
+        {
+            return true;
+        }
+
+        public override bool IsItemValid(string itemChangeId, IFolderDataSync parentFolder)
+        {
+            return true;
+        }
+
+        public override bool IsFolderInPlan(IFolderDataSync folderData)
+        {
+            if (((IFolderDataBase)folderData).DisplayName == "04Knowledge")
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

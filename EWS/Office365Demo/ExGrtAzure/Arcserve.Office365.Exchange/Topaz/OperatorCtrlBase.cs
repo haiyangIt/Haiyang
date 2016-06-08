@@ -70,7 +70,7 @@ namespace Arcserve.Office365.Exchange.Topaz
                     var type = e.GetType();
                     if (funcIsExceptionNeedSuspendRequest(e))
                     {
-                        EwsRequestGate.Instance.Close(new KeyValuePair<Type, OperationForFailBeforeRun>(type, new OperationForFailBeforeRun(60,
+                        EwsRequestGate.Instance.Close(new KeyValuePair<Type, OperationForFailBeforeRun>(type, new OperationForFailBeforeRun(CloudConfig.Instance.SuspendRequestTimeAfterThrowSpecificException,
                             () =>
                             {
                                 //DoNewExchangeService(Mailbox, EwsArgument, true);
@@ -105,6 +105,7 @@ namespace Arcserve.Office365.Exchange.Topaz
         {
         }
 
+        private object evLock = new object();
         public override void DoAction(Action action)
         {
             //LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.DEBUG, GetMessage("Enter timeout operator."));
@@ -125,11 +126,16 @@ namespace Arcserve.Office365.Exchange.Topaz
                         exception = ex;
                     }
 
-                    if (ev != null)
-                        ev.Set();
+                    using (evLock.LockWhile(() =>
+                    {
+                        if (ev != null)
+                            ev.Set();
+                    }))
+                    { }
+                    
                 }, null);
 
-                if (!ev.WaitOne())//CloudConfig.Instance.RequestTimeOut))
+                if (!ev.WaitOne(CloudConfig.Instance.RequestTimeOut))
                 {
                     exception = new TimeoutException();
                     LogFactory.LogInstance.WriteException(LogLevel.ERR, GetMessage("time out"), exception, "time out");
@@ -138,11 +144,15 @@ namespace Arcserve.Office365.Exchange.Topaz
             finally
             {
                 //LogFactory.LogInstance.WriteLog(LogInterface.LogLevel.DEBUG, GetMessage("Exit timeout operator."));
-                if (ev != null)
+                using (evLock.LockWhile(() =>
                 {
-                    ev.Dispose();
-                    ev = null;
-                }
+                    if (ev != null)
+                    {
+                        ev.Dispose();
+                        ev = null;
+                    }
+                }))
+                { }
             }
 
             if (exception != null)
@@ -151,8 +161,6 @@ namespace Arcserve.Office365.Exchange.Topaz
                 throw exception;
             }
         }
-
-        
     }
 
     public class RetryOperator : OperatorCtrlBase

@@ -20,6 +20,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Arcserve.Office365.Exchange.DataProtect.Tool.Result;
+using Arcserve.Office365.Exchange.DataProtect.Tool.Resource;
 
 namespace Arcserve.Office365.Exchange.Tool
 {
@@ -93,10 +95,10 @@ namespace Arcserve.Office365.Exchange.Tool
             }
         }
 
-        protected override string DoExcute()
+        protected override ResultBase DoExcute()
         {
             FullBackup();
-            return string.Empty;
+            return new ExchangeBackupResult();
         }
 
         private void FullBackup()
@@ -130,6 +132,16 @@ namespace Arcserve.Office365.Exchange.Tool
             {
 
             }
+        }
+
+        protected override ResultBase GetErrorResultBase(Exception e)
+        {
+            return new ExchangeBackupResult(e.Message);
+        }
+
+        protected override ResultBase GetInvalidUserPsw()
+        {
+            return new ExchangeBackupResult(ResMessage.UserNamePswInvalid);
         }
     }
 
@@ -258,6 +270,11 @@ namespace Arcserve.Office365.Exchange.Tool
         public bool IsItemValid(string itemChangeId, IFolderDataSync parentFolder)
         {
             return IsItemValid(itemChangeId, parentFolder.FolderId);
+        }
+
+        public bool IsFolderInPlan(IFolderDataSync folder)
+        {
+            return true;
         }
     }
 }

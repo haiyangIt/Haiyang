@@ -1,4 +1,5 @@
-﻿using Arcserve.Office365.Exchange.Log;
+﻿using Arcserve.Office365.Exchange.DataProtect.Tool.Result;
+using Arcserve.Office365.Exchange.Log;
 using Arcserve.Office365.Exchange.Manager;
 using Arcserve.Office365.Exchange.Tool.Framework;
 using System;
@@ -17,41 +18,37 @@ namespace Arcserve.Office365.Exchange.DataProtect.Tool
 
             if (args.Length == 1 && args[0] == "Help")
             {
-                Console.Out.WriteLine(Resource1.Help);
+                Console.Out.WriteLine(Resource.ResMessage.Help);
                 return;
             }
 
             //Console.Out.WriteLine(AppDomain.CurrentDomain.SetupInformation.ConfigurationFile);
 
             LogFactory.LogInstance.WriteLog(LogLevel.DEBUG, "config file", "file path {0}", AppDomain.CurrentDomain.SetupInformation.ConfigurationFile);
-            foreach(var arg in args)
+            foreach (var arg in args)
             {
-                LogFactory.LogInstance.WriteLog(LogLevel.DEBUG, "args", "arg {0}", arg);
+                if (arg.ToLower().IndexOf("password") < 0)
+                    LogFactory.LogInstance.WriteLog(LogLevel.DEBUG, "args", "arg {0}", arg);
             }
 
             //System.Threading.Thread.Sleep(20000);
             //return;
+            ResultBase result = null;
+            var argDic = ArgParser.Parser(args);
+            ArcserveCommandFactory factory = new ArcserveCommandFactory(argDic);
+            result = factory.GetArcserveCommand().Execute();
+
             try
             {
-                var argDic = ArgParser.Parser(args);
-                ArcserveCommandFactory factory = new ArcserveCommandFactory(argDic);
-                factory.GetArcserveCommand().Execute(Console.Out);
-            }
-            catch (ArgumentInToolException e)
-            {
-                Console.Out.WriteLine("Error");
-                Console.Out.WriteLine(e.Message);
+                Console.Out.WriteLine(ResultBase.Serialize(result));
             }
             catch (Exception e)
             {
-                Console.Out.WriteLine("Error");
-                Console.Out.WriteLine(e.Message);
-                Console.Out.WriteLine(e.StackTrace);
+                LogFactory.LogInstance.WriteException(LogLevel.ERR, "serialize to xml error", e, e.Message);
             }
-            finally
-            {
-                DisposeManager.DisposeInstance();
-            }
+
+            DisposeManager.DisposeInstance();
+
         }
     }
 }

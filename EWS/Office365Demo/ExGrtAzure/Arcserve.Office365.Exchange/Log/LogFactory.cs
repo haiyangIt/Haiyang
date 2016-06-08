@@ -28,7 +28,7 @@ namespace Arcserve.Office365.Exchange.Log
         private static LogFactory CreateFactory()
         {
             var result = new LogFactory();
-            string logImplAssemblyPath = Path.Combine(LibPath, "Arcserve.Office365.Exchange.Log.Impl.dll");
+            string logImplAssemblyPath = Path.Combine(LibPath, "Arcserve.Office365.Exchange.dll");
             result.LogImplAssembly = Assembly.LoadFrom(logImplAssemblyPath);
 
             result._logInstance = result.CreateLogInstance();

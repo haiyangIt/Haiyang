@@ -67,6 +67,11 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession
             return FolderClassUtil.IsFolderValid(folderClass);
         }
 
+        public bool IsFolderInPlan(IFolderDataSync folderData)
+        {
+            return true;
+        }
+
         public bool IsFolderInPlan(string uniqueFolderId)
         {
             return true;

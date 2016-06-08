@@ -13,20 +13,13 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             Instance = new AssemblyConfig();
         }
         public static readonly AssemblyConfig Instance;
-
-        public virtual string BinaryStorageAccessInAzure
-        {
-            get
-            {
-                return "Arcserve.Office365.Exchange.StorageAccess.Azure.dll";
-            }
-        }
+        
 
         public virtual string BinaryExchangeEwsApi
         {
             get
             {
-                return "Arcserve.Office365.Exchange.EwsApi.Impl.dll";
+                return "Arcserve.Office365.Exchange.EwsApi.dll";
             }
         }
 
@@ -42,89 +35,11 @@ namespace Arcserve.Office365.Exchange.Util.Setting
         {
             get
             {
-                return "Arcserve.Office365.Exchange.Data.Impl";
+                return "Arcserve.Office365.Exchange.Data.dll";
             }
         }
-
-        public virtual string ICatalogDataAccessImplClass
-        {
-            get
-            {
-                return "Arcserve.Office365.Exchange.StorageAccess.Azure.CatalogDataAccess";
-            }
-        }
-
-        public virtual string IDataConvertImplClass
-        {
-            get
-            {
-                return "Arcserve.Office365.Exchange.StorageAccess.Azure.DataConvert";
-            }
-        }
-
-        public virtual string IMailboxImplClass
-        {
-            get
-            {
-                return "Arcserve.Office365.Exchange.EwsApi.Impl.Impl.MailboxOperatorImpl";
-            }
-        }
-
-        public virtual string IFolderImplClass
-        {
-            get
-            {
-                return "Arcserve.Office365.Exchange.EwsApi.Impl.Impl.Impl.FolderOperatorImpl";
-            }
-        }
-
-        public virtual string IItemImplClass
-        {
-            get
-            {
-                return "Arcserve.Office365.Exchange.EwsApi.Impl.Impl.Impl.ItemOperatorImpl";
-            }
-        }
-
-        public virtual string ICatalogServiceImplClass
-        {
-            get
-            {
-                return "Arcserve.Office365.Exchange.DataProtect.Impl.CatalogService";
-            }
-        }
-
-        public virtual string IFilterItemImplClass
-        {
-            get
-            {
-                return "Arcserve.Office365.Exchange.DataProtect.Impl.FilterBySelectedTree";
-            }
-        }
-
-        public virtual string IQueryCatalogDataAccessImplClass
-        {
-            get
-            {
-                return "Arcserve.Office365.Exchange.StorageAccess.Azure.QueryCatalogDataAccess";
-            }
-        }
-
-        public virtual string IDataConvertFromDbImplClass
-        {
-            get
-            {
-                return "Arcserve.Office365.Exchange.StorageAccess.Azure.DataConvertFromDb";
-            }
-        }
-
-        public virtual string ICatalogJobImplClass
-        {
-            get
-            {
-                return "Arcserve.Office365.Exchange.Data.Impl.CatalogInfoModel";
-            }
-        }
+        
+        
 
         public virtual string IRestoreDestinationImplClass
         {

@@ -100,7 +100,6 @@
     <Compile Include="Backup\IDataConvert.cs" />
     <Compile Include="Backup\IDataFromClient.cs" />
     <Compile Include="Backup\IExchangeAccess.cs" />
-    <Compile Include="Backup\IFilterItemWithFolderAsync.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
