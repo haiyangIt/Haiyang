@@ -24,11 +24,18 @@ namespace Arcserve.Office365.Exchange.DataProtect.Tool.Result
         {
             XmlSerializer s = new XmlSerializer(obj.GetType());
             StringBuilder sb = new StringBuilder();
-            using (StringWriter writer = new StringWriter(sb))
+            using (UTF8StringWriter writer = new UTF8StringWriter(sb))
             {
                 s.Serialize(writer, obj);
             }
             return sb.ToString();
+        }
+
+        class UTF8StringWriter : StringWriter
+        {
+            public UTF8StringWriter(StringBuilder sb) : base(sb) { }
+
+            public override Encoding Encoding { get { return Encoding.UTF8; } }
         }
     }
 }
