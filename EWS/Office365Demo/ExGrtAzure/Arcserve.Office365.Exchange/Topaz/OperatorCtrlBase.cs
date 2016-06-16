@@ -41,22 +41,19 @@ namespace Arcserve.Office365.Exchange.Topaz
         }
 
         #region Retry Time out Operation
-        
+
 
         public static long OperationCount = 0;
 
-        public static void DoActionWithRetryTimeOut(Action operation, string operationName, Func<Exception, bool> funcIsExceptionNeedSuspendRequest)
+        public static void DoActionWithRetryTimeOut(Action operation, string operationName, Func<Exception, bool> funcIsExceptionNeedSuspendRequest, Func<Exception, bool> funcIsRetry)
         {
-            var operatorCtrl = NewOperatorCtrlBase(operationName, funcIsExceptionNeedSuspendRequest);
+            var operatorCtrl = NewOperatorCtrlBase(operationName, funcIsExceptionNeedSuspendRequest, funcIsRetry);
             Interlocked.Increment(ref OperationCount);
             operatorCtrl.DoAction(operation);
         }
 
-        
 
-        
-
-        private static OperatorCtrlBase NewOperatorCtrlBase(string operationName, Func<Exception, bool> funcIsExceptionNeedSuspendRequest)
+        private static OperatorCtrlBase NewOperatorCtrlBase(string operationName, Func<Exception, bool> funcIsExceptionNeedSuspendRequest, Func<Exception, bool> funcIsRetry)
         {
             var b = new OperatorCtrlBaseImpl(operationName);
             var timeOut = new TimeOutOperatorCtrl(b, operationName);
@@ -80,7 +77,7 @@ namespace Arcserve.Office365.Exchange.Topaz
                     {
                         System.Threading.Thread.Sleep(5 * 1000);
                     }
-                });
+                }, funcIsRetry);
             return retry;
         }
 
@@ -132,7 +129,7 @@ namespace Arcserve.Office365.Exchange.Topaz
                             ev.Set();
                     }))
                     { }
-                    
+
                 }, null);
 
                 if (!ev.WaitOne(CloudConfig.Instance.RequestTimeOut))
@@ -169,10 +166,12 @@ namespace Arcserve.Office365.Exchange.Topaz
         private int retryCount = 0;
         private Action<Exception> _afterFail;
         private Action _beforeRun;
-        public RetryOperator(OperatorCtrlBase other, string operationName, Action beforeRun, Action<Exception> afterFail) : base(other, operationName)
+        private Func<Exception, bool> _isRetry;
+        public RetryOperator(OperatorCtrlBase other, string operationName, Action beforeRun, Action<Exception> afterFail, Func<Exception, bool> isRetry) : base(other, operationName)
         {
             _afterFail = afterFail;
             _beforeRun = beforeRun;
+            _isRetry = isRetry;
         }
 
         public override void DoAction(Action action)
@@ -199,7 +198,7 @@ namespace Arcserve.Office365.Exchange.Topaz
                 catch (ThreadAbortException abortException)
                 {
                     LogFactory.LogInstance.WriteException(LogLevel.WARN,
-                        GetMessage( string.Format("[{0}]th operation thread abort.", retryCount)),
+                        GetMessage(string.Format("[{0}]th operation thread abort.", retryCount)),
                         abortException, abortException.Message);
                     throw abortException;
                 }
@@ -209,17 +208,23 @@ namespace Arcserve.Office365.Exchange.Topaz
                         GetMessage(string.Format("[{0}]th operation failed.{1}", retryCount, retryCount < 3 ? string.Format("will do [{0}]th try", retryCount + 1) : "")),
                         e, e.Message);
                     ex = e;
-                    if (retryCount < MaxRetryCount)
-                    {
-                        try
-                        {
-                            _afterFail.Invoke(e);
-                        }
-                        catch (Exception ex1)
-                        {
 
+                    if (_isRetry(e))
+                    {
+                        if (retryCount < MaxRetryCount)
+                        {
+                            try
+                            {
+                                _afterFail.Invoke(e);
+                            }
+                            catch (Exception ex1)
+                            {
+
+                            }
                         }
                     }
+                    else
+                        throw e;
                 }
             } while (retryCount < MaxRetryCount && !isSuccess);
 

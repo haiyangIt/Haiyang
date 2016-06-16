@@ -1,4 +1,5 @@
-﻿using Arcserve.Office365.Exchange.EwsApi.Impl.Increment;
+﻿using Arcserve.Office365.Exchange.EwsApi.Extension;
+using Arcserve.Office365.Exchange.EwsApi.Impl.Increment;
 using Arcserve.Office365.Exchange.Thread;
 using System;
 using System.Collections.Generic;
@@ -19,6 +20,11 @@ namespace Arcserve.Office365.Exchange.EwsApi.Interface
         public IEwsServiceAdapter<IJobProgress> NewEwsAdapter()
         {
             return new EwsServiceAdapter();
+        }
+
+        public IEwsServiceAdapterExtension<IJobProgress> NewEwsAdpaterExtension()
+        {
+            return new EwsServiceAdapterExtension();
         }
     }
 }

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Collections;
 using System.Diagnostics;
+using Arcserve.Office365.Exchange.Log;
 
 namespace Arcserve.Office365.Exchange.Util
 {
@@ -16,7 +17,9 @@ namespace Arcserve.Office365.Exchange.Util
             FuncGetSize = funcGetSize;
             PartitionListCount = MaxBatchAddCount / BatchRequestMaxCount;
             if (BatchRequestMaxCount != SmallCountInPartition + LargeCountInPartition)
-                throw new ArgumentException("the config is not right. small count add large count must equal maxBatchCount.");
+                LogFactory.LogInstance.WriteLog(LogLevel.WARN, "the config is not right. small count add large count must equal maxBatchCount.");
+            LargeCountInPartition = BatchRequestMaxCount * 3 / 10;
+            SmallCountInPartition = BatchRequestMaxCount - LargeCountInPartition;
         }
 
         public CollectionPatitionUtil(Func<T, int> funcGetSize, int maxBatchAddCount, int requestMaxSize, int smallCountInPartition, int largeCountInPartition)

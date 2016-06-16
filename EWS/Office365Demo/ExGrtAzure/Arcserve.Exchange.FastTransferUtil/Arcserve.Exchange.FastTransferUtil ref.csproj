@@ -1,0 +1,167 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{C9772BC6-1490-4F35-AEC1-FD9D6ECAD194}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Arcserve.Exchange.FastTransferUtil</RootNamespace>
+    <AssemblyName>Arcserve.Exchange.FastTransferUtil</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\Release</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\Release</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CompoundFile\BaseStruct.cs" />
+    <Compile Include="CompoundFile\CompoundFileBuild.cs" />
+    <Compile Include="CompoundFile\CompoundFileParser.cs" />
+    <Compile Include="CompoundFile\CompoundFileUtil.cs" />
+    <Compile Include="CompoundFile\MsgStruct\AttachmentStruct.cs" />
+    <Compile Include="CompoundFile\MsgStruct\EmbedStruct.cs" />
+    <Compile Include="CompoundFile\MsgStruct\Helper\Crc32.cs" />
+    <Compile Include="CompoundFile\MsgStruct\Helper\IStreamHelper.cs" />
+    <Compile Include="CompoundFile\MsgStruct\Helper\SpecialFixProperty.cs" />
+    <Compile Include="CompoundFile\MsgStruct\MessageContentStruct.cs" />
+    <Compile Include="CompoundFile\MsgStruct\RecipientStruct.cs" />
+    <Compile Include="CompoundFile\MsgStruct\TopLevelStruct.cs" />
+    <Compile Include="CompoundFile\NativeDll.cs" />
+    <Compile Include="FTFactory.cs" />
+    <Compile Include="FTMessageTreeRoot.cs" />
+    <Compile Include="FTNodeBase.cs" />
+    <Compile Include="FTNodeCollection.cs" />
+    <Compile Include="FTNodeLeaf.cs" />
+    <Compile Include="FTOneNode.cs" />
+    <Compile Include="FTParserUtil.cs" />
+    <Compile Include="FTStream\ByteArrayTransferUnit.cs" />
+    <Compile Include="FTStream\FTBufferRead.cs" />
+    <Compile Include="FTStream\FTStreamConst.cs" />
+    <Compile Include="FTStream\FTStreamReader.cs" />
+    <Compile Include="FTStream\FTStreamReaderForPage.cs" />
+    <Compile Include="FTStream\FTStreamWriter.cs" />
+    <Compile Include="FTStream\FTStreamWriterForPage.cs" />
+    <Compile Include="FTStream\FxOpcodes.cs" />
+    <Compile Include="FTStream\IFTPage.cs" />
+    <Compile Include="FTStream\IFTSerialize .cs" />
+    <Compile Include="FTStream\IFTStreamReader.cs" />
+    <Compile Include="FTStream\IFTStreamWriter.cs" />
+    <Compile Include="FTStream\IFTTransferUnit.cs" />
+    <Compile Include="IFTParseEvent.cs" />
+    <Compile Include="IFTTreeLeaf.cs" />
+    <Compile Include="IFTTreeNode.cs" />
+    <Compile Include="IPropertyProcess.cs" />
+    <Compile Include="Item\Attachment.cs" />
+    <Compile Include="Item\AttachmentCollection.cs" />
+    <Compile Include="Item\AttachmentContent.cs" />
+    <Compile Include="Item\EmbeddedMessage.cs" />
+    <Compile Include="Item\Marker\EndAttachMarker.cs" />
+    <Compile Include="Item\Marker\EndEmbedMarker.cs" />
+    <Compile Include="Item\Marker\EndRecipientMarker.cs" />
+    <Compile Include="Item\Marker\MarkerBase.cs" />
+    <Compile Include="Item\Marker\NewAttachmentMarker.cs" />
+    <Compile Include="Item\Marker\StartEmbedMarker.cs" />
+    <Compile Include="Item\Marker\StartRecipientMarker.cs" />
+    <Compile Include="Item\MessageChildren.cs" />
+    <Compile Include="Item\MessageContent.cs" />
+    <Compile Include="Item\PropertyTag.cs" />
+    <Compile Include="Item\PropertyType.cs" />
+    <Compile Include="Item\PropValue\AttachmentNumberTag.cs" />
+    <Compile Include="Item\PropValue\FixedPropType.cs" />
+    <Compile Include="Item\PropValue\FixPropValue.cs" />
+    <Compile Include="Item\PropValue\IFixedSizeValue.cs" />
+    <Compile Include="Item\PropValue\IPropInfo.cs" />
+    <Compile Include="Item\PropValue\IPropValue.cs" />
+    <Compile Include="Item\PropValue\ISizeValue.cs" />
+    <Compile Include="Item\PropValue\IVarSizeValue.cs" />
+    <Compile Include="Item\PropValue\MetaPropertyBase.cs" />
+    <Compile Include="Item\PropValue\MetaPropertyFxDelTag.cs" />
+    <Compile Include="Item\PropValue\MvPropType.cs" />
+    <Compile Include="Item\PropValue\MvPropValue.cs" />
+    <Compile Include="Item\PropValue\PropList.cs" />
+    <Compile Include="Item\PropValue\PropValueLength.cs" />
+    <Compile Include="Item\PropValue\VarPropType.cs" />
+    <Compile Include="Item\PropValue\VarPropValue.cs" />
+    <Compile Include="Item\Recipient.cs" />
+    <Compile Include="Item\RecipientCollection.cs" />
+    <Compile Include="LogWriter.cs" />
+    <Compile Include="Log\FtTraceListener.cs" />
+    <Compile Include="Log\ITraceLog.cs" />
+    <Compile Include="Log\TraceLog.cs" />
+    <Compile Include="Log\TraceLogLevel.cs" />
+    <Compile Include="Log\TraceSourceLog.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy  "$(ProjectDir)$(OutDir)*" "$(ProjectDir)..\packages\Arcserve_Office365_dll" /s /i /y</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

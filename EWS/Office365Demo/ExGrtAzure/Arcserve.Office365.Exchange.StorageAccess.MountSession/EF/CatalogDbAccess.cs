@@ -13,6 +13,8 @@ using System.Threading.Tasks;
 using Arcserve.Office365.Exchange.Util;
 using System.Data.Entity.Infrastructure;
 using Arcserve.Office365.Exchange.Util.Setting;
+using System.Data.SqlClient;
+using System.Diagnostics;
 
 namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 {
@@ -35,11 +37,18 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
                 fileName = Path.GetFileName(lastCatalogFile);
                 newCatalogFileName = Path.Combine(newCatalogFolder, fileName);
                 File.Copy(lastCatalogFile, newCatalogFileName);
+                var logFile = Path.GetFileNameWithoutExtension(lastCatalogFile);
+                logFile = string.Format("{0}_log.ldf", logFile);
+
+                var lastLogFilePath = Path.Combine(Path.GetDirectoryName(lastCatalogFile), logFile);
+                var newLogFilePath = Path.Combine(newCatalogFolder, logFile);
+                File.Copy(lastLogFilePath, newLogFilePath);
+
                 _queryContext = new CatalogSyncDbContext(lastCatalogFile);
             }
             else
             {
-                fileName = string.Format("Catalog_{0}", MD5Utility.ConvertToMd5(organizationName));
+                fileName = CatalogAccess.GetCatalogFileName(organizationName);
                 newCatalogFileName = Path.Combine(newCatalogFolder, fileName);
             }
 
@@ -47,6 +56,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
             _dataConvert = new DataConvert();
         }
+
 
         public CancellationToken CancelToken
         {
@@ -146,12 +156,17 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
             DoSaveChanges();
             if (_updateContext != null)
             {
+                SqlConnection.ClearPool(_updateContext.Database.Connection as SqlConnection);
                 _updateContext.Dispose();
+                
                 _updateContext = null;
+                
             }
             if (_queryContext != null)
             {
+                SqlConnection.ClearPool(_queryContext.Database.Connection as SqlConnection);
                 _queryContext.Dispose();
+               
                 _queryContext = null;
             }
         }
@@ -316,6 +331,13 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
             var folderInfo = (from m in _updateContext.Folders where m.FolderId == folder.FolderId select m).FirstOrDefault();
             if (folderInfo == null)
                 throw new ArgumentException("mailbox is not in catalog.");
+
+            var itemCount = (from m in _updateContext.Items where m.ParentFolderId == folder.FolderId select m).Count();
+            folderInfo.ChildItemCount = itemCount;
+
+            var childFolderCount = (from m in _updateContext.Folders where m.ParentFolderId == folder.FolderId select m).Count();
+            folderInfo.ChildFolderCount = childFolderCount;
+
             folderInfo.SyncStatus = folder.SyncStatus;
             _updateContext.SaveChanges();
         }
@@ -351,17 +373,20 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
             if (folder != null)
             {
                 _updateContext.Folders.Remove(folder);
-                _updateContext.SaveChanges();
+                int i = _updateContext.SaveChanges();
+                Debug.Write(String.Format("delete {0} folder record.", i));
             }
 
             var items = (from m in _updateContext.Items where m.ParentFolderId == folderId select m);
             if(items.Count() > 0)
             {
+                
                 foreach(var i in items)
                 {
                     _updateContext.Items.Remove(i);
                 }
-                _updateContext.SaveChanges();
+                int deleteCount = _updateContext.SaveChanges();
+                Debug.Write(String.Format("delete {0} item record.", deleteCount));
             }
         }
 
@@ -638,7 +663,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         public void DeleteItemsToCatalog(IEnumerable<string> itemIds)
         {
-            throw new NotImplementedException();
+            
         }
 
         public Task DeleteItemsToCatalogAsync(IEnumerable<string> itemIds)
@@ -648,7 +673,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         public void UpdateFolderToCatalog(IFolderDataSync folder)
         {
-            throw new NotImplementedException();
+           
         }
 
         public Task UpdateFolderToCatalogAsync(IFolderDataSync folder)
@@ -658,7 +683,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         public void UpdateFolderSyncStatusToCatalog(IFolderDataSync folder)
         {
-            throw new NotImplementedException();
+            
         }
 
         public Task UpdateFolderSyncStatusToCatalogAsync(IFolderDataSync folder)
@@ -668,7 +693,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         public void UpdateItemsToCatalog(IEnumerable<IItemDataSync> items)
         {
-            throw new NotImplementedException();
+            
         }
 
         public Task UpdateItemsToCatalogAsync(IEnumerable<IItemDataSync> items)
@@ -683,7 +708,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         public void DeleteFolderToCatalog(string folderId)
         {
-            throw new NotImplementedException();
+            
         }
 
         public Task DeleteFolderToCatalogAsync(string folderId)
@@ -693,7 +718,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         public void UpdateMailboxToCatalog(ICollection<IMailboxDataSync> mailboxes)
         {
-            throw new NotImplementedException();
+            
         }
 
         public Task UpdateMailboxToCatalogAsync(ICollection<IMailboxDataSync> mailboxes)
@@ -703,7 +728,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         public void DeleteMailboxToCatalog(ICollection<IMailboxDataSync> mailboxes)
         {
-            throw new NotImplementedException();
+            
         }
 
         public Task DeleteMailboxToCatalogAsync(ICollection<IMailboxDataSync> mailboxes)
@@ -713,7 +738,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         public void UpdateMailboxToCatalog(IMailboxDataSync mailbox)
         {
-            throw new NotImplementedException();
+            
         }
 
         public Task UpdateMailboxToCatalogAsync(IMailboxDataSync mailbox)
@@ -723,7 +748,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         public void AddMailboxesToCatalog(IMailboxDataSync mailbox)
         {
-            throw new NotImplementedException();
+            
         }
 
         public Task AddMailboxesToCatalogAsync(IMailboxDataSync mailbox)

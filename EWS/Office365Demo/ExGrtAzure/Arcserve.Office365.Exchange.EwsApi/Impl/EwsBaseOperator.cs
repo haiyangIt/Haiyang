@@ -19,6 +19,7 @@ using System.Security;
 using Arcserve.Office365.Exchange.Util.Setting;
 using Arcserve.Office365.Exchange.Log;
 using Arcserve.Office365.Exchange.EwsApi.Interface;
+using System.Xml;
 
 namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
 {
@@ -129,7 +130,13 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
             }
         }
 
-
+        public virtual void FolderCreate(string folderName, string folderType, Folder parentFolder)
+        {
+            Folder folder = new Folder(service);
+            folder.DisplayName = folderName;
+            folder.FolderClass = folderType;
+            folder.Save(parentFolder.Id);
+        }
 
         public virtual void LoadFolderProperties(Folder folder, PropertySet folderPropertySet)
         {
@@ -139,7 +146,8 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
             }
             catch (ArgumentException e)
             {
-                if (e.Message.IndexOf("Requested value 'clutter' was not found") >= 0)
+                LogFactory.LogInstance.WriteException(LogLevel.WARN, "Folder load error.", e, e.Message);
+                if(e.TargetSite.DeclaringType.FullName == "System.Enum+EnumResult" && e.TargetSite.MemberType == System.Reflection.MemberTypes.Method && e.TargetSite.Name == "SetFailure" && e.Message.IndexOf("Requested value ") >=0 )
                 {
                     PropertySet set = new PropertySet(folderPropertySet);
                     set.Remove(FolderSchema.WellKnownFolderName);
@@ -329,6 +337,11 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
             return service.FindItems(parentFolderId, searchFilter, view);
         }
 
+        public virtual void FolderEmpty(Folder folder, DeleteMode deleteMode, bool deleteSubFolders)
+        {
+            folder.Empty(deleteMode, deleteSubFolders);
+        }
+
         public virtual void LoadPropertiesForItems(IEnumerable<Item> items, PropertySet itemPropertySet)
         {
             var response = service.LoadPropertiesForItems(items, itemPropertySet);
@@ -356,16 +369,16 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
             return ExportUploadHelper.ExportItemsPost(Enum.GetName(typeof(ExchangeVersion), service.RequestedServerVersion), items, EwsArgument, exportItemOper);
         }
 
-        public virtual void ImportItem(string parentFolderId, Stream stream, EwsServiceArgument argument)
+        public virtual void ImportItem(string parentFolderId, Stream stream)
         {
             ExportUploadHelper.UploadItemPost(Enum.GetName(typeof(ExchangeVersion),
-                service.RequestedServerVersion), parentFolderId, CreateActionType.CreateNew, string.Empty, stream, argument);
+                service.RequestedServerVersion), parentFolderId, CreateActionType.CreateNew, string.Empty, stream, EwsArgument);
         }
 
-        public virtual void ImportItem(string parentFolderId, byte[] itemData, EwsServiceArgument argument)
+        public virtual void ImportItem(string parentFolderId, byte[] itemData)
         {
             ExportUploadHelper.UploadItemPost(Enum.GetName(typeof(ExchangeVersion),
-                service.RequestedServerVersion), parentFolderId, CreateActionType.CreateNew, string.Empty, itemData, argument);
+                service.RequestedServerVersion), parentFolderId, CreateActionType.CreateNew, string.Empty, itemData, EwsArgument);
         }
 
         protected void TryAction(Action operation, string operationName)
@@ -373,7 +386,7 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
             OperatorCtrlBase.DoActionWithRetryTimeOut(() =>
             {
                 operation.Invoke();
-            }, operationName, IsExceptionNeedSuspendRequest);
+            }, operationName, IsExceptionNeedSuspendRequest, IsExceptionCanRetry);
         }
 
         private static string[] FindArray = new string[]
@@ -384,13 +397,34 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
             "The connection was closed."
         };
 
+        private static string[] RetryArray = new string[]
+        {
+            "An existing connection was forcibly closed by the remote host",
+            "The underlying connection was closed",
+            "The mailbox database is temporarily unavailable",
+            "The connection was closed.",
+            "Unexpected end of file has occurred"
+        };
+
+        private static bool IsExceptionCanRetry(Exception e)
+        {
+            return ((e is ServiceRequestException) ||
+               (e is WebException) ||
+               (e is SocketException) ||
+               (e is ServiceResponseException) ||
+               (e is IOException) ||
+               (e is XmlException)) && (
+                   RetryArray.Any(e.Message.Contains)
+               );
+        }
+
         private static bool IsExceptionNeedSuspendRequest(Exception e)
         {
             return ((e is ServiceRequestException) ||
                 (e is WebException) ||
                 (e is SocketException) ||
                 (e is ServiceResponseException) ||
-                (e is IOException)) && (
+                (e is IOException) ) && (
                     FindArray.Any(e.Message.Contains)
                 );
         }
@@ -401,7 +435,7 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
             OperatorCtrlBase.DoActionWithRetryTimeOut(() =>
             {
                 result = operation.Invoke();
-            }, operationName, IsExceptionNeedSuspendRequest);
+            }, operationName, IsExceptionNeedSuspendRequest, IsExceptionCanRetry);
             return result;
         }
 
@@ -452,6 +486,15 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
             {
                 return base.FolderBind(id);
             }, "FolderBind");
+        }
+
+        public override void FolderCreate(string folderName, string folderType, Folder parentFolder)
+        {
+            TryAction(() =>
+            {
+                base.FolderCreate(folderName, folderType, parentFolder);
+            }, "FolderCreate");
+            
         }
 
         public override void FolderSave(Folder folder, FolderId parentFolderId)
@@ -543,6 +586,15 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
         }
 
 
+        public override void FolderEmpty(Folder folder, DeleteMode deleteMode, bool deleteSubFolders)
+        {
+            TryAction(() =>
+            {
+                base.FolderEmpty(folder, deleteMode, deleteSubFolders);
+            }, "FolderEmpty");
+            
+        }
+
         //public override void (string sItemId, EwsServiceArgument argument)
         //{
         //    return TryFunc(() =>
@@ -551,19 +603,19 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
         //    }, "ExportItem");
         //}
 
-        public override void ImportItem(string parentFolderId, byte[] itemData, EwsServiceArgument argument)
+        public override void ImportItem(string parentFolderId, byte[] itemData)
         {
             TryAction(() =>
             {
-                base.ImportItem(parentFolderId, itemData, argument);
+                base.ImportItem(parentFolderId, itemData);
             }, "ImportItem");
         }
 
-        public override void ImportItem(string parentFolderId, Stream stream, EwsServiceArgument argument)
+        public override void ImportItem(string parentFolderId, Stream stream)
         {
             TryAction(() =>
             {
-                base.ImportItem(parentFolderId, stream, argument);
+                base.ImportItem(parentFolderId, stream);
             }, "ImportItem");
         }
 

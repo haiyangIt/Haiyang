@@ -187,31 +187,32 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup
 
         private static int _loadPropertyMaxCount = CloudConfig.Instance.BatchLoadPropertyItemCount;
 
-        private Dictionary<ItemClass, List<ItemChange>> _dicItemChangs = new Dictionary<ItemClass, List<ItemChange>>();
+        private Dictionary<ItemClass, List<ItemChange>> _dicItemAdds = new Dictionary<ItemClass, List<ItemChange>>();
+        private Dictionary<ItemClass, List<ItemChange>> _dicItemUpdates = new Dictionary<ItemClass, List<ItemChange>>();
 
         protected override bool CheckCanBatchAdded(ItemChange itemChange, ItemClass itemClass, out ICollection<ItemChange> batchItems)
         {
-            return CheckCanBatch(itemChange, itemClass, out batchItems);
+            return CheckCanBatch(itemChange, itemClass, _dicItemAdds, out batchItems);
         }
 
-        private bool CheckCanBatch(ItemChange itemChange, ItemClass itemClass, out ICollection<ItemChange> batchItems)
+        private static bool CheckCanBatch(ItemChange itemChange, ItemClass itemClass, Dictionary<ItemClass, List<ItemChange>> itemChanges, out ICollection<ItemChange> batchItems)
         {
             List<ItemChange> outPut = null;
             bool isGet = false;
-            using (_dicItemChangs.LockWhile(() =>
+            using (itemChanges.LockWhile(() =>
             {
                 List<ItemChange> result;
-                if (!_dicItemChangs.TryGetValue(itemClass, out result))
+                if (!itemChanges.TryGetValue(itemClass, out result))
                 {
                     result = new List<ItemChange>(_loadPropertyMaxCount);
-                    _dicItemChangs.Add(itemClass, result);
+                    itemChanges.Add(itemClass, result);
                 }
                 result.Add(itemChange);
                 if (result.Count >= _loadPropertyMaxCount)
                 {
                     outPut = result;
                     result = new List<ItemChange>(_loadPropertyMaxCount);
-                    _dicItemChangs[itemClass] = result;
+                    itemChanges[itemClass] = result;
 
                     isGet = true;
                 }
@@ -222,9 +223,25 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup
             return isGet;
         }
 
+        private List<ItemChange> _itemDeletes = new List<ItemChange>();
         protected override bool CheckCanBatchDelete(ItemChange itemChange, out ICollection<ItemChange> batchItems)
         {
-            throw new NotImplementedException();
+            List<ItemChange> result = null;
+            bool isGet = false;
+            using (_itemDeletes.LockWhile(() =>
+            {
+                _itemDeletes.Add(itemChange);
+                if (_itemDeletes.Count >= _loadPropertyMaxCount)
+                {
+                    result = new List<ItemChange>(_itemDeletes);
+                    _itemDeletes.Clear();
+                }
+            }))
+            {
+
+            }
+            batchItems = result;
+            return isGet;
         }
 
         private List<ItemChange> _dicItemReadChangs = new List<ItemChange>();
@@ -250,7 +267,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup
 
         protected override bool CheckCanBatchUpdate(ItemChange itemChange, ItemClass itemClass, out ICollection<ItemChange> batchItems)
         {
-            return CheckCanBatch(itemChange, itemClass, out batchItems);
+            return CheckCanBatch(itemChange, itemClass, _dicItemUpdates, out batchItems);
         }
 
 
@@ -261,15 +278,15 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup
 
         protected override Dictionary<ItemClass, List<ItemChange>> GetLeftBatchAdded()
         {
-            var result = new Dictionary<ItemClass, List<ItemChange>>(_dicItemChangs);
-            _dicItemChangs.Clear();
+            var result = new Dictionary<ItemClass, List<ItemChange>>(_dicItemAdds);
+            _dicItemAdds.Clear();
             return result;
         }
 
         protected override Dictionary<ItemClass, List<ItemChange>> GetLeftBatchUpdated()
         {
-            var result = new Dictionary<ItemClass, List<ItemChange>>(_dicItemChangs);
-            _dicItemChangs.Clear();
+            var result = new Dictionary<ItemClass, List<ItemChange>>(_dicItemUpdates);
+            _dicItemUpdates.Clear();
             return result;
         }
 
@@ -278,9 +295,9 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup
             return _dicItemReadChangs;
         }
 
-        protected override Dictionary<ItemClass, List<ItemChange>> GetLeftBatchDeleted()
+        protected override List<ItemChange> GetLeftBatchDeleted()
         {
-            return new Dictionary<ItemClass, List<ItemChange>>(0);
+            return _itemDeletes;
         }
 
         protected override IEnumerable<IEnumerable<IItemDataSync>> GetLeftWriteToStorageItems()

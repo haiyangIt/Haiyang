@@ -7,6 +7,7 @@ using Arcserve.Office365.Exchange.Data;
 using Arcserve.Office365.Exchange.DataProtect.Interface.Backup;
 using Arcserve.Office365.Exchange.Util.Setting;
 using Arcserve.Office365.Exchange.EwsApi.Interface;
+using System.Threading.Tasks;
 
 namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup
 {
@@ -179,7 +180,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup
                             {
                                 result[ItemUADStatus.Update].Add(mailbox);
                             }
-                            
+
                             mailboxSyncDic.Remove(mailbox.Id);
                         }
                         else
@@ -190,7 +191,10 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup
 
                     foreach (var mailbox in mailboxInLastCatalog)
                     {
-                        result[ItemUADStatus.Delete].Add(mailbox);
+                        if (mailboxSyncDic.ContainsKey(mailbox.Id))
+                        {
+                            result[ItemUADStatus.Delete].Add(mailbox);
+                        }
                     }
                     return result;
                 };
@@ -261,6 +265,21 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup
 
         public override void Dispose()
         {
+        }
+    }
+
+    internal class SyncBackupParallel : SyncBackup
+    {
+        protected override void ForEachLoop(ICollection<IMailboxDataSync> items, ItemUADStatus uadStatus, Action<IMailboxDataSync, ItemUADStatus> DoEachMailbox)
+        {
+            Parallel.ForEach(items, new ParallelOptions() {
+                CancellationToken = CancelToken,
+                TaskScheduler = Scheduler,
+                MaxDegreeOfParallelism = CloudConfig.Instance.MaxDegreeOfParallelismForMailbox}, 
+                (item) =>
+            {
+                DoEachMailbox(item, uadStatus);
+            });
         }
     }
 }

@@ -94,6 +94,12 @@
     <Compile Include="CompoundBuildTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Arcserve.Exchange.FastTransferUtil\Arcserve.Exchange.FastTransferUtil ref.csproj">
+      <Project>{c9772bc6-1490-4f35-aec1-fd9d6ecad194}</Project>
+      <Name>Arcserve.Exchange.FastTransferUtil ref</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

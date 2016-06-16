@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{B732DC73-83AF-4884-9D61-2661F7EE7E5F}</ProjectGuid>
+    <ProjectGuid>{454462CC-DAE8-48AB-B609-8EC07666F715}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Arcserve.Office365.Exchange.EwsApi</RootNamespace>
-    <AssemblyName>Arcserve.Office365.Exchange.EwsApi</AssemblyName>
+    <RootNamespace>Arcserve.Office365.Exchange</RootNamespace>
+    <AssemblyName>Arcserve.Office365.Exchange</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -66,29 +66,17 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Arcserve.Office365.Exchange, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Arcserve_Office365_dll\Arcserve.Office365.Exchange.dll</HintPath>
-    </Reference>
-    <Reference Include="Arcserve.Office365.Exchange.Data, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Arcserve_Office365_dll\Arcserve.Office365.Exchange.Data.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Exchange.WebServices, Version=15.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Exchange.WebServices.2.2\lib\40\Microsoft.Exchange.WebServices.dll</HintPath>
+    <Reference Include="Microsoft.WindowsAzure.Configuration, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.WindowsAzure.ConfigurationManager.3.2.1\lib\net40\Microsoft.WindowsAzure.Configuration.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Exchange.WebServices.Auth, Version=15.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Exchange.WebServices.2.2\lib\40\Microsoft.Exchange.WebServices.Auth.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.DirectoryServices" />
-    <Reference Include="System.Management.Automation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Management.Automation.6.1.7601.17515\lib\net45\System.Management.Automation.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -96,28 +84,49 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Extension\EwsServiceAdapterExtension.cs" />
-    <Compile Include="Impl\Common\ActiveDirectoryHelper.cs" />
-    <Compile Include="Impl\Common\CertificateValidationHelper.cs" />
-    <Compile Include="Impl\Common\EwsProxyFactory.cs" />
-    <Compile Include="Impl\Common\EwsTraceListener.cs" />
-    <Compile Include="Impl\Common\ExchangeServiceExtensions.cs" />
-    <Compile Include="Impl\Common\ExportUploadHelper.cs" />
-    <Compile Include="Impl\Common\FileHelper.cs" />
-    <Compile Include="Impl\Common\ValidationCallbackHelper.cs" />
-    <Compile Include="Impl\EwsBaseOperator.cs" />
-    <Compile Include="Impl\EwsServiceAdapter.cs" />
-    <Compile Include="Interface\EwsFactory.cs" />
-    <Compile Include="Interface\EwsServiceArgument.cs" />
-    <Compile Include="Interface\EwsServiceExtension.cs" />
-    <Compile Include="Interface\EWSSetting.cs" />
-    <Compile Include="Interface\IEwsServiceAdapter.cs" />
-    <Compile Include="Interface\IExportItemsOper.cs" />
+    <Compile Include="FactoryBase.cs" />
+    <Compile Include="Log\ILog.cs" />
+    <Compile Include="Log\Impl\DefaultEwsTraceLog.cs" />
+    <Compile Include="Log\Impl\DefaultLog.cs" />
+    <Compile Include="Log\Impl\LogToBlob.cs" />
+    <Compile Include="Log\LogFactory.cs" />
+    <Compile Include="Log\LogLevel.cs" />
+    <Compile Include="Manager\Data\ProgressArgs.cs" />
+    <Compile Include="Manager\Data\ProtectProgressInfo.cs" />
+    <Compile Include="Manager\DisposeManager.cs" />
+    <Compile Include="Manager\IF\IArcJob.cs" />
+    <Compile Include="Manager\IF\IJobManager.cs" />
+    <Compile Include="Manager\IF\IManager.cs" />
+    <Compile Include="Manager\IF\IProgressInfo.cs" />
+    <Compile Include="Manager\IF\IProgressManager.cs" />
+    <Compile Include="Manager\IF\IThreadManager.cs" />
+    <Compile Include="Manager\Impl\ArcJobBase.cs" />
+    <Compile Include="Manager\Impl\JobFactoryServer.cs" />
+    <Compile Include="Manager\Impl\JobManager.cs" />
+    <Compile Include="Manager\Impl\ManagerBase.cs" />
+    <Compile Include="Manager\Impl\ProgressInfoBase.cs" />
+    <Compile Include="Manager\Impl\ProgressManager.cs" />
+    <Compile Include="Manager\Impl\ThreadManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Resource\TemplateEwsRequests.Designer.cs" />
+    <Compile Include="Thread\EwsRequestGate.cs" />
+    <Compile Include="Thread\IJobProgress.cs" />
+    <Compile Include="Thread\ITaskSyncContext.cs" />
+    <Compile Include="Thread\ThreadData.cs" />
+    <Compile Include="Topaz\OperatorCtrlBase.cs" />
+    <Compile Include="Util\CollectionPatitionUtil.cs" />
+    <Compile Include="Util\Deque.cs" />
+    <Compile Include="Util\MD5Utility.cs" />
+    <Compile Include="Util\PerformanceCounter.cs" />
+    <Compile Include="Util\ReadWriteLockExtension.cs" />
+    <Compile Include="Util\SendMailHelper.cs" />
+    <Compile Include="Util\Setting\AssemblyConfig.cs" />
+    <Compile Include="Util\Setting\CloudConfig.cs" />
+    <Compile Include="Util\Setting\Config.cs" />
+    <Compile Include="Util\Setting\MailConfig.Designer.cs" />
+    <Compile Include="Util\TreeNode.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resource\TemplateEwsRequests.resx" />
+    <EmbeddedResource Include="Util\Setting\MailConfig.resx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

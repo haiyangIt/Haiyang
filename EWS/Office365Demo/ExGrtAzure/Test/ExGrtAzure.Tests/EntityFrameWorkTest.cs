@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Data.SqlClient;
+using System.Linq;
 
 namespace ExGrtAzure.Tests
 {
@@ -196,12 +198,15 @@ namespace ExGrtAzure.Tests
             var defLogFile = Path.Combine(desMdf, logFileName);
 
             CreateMdfFile(sourMdfFile, false, catalogName);
-            System.Data.SqlClient.SqlConnection.ClearAllPools();
+            //System.Data.SqlClient.SqlConnection.ClearAllPools();
             File.Copy(sourMdfFile, desMdfFile);
             File.Copy(sourLogFile, defLogFile);
 
             CreateMdfFile(desMdfFile, false, catalogName);
             AsscessMdfFile(sourMdfFile, false, catalogName);
+            AsscessMdfFile(desMdfFile, false, catalogName);
+
+            DeleteMdfFile(desMdfFile, catalogName);
             AsscessMdfFile(desMdfFile, false, catalogName);
         }
 
@@ -222,6 +227,7 @@ namespace ExGrtAzure.Tests
                 };
                 context.Mailboxes.Add(model);
                 context.SaveChanges();
+                SqlConnection.ClearPool(context.Database.Connection as SqlConnection);
             }
             
         }
@@ -235,6 +241,19 @@ namespace ExGrtAzure.Tests
                 {
                     Debug.WriteLine(m.MailAddress);
                 }
+                SqlConnection.ClearPool(context.Database.Connection as SqlConnection);
+            }
+        }
+
+        private void DeleteMdfFile(string fileName, string catalogName)
+        {
+            using (CatalogSyncDbContext context = new CatalogSyncDbContext(fileName))
+            {
+                var mailbox = context.Mailboxes.ToList();
+                context.Mailboxes.Remove(mailbox[0]);
+                int i = context.SaveChanges();
+                Debug.WriteLine(string.Format("Delete {0} record.", i));
+                SqlConnection.ClearPool(context.Database.Connection as SqlConnection);
             }
         }
 

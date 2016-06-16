@@ -22,6 +22,7 @@ using Microsoft.Exchange.WebServices.Data;
 using Arcserve.Office365.Exchange.Util.Setting;
 using Arcserve.Office365.Exchange.DataProtect.Impl;
 using Arcserve.Office365.Exchange.EwsApi.Interface;
+using System.Text.RegularExpressions;
 
 namespace ExGrtAzure.Tests
 {
@@ -34,7 +35,7 @@ namespace ExGrtAzure.Tests
             DeleteDirectory(dir);
         }
 
-        private void DeleteDirectory(string folder)
+        public static void DeleteDirectory(string folder)
         {
             if (Directory.Exists(folder))
             {
@@ -56,8 +57,10 @@ namespace ExGrtAzure.Tests
         {
             //var workFolder = String.Format(@"""{0}""", "E:\\10 Test\\01O365Test\\Catalog10");
 
-            var workFolder = "\"E:\\10Test\\01O365Test\\Catalog10\"";
-            DeleteDirectory("E:\\10Test\\01O365Test\\Catalog10");
+            string folder = AppDomain.CurrentDomain.BaseDirectory;
+            folder = Path.Combine(folder, "Catalog1");
+            var workFolder = "\"" + folder + "\"";
+            DeleteDirectory(folder);
             var arg = string.Format("-JobType:{0} -AdminUserName:{1} -AdminPassword:{2} -Mailboxes:{3} -WorkFolder:{4} -ItemCount:{5}",
                 "ExchangeBackup",
                 "devO365admin@arcservemail.onmicrosoft.com",
@@ -71,7 +74,6 @@ namespace ExGrtAzure.Tests
         }
 
         
-
         [TestMethod]
         public void TestFullBackup()
         {
@@ -108,11 +110,11 @@ namespace ExGrtAzure.Tests
             }
         }
 
-        [TestMethod]
-        public void TestOrganization()
-        {
-            var org = "devO365admin@arcservemail.onmicrosoft.com".GetOrganization();
-        }
+        //[TestMethod]
+        //public void TestOrganization()
+        //{
+        //    var org = "devO365admin@arcservemail.onmicrosoft.com".GetOrganization();
+        //}
 
         [TestMethod]
         public void TestSyncBackup()
@@ -151,6 +153,75 @@ namespace ExGrtAzure.Tests
             }
         }
 
+        [TestMethod]
+        public void TestSyncBackupJacky()
+        {
+            try
+            {
+                var newCatalogInfo = GetNewCatalogFile();
+                var oldCatalogInfo = GetOldCatalogFile();
+                ClearEnv(newCatalogInfo);
+                using (var catalogAccess = new CatalogAccess(newCatalogInfo.WorkFolder, oldCatalogInfo.CatalogFilePath, newCatalogInfo.DataFolder, "arcserve"))
+                {
+                    var taskSyncContextBase = DataProtectFactory.Instance.NewDefaultTaskSyncContext();
+                    var dataClient = new DataFromClientWithJacky();
+                    dataClient.InitTaskSyncContext(taskSyncContextBase);
+                    catalogAccess.InitTaskSyncContext(taskSyncContextBase);
+
+                    var ewsAdapter = EwsFactory.Instance.NewEwsAdapter();
+                    ewsAdapter.InitTaskSyncContext(taskSyncContextBase);
+                    var dataConvert = new DataConvert();
+                    var adminInfo = new Arcserve.Office365.Exchange.Data.Account.OrganizationAdminInfo()
+                    {
+                        OrganizationName = "ArcserveJacky",
+                        UserName = "ArcserveJacky@ArcserveJacky.onmicrosoft.com",
+                        UserPassword = "Arcserve1!"
+                    };
+                    using (var backupFlow = DataProtectFactory.Instance.NewBackupInstance(catalogAccess, ewsAdapter, dataClient, dataConvert, adminInfo))
+                    {
+                        backupFlow.InitTaskSyncContext(taskSyncContextBase);
+                        backupFlow.BackupSync();
+                    }
+                }
+            }
+            finally
+            {
+                DisposeManager.DisposeInstance();
+            }
+        }
+
+        [TestMethod]
+        public void TestCallBackupProcessWithJacky()
+        {
+            //var workFolder = String.Format(@"""{0}""", "E:\\10 Test\\01O365Test\\Catalog10");
+
+            string folder = AppDomain.CurrentDomain.BaseDirectory;
+            folder = Path.Combine(folder, "Catalog1");
+            var workFolder = "\"" + folder + "\"";
+            DeleteDirectory(folder);
+            var arg = string.Format("-JobType:{0} -AdminUserName:{1} -AdminPassword:{2} -Mailboxes:{3} -WorkFolder:{4}",
+                "ExchangeBackup",
+                "ArcserveJacky@ArcserveJacky.onmicrosoft.com",
+                "Arcserve1!",
+                "ArcserveJacky@ArcserveJacky.onmicrosoft.com;Jacky.Mao@ArcserveJacky.onmicrosoft.com",
+                workFolder);
+            ProcessStartInfo startInfo = new ProcessStartInfo("Arcserve.Office365.Exchange.DataProtect.Tool.exe", arg);
+            startInfo.CreateNoWindow = true;
+            startInfo.UseShellExecute = false;
+            startInfo.RedirectStandardOutput = true;
+            using (var p = Process.Start(startInfo))
+            {
+                using (StreamReader reader = p.StandardOutput)
+                {
+                    var str = reader.ReadToEnd();
+                    Console.WriteLine(str);
+                    Debug.WriteLine(str);
+                }
+            }
+        }
+
+
+
         public IDataFromClient<IJobProgress> GetDataFromClient()
         {
             var result = new StubIDataFromClient<IJobProgress>();
@@ -188,7 +259,9 @@ namespace ExGrtAzure.Tests
 
         public CatalogInfo GetNewCatalogFile()
         {
-            var catalogFolder = @"E:\10Test\01O365Test\Catalog1\";
+            string folder = AppDomain.CurrentDomain.BaseDirectory;
+            folder = Path.Combine(folder, "Catalog1");
+            var catalogFolder = folder;
             if (Directory.Exists(catalogFolder))
             {
                 DeleteDirectory(catalogFolder);
@@ -206,11 +279,14 @@ namespace ExGrtAzure.Tests
                 DataFolder = workFolder,
                 CatalogFilePath = fileName
             };
+            
         }
 
         public CatalogInfo GetOldCatalogFile()
         {
-            var catalogFolder = @"E:\10Test\01O365Test\Catalog0\";
+            string folder = AppDomain.CurrentDomain.BaseDirectory;
+            folder = Path.Combine(folder, "Catalog0");
+            var catalogFolder = folder;
             if (!Directory.Exists(catalogFolder))
             {
                 return new CatalogInfo();
@@ -263,7 +339,7 @@ namespace ExGrtAzure.Tests
             get; set;
         }
 
-        public ICollection<IMailboxDataSync> GetAllMailboxes()
+        public virtual ICollection<IMailboxDataSync> GetAllMailboxes()
         {
             return new List<IMailboxDataSync>(1)
             {
@@ -404,6 +480,24 @@ namespace ExGrtAzure.Tests
                 return true;
             }
             return false;
+        }
+    }
+
+    public class DataFromClientWithJacky : DataFromClient
+    {
+        public override ICollection<IMailboxDataSync> GetAllMailboxes()
+        {
+            var mailboxes = new List<string>(2)
+            {
+                "ArcserveJacky@ArcserveJacky.onmicrosoft.com",
+                "Jacky.Mao@ArcserveJacky.onmicrosoft.com"
+            };
+            var result = new List<IMailboxDataSync>(mailboxes.Count);
+            foreach (var mailbox in mailboxes)
+            {
+                result.Add(new MailboxDataSyncBase() { MailAddress = mailbox });
+            }
+            return result;
         }
     }
 }

@@ -32,7 +32,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
         //            }
         //        }
         //        return null;
-                
+
         //    }
         //    set {
 
@@ -53,7 +53,7 @@ namespace Arcserve.Office365.Exchange.Util.Setting
         //            }
         //        }
         //        return null;
-                
+
         //    }
         //    set { }
         //}
@@ -429,13 +429,29 @@ namespace Arcserve.Office365.Exchange.Util.Setting
         }
 
         public virtual string WorkFolder { get; set; }
-        public virtual int SuspendRequestTimeAfterThrowSpecificException { get {
+        public virtual int SuspendRequestTimeAfterThrowSpecificException
+        {
+            get
+            {
                 int result = 30;
                 if (int.TryParse(CloudConfigurationManager.GetSetting("SuspendRequestTimeAfterThrowSpecificException"), out result))
                     return result;
                 return 30;
             }
             set { }
+        }
+
+        public virtual int MaxDegreeOfParallelismForMailbox
+        {
+            get
+            {
+                int result = 4;
+                if (int.TryParse(CloudConfigurationManager.GetSetting("MaxDegreeOfParallelismForMailbox"), out result))
+                    return result;
+                return 4;
+            }
+            set
+            { }
         }
     }
 

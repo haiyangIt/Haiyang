@@ -23,7 +23,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Tool
             }
 
             //Console.Out.WriteLine(AppDomain.CurrentDomain.SetupInformation.ConfigurationFile);
-
+            System.Threading.Thread.Sleep(10000);
             LogFactory.LogInstance.WriteLog(LogLevel.DEBUG, "config file", "file path {0}", AppDomain.CurrentDomain.SetupInformation.ConfigurationFile);
             foreach (var arg in args)
             {
@@ -34,12 +34,12 @@ namespace Arcserve.Office365.Exchange.DataProtect.Tool
             //System.Threading.Thread.Sleep(20000);
             //return;
             ResultBase result = null;
-            var argDic = ArgParser.Parser(args);
-            ArcserveCommandFactory factory = new ArcserveCommandFactory(argDic);
-            result = factory.GetArcserveCommand().Execute();
-
             try
             {
+                var argDic = ArgParser.Parser(args);
+                ArcserveCommandFactory factory = new ArcserveCommandFactory(argDic);
+                result = factory.GetArcserveCommand().Execute();
+
                 Console.Out.WriteLine(ResultBase.Serialize(result));
             }
             catch (Exception e)

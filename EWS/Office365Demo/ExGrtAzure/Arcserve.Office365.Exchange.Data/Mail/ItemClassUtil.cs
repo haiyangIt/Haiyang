@@ -169,14 +169,33 @@ namespace Arcserve.Office365.Exchange.Data.Mail
             {"IPF.Task", FolderClass.Task }
         };
 
+        private readonly static Dictionary<FolderClass, string> _folderClassToStr = new Dictionary<FolderClass, string>()
+        {
+            { FolderClass.Contact, "IPF.Contact"},
+            {FolderClass.Calendar ,"IPF.Appointment"},
+            {FolderClass.Message, "IPF.Note" },
+            {FolderClass.Task , "IPF.Task"}
+        };
+
         public static FolderClass GetFolderClass(this string folderClass)
         {
             FolderClass result;
             if (_folderClassDic.TryGetValue(folderClass, out result))
                 return result;
-            
+
             else
                 throw new NotSupportedException("Modify code to support this type");
+        }
+
+        public static string GetFolderClass(this FolderClass folderClass)
+        {
+            string result;
+            if (_folderClassToStr.TryGetValue(folderClass, out result))
+                return result;
+
+            else
+                throw new NotSupportedException("Modify code to support this type");
+
         }
 
         public static bool IsFolderValid(string folderClass)

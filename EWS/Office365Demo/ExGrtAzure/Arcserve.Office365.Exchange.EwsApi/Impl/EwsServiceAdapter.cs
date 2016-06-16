@@ -11,6 +11,7 @@ using System.Threading;
 using Arcserve.Office365.Exchange.Util;
 using Arcserve.Office365.Exchange.Data.Mail;
 using Arcserve.Office365.Exchange.EwsApi.Interface;
+using System.IO;
 
 namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
 {
@@ -66,7 +67,7 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
         /// <summary>
         /// todo need to hide private;
         /// </summary>
-        private EwsBaseOperator _ewsOperator = new EwsLimitOperator();
+        protected EwsBaseOperator _ewsOperator = new EwsLimitOperator();
 
         public ICollection<IMailboxDataSync> GetAllMailboxes(string adminUserName, string adminPassword, IEnumerable<string> mailboxes)
         {
@@ -170,6 +171,11 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
         public System.Threading.Tasks.Task<int> ExportItemsAsync(IEnumerable<IItemDataSync> items, IExportItemsOper exportItemOper)
         {
             throw new NotImplementedException();
+        }
+
+        public void ImportItem(Stream dataStream, FolderId folder)
+        {
+            _ewsOperator.ImportItem(folder.UniqueId, dataStream);
         }
     }
 }

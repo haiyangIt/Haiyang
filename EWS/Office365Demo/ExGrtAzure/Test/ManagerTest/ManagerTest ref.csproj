@@ -4,13 +4,14 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{288F5639-0A7B-4872-AA83-503898E46C3E}</ProjectGuid>
+    <ProjectGuid>{5DB68818-EDA4-42DF-8565-A17FE2AD763E}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Arcserve.Office365.Exchange.Test.Tool</RootNamespace>
-    <AssemblyName>Arcserve.Office365.Exchange.Test.Tool</AssemblyName>
+    <RootNamespace>ManagerTest</RootNamespace>
+    <AssemblyName>ManagerTest</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -73,6 +74,14 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Exchange.WebServices, Version=15.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Microsoft\Exchange\Web Services\2.2\Microsoft.Exchange.WebServices.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -94,6 +103,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestJob.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
@@ -107,6 +117,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -119,6 +132,40 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Arcserve.Exchange.FastTransferUtil\Arcserve.Exchange.FastTransferUtil ref.csproj">
+      <Project>{c9772bc6-1490-4f35-aec1-fd9d6ecad194}</Project>
+      <Name>Arcserve.Exchange.FastTransferUtil ref</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Arcserve.Office365.Exchange.DataProtect.Impl\Arcserve.Office365.Exchange.DataProtect.Impl ref.csproj">
+      <Project>{052f2d28-5e70-4d99-8e87-097357477b85}</Project>
+      <Name>Arcserve.Office365.Exchange.DataProtect.Impl ref</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Arcserve.Office365.Exchange.DataProtect.Interface\Arcserve.Office365.Exchange.DataProtect.Interface ref.csproj">
+      <Project>{6f4d7ebe-74c0-4992-a95c-7cadb41f3590}</Project>
+      <Name>Arcserve.Office365.Exchange.DataProtect.Interface ref</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Arcserve.Office365.Exchange.DataProtect.Tool\Arcserve.Office365.Exchange.DataProtect.Tool ref.csproj">
+      <Project>{49bee1fb-0140-4770-865f-92db6871b5d2}</Project>
+      <Name>Arcserve.Office365.Exchange.DataProtect.Tool ref</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Arcserve.Office365.Exchange.Data\Arcserve.Office365.Exchange.Data ref.csproj">
+      <Project>{2f89d7da-1138-4e24-bed3-caaf1df77465}</Project>
+      <Name>Arcserve.Office365.Exchange.Data ref</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Arcserve.Office365.Exchange.EwsApi\Arcserve.Office365.Exchange.EwsApi ref.csproj">
+      <Project>{b732dc73-83af-4884-9d61-2661f7ee7e5f}</Project>
+      <Name>Arcserve.Office365.Exchange.EwsApi ref</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Arcserve.Office365.Exchange.StorageAccess.MountSession\Arcserve.Office365.Exchange.StorageAccess.MountSession ref.csproj">
+      <Project>{b8023674-7877-41a0-8ca4-fd34509eb28b}</Project>
+      <Name>Arcserve.Office365.Exchange.StorageAccess.MountSession ref</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Arcserve.Office365.Exchange\Arcserve.Office365.Exchange ref.csproj">
+      <Project>{454462cc-dae8-48ab-b609-8ec07666f715}</Project>
+      <Name>Arcserve.Office365.Exchange ref</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -66,14 +66,6 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Arcserve.Office365.Exchange, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Arcserve_Office365_dll\Arcserve.Office365.Exchange.dll</HintPath>
-    </Reference>
-    <Reference Include="Arcserve.Office365.Exchange.Data, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Arcserve_Office365_dll\Arcserve.Office365.Exchange.Data.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Exchange.WebServices, Version=15.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Exchange.WebServices.2.2\lib\40\Microsoft.Exchange.WebServices.dll</HintPath>
       <Private>True</Private>
@@ -121,6 +113,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Arcserve.Office365.Exchange.Data\Arcserve.Office365.Exchange.Data ref.csproj">
+      <Project>{2f89d7da-1138-4e24-bed3-caaf1df77465}</Project>
+      <Name>Arcserve.Office365.Exchange.Data ref</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Arcserve.Office365.Exchange\Arcserve.Office365.Exchange ref.csproj">
+      <Project>{454462cc-dae8-48ab-b609-8ec07666f715}</Project>
+      <Name>Arcserve.Office365.Exchange ref</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

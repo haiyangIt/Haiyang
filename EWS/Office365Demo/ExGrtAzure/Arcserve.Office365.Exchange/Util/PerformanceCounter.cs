@@ -16,7 +16,7 @@ namespace Arcserve.Office365.Exchange.Util
 
         public void Restart()
         {
-            now = DateTime.Now;
+            Reset();
         }
         public static PerformanceCounter Start()
         {

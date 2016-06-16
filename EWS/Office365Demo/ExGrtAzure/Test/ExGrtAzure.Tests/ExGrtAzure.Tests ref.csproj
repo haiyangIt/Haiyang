@@ -158,6 +158,46 @@
     <None Include="Resources\test3.bin" />
     <None Include="TestData\no attach simple mail.bin" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Arcserve.Exchange.FastTransferUtil\Arcserve.Exchange.FastTransferUtil ref.csproj">
+      <Project>{c9772bc6-1490-4f35-aec1-fd9d6ecad194}</Project>
+      <Name>Arcserve.Exchange.FastTransferUtil ref</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Arcserve.Office365.Exchange.DataProtect.Impl\Arcserve.Office365.Exchange.DataProtect.Impl ref.csproj">
+      <Project>{052f2d28-5e70-4d99-8e87-097357477b85}</Project>
+      <Name>Arcserve.Office365.Exchange.DataProtect.Impl ref</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Arcserve.Office365.Exchange.DataProtect.Interface\Arcserve.Office365.Exchange.DataProtect.Interface ref.csproj">
+      <Project>{6f4d7ebe-74c0-4992-a95c-7cadb41f3590}</Project>
+      <Name>Arcserve.Office365.Exchange.DataProtect.Interface ref</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Arcserve.Office365.Exchange.DataProtect.Tool\Arcserve.Office365.Exchange.DataProtect.Tool ref.csproj">
+      <Project>{49bee1fb-0140-4770-865f-92db6871b5d2}</Project>
+      <Name>Arcserve.Office365.Exchange.DataProtect.Tool ref</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Arcserve.Office365.Exchange.Data\Arcserve.Office365.Exchange.Data ref.csproj">
+      <Project>{2f89d7da-1138-4e24-bed3-caaf1df77465}</Project>
+      <Name>Arcserve.Office365.Exchange.Data ref</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Arcserve.Office365.Exchange.EwsApi\Arcserve.Office365.Exchange.EwsApi ref.csproj">
+      <Project>{b732dc73-83af-4884-9d61-2661f7ee7e5f}</Project>
+      <Name>Arcserve.Office365.Exchange.EwsApi ref</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Arcserve.Office365.Exchange.StorageAccess.MountSession\Arcserve.Office365.Exchange.StorageAccess.MountSession ref.csproj">
+      <Project>{b8023674-7877-41a0-8ca4-fd34509eb28b}</Project>
+      <Name>Arcserve.Office365.Exchange.StorageAccess.MountSession ref</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Arcserve.Office365.Exchange\Arcserve.Office365.Exchange ref.csproj">
+      <Project>{454462cc-dae8-48ab-b609-8ec07666f715}</Project>
+      <Name>Arcserve.Office365.Exchange ref</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="MsgFile.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>MsgFile.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
