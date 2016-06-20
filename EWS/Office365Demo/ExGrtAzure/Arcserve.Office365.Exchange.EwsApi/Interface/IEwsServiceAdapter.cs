@@ -21,7 +21,7 @@ namespace Arcserve.Office365.Exchange.EwsApi.Interface
         ICollection<IMailboxDataSync> GetAllMailboxes(string adminUserName, string adminPassword, IEnumerable<string> mailboxes);
 
         ChangeCollection<FolderChange> SyncFolderHierarchy(string lastSyncStatus);
-        Task<ChangeCollection<FolderChange>> SyncFoldersAsync(string lastSyncStatus);
+        Task<ChangeCollection<FolderChange>> SyncFolderHierarchyAsync(string lastSyncStatus);
 
         void LoadFolderProperties(Folder folder);
         System.Threading.Tasks.Task LoadFolderPropertiesAsync(Folder folder);

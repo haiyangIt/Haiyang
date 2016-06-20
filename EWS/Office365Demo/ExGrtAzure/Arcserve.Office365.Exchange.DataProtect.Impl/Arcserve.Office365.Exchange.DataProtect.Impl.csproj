@@ -95,6 +95,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AsyncBackup\AsyncBackup.cs" />
     <Compile Include="Backup\SyncBackup.cs" />
     <Compile Include="Backup\SyncBackupFolder.cs" />
     <Compile Include="Backup\SyncBackupItem.cs" />

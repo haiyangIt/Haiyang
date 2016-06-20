@@ -105,7 +105,7 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
             return result;
         }
 
-        public async Task<ChangeCollection<FolderChange>> SyncFoldersAsync(string lastSyncStatus)
+        public async Task<ChangeCollection<FolderChange>> SyncFolderHierarchyAsync(string lastSyncStatus)
         {
             throw new NotImplementedException();
         }

@@ -83,6 +83,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Backup\BackupFlowAsyncTemplate.cs" />
     <Compile Include="Backup\BackupFlowTemplate.cs" />
     <Compile Include="Backup\ICatalogAccess.cs" />
     <Compile Include="Backup\IDataConvert.cs" />

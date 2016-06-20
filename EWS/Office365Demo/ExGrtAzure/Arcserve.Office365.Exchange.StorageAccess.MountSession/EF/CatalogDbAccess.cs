@@ -131,6 +131,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
         {
             if (_queryContext != null)
                 return (from folder in _queryContext.Folders where folder.MailboxAddress == mailboxData.MailAddress select folder).AsEnumerable();
+
             else
                 return new List<IFolderDataSync>(0);
         }

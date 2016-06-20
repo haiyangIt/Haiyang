@@ -83,6 +83,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AsyncBackup\AsyncBackup.cs" />
+    <Compile Include="AsyncBackup\AsyncBackupFolder.cs" />
+    <Compile Include="AsyncBackup\AsyncBackupItem.cs" />
+    <Compile Include="AsyncBackup\AsyncBackupMailbox.cs" />
     <Compile Include="Backup\SyncBackup.cs" />
     <Compile Include="Backup\SyncBackupFolder.cs" />
     <Compile Include="Backup\SyncBackupItem.cs" />

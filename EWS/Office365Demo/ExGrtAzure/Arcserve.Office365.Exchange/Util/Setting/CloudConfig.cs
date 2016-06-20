@@ -453,6 +453,31 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             set
             { }
         }
+
+        public virtual int MaxDegreeOfParallelismForFolderChanges {
+            get
+            {
+                int result = 10;
+                if (int.TryParse(CloudConfigurationManager.GetSetting("MaxDegreeOfParallelismForFolderChanges"), out result))
+                    return result;
+                return 10;
+            }
+            set
+            {
+            }
+        }
+        public virtual int MaxDegreeOfParallelismForFolder {
+            get
+            {
+                int result = 4;
+                if (int.TryParse(CloudConfigurationManager.GetSetting("MaxDegreeOfParallelismForFolder"), out result))
+                    return result;
+                return 4;
+            }
+            set
+            {
+            }
+        }
     }
 
     public class CloudConfigCache : CloudConfig
@@ -522,7 +547,22 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             BatchSaveToCatalogCount = base.BatchSaveToCatalogCount;
             WorkFolder = base.WorkFolder;
             SuspendRequestTimeAfterThrowSpecificException = base.SuspendRequestTimeAfterThrowSpecificException;
+            MaxDegreeOfParallelismForFolderChanges = base.MaxDegreeOfParallelismForFolderChanges;
+            MaxDegreeOfParallelismForFolder = base.MaxDegreeOfParallelismForFolder;
+            MaxDegreeOfParallelismForMailbox = base.MaxDegreeOfParallelismForMailbox;
+        }
 
+        public override int MaxDegreeOfParallelismForFolder
+        {
+            get; set;
+        }
+        public override int MaxDegreeOfParallelismForFolderChanges
+        {
+            get; set;
+        }
+        public override int MaxDegreeOfParallelismForMailbox
+        {
+            get; set;
         }
         public override string WorkFolder
         {

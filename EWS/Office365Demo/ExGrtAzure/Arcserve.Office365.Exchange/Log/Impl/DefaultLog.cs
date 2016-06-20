@@ -67,6 +67,7 @@ namespace Arcserve.Office365.Exchange.Log.Impl
                     {
                         logFolder = AppDomain.CurrentDomain.BaseDirectory;
                         logFolder = Path.Combine(logFolder, "..");
+                        logFolder = Path.Combine(logFolder, "..");
                         logFolder = Path.Combine(logFolder, "Logs");
                         logFolder = Path.Combine(logFolder, "Office365Log");
                     }

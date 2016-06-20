@@ -520,17 +520,6 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup
         public virtual void DealFinish(HashSet<string> dealedItemIds)
         {
             DealBatchLeft();
-            //IEnumerable<IItemDataSync> allItems = FuncGetItemsByParentFolderIdFromCatalog(ParentFolder.FolderId);
-            //if (allItems != null)
-            //{
-            //    foreach (var item in allItems)
-            //    {
-            //        if (FuncIsItemValid(item) && !dealedItemIds.Contains(item.ItemId))
-            //        {
-            //            ActionAddItemToCatalog(item);
-            //        }
-            //    }
-            //}
         }
 
         public abstract IDataConvert DataConvert { get; set; }
