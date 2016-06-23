@@ -88,7 +88,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup
 
         bool IsFolderClassValid(string folderClass);
 
-        Task UpdateMailboxSyncToCatalog(IMailboxDataSync mailbox);
+        Task UpdateMailboxSyncAndTreeToCatalog(IMailboxDataSync mailbox);
         Task UpdateMailboxToCatalog(IMailboxDataSync mailbox);
         Task AddMailboxToCatalog(IMailboxDataSync mailbox);
 

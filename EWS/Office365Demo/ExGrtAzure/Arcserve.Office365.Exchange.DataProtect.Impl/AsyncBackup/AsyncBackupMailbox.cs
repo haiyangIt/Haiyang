@@ -99,9 +99,9 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.AsyncBackup
             return DataFromClient.IsFolderClassValid(folderClass);
         }
 
-        public async System.Threading.Tasks.Task UpdateMailboxSyncToCatalog(IMailboxDataSync mailbox)
+        public async System.Threading.Tasks.Task UpdateMailboxSyncAndTreeToCatalog(IMailboxDataSync mailbox)
         {
-            await CatalogAccess.UpdateMailboxSyncToCatalogAsync(mailbox);
+            await CatalogAccess.UpdateMailboxSyncAndTreeToCatalogAsync(mailbox);
         }
 
         public async System.Threading.Tasks.Task UpdateMailboxToCatalog(IMailboxDataSync mailbox)
@@ -152,7 +152,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.AsyncBackup
 
         public async System.Threading.Tasks.Task ForEachFolderChagnes(ChangeCollection<FolderChange> folderChanges,
             HashSet<string> folderDealed,
-            List<IFolderDataSync> addOrUpdateFolders,
+            List<IFolderDataSync> folderTreeItems,
             Dictionary<ItemUADStatus, List<IFolderDataSync>> folderDataChangeUAD,
             Dictionary<string, IFolderDataSync> foldersInDic)
         {
@@ -166,14 +166,14 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.AsyncBackup
                 },
                 (folderChange) =>
                 {
-                    DoEachFolderChanges(folderChange, folderDealed, addOrUpdateFolders, folderDataChangeUAD, foldersInDic).Wait();
+                    DoEachFolderChanges(folderChange, folderDealed, folderTreeItems, folderDataChangeUAD, foldersInDic).Wait();
                 });
             });
         }
 
         public async System.Threading.Tasks.Task DoEachFolderChanges(FolderChange folderChange,
             HashSet<string> folderDealed,
-            List<IFolderDataSync> addOrUpdateFolders,
+            List<IFolderDataSync> folderTreeItems,
             Dictionary<ItemUADStatus, List<IFolderDataSync>> folderDataChangeUAD,
             Dictionary<string, IFolderDataSync> foldersInDic)
         {
@@ -193,22 +193,24 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.AsyncBackup
                     {
                         case ChangeType.Create:
                             folderData = DataConvert.Convert(folderChange.Folder, MailboxInfo);
+                            folderTreeItems.Add(folderData);
                             if (IsFolderValid(folderData))
                             {
                                 folderDataChangeUAD[ItemUADStatus.Add].Add(folderData);
-                                addOrUpdateFolders.Add(folderData);
+
                                 folderDealed.Add(folderChange.FolderId.UniqueId);
                             }
                             break;
                         case Microsoft.Exchange.WebServices.Data.ChangeType.ReadFlagChange:
                         case Microsoft.Exchange.WebServices.Data.ChangeType.Update:
                             folderData = DataConvert.Convert(folderChange.Folder, MailboxInfo);
+                            folderTreeItems.Add(folderData);
                             if (IsFolderValid(folderData))
                             {
 
                                 folderData.SyncStatus = foldersInDic[folderChange.Folder.Id.UniqueId].SyncStatus;
                                 folderDataChangeUAD[ItemUADStatus.Update].Add(folderData);
-                                addOrUpdateFolders.Add(folderData);
+
                                 folderDealed.Add(folderChange.FolderId.UniqueId);
                             }
                             break;
@@ -255,7 +257,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.AsyncBackup
                 var lastSyncStatus = MailboxInfo.SyncStatus;
 
                 List<FolderChange> validFolders = new List<Microsoft.Exchange.WebServices.Data.FolderChange>();
-                List<IFolderDataSync> addOrUpdateFolders = new List<IFolderDataSync>();
+                List<IFolderDataSync> folderTreeItems = new List<IFolderDataSync>();
                 Dictionary<ItemUADStatus, List<IFolderDataSync>> folderDataChangeUAD = new Dictionary<ItemUADStatus, List<IFolderDataSync>>(4)
                 {
                     {ItemUADStatus.Add, new List<IFolderDataSync>() },
@@ -272,23 +274,24 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.AsyncBackup
                     if (folderChanges.Count == 0)
                         break;
 
-                    var task = ForEachFolderChagnes(folderChanges, folderDealed, addOrUpdateFolders, folderDataChangeUAD, foldersInDic);
+                    var task = ForEachFolderChagnes(folderChanges, folderDealed, folderTreeItems, folderDataChangeUAD, foldersInDic);
                     allTasks.Add(task);
 
                 } while (folderChanges.MoreChangesAvailable);
 
                 await System.Threading.Tasks.Task.WhenAll(allTasks.ToArray());
 
-                var folderTree = GetFolderTrees(foldersInLastCatalog, addOrUpdateFolders);
+                var folderTree = GetFolderTrees(folderTreeItems, new List<IFolderDataSync>(0));
 
                 MailboxInfo.SyncStatus = lastSyncStatus;
+                MailboxInfo.FolderTree = folderTree.Serialize();
 
                 var tempTasks = new List<System.Threading.Tasks.Task>();
                 System.Threading.Tasks.Task updateOrAddTask = null;
                 switch (uadStatus)
                 {
                     case ItemUADStatus.None:
-                        updateOrAddTask = UpdateMailboxSyncToCatalog(MailboxInfo);
+                        updateOrAddTask = UpdateMailboxSyncAndTreeToCatalog(MailboxInfo);
                         break;
                     case ItemUADStatus.Update:
                         updateOrAddTask = UpdateMailboxToCatalog(MailboxInfo);

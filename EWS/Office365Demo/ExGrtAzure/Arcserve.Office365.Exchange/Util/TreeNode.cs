@@ -12,7 +12,7 @@ namespace Arcserve.Office365.Exchange.Util
         private Func<T, TKey> FuncGetParentTKey;
         private Func<T, TKey> FuncGetSelfKey;
 
-        Dictionary<TKey, TreeNode<T, TKey>> _dic = new Dictionary<TKey, TreeNode<T, TKey>>();
+        protected Dictionary<TKey, TreeNode<T, TKey>> _dic = new Dictionary<TKey, TreeNode<T, TKey>>();
         public Tree(Func<T, TKey> funcGetParentTKey, Func<T, TKey> funcGetSelfKey, TreeNode<T, TKey> tempRootNode)
         {
             Root = tempRootNode;

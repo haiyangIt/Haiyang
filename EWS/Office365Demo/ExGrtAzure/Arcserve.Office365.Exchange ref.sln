@@ -35,6 +35,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FastTransferTest ref", "Tes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagerTest ref", "Test\ManagerTest\ManagerTest ref.csproj", "{5DB68818-EDA4-42DF-8565-A17FE2AD763E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcserve.Office365.Exchange.Com ref", "Arcserve.Office365.Exchange.Com\Arcserve.Office365.Exchange.Com ref.csproj", "{8B48F709-E9F5-41D9-928E-98D2B99543CC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -189,6 +191,18 @@ Global
 		{5DB68818-EDA4-42DF-8565-A17FE2AD763E}.Release|x64.Build.0 = Release|x64
 		{5DB68818-EDA4-42DF-8565-A17FE2AD763E}.Release|x86.ActiveCfg = Release|x86
 		{5DB68818-EDA4-42DF-8565-A17FE2AD763E}.Release|x86.Build.0 = Release|x86
+		{8B48F709-E9F5-41D9-928E-98D2B99543CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B48F709-E9F5-41D9-928E-98D2B99543CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B48F709-E9F5-41D9-928E-98D2B99543CC}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{8B48F709-E9F5-41D9-928E-98D2B99543CC}.Debug|x64.Build.0 = Debug|Any CPU
+		{8B48F709-E9F5-41D9-928E-98D2B99543CC}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8B48F709-E9F5-41D9-928E-98D2B99543CC}.Debug|x86.Build.0 = Debug|Any CPU
+		{8B48F709-E9F5-41D9-928E-98D2B99543CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B48F709-E9F5-41D9-928E-98D2B99543CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B48F709-E9F5-41D9-928E-98D2B99543CC}.Release|x64.ActiveCfg = Release|Any CPU
+		{8B48F709-E9F5-41D9-928E-98D2B99543CC}.Release|x64.Build.0 = Release|Any CPU
+		{8B48F709-E9F5-41D9-928E-98D2B99543CC}.Release|x86.ActiveCfg = Release|Any CPU
+		{8B48F709-E9F5-41D9-928E-98D2B99543CC}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -10,6 +10,7 @@ namespace Arcserve.Office365.Exchange.Data.Increment
     public interface IMailboxDataSync : IMailboxData, IDataSync
     {
         string Name { get; set; }
+        string FolderTree { get; set; }
     }
 
     public class MailboxDataSyncBase : IMailboxDataSync
@@ -20,6 +21,8 @@ namespace Arcserve.Office365.Exchange.Data.Increment
             DisplayName = displayName;
             MailAddress = mailboxAddress.ToLower();
         }
+
+        public string FolderTree { get; set; }
 
         public string ChangeKey
         {

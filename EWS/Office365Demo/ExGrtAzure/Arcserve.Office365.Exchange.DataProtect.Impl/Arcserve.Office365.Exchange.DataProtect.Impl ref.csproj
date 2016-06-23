@@ -116,6 +116,7 @@
       <Name>Arcserve.Office365.Exchange ref</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>xcopy  "$(ProjectDir)$(OutDir)*" "$(ProjectDir)..\packages\Arcserve_Office365_dll" /s /i /y</PostBuildEvent>

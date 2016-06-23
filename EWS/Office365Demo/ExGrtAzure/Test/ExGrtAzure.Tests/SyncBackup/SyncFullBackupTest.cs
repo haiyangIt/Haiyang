@@ -124,7 +124,7 @@ namespace ExGrtAzure.Tests
                 var newCatalogInfo = GetNewCatalogFile();
                 var oldCatalogInfo = GetOldCatalogFile();
                 ClearEnv(newCatalogInfo);
-                using (var catalogAccess = new CatalogAccess(newCatalogInfo.WorkFolder, oldCatalogInfo.CatalogFilePath, newCatalogInfo.DataFolder, "arcserve"))
+                using (var catalogAccess = new CatalogAccess(newCatalogInfo.WorkFolder, oldCatalogInfo.WorkFolder, newCatalogInfo.DataFolder, "arcserve"))
                 {
                     var taskSyncContextBase = DataProtectFactory.Instance.NewDefaultTaskSyncContext();
                     var dataClient = new DataFromClientFilterFolderByDisplayName();
@@ -161,7 +161,7 @@ namespace ExGrtAzure.Tests
                 var newCatalogInfo = GetNewCatalogFile();
                 var oldCatalogInfo = GetOldCatalogFile();
                 ClearEnv(newCatalogInfo);
-                using (var catalogAccess = new CatalogAccess(newCatalogInfo.WorkFolder, oldCatalogInfo.CatalogFilePath, newCatalogInfo.DataFolder, "arcserve"))
+                using (var catalogAccess = new CatalogAccess(newCatalogInfo.WorkFolder, oldCatalogInfo.WorkFolder, newCatalogInfo.DataFolder, "arcserve"))
                 {
                     var taskSyncContextBase = DataProtectFactory.Instance.NewDefaultTaskSyncContext();
                     var dataClient = new DataFromClientWithJacky();

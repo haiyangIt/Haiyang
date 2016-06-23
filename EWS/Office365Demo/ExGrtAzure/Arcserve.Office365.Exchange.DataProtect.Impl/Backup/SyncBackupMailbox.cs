@@ -91,13 +91,13 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup
         }
 
 
-        protected override Action<IMailboxDataSync> ActionUpdateMailboxSyncToCatalog
+        protected override Action<IMailboxDataSync> ActionUpdateMailboxSyncAndTreeToCatalog
         {
             get
             {
                 return (mailbox) =>
                 {
-                    CatalogAccess.UpdateMailboxSyncToCatalog(mailbox);
+                    CatalogAccess.UpdateMailboxSyncAndTreeToCatalog(mailbox);
                 };
             }
         }

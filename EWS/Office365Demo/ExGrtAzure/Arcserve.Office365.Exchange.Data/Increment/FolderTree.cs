@@ -35,8 +35,7 @@ namespace Arcserve.Office365.Exchange.Data.Increment
         public IEnumerable<string> GetPath(IFolderDataSync data)
         {
             var parentsNode = GetParentsData(data);
-            string displayName; 
-            
+
             return (from m in parentsNode where m != null select ((IFolderDataBase)m).DisplayName).AsEnumerable();
         }
 
@@ -66,6 +65,59 @@ namespace Arcserve.Office365.Exchange.Data.Increment
                 }
                 return result;
             });
+        }
+
+        public string Serialize()
+        {
+            List<FolderBaseInfo> folders = new List<FolderBaseInfo>();
+            DFS((folderNode, level) =>
+            {
+                if (level != 0)
+                    folders.Add(new FolderBaseInfo() { Id = folderNode.Data.FolderId, PId = folderNode.Data.ParentFolderId, Name = ((IItemBase)folderNode.Data).DisplayName, Type = folderNode.Data.FolderType });
+            });
+            return JsonConvert.SerializeObject(folders);
+        }
+
+        public void Deserialize(string folderTreeString)
+        {
+            var folders = JsonConvert.DeserializeObject<List<FolderBaseInfo>>(folderTreeString);
+            foreach (var folder in folders)
+                this.AddNode(new FolderDataForTree() { FolderId = folder.Id, DisplayName = folder.Name, ParentFolderId = folder.PId, FolderType = folder.Type });
+            AddComplete();
+        }
+
+        class FolderBaseInfo
+        {
+            public string Id { get; set; }
+            public string PId { get; set; }
+            public string Name { get; set; }
+            public string Type { get; set; }
+        }
+
+        class FolderDataForTree : IFolderDataSync
+        {
+            public string MailboxId { get; set; }
+            public string ParentFolderId { get; set; }
+            public string MailboxAddress { get; set; }
+            public string Location { get; set; }
+            public int ChildItemCount { get; set; }
+            public int ChildFolderCount { get; set; }
+            public string FolderId { get; set; }
+            public IFolderData Clone()
+            {
+                throw new NotSupportedException();
+            }
+            public string SyncStatus { get; set; }
+
+            public string ChangeKey { get; set; }
+            public string DisplayName { get; set; }
+            public string FolderType { get; set; }
+
+            public string Id
+            { get; set; }
+
+            public ItemKind ItemKind
+            { get; set; }
         }
     }
 

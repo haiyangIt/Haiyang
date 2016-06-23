@@ -18,17 +18,18 @@ namespace Arcserve.Office365.Exchange.Data.Account
     {
         public static string GetOrganization(this string mailAddress)
         {
-            var address = mailAddress.Replace(".com", "");
-            address = address.Replace(".cn", "");
-            address = address.Replace(".net", "");
+            return "Office365";
+            //var address = mailAddress.Replace(".com", "");
+            //address = address.Replace(".cn", "");
+            //address = address.Replace(".net", "");
 
-            int dotPlace = address.IndexOf("@");
-            if (dotPlace < 0)
-                throw new ArgumentException("Invalid mail addresss.");
+            //int dotPlace = address.IndexOf("@");
+            //if (dotPlace < 0)
+            //    throw new ArgumentException("Invalid mail addresss.");
 
 
-            address = address.Substring(dotPlace + 1, address.Length - dotPlace - 1);
-            return address.Replace(".", "_");
+            //address = address.Substring(dotPlace + 1, address.Length - dotPlace - 1);
+            //return address.Replace(".", "_");
         }
     }
 }

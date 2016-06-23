@@ -89,9 +89,9 @@ namespace ExGrtAzure.Tests.SyncBackup
             {
                 var newCatalogFolder = Path.Combine(workFolder, IncrementBackupFolder);
                 var oldCatalogFileName = CatalogAccess.GetCatalogFileName("arcserve");
-                var oldCatalogFilePath = Path.Combine(workFolder, FullBackupFolder);
-                oldCatalogFilePath = Path.Combine(oldCatalogFilePath, oldCatalogFileName);
-                using (var catalogAccess = new CatalogAccess(newCatalogFolder, oldCatalogFilePath, newCatalogFolder, "arcserve"))
+                var oldCatalogFolder = Path.Combine(workFolder, FullBackupFolder);
+                var oldCatalogFilePath = Path.Combine(oldCatalogFolder, oldCatalogFileName);
+                using (var catalogAccess = new CatalogAccess(newCatalogFolder, oldCatalogFolder, newCatalogFolder, "arcserve"))
                 {
                     var taskSyncContextBase = DataProtectFactory.Instance.NewDefaultTaskSyncContext();
                     var dataClient = new DataFromClientFilterFolderForIncrement();

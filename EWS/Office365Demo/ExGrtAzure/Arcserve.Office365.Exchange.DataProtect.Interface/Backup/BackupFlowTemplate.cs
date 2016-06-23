@@ -157,13 +157,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup
         public abstract void Dispose();
     }
 
-    public enum ItemUADStatus
-    {
-        None = 0,
-        Update = 1,
-        Add = 2,
-        Delete = 3
-    }
+    
 
     public abstract class BackupMailboxFlowTemplate : ITaskSyncContext<IJobProgress>
     {
@@ -183,7 +177,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup
 
         protected abstract Func<string, bool> FuncIsFolderClassValid { get; }
 
-        protected abstract Action<IMailboxDataSync> ActionUpdateMailboxSyncToCatalog { get; }
+        protected abstract Action<IMailboxDataSync> ActionUpdateMailboxSyncAndTreeToCatalog { get; }
         protected abstract Action<IMailboxDataSync> ActionUpdateMailboxToCatalog { get; }
         protected abstract Action<IMailboxDataSync> ActionAddMailboxToCatalog { get; }
 
@@ -256,6 +250,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup
                      {ItemUADStatus.None, new List<IFolderDataSync>() }
                 };
 
+                List<IFolderDataSync> folderTreeItems = new List<IFolderDataSync>();
 
                 var pCounter = PerformanceCounter.Start();
                 Progress.Report("Get Folder Change {0} Start.", MailboxInfo.MailAddress);
@@ -291,6 +286,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup
                             {
                                 case EwsWSData.ChangeType.Create:
                                     folderData = DataConvert.Convert(folderChange.Folder, MailboxInfo);
+                                    folderTreeItems.Add(folderData);
                                     if (FuncIsFolderValid(folderData))
                                     {
                                         folderDataChangeUAD[ItemUADStatus.Add].Add(folderData);
@@ -301,6 +297,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup
                                 case Microsoft.Exchange.WebServices.Data.ChangeType.ReadFlagChange:
                                 case Microsoft.Exchange.WebServices.Data.ChangeType.Update:
                                     folderData = DataConvert.Convert(folderChange.Folder, MailboxInfo);
+                                    folderTreeItems.Add(folderData);
                                     if (FuncIsFolderValid(folderData))
                                     {
 
@@ -327,14 +324,15 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup
 
                 Progress.Report("Get Folder Change {0} End, total {1} changed folders, total time {2}.", MailboxInfo.MailAddress, addOrUpdateFolders.Count, pCounter.EndBySecond());
 
-                var folderTree = FuncGetFolderTrees(foldersInLastCatalog, addOrUpdateFolders);
+                var folderTree = FuncGetFolderTrees(folderTreeItems, new List<IFolderDataSync>(0));
 
                 MailboxInfo.SyncStatus = lastSyncStatus;
+                MailboxInfo.FolderTree = folderTree.Serialize();
 
                 switch (uadStatus)
                 {
                     case ItemUADStatus.None:
-                        ActionUpdateMailboxSyncToCatalog(MailboxInfo);
+                        ActionUpdateMailboxSyncAndTreeToCatalog(MailboxInfo);
                         break;
                     case ItemUADStatus.Update:
                         ActionUpdateMailboxToCatalog(MailboxInfo);

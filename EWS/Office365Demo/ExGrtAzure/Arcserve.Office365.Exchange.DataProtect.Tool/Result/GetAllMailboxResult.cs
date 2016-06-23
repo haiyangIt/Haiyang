@@ -1,4 +1,6 @@
-﻿using Arcserve.Office365.Exchange.Tool;
+﻿using Arcserve.Office365.Exchange.Data.Mail;
+using Arcserve.Office365.Exchange.DataProtect.Tool.Data;
+using Arcserve.Office365.Exchange.Tool;
 using System;
 using System.Collections.Generic;
 using System.Linq;

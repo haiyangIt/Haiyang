@@ -18,6 +18,8 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data
         {
 
         }
+        
+        public string FolderTree { get; set; }
 
         [NotMapped]
         public string ChangeKey
@@ -117,6 +119,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data
             this.RootFolderId = source.RootFolderId;
             this.SyncStatus = source.SyncStatus;
             this.Name = source.Name;
+            this.FolderTree = source.FolderTree;
         }
     }
 

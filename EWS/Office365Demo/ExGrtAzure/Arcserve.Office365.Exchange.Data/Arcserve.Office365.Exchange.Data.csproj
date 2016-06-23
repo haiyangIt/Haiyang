@@ -100,11 +100,13 @@
     <Compile Include="Increment\IFolderDataSync.cs" />
     <Compile Include="Increment\IItemDataSync.cs" />
     <Compile Include="Increment\IMailboxDataSync.cs" />
+    <Compile Include="Increment\ItemUADStatus.cs" />
     <Compile Include="Mail\IFolderData.cs" />
     <Compile Include="Mail\IItemData.cs" />
     <Compile Include="Mail\IMailboxData.cs" />
     <Compile Include="Mail\ItemClass.cs" />
     <Compile Include="Mail\ItemClassUtil.cs" />
+    <Compile Include="Mail\Mailbox.cs" />
     <Compile Include="Org\ICatalogInfo.cs" />
     <Compile Include="Org\ICatalogJob.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

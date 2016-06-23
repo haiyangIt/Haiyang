@@ -23,7 +23,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
         private CatalogSyncDbContext _updateContext;
         private CatalogSyncDbContext _queryContext = null;
         private DataConvert _dataConvert;
-        public CatalogDbAccess(string newCatalogFolder, string lastCatalogFile, string organizationName)
+        public CatalogDbAccess(string newCatalogFolder, string lastCatalogFolder, string organizationName)
         {
             if (!Directory.Exists(newCatalogFolder))
             {
@@ -32,15 +32,16 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
             string fileName = string.Empty;
             string newCatalogFileName = string.Empty;
-            if (!string.IsNullOrEmpty(lastCatalogFile) && File.Exists(lastCatalogFile))
+            if (!string.IsNullOrEmpty(lastCatalogFolder))
             {
-                fileName = Path.GetFileName(lastCatalogFile);
+                fileName = CatalogAccess.GetCatalogFileName(organizationName);
                 newCatalogFileName = Path.Combine(newCatalogFolder, fileName);
+                var lastCatalogFile = Path.Combine(lastCatalogFolder, fileName);
                 File.Copy(lastCatalogFile, newCatalogFileName);
-                var logFile = Path.GetFileNameWithoutExtension(lastCatalogFile);
+                var logFile = Path.GetFileNameWithoutExtension(fileName);
                 logFile = string.Format("{0}_log.ldf", logFile);
 
-                var lastLogFilePath = Path.Combine(Path.GetDirectoryName(lastCatalogFile), logFile);
+                var lastLogFilePath = Path.Combine(lastCatalogFolder, logFile);
                 var newLogFilePath = Path.Combine(newCatalogFolder, logFile);
                 File.Copy(lastLogFilePath, newLogFilePath);
 
@@ -239,13 +240,14 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
             throw new NotSupportedException();
         }
 
-        public void UpdateMailboxSyncToCatalog(IMailboxDataSync mailbox)
+        public void UpdateMailboxSyncAndTreeToCatalog(IMailboxDataSync mailbox)
         {
             DoSaveChanges();
             var mailboxInfo = (from m in _updateContext.Mailboxes where m.Id == mailbox.Id select m).FirstOrDefault();
             if (mailboxInfo == null)
                 throw new ArgumentException("mailbox is not in catalog.");
             mailboxInfo.SyncStatus = mailbox.SyncStatus;
+            mailboxInfo.FolderTree = mailbox.FolderTree;
             _updateContext.SaveChanges();
         }
 
@@ -363,7 +365,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
             throw new NotSupportedException();
         }
 
-        public Task UpdateMailboxSyncToCatalogAsync(IMailboxDataSync mailbox)
+        public Task UpdateMailboxSyncAndTreeToCatalogAsync(IMailboxDataSync mailbox)
         {
             throw new NotSupportedException();
         }
@@ -478,7 +480,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
         private CatalogSyncDbContext _updateContext;
         private CatalogSyncDbContext _queryContext = null;
         private DataConvert _dataConvert;
-        public CatalogTestAccess(string newCatalogFile, string lastCatalogFile, string organizationName)
+        public CatalogTestAccess(string newCatalogFile, string lastCatalogFolder, string organizationName)
         {
         }
 
@@ -611,7 +613,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
             throw new NotImplementedException();
         }
 
-        public void UpdateMailboxSyncToCatalog(IMailboxDataSync mailbox)
+        public void UpdateMailboxSyncAndTreeToCatalog(IMailboxDataSync mailbox)
         {
 
         }
@@ -702,7 +704,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
             throw new NotImplementedException();
         }
 
-        public Task UpdateMailboxSyncToCatalogAsync(IMailboxDataSync mailbox)
+        public Task UpdateMailboxSyncAndTreeToCatalogAsync(IMailboxDataSync mailbox)
         {
             throw new NotImplementedException();
         }

@@ -25,19 +25,19 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession
         /// Dispose. please use using.
         /// </summary>
         /// <param name="newCatalogFile"></param>
-        /// <param name="latestCatalogFile"></param>
+        /// <param name="lastCatalogFolder"></param>
         /// <param name="storageFolder"></param>
         /// <remarks>Dispose.</remarks>
-        public CatalogAccess(string newCatalogFolder, string latestCatalogFile, string storageFolder, string organizationName)
+        public CatalogAccess(string newCatalogFolder, string lastCatalogFolder, string storageFolder, string organizationName)
         {
-            LatestCatalogFile = latestCatalogFile;
+            LatestCatalogFile = lastCatalogFolder;
             StorageFolder = storageFolder;
             if (CloudConfig.Instance.IsTestForDemo)
             {
-                _catalogDbAccess = new CatalogTestAccess(newCatalogFolder, latestCatalogFile, organizationName);
+                _catalogDbAccess = new CatalogTestAccess(newCatalogFolder, lastCatalogFolder, organizationName);
             }
             else
-                _catalogDbAccess = new CatalogDbAccess(newCatalogFolder, latestCatalogFile, organizationName);
+                _catalogDbAccess = new CatalogDbAccess(newCatalogFolder, lastCatalogFolder, organizationName);
             _catalogDbAccess.CloneSyncContext(this);
             _exportItemWriter = new ExportItemWriter(storageFolder);
         }
@@ -178,9 +178,9 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession
             return _catalogDbAccess.IsItemContentExist(itemId);
         }
 
-        public void UpdateMailboxSyncToCatalog(IMailboxDataSync mailbox)
+        public void UpdateMailboxSyncAndTreeToCatalog(IMailboxDataSync mailbox)
         {
-            _catalogDbAccess.UpdateMailboxSyncToCatalog(mailbox);
+            _catalogDbAccess.UpdateMailboxSyncAndTreeToCatalog(mailbox);
         }
 
         public Task UpdateMailboxAsync(IMailboxDataSync mailbox)
@@ -242,7 +242,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession
             throw new NotSupportedException();
         }
 
-        public Task UpdateMailboxSyncToCatalogAsync(IMailboxDataSync mailbox)
+        public Task UpdateMailboxSyncAndTreeToCatalogAsync(IMailboxDataSync mailbox)
         {
             throw new NotSupportedException();
         }

@@ -4,6 +4,8 @@ using System.Diagnostics;
 using Arcserve.Office365.Exchange.DataProtect.Tool.Result;
 using Arcserve.Office365.Exchange.Tool;
 using System.IO;
+using Arcserve.Office365.Exchange.DataProtect.Tool.Data;
+using Arcserve.Office365.Exchange.Data.Mail;
 
 namespace ExGrtAzure.Tests
 {

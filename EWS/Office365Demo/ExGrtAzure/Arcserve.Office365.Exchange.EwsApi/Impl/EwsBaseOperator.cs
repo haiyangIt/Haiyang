@@ -57,77 +57,13 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
 
         public virtual ICollection<IMailboxDataSync> GetAllMailbox(string adminName, string adminPassword, IEnumerable<string> mailboxes)
         {
-            const string liveIDConnectionUri = "https://outlook.office365.com/PowerShell-LiveID";
-            const string schemaUri = "http://schemas.microsoft.com/powershell/Microsoft.Exchange";
-            PSCredential credentials = new PSCredential(adminName, StringToSecureString(adminPassword));
-
-            WSManConnectionInfo connectionInfo = new WSManConnectionInfo(
-        new Uri(liveIDConnectionUri),
-        schemaUri, credentials);
-            connectionInfo.AuthenticationMechanism = AuthenticationMechanism.Basic;
-
-            using (Runspace runspace = RunspaceFactory.CreateRunspace(connectionInfo))
+            var mailboxResult = EwsServiceExtension.GetAllMailbox(adminName, adminPassword, mailboxes);
+            var result = new List<IMailboxDataSync>(mailboxResult.Count);
+            foreach (var item in mailboxResult)
             {
-                using (Pipeline pipe = runspace.CreatePipeline())
-                {
-
-                    Command CommandGetMailbox = new Command("Get-Mailbox");
-                    CommandGetMailbox.Parameters.Add("RecipientTypeDetails", "UserMailbox");
-                    if (mailboxes != null && mailboxes.Count() > 0)
-                    {
-                        StringBuilder sb = new StringBuilder();
-                        sb.Append("{");
-                        const string Or = " -or ";
-                        foreach (var m in mailboxes)
-                        {
-                            sb.Append(" (PrimarySmtpAddress -eq ").Append("\"").Append(m).Append("\")").Append(Or);
-                        }
-                        sb.Length -= Or.Length;
-                        sb.Append(" }");
-                        CommandGetMailbox.Parameters.Add("Filter", sb.ToString());
-                    }
-                    pipe.Commands.Add(CommandGetMailbox);
-
-                    var props = new string[] { "Name", "DisplayName", "UserPrincipalName", "Guid" };
-                    Command CommandSelect = new Command("Select-Object");
-                    CommandSelect.Parameters.Add("Property", props);
-                    pipe.Commands.Add(CommandSelect);
-
-
-                    runspace.Open();
-
-                    var information = pipe.Invoke();
-                    List<IMailboxDataSync> result = new List<IMailboxDataSync>(information.Count);
-                    string displayName = string.Empty;
-                    string address = string.Empty;
-                    string name = string.Empty;
-                    string guid = string.Empty;
-                    foreach (PSObject eachUserMailBox in information)
-                    {
-                        displayName = string.Empty;
-                        address = string.Empty;
-                        name = string.Empty;
-                        guid = string.Empty;
-
-                        foreach (PSPropertyInfo propertyInfo in eachUserMailBox.Properties)
-                        {
-                            if (propertyInfo.Name == "DisplayName")
-                                displayName = propertyInfo.Value.ToString();
-                            if (propertyInfo.Name == "UserPrincipalName")
-                                address = propertyInfo.Value.ToString().ToLower();
-                            if (propertyInfo.Name == "Guid")
-                                guid = propertyInfo.Value.ToString();
-                            if (propertyInfo.Name == "Name")
-                                name = propertyInfo.Value.ToString();
-
-                        }
-
-                        //if (IsNeedGenerateMailbox(address) && address.ToLower() == "haiyang.ling@arcserve.com") // todo remove the specific mail address.
-                        result.Add(new MailboxDataSyncBase(displayName, address) { Name = name, Id = guid });
-                    }
-                    return result;
-                }
+                result.Add(new MailboxDataSyncBase(item.DisplayName, item.MailAddress) { Name = item.Name, Id = item.Id });
             }
+            return result;
         }
 
         public virtual void FolderCreate(string folderName, string folderType, Folder parentFolder)
@@ -147,7 +83,7 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
             catch (ArgumentException e)
             {
                 LogFactory.LogInstance.WriteException(LogLevel.WARN, "Folder load error.", e, e.Message);
-                if(e.TargetSite.DeclaringType.FullName == "System.Enum+EnumResult" && e.TargetSite.MemberType == System.Reflection.MemberTypes.Method && e.TargetSite.Name == "SetFailure" && e.Message.IndexOf("Requested value ") >=0 )
+                if (e.TargetSite.DeclaringType.FullName == "System.Enum+EnumResult" && e.TargetSite.MemberType == System.Reflection.MemberTypes.Method && e.TargetSite.Name == "SetFailure" && e.Message.IndexOf("Requested value ") >= 0)
                 {
                     PropertySet set = new PropertySet(folderPropertySet);
                     set.Remove(FolderSchema.WellKnownFolderName);
@@ -424,7 +360,7 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
                 (e is WebException) ||
                 (e is SocketException) ||
                 (e is ServiceResponseException) ||
-                (e is IOException) ) && (
+                (e is IOException)) && (
                     FindArray.Any(e.Message.Contains)
                 );
         }
@@ -494,7 +430,7 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
             {
                 base.FolderCreate(folderName, folderType, parentFolder);
             }, "FolderCreate");
-            
+
         }
 
         public override void FolderSave(Folder folder, FolderId parentFolderId)
@@ -592,7 +528,7 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
             {
                 base.FolderEmpty(folder, deleteMode, deleteSubFolders);
             }, "FolderEmpty");
-            
+
         }
 
         //public override void (string sItemId, EwsServiceArgument argument)

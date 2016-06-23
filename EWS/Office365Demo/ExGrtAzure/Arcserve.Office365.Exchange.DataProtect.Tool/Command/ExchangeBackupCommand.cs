@@ -22,6 +22,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Arcserve.Office365.Exchange.DataProtect.Tool.Result;
 using Arcserve.Office365.Exchange.DataProtect.Tool.Resource;
+using System.IO;
 
 namespace Arcserve.Office365.Exchange.Tool
 {
@@ -50,6 +51,15 @@ namespace Arcserve.Office365.Exchange.Tool
 
         [CommandArgument("WorkFolder", "Please specify the work folder, like:-WorkFolder:E:\\myFolder", true)]
         public ArgInfo WorkFolder { get; set; }
+
+        [CommandArgument("IsFull", "Please specify backup type, like:-IsFull:0", true)]
+        public ArgInfo IsFull { get; set; }
+
+        [CommandArgument("CurrentCatalogFolder", "Please specify current catalog folder, like:-CurrentCatalogFolder:E:\\myFolder", true)]
+        public ArgInfo CurrentCatalogFolder { get; set; }
+
+        [CommandArgument("LastCatalogFolder", "Please specify last catalog folder, like:-LastCatalogFolder:E:\\myFolder", false)]
+        public ArgInfo LastCatalogFolder { get; set; }
 
         private int? _FolderCount
         {
@@ -97,15 +107,31 @@ namespace Arcserve.Office365.Exchange.Tool
 
         protected override ResultBase DoExcute()
         {
-            FullBackup();
+
+            Backup();
             return new ExchangeBackupResult();
         }
 
-        private void FullBackup()
+        private void Backup()
         {
             try
             {
-                using (var catalogAccess = new CatalogAccess("", "", WorkFolder.Value, AdminUserName.Value.GetOrganization()))
+                if(IsFull.Value != "1")
+                {
+                    var lastCatalogFolder = LastCatalogFolder.Value;
+                    if(string.IsNullOrEmpty(lastCatalogFolder) || !Directory.Exists(lastCatalogFolder))
+                    {
+                        throw new ArgumentException(string.Format("last catalog folder is not right {0}.", lastCatalogFolder));
+                    }
+
+                    LogFactory.LogInstance.WriteLog(LogLevel.INFO, string.Format("will start increment backup."));
+                }
+                else
+                {
+                    LogFactory.LogInstance.WriteLog(LogLevel.INFO, string.Format("will start full backup."));
+                }
+
+                using (var catalogAccess = new CatalogAccess(CurrentCatalogFolder.Value, LastCatalogFolder.Value, WorkFolder.Value, AdminUserName.Value.GetOrganization()))
                 {
                     var taskSyncContextBase = DataProtectFactory.Instance.NewDefaultTaskSyncContext();
                     catalogAccess.InitTaskSyncContext(taskSyncContextBase);

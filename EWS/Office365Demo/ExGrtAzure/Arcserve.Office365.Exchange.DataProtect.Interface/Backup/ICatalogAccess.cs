@@ -47,8 +47,8 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup
         Task<IEnumerable<IItemDataSync>> GetItemsFromLatestCatalogAsync(IEnumerable<string> itemIds);
         IEnumerable<IItemDataSync> GetItemsByParentFolderIdFromCatalog(string parentFolderId);
         Task<IEnumerable<IItemDataSync>> GetItemsByParentFolderIdFromCatalogAsync(string parentFolderId);
-        void UpdateMailboxSyncToCatalog(IMailboxDataSync mailbox);
-        System.Threading.Tasks.Task UpdateMailboxSyncToCatalogAsync(IMailboxDataSync mailbox);
+        void UpdateMailboxSyncAndTreeToCatalog(IMailboxDataSync mailbox);
+        System.Threading.Tasks.Task UpdateMailboxSyncAndTreeToCatalogAsync(IMailboxDataSync mailbox);
         void DeleteFolderToCatalog(string folderId);
         System.Threading.Tasks.Task DeleteFolderToCatalogAsync(string folderId);
         void UpdateMailboxToCatalog(ICollection<IMailboxDataSync> mailboxes);
