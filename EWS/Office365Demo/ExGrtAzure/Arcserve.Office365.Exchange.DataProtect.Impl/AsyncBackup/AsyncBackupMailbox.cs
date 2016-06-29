@@ -18,7 +18,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.AsyncBackup
     {
         public ICatalogAccess<IJobProgress> CatalogAccess { get; set; }
         public IEwsServiceAdapter<IJobProgress> EwsServiceAdapter { get; set; }
-        public IDataFromClient<IJobProgress> DataFromClient { get; set; }
+        public IDataFromBackup<IJobProgress> DataFromClient { get; set; }
         public OrganizationAdminInfo AdminInfo { get; internal set; }
         public string Organization { get; internal set; }
         public IDataConvert DataConvert

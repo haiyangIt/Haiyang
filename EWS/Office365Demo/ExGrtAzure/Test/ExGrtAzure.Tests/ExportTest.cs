@@ -210,7 +210,7 @@ namespace ExGrtAzure.Tests
             {
                 if (isNeedRead)
                 {
-                    if(xmlReader.Read())
+                    if (xmlReader.Read())
                     {
                         isNeedRead = false;
                         if (xmlReader.Depth <= depth)
@@ -221,7 +221,7 @@ namespace ExGrtAzure.Tests
                         break;
                     }
                 }
-                
+
                 switch (xmlReader.NodeType)
                 {
                     case XmlNodeType.Element:
@@ -259,6 +259,8 @@ namespace ExGrtAzure.Tests
             return sb.ToString();
         }
 
-       
+
     }
+
+
 }

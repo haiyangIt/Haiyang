@@ -15,13 +15,15 @@ using System.Data.Entity.Infrastructure;
 using Arcserve.Office365.Exchange.Util.Setting;
 using System.Data.SqlClient;
 using System.Diagnostics;
+using Arcserve.Office365.Exchange.StorageAccess.MountSession.Backup;
+using Arcserve.Office365.Exchange.Log;
 
 namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 {
     public class CatalogDbAccess : ICatalogAccess<IJobProgress>, ITaskSyncContext<IJobProgress>, IDisposable
     {
-        private CatalogSyncDbContext _updateContext;
-        private CatalogSyncDbContext _queryContext = null;
+        private CatalogDbContextBase _updateContext;
+        private CatalogDbContextBase _queryContext = null;
         private DataConvert _dataConvert;
         public CatalogDbAccess(string newCatalogFolder, string lastCatalogFolder, string organizationName)
         {
@@ -34,26 +36,39 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
             string newCatalogFileName = string.Empty;
             if (!string.IsNullOrEmpty(lastCatalogFolder))
             {
-                fileName = CatalogAccess.GetCatalogFileName(organizationName);
+                fileName = organizationName.GetCatalogDatabaseFileName(CloudConfig.Instance.DbType.GetDatabaseType());
                 newCatalogFileName = Path.Combine(newCatalogFolder, fileName);
                 var lastCatalogFile = Path.Combine(lastCatalogFolder, fileName);
                 File.Copy(lastCatalogFile, newCatalogFileName);
-                var logFile = Path.GetFileNameWithoutExtension(fileName);
-                logFile = string.Format("{0}_log.ldf", logFile);
 
-                var lastLogFilePath = Path.Combine(lastCatalogFolder, logFile);
-                var newLogFilePath = Path.Combine(newCatalogFolder, logFile);
-                File.Copy(lastLogFilePath, newLogFilePath);
+                if (CloudConfig.Instance.DbType.GetDatabaseType() == DatabaseType.SqlServer)
+                {
+                    var logFile = Path.GetFileNameWithoutExtension(fileName);
+                    logFile = string.Format("{0}_log.ldf", logFile);
 
-                _queryContext = new CatalogSyncDbContext(lastCatalogFile);
+                    var lastLogFilePath = Path.Combine(lastCatalogFolder, logFile);
+                    var newLogFilePath = Path.Combine(newCatalogFolder, logFile);
+                    File.Copy(lastLogFilePath, newLogFilePath);
+                }
+
+                _queryContext = CatalogDbContextBase.NewCatalogContext(lastCatalogFile);
             }
             else
             {
-                fileName = CatalogAccess.GetCatalogFileName(organizationName);
+                fileName = organizationName.GetCatalogDatabaseFileName(CloudConfig.Instance.DbType.GetDatabaseType());
                 newCatalogFileName = Path.Combine(newCatalogFolder, fileName);
+                if (!File.Exists(newCatalogFileName))
+                {
+                    var templateFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName);
+                    if(!File.Exists(templateFile))
+                    {
+                        LogFactory.LogInstance.WriteLog(LogLevel.ERR, string.Format("template catalog file {0} not exist.", templateFile));
+                    }
+                    //File.Copy(templateFile, newCatalogFileName);
+                }
             }
 
-            _updateContext = new CatalogSyncDbContext(newCatalogFileName);
+            _updateContext = CatalogDbContextBase.NewCatalogContext(newCatalogFileName);
 
             _dataConvert = new DataConvert();
         }
@@ -158,17 +173,19 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
             DoSaveChanges();
             if (_updateContext != null)
             {
-                SqlConnection.ClearPool(_updateContext.Database.Connection as SqlConnection);
+                if (CloudConfig.Instance.DbType.GetDatabaseType() == DatabaseType.SqlServer)
+                    SqlConnection.ClearPool(_updateContext.Database.Connection as SqlConnection);
                 _updateContext.Dispose();
-                
+
                 _updateContext = null;
-                
+
             }
             if (_queryContext != null)
             {
-                SqlConnection.ClearPool(_queryContext.Database.Connection as SqlConnection);
+                if (CloudConfig.Instance.DbType.GetDatabaseType() == DatabaseType.SqlServer)
+                    SqlConnection.ClearPool(_queryContext.Database.Connection as SqlConnection);
                 _queryContext.Dispose();
-               
+
                 _queryContext = null;
             }
         }
@@ -381,10 +398,10 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
             }
 
             var items = (from m in _updateContext.Items where m.ParentFolderId == folderId select m);
-            if(items.Count() > 0)
+            if (items.Count() > 0)
             {
-                
-                foreach(var i in items)
+
+                foreach (var i in items)
                 {
                     _updateContext.Items.Remove(i);
                 }
@@ -477,8 +494,8 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
     public class CatalogTestAccess : ICatalogAccess<IJobProgress>, ITaskSyncContext<IJobProgress>, IDisposable
     {
-        private CatalogSyncDbContext _updateContext;
-        private CatalogSyncDbContext _queryContext = null;
+        private CatalogDbContextBase _updateContext;
+        private CatalogDbContextBase _queryContext = null;
         private DataConvert _dataConvert;
         public CatalogTestAccess(string newCatalogFile, string lastCatalogFolder, string organizationName)
         {
@@ -666,7 +683,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         public void DeleteItemsToCatalog(IEnumerable<string> itemIds)
         {
-            
+
         }
 
         public Task DeleteItemsToCatalogAsync(IEnumerable<string> itemIds)
@@ -676,7 +693,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         public void UpdateFolderToCatalog(IFolderDataSync folder)
         {
-           
+
         }
 
         public Task UpdateFolderToCatalogAsync(IFolderDataSync folder)
@@ -686,7 +703,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         public void UpdateFolderSyncStatusToCatalog(IFolderDataSync folder)
         {
-            
+
         }
 
         public Task UpdateFolderSyncStatusToCatalogAsync(IFolderDataSync folder)
@@ -696,7 +713,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         public void UpdateItemsToCatalog(IEnumerable<IItemDataSync> items)
         {
-            
+
         }
 
         public Task UpdateItemsToCatalogAsync(IEnumerable<IItemDataSync> items)
@@ -711,7 +728,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         public void DeleteFolderToCatalog(string folderId)
         {
-            
+
         }
 
         public Task DeleteFolderToCatalogAsync(string folderId)
@@ -721,7 +738,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         public void UpdateMailboxToCatalog(ICollection<IMailboxDataSync> mailboxes)
         {
-            
+
         }
 
         public Task UpdateMailboxToCatalogAsync(ICollection<IMailboxDataSync> mailboxes)
@@ -731,7 +748,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         public void DeleteMailboxToCatalog(ICollection<IMailboxDataSync> mailboxes)
         {
-            
+
         }
 
         public Task DeleteMailboxToCatalogAsync(ICollection<IMailboxDataSync> mailboxes)
@@ -741,7 +758,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         public void UpdateMailboxToCatalog(IMailboxDataSync mailbox)
         {
-            
+
         }
 
         public Task UpdateMailboxToCatalogAsync(IMailboxDataSync mailbox)
@@ -751,7 +768,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 
         public void AddMailboxesToCatalog(IMailboxDataSync mailbox)
         {
-            
+
         }
 
         public Task AddMailboxesToCatalogAsync(IMailboxDataSync mailbox)

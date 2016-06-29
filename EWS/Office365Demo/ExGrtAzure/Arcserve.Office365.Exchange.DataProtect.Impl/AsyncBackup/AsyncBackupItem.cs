@@ -32,7 +32,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.AsyncBackup
             get; set;
         }
 
-        public IDataFromClient<IJobProgress> DataFromClient
+        public IDataFromBackup<IJobProgress> DataFromClient
         {
             get; set;
         }

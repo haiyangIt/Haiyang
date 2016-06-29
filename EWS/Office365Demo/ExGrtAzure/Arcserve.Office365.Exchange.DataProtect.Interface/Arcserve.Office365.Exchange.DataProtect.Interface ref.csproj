@@ -90,6 +90,10 @@
     <Compile Include="Backup\IDataFromClient.cs" />
     <Compile Include="Backup\IExchangeAccess.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Restore\ICatalogAccessForRestore.cs" />
+    <Compile Include="Restore\IDataFromClientForRestore.cs" />
+    <Compile Include="Restore\IExchangeAccessForRestore.cs" />
+    <Compile Include="Restore\IRestoreToPosition.cs" />
     <Compile Include="Restore\RestoreFlowTemplate.cs" />
   </ItemGroup>
   <ItemGroup>

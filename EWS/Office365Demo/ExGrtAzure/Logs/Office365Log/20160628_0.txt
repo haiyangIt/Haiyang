@@ -1,0 +1,8 @@
+20160628113510	D	Is Administrator
+20160628113510	D	config file	file path E:\test99\Haiyang\EWS\Office365Demo\ExGrtAzure\packages\Arcserve_Office365_dll\Arcserve.Office365.Exchange.DataProtect.Tool.exe.Config
+20160628113510	D	args	arg -JobType:Test
+2016-06-28 11:35:52	0		0001	0000	E	execute command Arcserve.Office365.Exchange.Tool.Framework.ArgInfo error	Value cannot be null.  Parameter name: connection	80004003	   at System.Data.SqlClient.SqlConnection.ClearPool(SqlConnection connection)     at Arcserve.Office365.Exchange.DataProtect.Tool.Command.TestCommand.CreateMdfFile(String fileName, Boolean isInitCatalog, String catalogName)     at Arcserve.Office365.Exchange.DataProtect.Tool.Command.TestCommand.CreateMdfWithOutInitCatalog()     at Arcserve.Office365.Exchange.DataProtect.Tool.Command.TestCommand.DoExcute()     at Arcserve.Office365.Exchange.Tool.Framework.ArcServeCommand.Execute()	System.ArgumentNullException	Value cannot be null.
+Parameter name: connection
+
+
+Log end.

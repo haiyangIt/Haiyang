@@ -22,7 +22,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup
         public string Organization { get; private set; }
         public ICatalogAccess<IJobProgress> CatalogAccess { get; set; }
         public IEwsServiceAdapter<IJobProgress> EwsServiceAdapter { get; set; }
-        public IDataFromClient<IJobProgress> DataFromClient { get; set; }
+        public IDataFromBackup<IJobProgress> DataFromClient { get; set; }
         public DateTime JobStartTime { get; private set; }
 
         protected override Func<IEnumerable<string>, ICollection<IMailboxDataSync>> FuncGetAllMailboxFromExchange
@@ -59,81 +59,13 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup
             }
         }
 
-        protected override Func<ICollection<IMailboxDataSync>> FuncGetAllMailboxFromPlan
+        protected override Func<ICollection<IMailboxDataSync>> FuncGetAllMailboxFromPlanAndExchange
         {
             get
             {
                 return () =>
                 {
-                    return DataFromClient.GetAllMailboxes();
-                };
-            }
-        }
-
-        protected override Func<ICollection<IMailboxDataSync>, ICollection<IMailboxDataSync>, ICollection<IMailboxDataSync>> FuncGetIntersectionMailboxCollection
-        {
-            get
-            {
-                if (CloudConfig.Instance.IsTestForDemo)
-                {
-                    return (mailboxInExchange, mailboxInPlan) =>
-                    {
-                        var result = new List<IMailboxDataSync>(mailboxInExchange.Count);
-
-                        var dicExchange = new Dictionary<string, IMailboxDataSync>();
-                        foreach (var item in mailboxInExchange)
-                        {
-                            dicExchange.Add(item.MailAddress, item);
-                        }
-
-                        var dicPlan = new Dictionary<string, IMailboxDataSync>();
-                        foreach (var item in mailboxInPlan)
-                        {
-                            dicPlan.Add(item.MailAddress, item);
-                        }
-
-                        foreach (var key in dicExchange.Keys)
-                        {
-                            if (dicPlan.ContainsKey(key))
-                            {
-                                result.Add(dicExchange[key]);
-                            }
-                        }
-
-                        var temp = new List<IMailboxDataSync>(result.Count);
-                        foreach (var item in result)
-                        {
-                            temp.Add(DataConvert.Convert(item));
-                        }
-
-                        return temp;
-                    };
-                }
-
-                return (mailboxInExchange, mailboxInPlan) =>
-                {
-                    var result = new List<IMailboxDataSync>(mailboxInExchange.Count);
-
-                    var dicExchange = new Dictionary<string, IMailboxDataSync>();
-                    foreach (var item in mailboxInExchange)
-                    {
-                        dicExchange.Add(item.Id, item);
-                    }
-
-                    var dicPlan = new Dictionary<string, IMailboxDataSync>();
-                    foreach (var item in mailboxInPlan)
-                    {
-                        dicPlan.Add(item.Id, item);
-                    }
-
-                    foreach (var key in dicExchange.Keys)
-                    {
-                        if (dicPlan.ContainsKey(key))
-                        {
-                            result.Add(dicExchange[key]);
-                        }
-                    }
-
+                    var result = DataFromClient.GetAllMailboxFromPlanAndExchange(FuncGetAllMailboxFromExchange);
                     var temp = new List<IMailboxDataSync>(result.Count);
                     foreach (var item in result)
                     {
@@ -144,6 +76,81 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup
                 };
             }
         }
+
+        //protected override Func<ICollection<IMailboxDataSync>, ICollection<IMailboxDataSync>, ICollection<IMailboxDataSync>> FuncGetIntersectionMailboxCollection
+        //{
+        //    get
+        //    {
+        //        if (CloudConfig.Instance.IsTestForDemo)
+        //        {
+        //            return (mailboxInExchange, mailboxInPlan) =>
+        //            {
+        //                var result = new List<IMailboxDataSync>(mailboxInExchange.Count);
+
+        //                var dicExchange = new Dictionary<string, IMailboxDataSync>();
+        //                foreach (var item in mailboxInExchange)
+        //                {
+        //                    dicExchange.Add(item.MailAddress, item);
+        //                }
+
+        //                var dicPlan = new Dictionary<string, IMailboxDataSync>();
+        //                foreach (var item in mailboxInPlan)
+        //                {
+        //                    dicPlan.Add(item.MailAddress, item);
+        //                }
+
+        //                foreach (var key in dicExchange.Keys)
+        //                {
+        //                    if (dicPlan.ContainsKey(key))
+        //                    {
+        //                        result.Add(dicExchange[key]);
+        //                    }
+        //                }
+
+        //                var temp = new List<IMailboxDataSync>(result.Count);
+        //                foreach (var item in result)
+        //                {
+        //                    temp.Add(DataConvert.Convert(item));
+        //                }
+
+        //                return temp;
+        //            };
+        //        }
+
+        //        return (mailboxInExchange, mailboxInPlan) =>
+        //        {
+        //            var result = new List<IMailboxDataSync>(mailboxInExchange.Count);
+
+        //            var dicExchange = new Dictionary<string, IMailboxDataSync>();
+        //            foreach (var item in mailboxInExchange)
+        //            {
+        //                dicExchange.Add(item.Id, item);
+        //            }
+
+        //            var dicPlan = new Dictionary<string, IMailboxDataSync>();
+        //            foreach (var item in mailboxInPlan)
+        //            {
+        //                dicPlan.Add(item.Id, item);
+        //            }
+
+        //            foreach (var key in dicExchange.Keys)
+        //            {
+        //                if (dicPlan.ContainsKey(key))
+        //                {
+        //                    result.Add(dicExchange[key]);
+        //                }
+        //            }
+
+        //            var temp = new List<IMailboxDataSync>(result.Count);
+        //            foreach (var item in result)
+        //            {
+        //                temp.Add(DataConvert.Convert(item));
+        //            }
+
+        //            return temp;
+        //        };
+        //    }
+        //}
 
         protected override Func<ICollection<IMailboxDataSync>, IEnumerable<IMailboxDataSync>, IDictionary<ItemUADStatus, ICollection<IMailboxDataSync>>> FuncGetMailboxUAD
         {

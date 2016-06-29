@@ -12,7 +12,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup
     {
         ICatalogAccess<ProgressType> CatalogAccess { get; set; }
         IEwsServiceAdapter<ProgressType> EwsServiceAdapter { get; set; }
-        IDataFromClient<ProgressType> DataFromClient { get; set; }
+        IDataFromBackup<ProgressType> DataFromClient { get; set; }
         IDataConvert DataConvert { get; set; }
     }
 

@@ -27,7 +27,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup
         /// <summary>
         /// get all mailbox information from plan/client
         /// </summary>
-        Task<ICollection<IMailboxDataSync>> GetAllMailboxFromPlan();
+        Task<ICollection<IMailboxDataSync>> GetAllMailboxFromPlan(Func<IEnumerable<string>, Task<ICollection<IMailboxDataSync>>> funcGetAllMailboxFromExchange);
         /// <summary>
         /// get all mailbox from exchange
         /// </summary>

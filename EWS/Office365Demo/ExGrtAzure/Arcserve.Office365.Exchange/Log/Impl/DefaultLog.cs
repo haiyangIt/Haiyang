@@ -156,7 +156,7 @@ namespace Arcserve.Office365.Exchange.Log.Impl
         }
 
         private const string TimeFormat = "yyyy-MM-dd HH:mm:ss";
-        public static string GetExceptionString(string module ,LogLevel level, string message, Exception exception, string exMsg, int innerLevel = 0)
+        public static string GetExceptionString(string module, LogLevel level, string message, Exception exception, string exMsg, int innerLevel = 0)
         {
             StringBuilder sb = new StringBuilder();
             var curEx = exception;
@@ -168,12 +168,12 @@ namespace Arcserve.Office365.Exchange.Log.Impl
                 }
                 else
                 {
-                    sb.AppendLine(string.Join(blank,  DateTime.Now.ToString(TimeFormat), innerLevel.ToString(string.Format("D{0}", innerLevel * 2)), module, System.Threading.Thread.CurrentThread.ManagedThreadId.ToString("D4"), Task.CurrentId.HasValue ? Task.CurrentId.Value.ToString("D4") : "0000",
+                    sb.AppendLine(string.Join(blank, DateTime.Now.ToString(TimeFormat), innerLevel.ToString(string.Format("D{0}", innerLevel * 2)), module, System.Threading.Thread.CurrentThread.ManagedThreadId.ToString("D4"), Task.CurrentId.HasValue ? Task.CurrentId.Value.ToString("D4") : "0000",
                         LogLevelHelper.GetLevelString(level),
-                        message.RemoveRN(),
-                        curEx.Message.RemoveRN(),
-                        curEx.HResult.ToString("X8"),
-                        curEx.StackTrace.RemoveRN(), curEx.GetType().FullName, exMsg));
+                        string.IsNullOrEmpty(message) ? "" : message.RemoveRN(),
+                         string.IsNullOrEmpty(curEx.Message) ? "" : curEx.Message.RemoveRN(),
+                         curEx.HResult.ToString("X8"),
+                         string.IsNullOrEmpty(curEx.StackTrace) ? "" : curEx.StackTrace.RemoveRN(), curEx.GetType().FullName, exMsg));
 
                     curEx = curEx.InnerException;
                     innerLevel += 1;
@@ -188,10 +188,10 @@ namespace Arcserve.Office365.Exchange.Log.Impl
             StringBuilder sb = new StringBuilder();
             sb.AppendLine(string.Join(blank, module, DateTime.Now.ToString(TimeFormat), innerLevel.ToString(string.Format("D{0}", innerLevel * 2)), System.Threading.Thread.CurrentThread.ManagedThreadId.ToString("D4"), Task.CurrentId.HasValue ? Task.CurrentId.Value.ToString("D4") : "0000",
                     LogLevelHelper.GetLevelString(level),
-                    message.RemoveRN(),
-                    ex.Message.RemoveRN(),
+                    string.IsNullOrEmpty(message) ? "" : message.RemoveRN(),
+                    string.IsNullOrEmpty(ex.Message) ? "" : ex.Message.RemoveRN(),
                     ex.HResult.ToString("X8"),
-                    ex.StackTrace.RemoveRN(), ex.GetType().FullName, exMsg));
+                    string.IsNullOrEmpty(ex.StackTrace) ? "" : ex.StackTrace.RemoveRN(), ex.GetType().FullName, exMsg));
 
             foreach (var innerEx in ex.Flatten().InnerExceptions)
             {
@@ -216,7 +216,7 @@ namespace Arcserve.Office365.Exchange.Log.Impl
 
         public void Dispose()
         {
-            if(_instance != null)
+            if (_instance != null)
             {
                 _instance.Dispose();
                 _instance = null;
@@ -227,6 +227,8 @@ namespace Arcserve.Office365.Exchange.Log.Impl
     {
         internal static string RemoveRN(this string message)
         {
+            if (message == null)
+                return "";
             return message.Replace('\r', ' ').Replace('\n', ' ');
         }
     }
@@ -277,7 +279,7 @@ namespace Arcserve.Office365.Exchange.Log.Impl
             _fileNameFormat = fileNameFormat;
             _MaxLogCount = fileMaxCount;
         }
-        
+
         protected override void DoWriteLog(string msg)
         {
             Interlocked.Increment(ref LogCount);

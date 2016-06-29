@@ -23,6 +23,9 @@ using System.Threading.Tasks;
 using Arcserve.Office365.Exchange.DataProtect.Tool.Result;
 using Arcserve.Office365.Exchange.DataProtect.Tool.Resource;
 using System.IO;
+using Arcserve.Office365.Exchange.DataProtect.Tool.Command;
+using Arcserve.Office365.Exchange.StorageAccess.MountSession.Backup;
+using Arcserve.Office365.Exchange.Util.Setting;
 
 namespace Arcserve.Office365.Exchange.Tool
 {
@@ -107,7 +110,8 @@ namespace Arcserve.Office365.Exchange.Tool
 
         protected override ResultBase DoExcute()
         {
-
+            //var testCommand = new TestCommand(ArgParser.Parser(new string[1] { "-JobType:Test" }));
+            //testCommand.Execute();
             Backup();
             return new ExchangeBackupResult();
         }
@@ -116,22 +120,39 @@ namespace Arcserve.Office365.Exchange.Tool
         {
             try
             {
-                if(IsFull.Value != "1")
+                string lastCatalogFolder = string.Empty;
+                if (IsFull.Value != "1")
                 {
-                    var lastCatalogFolder = LastCatalogFolder.Value;
-                    if(string.IsNullOrEmpty(lastCatalogFolder) || !Directory.Exists(lastCatalogFolder))
+                    if (LastCatalogFolder == null || string.IsNullOrEmpty(LastCatalogFolder.Value) || !Directory.Exists(LastCatalogFolder.Value))
                     {
-                        throw new ArgumentException(string.Format("last catalog folder is not right {0}.", lastCatalogFolder));
-                    }
+                        LogFactory.LogInstance.WriteLog(LogLevel.WARN, string.Format("lastCatalogFolder not exist, will start full backup."));
 
-                    LogFactory.LogInstance.WriteLog(LogLevel.INFO, string.Format("will start increment backup."));
+                    }
+                    else
+                    {
+                        lastCatalogFolder = LastCatalogFolder.Value;
+
+                        LogFactory.LogInstance.WriteLog(LogLevel.INFO, string.Format("will start increment backup."));
+                    }
                 }
                 else
                 {
                     LogFactory.LogInstance.WriteLog(LogLevel.INFO, string.Format("will start full backup."));
                 }
 
-                using (var catalogAccess = new CatalogAccess(CurrentCatalogFolder.Value, LastCatalogFolder.Value, WorkFolder.Value, AdminUserName.Value.GetOrganization()))
+                var tempFolder = Path.GetTempPath();
+                var currentCatalogFolder = Path.Combine(tempFolder, DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss"));
+                var newCatalogFolder = Path.Combine(currentCatalogFolder, "New");
+                Directory.CreateDirectory(newCatalogFolder);
+                var oldCatalogFolder = string.Empty;
+                if (!string.IsNullOrEmpty(lastCatalogFolder))
+                {
+                    Path.Combine(currentCatalogFolder, "Old");
+                    Directory.CreateDirectory(oldCatalogFolder);
+                    lastCatalogFolder.CatalogFileCopy(oldCatalogFolder, CloudConfig.Instance.DbType.GetDatabaseType());
+                }
+
+                using (var catalogAccess = new CatalogAccess(newCatalogFolder, oldCatalogFolder, WorkFolder.Value, AdminUserName.Value.GetOrganization()))
                 {
                     var taskSyncContextBase = DataProtectFactory.Instance.NewDefaultTaskSyncContext();
                     catalogAccess.InitTaskSyncContext(taskSyncContextBase);
@@ -153,6 +174,9 @@ namespace Arcserve.Office365.Exchange.Tool
                         backupFlow.BackupSync();
                     }
                 }
+
+                newCatalogFolder.CatalogFileCopy(CurrentCatalogFolder.Value, CloudConfig.Instance.DbType.GetDatabaseType());
+                Directory.Delete(currentCatalogFolder, true);
             }
             finally
             {
@@ -171,16 +195,21 @@ namespace Arcserve.Office365.Exchange.Tool
         }
     }
 
-    public class DataFromClient : IDataFromClient<IJobProgress>
+    public class DataFromClient : IDataFromBackup<IJobProgress>
     {
         public DataFromClient(int? folderCount, int? itemCount, List<string> mailboxes)
         {
             FolderCount = folderCount;
             ItemCount = itemCount;
             Mailboxes = mailboxes;
+            if (Mailboxes != null && Mailboxes.Count == 1 && Mailboxes[0] == "ALLMAILBOX")
+            {
+                IsAllMailbox = true;
+            }
         }
 
         private List<string> Mailboxes;
+        private bool IsAllMailbox;
         private int? ItemCount = null;
         public CancellationToken CancelToken
         {
@@ -197,17 +226,18 @@ namespace Arcserve.Office365.Exchange.Tool
             get; set;
         }
 
-        public ICollection<IMailboxDataSync> GetAllMailboxes()
+        public ICollection<IMailboxDataSync> GetAllMailboxFromPlanAndExchange(Func<IEnumerable<string>, ICollection<IMailboxDataSync>> funcGetAllMailboxFromExchange)
         {
-            var result = new List<IMailboxDataSync>(Mailboxes.Count);
-            foreach (var mailbox in Mailboxes)
+
+            if (IsAllMailbox)
             {
-                result.Add(new MailboxDataSyncBase() { MailAddress = mailbox });
+                return funcGetAllMailboxFromExchange(null);
             }
-            return result;
+
+            return funcGetAllMailboxFromExchange(Mailboxes);
         }
 
-        public Task<ICollection<IMailboxDataSync>> GetAllMailboxesAsync()
+        public Task<ICollection<IMailboxDataSync>> GetAllMailboxesAsync(Func<IEnumerable<string>, Task<ICollection<IMailboxDataSync>>> funcGetAllMailboxFromExchange)
         {
             throw new NotImplementedException();
         }

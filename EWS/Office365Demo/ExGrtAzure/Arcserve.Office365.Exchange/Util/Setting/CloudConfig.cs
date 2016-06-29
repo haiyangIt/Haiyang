@@ -478,6 +478,38 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             {
             }
         }
+
+        public virtual int BatchLoadItemsCountForRestore { get; set; }
+        public virtual string SqlServerVersion
+        {
+            get
+            {
+                string result = "2012";
+                var config = CloudConfigurationManager.GetSetting("SqlServerVersion");
+                if (string.IsNullOrEmpty(config))
+                    return result;
+                return config;
+            }
+            set
+            {
+            }
+        }
+
+        public virtual string DbType
+        {
+            get
+            {
+                string result = "SqLite";
+                var config = CloudConfigurationManager.GetSetting("DbType");
+                if (string.IsNullOrEmpty(config))
+                    return result;
+                return config;
+            }
+            set
+            {
+            }
+        }
+        
     }
 
     public class CloudConfigCache : CloudConfig
@@ -550,8 +582,17 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             MaxDegreeOfParallelismForFolderChanges = base.MaxDegreeOfParallelismForFolderChanges;
             MaxDegreeOfParallelismForFolder = base.MaxDegreeOfParallelismForFolder;
             MaxDegreeOfParallelismForMailbox = base.MaxDegreeOfParallelismForMailbox;
+            SqlServerVersion = base.SqlServerVersion;
+            DbType = base.DbType;
         }
-
+        public override string DbType
+        {
+            get; set;
+        }
+        public override string SqlServerVersion
+        {
+            get; set;
+        }
         public override int MaxDegreeOfParallelismForFolder
         {
             get; set;

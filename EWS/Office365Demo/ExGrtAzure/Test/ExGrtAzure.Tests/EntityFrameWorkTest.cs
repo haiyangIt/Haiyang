@@ -214,7 +214,7 @@ namespace ExGrtAzure.Tests
 
         private void CreateMdfFile(string fileName, bool isInitCatalog, string catalogName)
         {
-            using (CatalogSyncDbContext context = new CatalogSyncDbContext(fileName))
+            using (CatalogDbContextBase context = CatalogDbContextBase.NewCatalogContext(fileName))
             {
                 MailboxSyncModel model = new MailboxSyncModel()
                 {
@@ -234,7 +234,7 @@ namespace ExGrtAzure.Tests
 
         private void AsscessMdfFile(string fileName, bool isInitCatalog, string catalogName)
         {
-            using (CatalogSyncDbContext context = new CatalogSyncDbContext(fileName))
+            using (CatalogDbContextBase context = CatalogDbContextBase.NewCatalogContext(fileName))
             {
                 var mailbox = context.Mailboxes;
                 foreach (var m in mailbox)
@@ -247,7 +247,7 @@ namespace ExGrtAzure.Tests
 
         private void DeleteMdfFile(string fileName, string catalogName)
         {
-            using (CatalogSyncDbContext context = new CatalogSyncDbContext(fileName))
+            using (CatalogDbContextBase context = CatalogDbContextBase.NewCatalogContext(fileName))
             {
                 var mailbox = context.Mailboxes.ToList();
                 context.Mailboxes.Remove(mailbox[0]);
@@ -266,31 +266,33 @@ namespace ExGrtAzure.Tests
                 Directory.CreateDirectory(catalogWithInitCatalog);
             }
             var file = Path.Combine(catalogWithInitCatalog, string.Format("{0}.mdf", DateTime.Now.ToString("yyyyMMddHHmmss")));
-            CatalogSyncDbContext context = new CatalogSyncDbContext(file);
+            using (CatalogDbContextBase context = CatalogDbContextBase.NewCatalogContext(file))
+            {
 
-            Parallel.For(0, 2, (index) =>
-             {
-                 Thread.Sleep(index * 1000);
-
-                 try
+                Parallel.For(0, 2, (index) =>
                  {
-                     MailboxSyncModel model = new MailboxSyncModel()
+                     Thread.Sleep(index * 1000);
+
+                     try
                      {
-                         Id = DateTime.Now.ToString("yyyyMMddHHmmss"),
-                         DisplayName = "test",
-                         MailAddress = string.Format("test{0}@arcserve.com", DateTime.Now.ToString("yyyyMMddHHmmss")),
-                         SyncStatus = string.Empty,
-                         Name = "test"
+                         MailboxSyncModel model = new MailboxSyncModel()
+                         {
+                             Id = DateTime.Now.ToString("yyyyMMddHHmmss"),
+                             DisplayName = "test",
+                             MailAddress = string.Format("test{0}@arcserve.com", DateTime.Now.ToString("yyyyMMddHHmmss")),
+                             SyncStatus = string.Empty,
+                             Name = "test"
 
-                     };
-                     context.Mailboxes.Add(model);
-                     context.SaveChanges();
-                 }
-                 catch(Exception e)
-                 {
+                         };
+                         context.Mailboxes.Add(model);
+                         context.SaveChanges();
+                     }
+                     catch (Exception e)
+                     {
 
-                 }
-             });
+                     }
+                 });
+            }
             
         }
 

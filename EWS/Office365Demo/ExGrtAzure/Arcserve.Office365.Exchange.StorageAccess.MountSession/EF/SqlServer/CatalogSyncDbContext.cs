@@ -1,5 +1,6 @@
 ﻿using Arcserve.Office365.Exchange.Data;
 using Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data;
+using Arcserve.Office365.Exchange.Util.Setting;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -10,10 +11,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
+namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.SqlServer
 {
     [DbConfigurationType(typeof(CustomApplicationDbConfiguration))]
-    public class CatalogSyncDbContext : DbContext
+    internal class CatalogSyncDbContext : CatalogDbContextBase
     {
         public CatalogSyncDbContext(string file) : base(GetConnectionString(file, false, string.Empty))
         {
@@ -39,10 +40,10 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
             if (initCatalog)
                 sqlBuilder.InitialCatalog = initCatalogName;
 
-            sqlBuilder.DataSource = @"(LocalDb)\MSSQLLocalDB";
+            sqlBuilder.SetDataSource();
             sqlBuilder.AttachDBFilename = filePath;
             sqlBuilder.IntegratedSecurity = true;
-
+            Log.LogFactory.LogInstance.WriteLog(Log.LogLevel.DEBUG, sqlBuilder.ToString());
             return sqlBuilder.ToString();
         }
 
@@ -52,10 +53,10 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
             SqlConnectionStringBuilder sqlBuilder = new SqlConnectionStringBuilder();
             //sqlBuilder.InitialCatalog = initCatalog;
 
-            sqlBuilder.DataSource = @"(LocalDb)\MSSQLLocalDB";
+            sqlBuilder.SetDataSource();
             sqlBuilder.AttachDBFilename = filePath;
             sqlBuilder.IntegratedSecurity = true;
-
+            Log.LogFactory.LogInstance.WriteLog(Log.LogLevel.DEBUG, sqlBuilder.ToString());
             return sqlBuilder.ToString();
         }
 
@@ -65,10 +66,10 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
             SqlConnectionStringBuilder sqlBuilder = new SqlConnectionStringBuilder();
             sqlBuilder.InitialCatalog = initCatalog;
 
-            sqlBuilder.DataSource = @"(LocalDb)\MSSQLLocalDB";
+            sqlBuilder.SetDataSource();
             sqlBuilder.AttachDBFilename = filePath;
             sqlBuilder.IntegratedSecurity = true;
-
+            Log.LogFactory.LogInstance.WriteLog(Log.LogLevel.DEBUG, sqlBuilder.ToString());
             return sqlBuilder.ToString();
         }
 
@@ -78,10 +79,10 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
             SqlConnectionStringBuilder sqlBuilder = new SqlConnectionStringBuilder();
             sqlBuilder.InitialCatalog = Path.GetFileNameWithoutExtension(filePath);
 
-            sqlBuilder.DataSource = @"(LocalDb)\MSSQLLocalDB";
+            sqlBuilder.SetDataSource();
             sqlBuilder.AttachDBFilename = filePath;
             sqlBuilder.IntegratedSecurity = true;
-
+            Log.LogFactory.LogInstance.WriteLog(Log.LogLevel.DEBUG, sqlBuilder.ToString());
             return sqlBuilder.ToString();
         }
 
@@ -92,13 +93,23 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
             (property, attributes) => attributes.Single()));
             base.OnModelCreating(modelBuilder);
         }
+        
+    }
 
-        public DbSet<MailboxSyncModel> Mailboxes { get; set; }
-        public DbSet<FolderSyncModel> Folders { get; set; }
-        public DbSet<ItemSyncModel> Items { get; set; }
-
-        //public DbSet<MailboxSyncModel> UpdateMailboxes { get; set; }
-        //public DbSet<FolderSyncModel> UpdateFolders { get; set; }
-        //public DbSet<ItemSyncModel> UpdateItems { get; set; }
+    public static class SqlConnectStringBuilderEx
+    {
+        public static void SetDataSource(this SqlConnectionStringBuilder sb)
+        {
+            if (CloudConfig.Instance.SqlServerVersion == "2012")
+            {
+                sb.DataSource = @"(LocalDb)\v11.0";
+            }
+            else if (CloudConfig.Instance.SqlServerVersion == "2014")
+            {
+                sb.DataSource = @"(LocalDb)\MSSQLLocalDB";
+            }
+            else
+                throw new NotSupportedException("Not support the sql server version");
+        }
     }
 }

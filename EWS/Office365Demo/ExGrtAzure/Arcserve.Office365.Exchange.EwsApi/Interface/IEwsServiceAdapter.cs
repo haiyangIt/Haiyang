@@ -25,6 +25,7 @@ namespace Arcserve.Office365.Exchange.EwsApi.Interface
 
         void LoadFolderProperties(Folder folder);
         System.Threading.Tasks.Task LoadFolderPropertiesAsync(Folder folder);
+        Folder GetAndCreateIfFolderNotExist(IFolderDataSync folder, Folder parentFolder);
         ChangeCollection<ItemChange> SyncItems(FolderId folderId, string lastSyncStatus);
         Task<ChangeCollection<ItemChange>> SyncItemsAsync(FolderId folderId, string lastSyncStatus);
         int ExportItems(IEnumerable<IItemDataSync> items, IExportItemsOper exportItemOper);

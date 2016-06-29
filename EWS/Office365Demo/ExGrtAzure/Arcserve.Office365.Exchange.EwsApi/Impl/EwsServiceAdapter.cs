@@ -177,5 +177,10 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
         {
             _ewsOperator.ImportItem(folder.UniqueId, dataStream);
         }
+
+        public Folder GetAndCreateIfFolderNotExist(IFolderDataSync folder, Folder parentFolder)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

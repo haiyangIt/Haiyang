@@ -10,9 +10,9 @@ using Arcserve.Office365.Exchange.Data.Increment;
 using System.Threading;
 using Arcserve.Office365.Exchange.Data.Mail;
 
-namespace Arcserve.Office365.Exchange.StorageAccess.MountSession
+namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.Backup
 {
-    public class DataFromClient : IDataFromClient<IJobProgress>
+    public class DataFromClient : IDataFromBackup<IJobProgress>
     {
         public CancellationToken CancelToken
         {
@@ -29,19 +29,12 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession
             get; set;
         }
 
-        public ICollection<IMailboxDataSync> GetAllMailboxes()
+        public ICollection<IMailboxDataSync> GetAllMailboxFromPlanAndExchange(Func<IEnumerable<string>, ICollection<IMailboxDataSync>> funcGetAllMailboxFromExchange)
         {
-            return new List<IMailboxDataSync>(1)
-            {
-                new MailboxDataSyncBase("Haiyang.Ling", "haiyang.ling@arcserve.com")
-                {
-                    Id = "ce7b5ec2-8732-4b85-a1bd-3196a2284bf2",
-                    Name = "Haiyang.Ling"
-                }
-            };
+            return funcGetAllMailboxFromExchange(new List<string>() { "haiyang.ling@arcserve.com" });
         }
 
-        public Task<ICollection<IMailboxDataSync>> GetAllMailboxesAsync()
+        public Task<ICollection<IMailboxDataSync>> GetAllMailboxesAsync(Func<IEnumerable<string>, Task<ICollection<IMailboxDataSync>>> funcGetAllMailboxFromExchange)
         {
             throw new NotImplementedException();
         }

@@ -1,9 +1,11 @@
-﻿using Arcserve.Office365.Exchange.Data.Increment;
+﻿using Arcserve.Office365.Exchange.Data;
+using Arcserve.Office365.Exchange.Data.Increment;
 using Arcserve.Office365.Exchange.Data.Mail;
 using Arcserve.Office365.Exchange.DataProtect.Impl;
 using Arcserve.Office365.Exchange.EwsApi.Interface;
 using Arcserve.Office365.Exchange.Manager;
 using Arcserve.Office365.Exchange.StorageAccess.MountSession;
+using Arcserve.Office365.Exchange.StorageAccess.MountSession.Backup;
 using Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data;
 using Arcserve.Office365.Exchange.Thread;
 using Arcserve.Office365.Exchange.Util.Setting;
@@ -88,7 +90,7 @@ namespace ExGrtAzure.Tests.SyncBackup
             try
             {
                 var newCatalogFolder = Path.Combine(workFolder, IncrementBackupFolder);
-                var oldCatalogFileName = CatalogAccess.GetCatalogFileName("arcserve");
+                var oldCatalogFileName = "arcserve".GetCatalogDatabaseFileName(CloudConfig.Instance.DbType.GetDatabaseType());
                 var oldCatalogFolder = Path.Combine(workFolder, FullBackupFolder);
                 var oldCatalogFilePath = Path.Combine(oldCatalogFolder, oldCatalogFileName);
                 using (var catalogAccess = new CatalogAccess(newCatalogFolder, oldCatalogFolder, newCatalogFolder, "arcserve"))

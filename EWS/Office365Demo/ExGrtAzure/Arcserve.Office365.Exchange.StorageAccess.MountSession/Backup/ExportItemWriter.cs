@@ -8,7 +8,7 @@ using Arcserve.Office365.Exchange.Util.Setting;
 using Arcserve.Office365.Exchange.Log;
 using Arcserve.Office365.Exchange.EwsApi.Interface;
 
-namespace Arcserve.Office365.Exchange.StorageAccess.MountSession
+namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.Backup
 {
     public class ExportItemWriter : IExportItemsOper, IDisposable
     {

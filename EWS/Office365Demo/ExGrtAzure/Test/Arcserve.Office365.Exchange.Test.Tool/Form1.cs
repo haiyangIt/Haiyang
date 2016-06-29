@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -202,6 +203,26 @@ namespace Arcserve.Office365.Exchange.Test.Tool
             catch (Exception ex)
             {
                 MessageBox.Show(string.Format("{0}\r\n{1}", ex.Message, ex.StackTrace));
+            }
+        }
+
+        private void btnTestEntitiyFrameWork_Click(object sender, EventArgs e)
+        {
+            var arg = string.Format("-JobType:{0}",
+                "Test");
+            ProcessStartInfo startInfo = new ProcessStartInfo("Arcserve.Office365.Exchange.DataProtect.Tool.exe", arg);
+            startInfo.CreateNoWindow = true;
+            startInfo.UseShellExecute = false;
+            startInfo.RedirectStandardOutput = true;
+            using (var p = Process.Start(startInfo))
+            {
+                using (StreamReader reader = p.StandardOutput)
+                {
+                    var str = reader.ReadToEnd();
+                    Console.WriteLine(str);
+                    Debug.WriteLine(str);
+                    txtResult.Text = str;
+                }
             }
         }
     }

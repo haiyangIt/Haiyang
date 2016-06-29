@@ -18,7 +18,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.AsyncBackup
         public Data.Increment.FolderTree FolderTree { get; set; }
         public ICatalogAccess<IJobProgress> CatalogAccess { get; set; }
         public IEwsServiceAdapter<IJobProgress> EwsServiceAdapter { get; set; }
-        public IDataFromClient<IJobProgress> DataFromClient { get; set; }
+        public IDataFromBackup<IJobProgress> DataFromClient { get; set; }
         public IDataConvert DataConvert
         {
             get; set;

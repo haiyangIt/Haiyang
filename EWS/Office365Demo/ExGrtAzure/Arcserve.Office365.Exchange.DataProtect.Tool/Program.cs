@@ -5,6 +5,7 @@ using Arcserve.Office365.Exchange.Tool.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,6 +16,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Tool
         static void Main(string[] args)
         {
             SqlServerTypes.Utilities.LoadNativeAssemblies(AppDomain.CurrentDomain.BaseDirectory);
+            System.Threading.Thread.Sleep(15000);
 
             if (args.Length == 1 && args[0] == "Help")
             {
@@ -22,6 +24,8 @@ namespace Arcserve.Office365.Exchange.DataProtect.Tool
                 return;
             }
 
+            bool isRunAsAdministrator = IsAdministrator();
+            LogFactory.LogInstance.WriteLog(LogLevel.DEBUG, isRunAsAdministrator ? "Is Administrator" : "Is Not Administrator");
             //Console.Out.WriteLine(AppDomain.CurrentDomain.SetupInformation.ConfigurationFile);
             LogFactory.LogInstance.WriteLog(LogLevel.DEBUG, "config file", "file path {0}", AppDomain.CurrentDomain.SetupInformation.ConfigurationFile);
             foreach (var arg in args)
@@ -30,7 +34,6 @@ namespace Arcserve.Office365.Exchange.DataProtect.Tool
                     LogFactory.LogInstance.WriteLog(LogLevel.DEBUG, "args", "arg {0}", arg);
             }
 
-            System.Threading.Thread.Sleep(15000);
             //return;
             ResultBase result = null;
             try
@@ -48,6 +51,13 @@ namespace Arcserve.Office365.Exchange.DataProtect.Tool
 
             DisposeManager.DisposeInstance();
 
+        }
+
+        public static bool IsAdministrator()
+        {
+            var identity = WindowsIdentity.GetCurrent();
+            var principal = new WindowsPrincipal(identity);
+            return principal.IsInRole(WindowsBuiltInRole.Administrator);
         }
     }
 }

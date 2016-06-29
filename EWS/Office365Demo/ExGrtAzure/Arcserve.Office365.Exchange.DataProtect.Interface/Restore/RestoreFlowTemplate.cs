@@ -1,5 +1,6 @@
 ﻿using Arcserve.Office365.Exchange.Data.Increment;
 using Arcserve.Office365.Exchange.Thread;
+using Arcserve.Office365.Exchange.Util.Setting;
 using Microsoft.Exchange.WebServices.Data;
 using System;
 using System.Collections.Generic;
@@ -38,27 +39,17 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Restore
         {
             try
             {
-                var mailboxesInPlan = GetAllMailboxFromPlan();
-                var mailboxesInExchange = GetAllMailboxFromExchange(mailboxesInPlan);
-                var validMailboxes = GetValidMailboxes(mailboxesInPlan, mailboxesInExchange);
-                
-                foreach(var noexistMailbox in validMailboxes[ItemUADStatus.Delete])
-                {
-                    DealNotExistMailbox(noexistMailbox);
-                }
-
-                ForEachMailbox(validMailboxes[ItemUADStatus.None], RestoreMailbox);
+                var mailboxesInPlan = GetAllMailboxFromPlan(GetAllMailboxFromCatalog);
+                ForEachMailbox(mailboxesInPlan, RestoreMailbox);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
 
             }
         }
 
-        protected abstract IEnumerable<IMailboxDataSync> GetAllMailboxFromPlan();
-        protected abstract IEnumerable<IMailboxDataSync> GetAllMailboxFromExchange(IEnumerable<IMailboxDataSync> selectedMailboxes);
-        protected abstract IDictionary<ItemUADStatus, ICollection<IMailboxDataSync>> GetValidMailboxes(IEnumerable<IMailboxDataSync> selectedMailboxes, IEnumerable<IMailboxDataSync> mailboxesInExchange);
-        protected abstract void DealNotExistMailbox(IMailboxDataSync notExistMailbox);
+        protected abstract IEnumerable<IMailboxDataSync> GetAllMailboxFromCatalog();
+        protected abstract IEnumerable<IMailboxDataSync> GetAllMailboxFromPlan(Func<IEnumerable<IMailboxDataSync>> funcGetAllMailboxFromCatalog);
         protected abstract void ForEachMailbox(IEnumerable<IMailboxDataSync> mailboxes, Action<IMailboxDataSync> ActionDealMailbox);
         protected virtual void RestoreMailbox(IMailboxDataSync mailbox)
         {
@@ -87,30 +78,34 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Restore
             get; set;
         }
 
+        public IRestoreToPosition<IJobProgress> RestoreToPosition { get; set; }
+
         public void InitTaskSyncContext(ITaskSyncContext<IJobProgress> mainContext)
         {
             this.CloneSyncContext(mainContext);
         }
 
-        internal IMailboxDataSync MailboxInfo { get; set; }
+        internal protected IMailboxDataSync MailboxInfo { get; set; }
         public void RestoreMailbox()
         {
+            RestoreToPosition = NewRestoreToPosition();
             ConnectExchangeService();
             var folderTree = new FolderTree();
             folderTree.Deserialize(MailboxInfo.FolderTree);
-            var foldersInPlan = GetFoldersFromPlan(MailboxInfo);
-            foldersInPlan = LoadDetailInformationFromCatalog(foldersInPlan);
-            ForEachFolder(foldersInPlan, DealFolder);
+            var folders = GetFoldersFromPlan(MailboxInfo, GetFoldersFromCatalog);
+            ForEachFolder(folders, folderTree, DealFolder);
         }
 
+        protected abstract IRestoreToPosition<IJobProgress> NewRestoreToPosition();
         protected abstract void ConnectExchangeService();
-        protected abstract IEnumerable<IFolderDataSync> GetFoldersFromPlan(IMailboxDataSync mailboxInfo);
-        protected abstract IEnumerable<IFolderDataSync> LoadDetailInformationFromCatalog(IEnumerable<IFolderDataSync> foldersInPlan);
-        protected abstract void ForEachFolder(IEnumerable<IFolderDataSync> folders, Action<IFolderDataSync, FolderTree> actionDoFolder);
+        protected abstract IEnumerable<IFolderDataSync> GetFoldersFromPlan(IMailboxDataSync mailboxInfo, Func<IMailboxDataSync, IEnumerable<IFolderDataSync>> funcGetFolderFromCatalog);
+        protected abstract IEnumerable<IFolderDataSync> GetFoldersFromCatalog(IMailboxDataSync mailboxInfo);
+        protected abstract void ForEachFolder(IEnumerable<IFolderDataSync> folders, FolderTree folderTree, Action<IFolderDataSync, FolderTree> actionDoFolder);
         protected abstract RestoreFolderFlowTemplate NewRestoreFolderTemplate();
         protected virtual void DealFolder(IFolderDataSync folder, FolderTree folderTree)
         {
             var folderFlow = NewRestoreFolderTemplate();
+            folderFlow.RestoreToPosition = RestoreToPosition;
             folderFlow.Folder = folder;
             folderFlow.FolderTree = folderTree;
             folderFlow.RestoreFolder();
@@ -133,6 +128,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Restore
         {
             get; set;
         }
+        internal protected IRestoreToPosition<IJobProgress> RestoreToPosition { get; set; }
 
         public void InitTaskSyncContext(ITaskSyncContext<IJobProgress> mainContext)
         {
@@ -146,33 +142,85 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Restore
         {
             var folderHierarchy = FolderTree.GetParentsData(Folder);
             var folder = GetAndCreateIfFolderNotExistToExchange(folderHierarchy);
-            var items = GetFolderItemsFromPlan(Folder);
-            items = LoadDetailsFromCatalog(items);
-            ForEachItems(items, folder, DoItem);
+            ItemList itemList = null;
+            int offset = 0;
+            int pageCount = CloudConfig.Instance.BatchLoadItemsCountForRestore;
+            var restoreItem = NewRestoreItemFlow();
+            restoreItem.RestoreToPosition = RestoreToPosition;
+            restoreItem.Folder = Folder;
+            restoreItem.FolderForRestore = folder;
+            restoreItem.Init();
+            do
+            {
+                itemList = GetFolderItemsFromPlanAndCatalog(Folder, offset, pageCount);
+                offset = itemList.NextOffset;
+                restoreItem.AddItems(itemList.Items);
+            } while (itemList.MoreAvailable);
+            restoreItem.AddComplete();
         }
 
-        protected abstract Folder GetAndCreateIfFolderNotExistToExchange(IEnumerable<IFolderDataSync> folderHierarchy);
-        protected abstract IEnumerable<IItemDataSync> GetFolderItemsFromPlan(IFolderDataSync folder);
-        protected abstract IEnumerable<IItemDataSync> LoadDetailsFromCatalog(IEnumerable<IItemDataSync> items);
-        protected abstract void ForEachItems(IEnumerable<IItemDataSync> items, Folder folder, Action<IItemDataSync, Folder> actionDoItem);
-        protected abstract RestoreItemFlowTemplate NewRestoreItemFlow();
-        protected virtual void DoItem(IItemDataSync item, Folder folder)
-        {
-            var restoreItem = NewRestoreItemFlow();
-            restoreItem.Folder = Folder;
-            restoreItem.FolderInExchange = folder;
-            restoreItem.RestoreItem(item);
-        }
+        protected abstract IRestoreFolder GetAndCreateIfFolderNotExistToExchange(IEnumerable<IFolderDataSync> folderHierarchy);
+        protected abstract ItemList GetFolderItemsFromPlanAndCatalog(IFolderDataSync folder, int offset, int pageCount);
+        protected abstract RestoreItemsFlowTemplate NewRestoreItemFlow();
     }
 
-    public class RestoreItemFlowTemplate
+    public class ItemList
     {
-        internal Folder FolderInExchange { get; set; }
-        internal IFolderDataSync Folder { get; set; }
+        public IEnumerable<IItemDataSync> Items { get; set; }
+        public bool MoreAvailable { get; set; }
+        public int NextOffset { get; set; }
+    }
 
-        public void RestoreItem(IItemDataSync item)
+    public abstract class RestoreItemsFlowTemplate : ITaskSyncContext<IJobProgress>
+    {
+        public IJobProgress Progress
         {
+            get; set;
+        }
 
+        public CancellationToken CancelToken
+        {
+            get; set;
+        }
+
+        public TaskScheduler Scheduler
+        {
+            get; set;
+        }
+        public IRestoreToPosition<IJobProgress> RestoreToPosition { get; set; }
+        public void InitTaskSyncContext(ITaskSyncContext<IJobProgress> mainContext)
+        {
+            this.CloneSyncContext(mainContext);
+        }
+        internal protected IRestoreFolder FolderForRestore { get; set; }
+        internal protected IFolderDataSync Folder { get; set; }
+        
+        /// <summary>
+        /// Before retore items in folder, this method will initialize some values.
+        /// </summary>
+        public abstract void Init();
+
+        /// <summary>
+        /// used to analysis items, which items is need to restore, and which items not.
+        /// </summary>
+        /// <param name="items"></param>
+        protected abstract void AnalysisItems(IEnumerable<IItemDataSync> items);
+
+        /// <summary>
+        /// batch restore the items who need restore.
+        /// </summary>
+        /// <param name="isForceRestore"></param>
+        protected abstract void RestoreItems(bool isForceRestore);
+
+        public void AddItems(IEnumerable<IItemDataSync> items)
+        {
+            AnalysisItems(items);
+            RestoreItems(false);
+        }
+
+        public void AddComplete()
+        {
+            RestoreItems(true);
         }
     }
 }

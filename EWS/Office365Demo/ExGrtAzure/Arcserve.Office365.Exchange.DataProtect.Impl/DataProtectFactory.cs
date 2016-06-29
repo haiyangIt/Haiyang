@@ -29,7 +29,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl
 
         public BackupFlowTemplate NewBackupInstance(ICatalogAccess<IJobProgress> CatalogAccess,
                                     IEwsServiceAdapter<IJobProgress> EwsServiceAdapter,
-                                    IDataFromClient<IJobProgress> DataFromClient,
+                                    IDataFromBackup<IJobProgress> DataFromClient,
                                     IDataConvert DataConvert, OrganizationAdminInfo adminUserInfo)
         {
             var result = new SyncBackup();

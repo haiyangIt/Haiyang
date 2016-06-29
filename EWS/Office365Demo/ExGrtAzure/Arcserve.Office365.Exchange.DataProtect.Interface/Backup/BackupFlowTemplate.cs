@@ -26,7 +26,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup
         /// <summary>
         /// get all mailbox information from plan/client
         /// </summary>
-        protected abstract Func<ICollection<IMailboxDataSync>> FuncGetAllMailboxFromPlan { get; }
+        protected abstract Func<ICollection<IMailboxDataSync>> FuncGetAllMailboxFromPlanAndExchange { get; }
         /// <summary>
         /// get all mailbox from exchange
         /// </summary>
@@ -39,11 +39,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup
         /// get all mailbox information from last catalog .param:catalogjob.
         /// </summary>
         protected abstract Func<ICatalogJob, IEnumerable<IMailboxDataSync>> FuncGetAllMailboxFromLastCatalog { get; }
-
-        /// <summary>
-        /// get intersection mailbox collection from param1 mailbox from exchange and param2 mailbox from plan
-        /// </summary>
-        protected abstract Func<ICollection<IMailboxDataSync>, ICollection<IMailboxDataSync>, ICollection<IMailboxDataSync>> FuncGetIntersectionMailboxCollection { get; }
+        
 
         protected abstract Func<ICollection<IMailboxDataSync>, IEnumerable<IMailboxDataSync>, IDictionary<ItemUADStatus, ICollection<IMailboxDataSync>>> FuncGetMailboxUAD { get; }
         /// <summary>
@@ -98,13 +94,13 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup
 
                 Progress.Report("Generate catalog {0} Start.", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"));
 
-                var mailboxesInPlan = FuncGetAllMailboxFromPlan();
-                var mailboxesInExchange = FuncGetAllMailboxFromExchange(from m in mailboxesInPlan select m.MailAddress);
+                var mailboxesValid = FuncGetAllMailboxFromPlanAndExchange();
+                
 
                 var catalogJob = FuncGetLatestCatalogJob();
                 var mailboxesInLastCatalog = FuncGetAllMailboxFromLastCatalog(catalogJob);
 
-                var mailboxesValid = FuncGetIntersectionMailboxCollection(mailboxesInExchange, mailboxesInPlan);
+                //var mailboxesValid = FuncGetIntersectionMailboxCollection(mailboxesInExchange, mailboxesInPlan);
                 var mailboxesUAD = FuncGetMailboxUAD(mailboxesValid, mailboxesInLastCatalog);
 
                 DeleteMailboxToCurrentCatalog(mailboxesUAD[ItemUADStatus.Delete]);

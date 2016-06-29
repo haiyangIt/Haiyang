@@ -9,10 +9,10 @@ using Arcserve.Office365.Exchange.Data;
 
 namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup
 {
-    public interface IDataFromClient<ProgressType> : ITaskSyncContext<ProgressType>
+    public interface IDataFromBackup<ProgressType> : ITaskSyncContext<ProgressType>
     {
-        ICollection<IMailboxDataSync> GetAllMailboxes();
-        Task<ICollection<IMailboxDataSync>> GetAllMailboxesAsync();
+        ICollection<IMailboxDataSync> GetAllMailboxFromPlanAndExchange(Func<IEnumerable<string>, ICollection<IMailboxDataSync>> funcGetAllMailboxFromExchange);
+        Task<ICollection<IMailboxDataSync>> GetAllMailboxesAsync(Func<IEnumerable<string>, Task<ICollection<IMailboxDataSync>>> funcGetAllMailboxFromExchange);
         ICatalogJob GetLatestCatalogJob();
         Task<ICatalogJob> GetLatestCatalogJobAsync();
         bool IsFolderInPlan(string uniqueFolderId);

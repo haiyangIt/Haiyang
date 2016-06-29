@@ -23,6 +23,7 @@ using Arcserve.Office365.Exchange.Util.Setting;
 using Arcserve.Office365.Exchange.DataProtect.Impl;
 using Arcserve.Office365.Exchange.EwsApi.Interface;
 using System.Text.RegularExpressions;
+using Arcserve.Office365.Exchange.StorageAccess.MountSession.Backup;
 
 namespace ExGrtAzure.Tests
 {
@@ -222,19 +223,12 @@ namespace ExGrtAzure.Tests
 
 
 
-        public IDataFromClient<IJobProgress> GetDataFromClient()
+        public IDataFromBackup<IJobProgress> GetDataFromClient()
         {
-            var result = new StubIDataFromClient<IJobProgress>();
-            result.GetAllMailboxes = () =>
+            var result = new StubIDataFromBackup<IJobProgress>();
+            result.GetAllMailboxFromPlanAndExchangeFuncOfIEnumerableOfStringICollectionOfIMailboxDataSync = (func) =>
             {
-                return new List<IMailboxDataSync>(1)
-                {
-                    new MailboxDataSyncBase("Haiyang.Ling", "haiyang.ling@arcserve.com")
-                    {
-                        Id = "ce7b5ec2-8732-4b85-a1bd-3196a2284bf2",
-                        Name = "Haiyang.Ling"
-                    }
-                };
+                return func(new List<string>(1) { "haiyang.ling@arcserve.com" });
             };
 
             result.IsFolderInPlanString = (folderId) =>
@@ -314,7 +308,7 @@ namespace ExGrtAzure.Tests
         public string CatalogFilePath;
     }
 
-    public class DataFromClient : IDataFromClient<IJobProgress>
+    public class DataFromClient : IDataFromBackup<IJobProgress>
     {
         protected DataFromClient() { }
         public DataFromClient(int? folderCount, int? itemCount)
@@ -339,19 +333,12 @@ namespace ExGrtAzure.Tests
             get; set;
         }
 
-        public virtual ICollection<IMailboxDataSync> GetAllMailboxes()
+        public virtual ICollection<IMailboxDataSync> GetAllMailboxFromPlanAndExchange(Func<IEnumerable<string>, ICollection<IMailboxDataSync>> funcGetAllMailboxFromExchange)
         {
-            return new List<IMailboxDataSync>(1)
-            {
-                new MailboxDataSyncBase("Haiyang.Ling", "haiyang.ling@arcserve.com")
-                {
-                    Id = "ce7b5ec2-8732-4b85-a1bd-3196a2284bf2",
-                    Name = "Haiyang.Ling"
-                }
-            };
+            return funcGetAllMailboxFromExchange(new List<string>() { "haiyang.ling@arcserve.com" });
         }
 
-        public System.Threading.Tasks.Task<ICollection<IMailboxDataSync>> GetAllMailboxesAsync()
+        public System.Threading.Tasks.Task<ICollection<IMailboxDataSync>> GetAllMailboxesAsync(Func<IEnumerable<string>, Task<ICollection<IMailboxDataSync>>> funcGetAllMailboxFromExchange)
         {
             throw new NotImplementedException();
         }
@@ -485,19 +472,14 @@ namespace ExGrtAzure.Tests
 
     public class DataFromClientWithJacky : DataFromClient
     {
-        public override ICollection<IMailboxDataSync> GetAllMailboxes()
+        public override ICollection<IMailboxDataSync> GetAllMailboxFromPlanAndExchange(Func<IEnumerable<string>, ICollection<IMailboxDataSync>> funcGetAllMailboxFromExchange)
         {
             var mailboxes = new List<string>(2)
             {
                 "ArcserveJacky@ArcserveJacky.onmicrosoft.com",
                 "Jacky.Mao@ArcserveJacky.onmicrosoft.com"
             };
-            var result = new List<IMailboxDataSync>(mailboxes.Count);
-            foreach (var mailbox in mailboxes)
-            {
-                result.Add(new MailboxDataSyncBase() { MailAddress = mailbox });
-            }
-            return result;
+            return funcGetAllMailboxFromExchange(mailboxes);
         }
     }
 }

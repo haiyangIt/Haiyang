@@ -77,7 +77,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup
             get; set;
         }
 
-        public IDataFromClient<IJobProgress> DataFromClient
+        public IDataFromBackup<IJobProgress> DataFromClient
         {
             get; set;
         }

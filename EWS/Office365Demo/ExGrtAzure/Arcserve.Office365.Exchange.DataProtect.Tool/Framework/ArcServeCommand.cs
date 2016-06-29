@@ -1,4 +1,5 @@
-﻿using Arcserve.Office365.Exchange.DataProtect.Tool.Resource;
+﻿using Arcserve.Office365.Exchange.DataProtect.Tool.Command;
+using Arcserve.Office365.Exchange.DataProtect.Tool.Resource;
 using Arcserve.Office365.Exchange.DataProtect.Tool.Result;
 using Arcserve.Office365.Exchange.Log;
 using System;
@@ -98,7 +99,8 @@ namespace Arcserve.Office365.Exchange.Tool.Framework
         private static Dictionary<string, Func<CommandArgs, ArcServeCommand>> AllCommand = new Dictionary<string, Func<CommandArgs, ArcServeCommand>>
         {
             {ExchangeBackupCommand.CommandName, (args) => {return new ExchangeBackupCommand(args); } },
-             {GetAllMailboxCommand.CommandName, (args) => {return new GetAllMailboxCommand(args); } }
+             {GetAllMailboxCommand.CommandName, (args) => {return new GetAllMailboxCommand(args); } },
+             {TestCommand.CommandName, (args) => {return new TestCommand(args); } }
         };
 
         public ArcServeCommand GetArcserveCommand()

@@ -12,7 +12,7 @@ using Arcserve.Office365.Exchange.StorageAccess.MountSession.EF;
 using Arcserve.Office365.Exchange.Util.Setting;
 using Arcserve.Office365.Exchange.Util;
 
-namespace Arcserve.Office365.Exchange.StorageAccess.MountSession
+namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.Backup
 {
     public class CatalogAccess : ICatalogAccess<IJobProgress>, IDisposable
     {
@@ -40,11 +40,6 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession
                 _catalogDbAccess = new CatalogDbAccess(newCatalogFolder, lastCatalogFolder, organizationName);
             _catalogDbAccess.CloneSyncContext(this);
             _exportItemWriter = new ExportItemWriter(storageFolder);
-        }
-
-        public static string GetCatalogFileName(string organizationName)
-        {
-            return string.Format("Catalog_{0}.mdf", MD5Utility.ConvertToMd5(organizationName));
         }
 
         public CancellationToken CancelToken

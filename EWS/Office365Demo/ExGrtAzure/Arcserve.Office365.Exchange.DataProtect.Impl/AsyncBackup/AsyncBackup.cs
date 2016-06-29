@@ -21,7 +21,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.AsyncBackup
         {
             try
             {
-                var mailboxesInPlanTask = GetAllMailboxFromPlan();
+                var mailboxesInPlanTask = GetAllMailboxFromPlan(GetAllMailboxFromExchange);
                 var catalogJobTask = GetLatestCatalogJob();
 
                 await Task.WhenAll(mailboxesInPlanTask, catalogJobTask);
@@ -85,7 +85,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.AsyncBackup
         public string Organization { get; private set; }
         public ICatalogAccess<IJobProgress> CatalogAccess { get; set; }
         public IEwsServiceAdapter<IJobProgress> EwsServiceAdapter { get; set; }
-        public IDataFromClient<IJobProgress> DataFromClient { get; set; }
+        public IDataFromBackup<IJobProgress> DataFromClient { get; set; }
         public DateTime JobStartTime { get; private set; }
 
         public IDataConvert DataConvert
@@ -97,9 +97,9 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.AsyncBackup
         {
         }
 
-        public async Task<ICollection<IMailboxDataSync>> GetAllMailboxFromPlan()
+        public async Task<ICollection<IMailboxDataSync>> GetAllMailboxFromPlan(Func<IEnumerable<string>, Task<ICollection<IMailboxDataSync>>> funcGetAllMailboxFromExchange)
         {
-            return await DataFromClient.GetAllMailboxesAsync();
+            return await DataFromClient.GetAllMailboxesAsync(funcGetAllMailboxFromExchange);
         }
 
         public async Task<ICollection<IMailboxDataSync>> GetAllMailboxFromExchange(IEnumerable<string> mailboxAddresses)
