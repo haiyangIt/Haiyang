@@ -624,6 +624,8 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup
 
         protected virtual void BatchAddedItems(ICollection<EwsWSData.ItemChange> batchItems, ItemClass itemClass)
         {
+            if (batchItems == null || batchItems.Count == 0)
+                return;
             var items = from item in batchItems select item.Item;
 
             var pCounter = PerformanceCounter.Start();
@@ -641,11 +643,15 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup
         }
         protected virtual void BatchDeleteItems(ICollection<EwsWSData.ItemChange> batchItems)
         {
+            if (batchItems == null || batchItems.Count == 0)
+                return;
             var itemIds = from item in batchItems select item.ItemId.UniqueId;
             ActionDeleteItemsToCatalog(itemIds);
         }
         protected virtual void BatchUpdate(ICollection<EwsWSData.ItemChange> batchItems, ItemClass itemClass)
         {
+            if (batchItems == null || batchItems.Count == 0)
+                return;
             var items = from item in batchItems select item.Item;
             var pCounter = PerformanceCounter.Start();
             Progress.Report("      Items update {0} Start.", batchItems.Count());
@@ -692,6 +698,8 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup
 
         protected virtual void BatchWriteItemToStorage(IEnumerable<IItemDataSync> items)
         {
+            if (items == null)
+                return;
             var pCounter = PerformanceCounter.Start();
             foreach (var item in items)
             {

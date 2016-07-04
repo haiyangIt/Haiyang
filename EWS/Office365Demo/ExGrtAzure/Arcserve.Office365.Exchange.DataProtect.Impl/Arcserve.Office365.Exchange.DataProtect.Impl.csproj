@@ -95,6 +95,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\H\ARCAssemblyInfo.cs" />
     <Compile Include="AsyncBackup\AsyncBackup.cs" />
     <Compile Include="AsyncBackup\AsyncBackupFolder.cs" />
     <Compile Include="AsyncBackup\AsyncBackupItem.cs" />
@@ -105,6 +106,10 @@
     <Compile Include="Backup\SyncBackupMailbox.cs" />
     <Compile Include="DataProtectFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Restore\SyncRestore.cs" />
+    <Compile Include="Restore\SyncRestoreFolder.cs" />
+    <Compile Include="Restore\SyncRestoreMailbox.cs" />
+    <Compile Include="Restore\SyncRetoreItems.cs" />
     <Compile Include="TaskSyncContextBase.cs" />
   </ItemGroup>
   <ItemGroup>

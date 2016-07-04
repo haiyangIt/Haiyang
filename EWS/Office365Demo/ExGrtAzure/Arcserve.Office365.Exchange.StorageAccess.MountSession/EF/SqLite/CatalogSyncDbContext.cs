@@ -17,8 +17,8 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.SqLite
 
         public static string GetConnectStr(string fileName)
         {
-            fileName = fileName.Replace("\\\\", "file://");
-            fileName = fileName.Replace("\\", "/");
+            //fileName = fileName.Replace("\\\\", "file://");
+            //fileName = fileName.Replace("\\", "/");
             
             SQLiteConnectionStringBuilder builder = new SQLiteConnectionStringBuilder();
             builder.DataSource = fileName;

@@ -147,10 +147,12 @@ namespace Arcserve.Office365.Exchange.Tool
                 var oldCatalogFolder = string.Empty;
                 if (!string.IsNullOrEmpty(lastCatalogFolder))
                 {
-                    Path.Combine(currentCatalogFolder, "Old");
+                    oldCatalogFolder = Path.Combine(currentCatalogFolder, "Old");
                     Directory.CreateDirectory(oldCatalogFolder);
                     lastCatalogFolder.CatalogFileCopy(oldCatalogFolder, CloudConfig.Instance.DbType.GetDatabaseType());
                 }
+
+                LogFactory.LogInstance.WriteLog(LogLevel.DEBUG, string.Format("newCatatlogFolder:{0}, oldCatalogFolder:{1}.", newCatalogFolder, oldCatalogFolder));
 
                 using (var catalogAccess = new CatalogAccess(newCatalogFolder, oldCatalogFolder, WorkFolder.Value, AdminUserName.Value.GetOrganization()))
                 {
@@ -176,7 +178,23 @@ namespace Arcserve.Office365.Exchange.Tool
                 }
 
                 newCatalogFolder.CatalogFileCopy(CurrentCatalogFolder.Value, CloudConfig.Instance.DbType.GetDatabaseType());
-                Directory.Delete(currentCatalogFolder, true);
+
+                int retry = 0;
+                bool isDelete = false;
+                do {
+                    try {
+                        Directory.Delete(currentCatalogFolder, true);
+                        isDelete = true;
+                    }
+                    catch (Exception e)
+                    {
+                        LogFactory.LogInstance.WriteException(LogLevel.DEBUG, "Delete folder error.", e, e.Message);
+                        System.Threading.Thread.Sleep(2000);
+                    }
+                }
+                while (retry++ < 3);
+                if (!isDelete)
+                    LogFactory.LogInstance.WriteLog(LogLevel.DEBUG, string.Format("delete folder {0} fails.", currentCatalogFolder));
             }
             finally
             {

@@ -67,7 +67,7 @@ namespace Arcserve.Office365.Exchange.Data.Mail
                 return ItemClass.Appointment;
 
             else
-                throw new NotSupportedException("Modify code to support this type");
+                throw new NotSupportedException(string.Format("Modify code to support this type:{0}", itemClass));
         }
 
         public static string GetItemSuffix(this ItemClass itemClass)
@@ -77,7 +77,7 @@ namespace Arcserve.Office365.Exchange.Data.Mail
                 return result;
 
             else
-                throw new NotSupportedException("Modify code to support this type");
+                throw new NotSupportedException(string.Format("Modify code to support this type:{0}", itemClass));
         }
 
 
@@ -184,7 +184,7 @@ namespace Arcserve.Office365.Exchange.Data.Mail
                 return result;
 
             else
-                throw new NotSupportedException("Modify code to support this type");
+                throw new NotSupportedException(string.Format("Modify code to support this folder type:{0}", folderClass));
         }
 
         public static string GetFolderClass(this FolderClass folderClass)
@@ -194,7 +194,7 @@ namespace Arcserve.Office365.Exchange.Data.Mail
                 return result;
 
             else
-                throw new NotSupportedException("Modify code to support this type");
+                throw new NotSupportedException(string.Format("Modify code to support this folder type:{0}", folderClass));
 
         }
 
@@ -308,7 +308,7 @@ namespace Arcserve.Office365.Exchange.Data.Mail
                 return itemBase as IMailboxData;
             }
             else
-                throw new NotSupportedException("Type is wrong.");
+                throw new NotSupportedException(string.Format("Type {0} is wrong.", itemBase.GetType().FullName));
         }
 
         class MailClass : IMailboxData

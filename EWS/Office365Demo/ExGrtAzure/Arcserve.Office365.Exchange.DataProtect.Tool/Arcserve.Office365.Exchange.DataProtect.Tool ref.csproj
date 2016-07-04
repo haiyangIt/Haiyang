@@ -125,6 +125,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\H\ARCAssemblyInfo.cs" />
     <Compile Include="Command\ExchangeBackupCommand.cs" />
     <Compile Include="Command\TestCommand.cs" />
     <Compile Include="Data\MailboxList.cs" />

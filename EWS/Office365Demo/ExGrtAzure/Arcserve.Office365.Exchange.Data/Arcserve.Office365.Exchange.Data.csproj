@@ -93,6 +93,7 @@
   <ItemGroup>
     <Compile Include="Account\OrganizationAdminInfo.cs" />
     <Compile Include="CustomApplicationDbConfiguration.cs" />
+    <Compile Include="DatabaseType.cs" />
     <Compile Include="IItemBase.cs" />
     <Compile Include="Increment\EwsResponseException.cs" />
     <Compile Include="Increment\FolderTree.cs" />

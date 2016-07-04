@@ -91,6 +91,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="..\..\..\H\ARCAssemblyInfo.cs" />
     <Compile Include="CompoundBuildTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

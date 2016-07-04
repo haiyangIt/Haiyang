@@ -75,6 +75,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\H\ARCAssemblyInfo.cs" />
     <Compile Include="CompoundFile\BaseStruct.cs" />
     <Compile Include="CompoundFile\CompoundFileBuild.cs" />
     <Compile Include="CompoundFile\CompoundFileParser.cs" />

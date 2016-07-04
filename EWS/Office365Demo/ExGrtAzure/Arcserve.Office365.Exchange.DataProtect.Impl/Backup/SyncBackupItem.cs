@@ -278,14 +278,28 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Backup
 
         protected override Dictionary<ItemClass, List<ItemChange>> GetLeftBatchAdded()
         {
-            var result = new Dictionary<ItemClass, List<ItemChange>>(_dicItemAdds);
+            var result = new Dictionary<ItemClass, List<ItemChange>>();
+            foreach(var keyValue in _dicItemAdds)
+            {
+                if(keyValue.Value.Count > 0)
+                {
+                    result.Add(keyValue.Key, keyValue.Value);
+                }
+            }
             _dicItemAdds.Clear();
             return result;
         }
 
         protected override Dictionary<ItemClass, List<ItemChange>> GetLeftBatchUpdated()
         {
-            var result = new Dictionary<ItemClass, List<ItemChange>>(_dicItemUpdates);
+            var result = new Dictionary<ItemClass, List<ItemChange>>();
+            foreach (var keyValue in _dicItemUpdates)
+            {
+                if (keyValue.Value.Count > 0)
+                {
+                    result.Add(keyValue.Key, keyValue.Value);
+                }
+            }
             _dicItemUpdates.Clear();
             return result;
         }

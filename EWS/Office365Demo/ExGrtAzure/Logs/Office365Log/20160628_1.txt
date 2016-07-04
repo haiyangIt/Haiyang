@@ -1,4 +1,0 @@
-20160628113750	D	Is Administrator
-20160628113750	D	config file	file path E:\test99\Haiyang\EWS\Office365Demo\ExGrtAzure\packages\Arcserve_Office365_dll\Arcserve.Office365.Exchange.DataProtect.Tool.exe.Config
-20160628113750	D	args	arg -JobType:Test
-Log end.

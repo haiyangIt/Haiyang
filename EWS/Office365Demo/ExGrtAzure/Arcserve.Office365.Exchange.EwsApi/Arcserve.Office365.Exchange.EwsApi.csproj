@@ -96,6 +96,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\H\ARCAssemblyInfo.cs" />
     <Compile Include="Extension\EwsServiceAdapterExtension.cs" />
     <Compile Include="Impl\Common\ActiveDirectoryHelper.cs" />
     <Compile Include="Impl\Common\CertificateValidationHelper.cs" />

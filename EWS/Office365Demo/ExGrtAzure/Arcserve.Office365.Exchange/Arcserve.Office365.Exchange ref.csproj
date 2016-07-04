@@ -84,6 +84,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\H\ARCAssemblyInfo.cs" />
     <Compile Include="FactoryBase.cs" />
     <Compile Include="Log\ILog.cs" />
     <Compile Include="Log\Impl\DefaultEwsTraceLog.cs" />

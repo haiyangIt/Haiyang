@@ -82,7 +82,7 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
             }
             catch (ArgumentException e)
             {
-                LogFactory.LogInstance.WriteException(LogLevel.WARN, "Folder load error.", e, e.Message);
+                LogFactory.LogInstance.WriteException(LogLevel.DEBUG, "Folder load error.", e, e.Message);
                 if (e.TargetSite.DeclaringType.FullName == "System.Enum+EnumResult" && e.TargetSite.MemberType == System.Reflection.MemberTypes.Method && e.TargetSite.Name == "SetFailure" && e.Message.IndexOf("Requested value ") >= 0)
                 {
                     PropertySet set = new PropertySet(folderPropertySet);

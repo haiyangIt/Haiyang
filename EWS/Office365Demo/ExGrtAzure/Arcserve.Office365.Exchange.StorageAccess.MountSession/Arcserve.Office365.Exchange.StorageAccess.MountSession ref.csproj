@@ -110,6 +110,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\H\ARCAssemblyInfo.cs" />
     <Compile Include="Backup\CatalogAccess.cs" />
     <Compile Include="Backup\DataFromClient.cs" />
     <Compile Include="EF\CatalogDbAccess.cs" />

@@ -83,6 +83,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\H\ARCAssemblyInfo.cs" />
     <Compile Include="AsyncBackup\AsyncBackup.cs" />
     <Compile Include="AsyncBackup\AsyncBackupFolder.cs" />
     <Compile Include="AsyncBackup\AsyncBackupItem.cs" />

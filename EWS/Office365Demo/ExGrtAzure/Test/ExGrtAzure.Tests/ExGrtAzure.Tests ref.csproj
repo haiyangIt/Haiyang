@@ -142,6 +142,7 @@
     <Reference Include="System.Net.Http.WebRequest" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\..\H\ARCAssemblyInfo.cs" />
     <Compile Include="MsgFile.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
