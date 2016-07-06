@@ -17,25 +17,57 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Restore
         OrganizationAdminInfo AdminInfo { get; set; }
 
         void ConnectExchangeService();
-        IRestoreFolder GetAndCreateFolderIfFolderNotExist(IFolderDataSync folder, IRestoreFolder parentFolder);
-        void ImportItems(IEnumerable<ImportItemStatus> partition, IRestoreFolder folder);
+        IRestoreDestinationFolder GetAndCreateFolderIfFolderNotExist(IFolderDataSync folder, IRestoreDestinationFolder parentFolder);
+        void ImportItems(IEnumerable<ImportItemStatus> partition, IRestoreDestinationFolder folder);
+
+        IRestoreToPosition<ProgressType> NewRestoreToPosition(IMailboxDataSync currentRestoreMailbox);
+        IEnumerable<string> GetNotExistItems(IRestoreDestinationFolder destinationFolder, IFolderDataSync folderInCatalog);
+        bool ImportExistItems();
+        bool ImportNotExistItems();
     }
 
-    public interface IRestoreFolder
+    public interface IRestoreDestinationFolder
     {
-        string Name { get; set; }
+        string Name { get; }
+        string Id { get; }
     }
 
-    public class ImportItemStatus
+    public class RestoreServerDestinationFolder : IRestoreDestinationFolder
     {
-        public IItemDataSync Item;
-        public bool IsExist;
-        public ImportItemStatus() { }
-
-        public ImportItemStatus(IItemDataSync item, bool isExist)
+        public RestoreServerDestinationFolder(Folder folder)
         {
-            Item = item;
-            IsExist = isExist;
+            Folder = folder;
+        }
+        public Folder Folder { get; set; }
+        public string Name
+        {
+            get
+            {
+                return Folder.DisplayName;
+            }
+        }
+        public string Id
+        {
+            get
+            {
+                return Folder.Id.UniqueId;
+            }
+        }
+    }
+
+    public class RestoreLocalDestinationFolder : IRestoreDestinationFolder
+    {
+        public string Id
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public string Name
+        {
+            get; set;
         }
     }
 }

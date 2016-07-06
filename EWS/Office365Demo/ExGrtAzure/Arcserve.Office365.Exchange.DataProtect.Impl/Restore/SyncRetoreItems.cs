@@ -41,7 +41,14 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Restore
 
         public override void Init()
         {
-            
+            IEnumerable<string> notExistItems = RestoreToPosition.GetNotExistItems(FolderForRestore, Folder);
+            if(notExistItems != null)
+            {
+                foreach(var item in notExistItems)
+                {
+                    notExistItemsInExchange.Add(item);
+                }
+            }
         }
 
         protected override void AnalysisItems(IEnumerable<IItemDataSync> items)
@@ -67,7 +74,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Restore
             List<IEnumerable<ImportItemStatus>> partitions = new List<IEnumerable<ImportItemStatus>>();
             if (isRestoreExistItems)
             {
-                if (DataFromClient.ImportExistItems())
+                if (RestoreToPosition.ImportExistItems())
                 {
                     foreach(var item in existItems)
                     {
@@ -82,7 +89,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Restore
 
             if (isRestoreNotExistItems)
             {
-                if(DataFromClient.ImportNotExistItems())
+                if(RestoreToPosition.ImportNotExistItems())
                 {
                     foreach(var item in notExistItems)
                     {

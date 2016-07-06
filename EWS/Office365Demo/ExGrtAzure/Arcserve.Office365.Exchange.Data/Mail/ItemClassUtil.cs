@@ -66,8 +66,12 @@ namespace Arcserve.Office365.Exchange.Data.Mail
             else if (itemClass.IndexOf("IPM.Appointment") >= 0 || itemClass == "IPM.Schedule.Meeting.Request")
                 return ItemClass.Appointment;
 
+            else if(itemClass.IndexOf("REPORT.IPM.Note.Delayed.DR") >= 0)
+            {
+                return ItemClass.Message;
+            }
             else
-                throw new NotSupportedException(string.Format("Modify code to support this type:{0}", itemClass));
+                throw new NotSupportedException(string.Format("Modify code to support this item type:{0}", itemClass));
         }
 
         public static string GetItemSuffix(this ItemClass itemClass)
@@ -77,7 +81,7 @@ namespace Arcserve.Office365.Exchange.Data.Mail
                 return result;
 
             else
-                throw new NotSupportedException(string.Format("Modify code to support this type:{0}", itemClass));
+                throw new NotSupportedException(string.Format("Modify code to support this item type:{0}", itemClass));
         }
 
 

@@ -26,12 +26,6 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Restore
         }
 
         public OrganizationAdminInfo AdminInfo { get; set; }
-
-        protected override IRestoreToPosition<IJobProgress> NewRestoreToPosition()
-        {
-            throw new NotImplementedException();
-        }
-
         protected override void ConnectExchangeService()
         {
             RestoreToPosition.ConnectExchangeService();

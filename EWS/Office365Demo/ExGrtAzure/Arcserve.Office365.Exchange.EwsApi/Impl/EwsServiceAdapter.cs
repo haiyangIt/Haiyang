@@ -142,8 +142,6 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
         //    throw new NotImplementedException();
         //}
 
-
-
         public void LoadItemsProperties(IEnumerable<Item> items, ItemClass itemClass)
         {
             switch (itemClass)
@@ -155,7 +153,6 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
                     _ewsOperator.LoadPropertiesForItems(items, ItemPropertySet);
                     break;
             }
-
         }
 
         public System.Threading.Tasks.Task LoadItemsPropertiesAsync(IEnumerable<Item> items, ItemClass itemClass)
@@ -179,6 +176,95 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
         }
 
         public Folder GetAndCreateIfFolderNotExist(IFolderDataSync folder, Folder parentFolder)
+        {
+            throw new NotImplementedException();
+        }
+
+        public FindFoldersResults FindFolders(FolderId parentFolderId, FolderView view)
+        {
+            return _ewsOperator.FindFolders(parentFolderId, view);
+        }
+
+        public FindFoldersResults FindFolders(WellKnownFolderName parentFolderName, FolderView view)
+        {
+            return _ewsOperator.FindFolders(parentFolderName, view);
+        }
+
+        public FindFoldersResults FindFolders(FolderId parentFolderId, SearchFilter searchFilter, FolderView view)
+        {
+            return _ewsOperator.FindFolders(parentFolderId, searchFilter, view);
+        }
+
+        public FindFoldersResults FindFolders(WellKnownFolderName parentFolderName, SearchFilter searchFilter, FolderView view)
+        {
+            return _ewsOperator.FindFolders(parentFolderName, searchFilter, view);
+        }
+
+        public Task<FindFoldersResults> FindFoldersAsync(FolderId parentFolderId, FolderView view)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<FindFoldersResults> FindFoldersAsync(WellKnownFolderName parentFolderName, FolderView view)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<FindFoldersResults> FindFoldersAsync(FolderId parentFolderId, SearchFilter searchFilter, FolderView view)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<FindFoldersResults> FindFoldersAsync(WellKnownFolderName parentFolderName, SearchFilter searchFilter, FolderView view)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Folder FolderBind(WellKnownFolderName wellKnowFolderName)
+        {
+            return _ewsOperator.FolderBind(wellKnowFolderName);
+        }
+
+        public Folder FolderBind(WellKnownFolderName wellKnowFolderName, PropertySet propertySet)
+        {
+            return _ewsOperator.FolderBind(wellKnowFolderName, propertySet);
+        }
+
+        public Task<Folder> FolderBindAsync(WellKnownFolderName wellKnowFolderName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Folder> FolderBindAsync(WellKnownFolderName wellKnowFolderName, PropertySet propertySet)
+        {
+            throw new NotImplementedException();
+        }
+        public void FolderCreate(string folderName, string folderType, Folder parentFolder)
+        {
+            _ewsOperator.FolderCreate(folderName, folderType, parentFolder);
+        }
+
+        public Folder FindFolderInRoot(string folderDisplayName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Folder FindFolder(string folderDisplayName, FolderId parentFolderId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Folder CreateFolder(string folderName, string folderType, FolderId parentFolderId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Folder CreateFolder(string folderName, string folderType)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ImportItems(IEnumerable<ImportItemStatus> partition, Folder folder)
         {
             throw new NotImplementedException();
         }

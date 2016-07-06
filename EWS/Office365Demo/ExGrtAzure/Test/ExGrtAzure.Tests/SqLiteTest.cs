@@ -167,7 +167,7 @@ namespace ExGrtAzure.Tests
             get; set;
         }
 
-        [Key]
+        [Index]
         public string Id
         {
             get; set;
@@ -220,6 +220,12 @@ namespace ExGrtAzure.Tests
         /// </summary>
         [CaseSensitive]
         public string SyncStatus
+        {
+            get; set;
+        }
+
+        [Key]
+        public Int64 UniqueId
         {
             get; set;
         }

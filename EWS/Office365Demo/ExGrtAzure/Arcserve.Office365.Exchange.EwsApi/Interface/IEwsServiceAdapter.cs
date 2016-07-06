@@ -34,11 +34,6 @@ namespace Arcserve.Office365.Exchange.EwsApi.Interface
         void LoadItemsProperties(IEnumerable<Item> items, ItemClass itemClass);
         System.Threading.Tasks.Task LoadItemsPropertiesAsync(IEnumerable<Item> items, ItemClass itemClass);
 
-        void ImportItem(Stream dataStream, FolderId folder);
-    }
-
-    public interface IEwsServiceAdapterExtension<ProgressType> : IEwsServiceAdapter<ProgressType>
-    {
         Folder FolderBind(WellKnownFolderName name, PropertySet propertySet);
         Folder FolderBind(WellKnownFolderName name);
         Task<Folder> FolderBindAsync(WellKnownFolderName name, PropertySet propertySet);
@@ -46,6 +41,14 @@ namespace Arcserve.Office365.Exchange.EwsApi.Interface
 
         FindFoldersResults FindFolders(WellKnownFolderName parentFolderName, FolderView view);
         Task<FindFoldersResults> FindFoldersAsync(WellKnownFolderName parentFolderName, FolderView view);
+
+        Folder FindFolderInRoot(string folderDisplayName);
+
+        Folder FindFolder(string folderDisplayName, FolderId parentFolderId);
+        void FolderCreate(string folderName, string folderType, Folder parentFolder);
+        Folder CreateFolder(string folderName, string folderType, FolderId parentFolderId);
+        Folder CreateFolder(string folderName, string folderType);
+        void ImportItems(IEnumerable<ImportItemStatus> partition, Folder folder);
 
         //
         // Summary:
@@ -102,6 +105,12 @@ namespace Arcserve.Office365.Exchange.EwsApi.Interface
         //     An object representing the results of the search operation.
         FindFoldersResults FindFolders(FolderId parentFolderId, SearchFilter searchFilter, FolderView view);
         Task<FindFoldersResults> FindFoldersAsync(FolderId parentFolderId, SearchFilter searchFilter, FolderView view);
+        void ImportItem(Stream dataStream, FolderId folder);
+    }
+
+    public interface IEwsServiceAdapterExtension<ProgressType> : IEwsServiceAdapter<ProgressType>
+    {
+        
 
         //
         // Summary:

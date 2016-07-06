@@ -16,6 +16,8 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data
     [Table("ItemSync")]
     public class ItemSyncModel : IItemDataSync
     {
+        [Key]
+        public Int64 UniqueId { get; set; }
         [Required]
         public DateTime? CreateTime { get; set; }
 
@@ -28,7 +30,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data
         [MaxLength(64)]
         public string ItemClass { get; set; }
 
-        [Key]
+        [Index]
         [Column(Order = 1)]
         [MaxLength(512)]
         [CaseSensitive("ItemId")]
@@ -120,7 +122,12 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data
             var itemName = MD5Utility.ConvertToMd5(item.DisplayName);
             itemName = string.Format("{0}_{1}.bin", item.CreateTime.Value.ToString("yyyyMMdd_HHmmss"), itemName);
 
-            var parentFolderPath = string.Join(DirectorySeparatorChar, folderPath);
+            string parentFolderPath = string.Empty;
+            foreach(var folderPathItem in folderPath)
+            {
+                parentFolderPath = Path.Combine(parentFolderPath, folderPathItem.GetValidFolderName());
+            }
+
             if (parentFolderPath.Length > 180)
             {
                 parentFolderPath = MD5Utility.ConvertToMd5(parentFolderPath);
@@ -133,7 +140,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data
 
         public static string GetFilePath(this IItemDataSync item, string dataFolder)
         {
-            var workFolder = Path.Combine(dataFolder, item.MailboxAddress);
+            var workFolder = Path.Combine(dataFolder, item.MailboxAddress.GetValidFolderName());
             var file = Path.Combine(workFolder, item.Location);
             return file;
         }

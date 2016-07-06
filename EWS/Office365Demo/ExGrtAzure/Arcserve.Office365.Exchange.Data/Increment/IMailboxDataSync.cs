@@ -93,6 +93,11 @@ namespace Arcserve.Office365.Exchange.Data.Increment
             get; set;
         }
 
+        public long UniqueId
+        {
+            get; set;
+        }
+
         public IMailboxDataSync Clone()
         {
             return new MailboxDataSyncBase(DisplayName, MailAddress)

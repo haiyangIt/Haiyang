@@ -27,6 +27,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Restore
         {
             get; set;
         }
+        public IRestoreToPosition<IJobProgress> RestoreToPosition { get; set; }
 
         public void InitTaskSyncContext(ITaskSyncContext<IJobProgress> mainContext)
         {
@@ -77,7 +78,6 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Restore
         {
             get; set;
         }
-
         public IRestoreToPosition<IJobProgress> RestoreToPosition { get; set; }
 
         public void InitTaskSyncContext(ITaskSyncContext<IJobProgress> mainContext)
@@ -88,7 +88,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Restore
         internal protected IMailboxDataSync MailboxInfo { get; set; }
         public void RestoreMailbox()
         {
-            RestoreToPosition = NewRestoreToPosition();
+            RestoreToPosition = RestoreToPosition.NewRestoreToPosition(MailboxInfo);
             ConnectExchangeService();
             var folderTree = new FolderTree();
             folderTree.Deserialize(MailboxInfo.FolderTree);
@@ -96,7 +96,6 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Restore
             ForEachFolder(folders, folderTree, DealFolder);
         }
 
-        protected abstract IRestoreToPosition<IJobProgress> NewRestoreToPosition();
         protected abstract void ConnectExchangeService();
         protected abstract IEnumerable<IFolderDataSync> GetFoldersFromPlan(IMailboxDataSync mailboxInfo, Func<IMailboxDataSync, IEnumerable<IFolderDataSync>> funcGetFolderFromCatalog);
         protected abstract IEnumerable<IFolderDataSync> GetFoldersFromCatalog(IMailboxDataSync mailboxInfo);
@@ -159,7 +158,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Restore
             restoreItem.AddComplete();
         }
 
-        protected abstract IRestoreFolder GetAndCreateIfFolderNotExistToExchange(IEnumerable<IFolderDataSync> folderHierarchy);
+        protected abstract IRestoreDestinationFolder GetAndCreateIfFolderNotExistToExchange(IEnumerable<IFolderDataSync> folderHierarchy);
         protected abstract ItemList GetFolderItemsFromPlanAndCatalog(IFolderDataSync folder, int offset, int pageCount);
         protected abstract RestoreItemsFlowTemplate NewRestoreItemFlow();
     }
@@ -192,7 +191,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Restore
         {
             this.CloneSyncContext(mainContext);
         }
-        internal protected IRestoreFolder FolderForRestore { get; set; }
+        internal protected IRestoreDestinationFolder FolderForRestore { get; set; }
         internal protected IFolderDataSync Folder { get; set; }
         
         /// <summary>

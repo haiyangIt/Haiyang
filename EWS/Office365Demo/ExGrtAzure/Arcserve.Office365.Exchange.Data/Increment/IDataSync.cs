@@ -11,6 +11,8 @@ namespace Arcserve.Office365.Exchange.Data.Increment
         string SyncStatus { get; set; }
 
         string ChangeKey { get; }
+
+        Int64 UniqueId { get; }
     }
 
 }

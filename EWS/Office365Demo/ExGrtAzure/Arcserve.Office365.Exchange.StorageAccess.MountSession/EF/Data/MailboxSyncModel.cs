@@ -18,7 +18,9 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data
         {
 
         }
-        
+        [Key]
+        public Int64 UniqueId { get; set; }
+
         public string FolderTree { get; set; }
 
         [NotMapped]
@@ -39,7 +41,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data
             get; set;
         }
 
-        [Key]
+        [Index]
         public string Id
         {
             get; set;

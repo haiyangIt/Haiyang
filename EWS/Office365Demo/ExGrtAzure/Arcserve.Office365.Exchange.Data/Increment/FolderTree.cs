@@ -118,6 +118,11 @@ namespace Arcserve.Office365.Exchange.Data.Increment
 
             public ItemKind ItemKind
             { get; set; }
+
+            public long UniqueId
+            {
+                get; set;
+            }
         }
     }
 
@@ -128,12 +133,23 @@ namespace Arcserve.Office365.Exchange.Data.Increment
             HashSet<char> charHash = new HashSet<char>(Path.GetInvalidPathChars());
             if (!charHash.Contains('\\'))
                 charHash.Add('\\');
-            InvalidFolderChar = charHash.ToArray();
+            if (!charHash.Contains('/'))
+                charHash.Add('/');
 
-            charHash = new HashSet<char>(Path.GetInvalidFileNameChars());
-            if (!charHash.Contains('\\'))
-                charHash.Add('\\');
+            var invalidFileNameChars = Path.GetInvalidFileNameChars();
+            foreach(var charItem in invalidFileNameChars)
+            {
+                if (!charHash.Contains(charItem))
+                {
+                    charHash.Add(charItem);
+                }
+            }
+
+            InvalidFolderChar = charHash.ToArray();
             InvalidFileChars = charHash.ToArray();
+
+            Log.LogFactory.LogInstance.WriteLog(Log.LogLevel.DEBUG, string.Join(" ", InvalidFolderChar));
+            Log.LogFactory.LogInstance.WriteLog(Log.LogLevel.DEBUG, string.Join(" ", InvalidFileChars));
         }
 
         public static string GetFolderLocation(this List<string> folderDisplays)

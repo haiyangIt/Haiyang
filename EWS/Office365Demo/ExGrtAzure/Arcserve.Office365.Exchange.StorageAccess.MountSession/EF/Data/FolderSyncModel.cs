@@ -15,6 +15,9 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data
     [Table("FolderSync")]
     public class FolderSyncModel : IFolderDataSync
     {
+        [Key]
+        public Int64 UniqueId { get; set; }
+
         [Required]
         public int ChildItemCount
         {
@@ -28,7 +31,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data
             get; set;
         }
 
-        [Key]
+        [Index]
         [MaxLength(512)]
         [CaseSensitive("FolderId")]
         public string FolderId

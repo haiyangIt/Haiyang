@@ -29,9 +29,9 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Restore
             get; set;
         }
 
-        protected override IRestoreFolder GetAndCreateIfFolderNotExistToExchange(IEnumerable<IFolderDataSync> folderHierarchy)
+        protected override IRestoreDestinationFolder GetAndCreateIfFolderNotExistToExchange(IEnumerable<IFolderDataSync> folderHierarchy)
         {
-            IRestoreFolder parentFolder = null;
+            IRestoreDestinationFolder parentFolder = null;
             foreach(var folder in folderHierarchy)
             {
                 parentFolder = RestoreToPosition.GetAndCreateFolderIfFolderNotExist(folder, parentFolder);

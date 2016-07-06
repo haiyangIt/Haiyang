@@ -94,6 +94,8 @@
     <Compile Include="Backup\SyncBackupMailbox.cs" />
     <Compile Include="DataProtectFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Restore\RestoreToOriginal.cs" />
+    <Compile Include="Restore\RestoreToPositionBase.cs" />
     <Compile Include="Restore\SyncRestore.cs" />
     <Compile Include="Restore\SyncRestoreFolder.cs" />
     <Compile Include="Restore\SyncRestoreMailbox.cs" />

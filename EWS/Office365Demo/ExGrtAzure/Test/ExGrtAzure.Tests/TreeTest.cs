@@ -247,6 +247,14 @@ namespace ExGrtAzure.Tests
             }
         }
 
+        public long UniqueId
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         public IFolderData Clone()
         {
             throw new NotImplementedException();

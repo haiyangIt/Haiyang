@@ -15,5 +15,16 @@ namespace Arcserve.Office365.Exchange.Data.Increment
         string MailboxAddress { get; set; }
     }
 
-    
+    public class ImportItemStatus
+    {
+        public IItemDataSync Item;
+        public bool IsExist;
+        public ImportItemStatus() { }
+
+        public ImportItemStatus(IItemDataSync item, bool isExist)
+        {
+            Item = item;
+            IsExist = isExist;
+        }
+    }
 }

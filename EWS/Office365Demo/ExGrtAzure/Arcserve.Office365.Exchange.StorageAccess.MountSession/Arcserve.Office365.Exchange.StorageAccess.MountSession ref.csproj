@@ -125,7 +125,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Restore\CatalogAccess.cs" />
     <Compile Include="Restore\DataFromClient.cs" />
-    <Compile Include="Restore\RestoreToOrginal.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
