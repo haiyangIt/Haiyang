@@ -82,6 +82,12 @@
   <PropertyGroup>
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>..\packages\Arcserve.Office365.Exchange.Assemly\ArcserveOffice365.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
@@ -143,9 +149,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\packages\Arcserve.Office365.Exchange.Assemly\ArcserveOffice365.snk" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="..\..\H\ARCAssemblyInfo.cs" />
     <Compile Include="Command\ExchangeBackupCommand.cs" />
     <Compile Include="Command\TestCommand.cs" />
+    <Compile Include="Command\ValidateUserCommand.cs" />
     <Compile Include="Data\MailboxList.cs" />
     <Compile Include="Framework\ArcServeCommand.cs" />
     <Compile Include="Framework\ArcserveCommandAttribute.cs" />

@@ -13,16 +13,18 @@ namespace Arcserve.Office365.Exchange.DataProtect.Tool
 {
     class Program
     {
-        static void Main(string[] args)
+        static int Main(string[] args)
         {
             SqlServerTypes.Utilities.LoadNativeAssemblies(AppDomain.CurrentDomain.BaseDirectory);
-            System.Threading.Thread.Sleep(15000);
+            //System.Threading.Thread.Sleep(15000);
 
             if (args.Length == 1 && args[0] == "Help")
             {
                 Console.Out.WriteLine(Resource.ResMessage.Help);
-                return;
+                return 0;
             }
+
+            int exitCode = 0;
 
             bool isRunAsAdministrator = IsAdministrator();
             LogFactory.LogInstance.WriteLog(LogLevel.DEBUG, isRunAsAdministrator ? "Is Administrator" : "Is Not Administrator");
@@ -40,17 +42,20 @@ namespace Arcserve.Office365.Exchange.DataProtect.Tool
             {
                 var argDic = ArgParser.Parser(args);
                 ArcserveCommandFactory factory = new ArcserveCommandFactory(argDic);
-                result = factory.GetArcserveCommand().Execute();
+                int errorCode = 0;
+                result = factory.GetArcserveCommand().Execute(out errorCode);
 
+                exitCode = errorCode;
                 Console.Out.WriteLine(ResultBase.Serialize(result));
             }
             catch (Exception e)
             {
                 LogFactory.LogInstance.WriteException(LogLevel.ERR, "serialize to xml error", e, e.Message);
+                exitCode = -1;
             }
 
             DisposeManager.DisposeInstance();
-
+            return exitCode;
         }
 
         public static bool IsAdministrator()

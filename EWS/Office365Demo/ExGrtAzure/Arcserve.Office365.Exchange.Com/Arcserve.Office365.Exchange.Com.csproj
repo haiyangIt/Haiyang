@@ -20,7 +20,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <RegisterForComInterop>true</RegisterForComInterop>
+    <RegisterForComInterop>false</RegisterForComInterop>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -34,12 +34,9 @@
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>ArcserveOffice365.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>..\packages\Arcserve.Office365.Exchange.Assemly\ArcserveOffice365.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Arcserve.Office365.Exchange.Data">
-      <HintPath>..\packages\Arcserve_Office365_dll\Arcserve.Office365.Exchange.Data.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -52,12 +49,34 @@
   <ItemGroup>
     <Compile Include="..\..\H\ARCAssemblyInfo.cs" />
     <Compile Include="IBackupUtil.cs" />
+    <Compile Include="Impl\FolderResultItem.cs" />
+    <Compile Include="Impl\MailboxResultItem.cs" />
+    <Compile Include="Impl\MailResultItem.cs" />
+    <Compile Include="Impl\Office365ComFactory.cs" />
+    <Compile Include="Impl\QueryCatalog.cs" />
+    <Compile Include="Impl\QueryCondition.cs" />
+    <Compile Include="Impl\QueryResult.cs" />
+    <Compile Include="Impl\ResultItem.cs" />
+    <Compile Include="IOffice365ComFactory.cs" />
+    <Compile Include="IQueryCatalog.cs" />
+    <Compile Include="IQueryCondition.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ArcserveOffice365.snk" />
+    <None Include="..\packages\Arcserve.Office365.Exchange.Assemly\ArcserveOffice365.snk" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>gacutil /u "$(ProjectDir)..\packages\Arcserve_Office365_dll\$(TargetFileName)"
+
+%25SystemRoot%25\Microsoft.NET\Framework\v4.0.30319\regasm /unregister "$(ProjectDir)..\packages\Arcserve_Office365_dll\$(TargetFileName)"
+
+xcopy  "$(ProjectDir)$(OutDir)*" "$(ProjectDir)..\packages\Arcserve_Office365_dll" /s /i /y
+gacutil /i "$(ProjectDir)..\packages\Arcserve_Office365_dll\$(TargetFileName)"
+
+%25SystemRoot%25\Microsoft.NET\Framework\v4.0.30319\regasm "$(ProjectDir)..\packages\Arcserve_Office365_dll\$(TargetFileName)" /tlb:$(ProjectDir)..\packages\Arcserve_Office365_dll\$(TargetName).tlb
+</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

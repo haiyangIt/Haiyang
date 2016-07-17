@@ -1,6 +1,7 @@
 ﻿using Arcserve.Office365.Exchange.DataProtect.Tool.Command;
 using Arcserve.Office365.Exchange.DataProtect.Tool.Resource;
 using Arcserve.Office365.Exchange.DataProtect.Tool.Result;
+using Arcserve.Office365.Exchange.Ex;
 using Arcserve.Office365.Exchange.Log;
 using System;
 using System.Collections.Generic;
@@ -54,16 +55,22 @@ namespace Arcserve.Office365.Exchange.Tool.Framework
         protected abstract ResultBase DoExcute();
         protected abstract ResultBase GetErrorResultBase(Exception e);
         protected abstract ResultBase GetInvalidUserPsw();
-        public ResultBase Execute()
+
+        private const int InvalidUserNamePassword = -2;
+        private const int NotImpersonateMailbox = -3;
+        private const int OtherError = -1;
+        public ResultBase Execute(out int errorCode)
         {
             try
             {
                 CheckArgument();
+                errorCode = 0;
                 return DoExcute();
             }
             catch (ArgumentInToolException e)
             {
                 LogFactory.LogInstance.WriteException(LogLevel.ERR, string.Format("execute command {0} error", JobType), e, e.Message);
+                errorCode = OtherError;
                 return GetErrorResultBase(e);
             }
             catch (PSRemotingTransportException e)
@@ -71,17 +78,34 @@ namespace Arcserve.Office365.Exchange.Tool.Framework
                 if (e.HResult == -2146233087 && e.ErrorCode == -2144108477)
                 {
                     LogFactory.LogInstance.WriteException(LogLevel.ERR, string.Format("execute command {0} error", JobType), e, e.Message);
+                    errorCode = InvalidUserNamePassword;
                     return GetInvalidUserPsw();
                 }
                 else
                 {
                     LogFactory.LogInstance.WriteException(LogLevel.ERR, string.Format("execute command {0} error", JobType), e, e.Message);
+                    errorCode = OtherError;
                     return GetErrorResultBase(e);
                 }
+            }
+            catch (AccountImpersonateException e)
+            {
+                LogFactory.LogInstance.WriteException(LogLevel.ERR, string.Format("execute command {0} error", JobType), e, e.Message);
+                // todo may be not impersonate.
+                errorCode = NotImpersonateMailbox;
+                return GetErrorResultBase(e);
+            }
+            catch (AccountErrorException e)
+            {
+                LogFactory.LogInstance.WriteException(LogLevel.ERR, string.Format("execute command {0} error", JobType), e, e.Message);
+                // todo may be not impersonate.
+                errorCode = InvalidUserNamePassword;
+                return GetInvalidUserPsw();
             }
             catch (Exception e)
             {
                 LogFactory.LogInstance.WriteException(LogLevel.ERR, string.Format("execute command {0} error", JobType), e, e.Message);
+                errorCode = OtherError;
                 return GetErrorResultBase(e);
             }
         }
@@ -100,7 +124,8 @@ namespace Arcserve.Office365.Exchange.Tool.Framework
         {
             {ExchangeBackupCommand.CommandName, (args) => {return new ExchangeBackupCommand(args); } },
              {GetAllMailboxCommand.CommandName, (args) => {return new GetAllMailboxCommand(args); } },
-             {TestCommand.CommandName, (args) => {return new TestCommand(args); } }
+             {TestCommand.CommandName, (args) => {return new TestCommand(args); } },
+             {ValidateUserCommand.CommandName, (args) => {return new ValidateUserCommand(args); } }
         };
 
         public ArcServeCommand GetArcserveCommand()

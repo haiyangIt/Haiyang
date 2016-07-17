@@ -75,7 +75,16 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>..\..\packages\Arcserve.Office365.Exchange.Assemly\ArcserveOffice365.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Arcserve.Office365.Exchange.Data.Fakes">
+      <HintPath>FakesAssemblies\Arcserve.Office365.Exchange.Data.Fakes.dll</HintPath>
+    </Reference>
     <Reference Include="Arcserve.Office365.Exchange.DataProtect.Interface.Fakes">
       <HintPath>FakesAssemblies\Arcserve.Office365.Exchange.DataProtect.Interface.Fakes.dll</HintPath>
     </Reference>
@@ -142,6 +151,9 @@
     <Reference Include="System.Net.Http.WebRequest" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\packages\Arcserve.Office365.Exchange.Assemly\ArcserveOffice365.snk" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="..\..\..\H\ARCAssemblyInfo.cs" />
     <Compile Include="MsgFile.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -170,6 +182,7 @@
     <Content Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Fakes Include="Fakes\Arcserve.Office365.Exchange.Data.fakes" />
     <Fakes Include="Fakes\Arcserve.Office365.Exchange.DataProtect.Interface.fakes" />
     <None Include="packages.config" />
     <None Include="Resources\OldTransfer.bin" />
@@ -179,9 +192,19 @@
     <None Include="TestData\no attach simple mail.bin" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="MsgFile.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>MsgFile.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\Arcserve.Exchange.FastTransferUtil\Arcserve.Exchange.FastTransferUtil ref.csproj">
       <Project>{c9772bc6-1490-4f35-aec1-fd9d6ecad194}</Project>
       <Name>Arcserve.Exchange.FastTransferUtil ref</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Arcserve.Office365.Exchange.Com\Arcserve.Office365.Exchange.Com ref.csproj">
+      <Project>{8b48f709-e9f5-41d9-928e-98d2b99543cc}</Project>
+      <Name>Arcserve.Office365.Exchange.Com ref</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Arcserve.Office365.Exchange.DataProtect.Impl\Arcserve.Office365.Exchange.DataProtect.Impl ref.csproj">
       <Project>{052f2d28-5e70-4d99-8e87-097357477b85}</Project>
@@ -190,10 +213,6 @@
     <ProjectReference Include="..\..\Arcserve.Office365.Exchange.DataProtect.Interface\Arcserve.Office365.Exchange.DataProtect.Interface ref.csproj">
       <Project>{6f4d7ebe-74c0-4992-a95c-7cadb41f3590}</Project>
       <Name>Arcserve.Office365.Exchange.DataProtect.Interface ref</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Arcserve.Office365.Exchange.DataProtect.Tool\Arcserve.Office365.Exchange.DataProtect.Tool ref.csproj">
-      <Project>{49bee1fb-0140-4770-865f-92db6871b5d2}</Project>
-      <Name>Arcserve.Office365.Exchange.DataProtect.Tool ref</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Arcserve.Office365.Exchange.Data\Arcserve.Office365.Exchange.Data ref.csproj">
       <Project>{2f89d7da-1138-4e24-bed3-caaf1df77465}</Project>
@@ -211,12 +230,6 @@
       <Project>{454462cc-dae8-48ab-b609-8ec07666f715}</Project>
       <Name>Arcserve.Office365.Exchange ref</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="MsgFile.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>MsgFile.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="..\..\packages\System.Data.SQLite.Core.1.0.102.0\build\net45\System.Data.SQLite.Core.targets" Condition="Exists('..\..\packages\System.Data.SQLite.Core.1.0.102.0\build\net45\System.Data.SQLite.Core.targets')" />

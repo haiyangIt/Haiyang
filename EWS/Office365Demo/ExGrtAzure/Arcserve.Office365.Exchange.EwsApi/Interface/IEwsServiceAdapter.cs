@@ -20,6 +20,8 @@ namespace Arcserve.Office365.Exchange.EwsApi.Interface
         Task<ICollection<IMailboxDataSync>> GetAllMailboxesAsync(string adminUserName, string adminPassword, IEnumerable<string> mailboxes);
         ICollection<IMailboxDataSync> GetAllMailboxes(string adminUserName, string adminPassword, IEnumerable<string> mailboxes);
 
+        int GetAllItemsCount();
+
         ChangeCollection<FolderChange> SyncFolderHierarchy(string lastSyncStatus);
         Task<ChangeCollection<FolderChange>> SyncFolderHierarchyAsync(string lastSyncStatus);
 

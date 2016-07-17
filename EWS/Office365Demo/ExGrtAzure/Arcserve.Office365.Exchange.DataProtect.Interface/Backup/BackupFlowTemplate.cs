@@ -18,6 +18,7 @@ using Arcserve.Office365.Exchange.Data.Mail;
 using Arcserve.Office365.Exchange.Util.Setting;
 using Arcserve.Office365.Exchange.Thread;
 using Arcserve.Office365.Exchange.Log;
+using Arcserve.Office365.Exchange.Ex;
 
 namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup
 {
@@ -137,6 +138,57 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup
                 Progress.Report("Generate catalog {0} successful, Total mailbox count:{5}, Total folder count:{2},  total item count:{3}, total item size:{4}, TotalTime {1}h. Speed:{6}G/H",
                         DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"), endByHour, CompletedFolderCount, CompletedItemCount, CompletedItemSize, CompletedMailboxCount, ((CompletedItemSize) / (endByHour * 1024 * 1024 * 1024)).ToString("0.00"));
             }
+            catch (AccountImpersonateException ex)
+            {
+                var endByHour = pCounter.EndByHour();
+                LogFactory.LogInstance.WriteException(LogLevel.DEBUG, "Generate catalog End with error", ex, ex.Message);
+                Progress.Report("Generate catalog {0} failed, Total mailbox count:{5}, Total folder count:{2},  total item count:{3}, total item size:{4}, TotalTime {1}h. Speed:{6}G/H",
+                        DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"), endByHour, CompletedFolderCount, CompletedItemCount, CompletedItemSize, CompletedMailboxCount, ((CompletedItemSize) / (endByHour * 1024 * 1024 * 1024)).ToString("0.00"));
+                throw ex;
+            }
+            catch (AccountErrorException ex)
+            {
+                var endByHour = pCounter.EndByHour();
+                LogFactory.LogInstance.WriteException(LogLevel.DEBUG, "Generate catalog End with error", ex, ex.Message);
+                Progress.Report("Generate catalog {0} failed, Total mailbox count:{5}, Total folder count:{2},  total item count:{3}, total item size:{4}, TotalTime {1}h. Speed:{6}G/H",
+                        DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"), endByHour, CompletedFolderCount, CompletedItemCount, CompletedItemSize, CompletedMailboxCount, ((CompletedItemSize) / (endByHour * 1024 * 1024 * 1024)).ToString("0.00"));
+                throw ex;
+            }
+            catch (EwsWSData.ServiceRequestException ex)
+            {
+                var endByHour = pCounter.EndByHour();
+                LogFactory.LogInstance.WriteException(LogLevel.DEBUG, "Generate catalog End with error", ex, ex.Message);
+                Progress.Report("Generate catalog {0} failed, Total mailbox count:{5}, Total folder count:{2},  total item count:{3}, total item size:{4}, TotalTime {1}h. Speed:{6}G/H",
+                        DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"), endByHour, CompletedFolderCount, CompletedItemCount, CompletedItemSize, CompletedMailboxCount, ((CompletedItemSize) / (endByHour * 1024 * 1024 * 1024)).ToString("0.00"));
+                if (ex.HResult == -2146233088)
+                {
+                    if (ex.Message.IndexOf("(401) Unauthorized.") >= 0)
+                    {
+                        throw new AccountErrorException("password invalid.", ex);
+                    }
+                    else if (ex.Message.IndexOf("(404) Not Found") >= 0)
+                    {
+                        throw new AccountErrorException("username invalid.", ex);
+                    }
+
+                }
+                throw new Exception(ex.Message, ex);
+            }
+            catch (EwsWSData.ServiceResponseException ex)
+            {
+                var endByHour = pCounter.EndByHour();
+                LogFactory.LogInstance.WriteException(LogLevel.DEBUG, "Generate catalog End with error", ex, ex.Message);
+                Progress.Report("Generate catalog {0} failed, Total mailbox count:{5}, Total folder count:{2},  total item count:{3}, total item size:{4}, TotalTime {1}h. Speed:{6}G/H",
+                        DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"), endByHour, CompletedFolderCount, CompletedItemCount, CompletedItemSize, CompletedMailboxCount, ((CompletedItemSize) / (endByHour * 1024 * 1024 * 1024)).ToString("0.00"));
+                if (ex.HResult == -2146233088)
+                {
+                    if (ex.ErrorCode == EwsWSData.ServiceError.ErrorImpersonateUserDenied)
+                    {
+                        throw new AccountImpersonateException(ex.Message, ex);
+                    }
+                }
+                throw new Exception(ex.Message, ex);
+            }
             catch (Exception e)
             {
                 var endByHour = pCounter.EndByHour();
@@ -183,6 +235,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup
 
         protected abstract void ForEachLoop(ICollection<IFolderDataSync> folders, ItemUADStatus itemStatus, Action<IFolderDataSync, ItemUADStatus> DoEachFolderChange);
 
+        protected abstract Func<string> FuncGetRootFolderId { get; }
         public abstract IDataConvert DataConvert { get; set; }
 
         public IJobProgress Progress
@@ -324,6 +377,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup
 
                 MailboxInfo.SyncStatus = lastSyncStatus;
                 MailboxInfo.FolderTree = folderTree.Serialize();
+                MailboxInfo.RootFolderId = FuncGetRootFolderId();
 
                 switch (uadStatus)
                 {
@@ -439,6 +493,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup
 
             var pCounter = PerformanceCounter.Start();
             Progress.Report("  Folder {0} items changed  Start.", folder.Location);
+            
             do
             {
                 itemChanges = FuncGetChangedItems(folder.FolderId, lastSyncStatus);
@@ -557,8 +612,6 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup
             }
         }
 
-
-
         protected abstract Action<IEnumerable<EwsWSData.Item>, ItemClass> ActionLoadPropertyForItems { get; }
         protected abstract Func<IEnumerable<IItemDataSync>, int> FuncWriteItemsToStorage { get; }
         protected abstract Action<IEnumerable<IItemDataSync>> ActionAddItemsToCatalog { get; }
@@ -672,13 +725,15 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Backup
             var pCounter = PerformanceCounter.Start();
             Progress.Report("      Items readChange {0} Start.", batchItems.Count());
 
-            var items = from item in batchItems select item.Item;
-            var ids = from item in batchItems select item.ItemId.UniqueId;
+            
             var itemToIsRead = new Dictionary<string, bool>(batchItems.Count);
             foreach (var itemChange in batchItems)
             {
-                itemToIsRead.Add(itemChange.ItemId.UniqueId, itemChange.IsRead);
+                itemToIsRead[itemChange.ItemId.UniqueId] = itemChange.IsRead;
             }
+
+            var ids = (from item in batchItems orderby item.ItemId.UniqueId select item.ItemId.UniqueId).Distinct();
+
             var itemDatas = FuncGetItemsFromCatalog(ids);
             itemDatas = FuncRemoveInvalidItem(itemDatas);
 

@@ -31,15 +31,35 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
                         ItemSchema.ParentFolderId,
                         ItemSchema.ItemClass,
                         ItemSchema.Size,
+                        ItemSchema.DateTimeSent,
+                        ItemSchema.DateTimeReceived,
                         ItemSchema.HasAttachments);
+
             EmailPropertySet = new PropertySet(ItemSchema.Subject,
                         ItemSchema.DateTimeCreated,
                         ItemSchema.ParentFolderId,
                         ItemSchema.ItemClass,
                         ItemSchema.Size,
+                        ItemSchema.DateTimeSent,
+                        ItemSchema.DateTimeReceived,
                         ItemSchema.HasAttachments,
+                        EmailMessageSchema.Sender,
+                        EmailMessageSchema.ReceivedRepresenting,
                         EmailMessageSchema.IsRead);
 
+            CalendarPropertySet = new PropertySet(
+                        ItemSchema.Subject,
+                        ItemSchema.DateTimeCreated,
+                        ItemSchema.ParentFolderId,
+                        ItemSchema.ItemClass,
+                        ItemSchema.Size,
+                        ItemSchema.DateTimeSent,
+                        ItemSchema.DateTimeReceived,
+                        ItemSchema.HasAttachments,
+                        AppointmentSchema.Organizer,
+                        AppointmentSchema.RequiredAttendees,
+                        AppointmentSchema.OptionalAttendees
+                );
         }
 
         private static readonly PropertySet FolderPropertySet;
@@ -47,6 +67,8 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
         private static readonly PropertySet ItemPropertySet;
 
         private static readonly PropertySet EmailPropertySet;
+
+        private static readonly PropertySet CalendarPropertySet;
 
 
         public CancellationToken CancelToken
@@ -267,6 +289,19 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
         public void ImportItems(IEnumerable<ImportItemStatus> partition, Folder folder)
         {
             throw new NotImplementedException();
+        }
+
+        public int GetAllItemsCount()
+        {
+            var rootFolder = _ewsOperator.FolderBind(WellKnownFolderName.Root, BasePropertySet.IdOnly);
+            var folderView = new FolderView(1);
+            folderView.PropertySet = new PropertySet(FolderSchema.TotalCount);
+            folderView.Traversal = FolderTraversal.Shallow;
+            var searchFilter = new SearchFilter.IsEqualTo(FolderSchema.DisplayName, "AllItems");
+            var result = _ewsOperator.FindFolders(rootFolder.Id, searchFilter, folderView);
+            if (result.TotalCount != 1)
+                return -1;
+            return result.Folders[0].TotalCount;
         }
     }
 }

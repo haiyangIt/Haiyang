@@ -1,0 +1,5 @@
+bin
+obj
+.scmignore
+Arcserve.Office365.Exchange.DataProtect.Interface ref.csproj.user
+Arcserve.Office365.Exchange.DataProtect.Interface.csproj.user

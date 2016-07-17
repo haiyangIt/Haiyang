@@ -305,6 +305,12 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
             return ExportUploadHelper.ExportItemsPost(Enum.GetName(typeof(ExchangeVersion), service.RequestedServerVersion), items, EwsArgument, exportItemOper);
         }
 
+        internal void ImportItems(IEnumerable<ImportItemStatus> partition, Folder folder)
+        {
+            throw new NotImplementedException();
+            //return ExportUploadHelper.UploadItemsPost(Enum.GetName(typeof(ExchangeVersion), service.RequestedServerVersion), items, EwsArgument, exportItemOper);
+        }
+
         public virtual void ImportItem(string parentFolderId, Stream stream)
         {
             ExportUploadHelper.UploadItemPost(Enum.GetName(typeof(ExchangeVersion),
@@ -325,7 +331,7 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
             }, operationName, IsExceptionNeedSuspendRequest, IsExceptionCanRetry);
         }
 
-        private static string[] FindArray = new string[]
+        private static string[] SuspendArray = new string[]
         {
             "An existing connection was forcibly closed by the remote host",
             "The underlying connection was closed",
@@ -339,19 +345,22 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
             "The underlying connection was closed",
             "The mailbox database is temporarily unavailable",
             "The connection was closed.",
-            "Unexpected end of file has occurred"
+            "Unexpected end of file has occurred",
+            "Received an unexpected EOF or 0 bytes from the transport stream"
         };
 
         private static bool IsExceptionCanRetry(Exception e)
         {
-            return ((e is ServiceRequestException) ||
+            var result1 = ((e is ServiceRequestException) ||
                (e is WebException) ||
                (e is SocketException) ||
                (e is ServiceResponseException) ||
                (e is IOException) ||
-               (e is XmlException)) && (
-                   RetryArray.Any(e.Message.Contains)
-               );
+               (e is XmlException));
+            var result2 = RetryArray.Any(e.Message.Contains);
+            var result3 = (e is TimeoutException && e.Message == TimeOutOperatorCtrl.RetryMessage);
+
+            return (result1 && result2) || result3;
         }
 
         private static bool IsExceptionNeedSuspendRequest(Exception e)
@@ -361,7 +370,7 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
                 (e is SocketException) ||
                 (e is ServiceResponseException) ||
                 (e is IOException)) && (
-                    FindArray.Any(e.Message.Contains)
+                    SuspendArray.Any(e.Message.Contains)
                 );
         }
 

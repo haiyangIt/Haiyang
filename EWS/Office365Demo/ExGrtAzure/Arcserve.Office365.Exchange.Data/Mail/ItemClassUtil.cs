@@ -63,15 +63,29 @@ namespace Arcserve.Office365.Exchange.Data.Mail
             if (_itemClassDic.TryGetValue(itemClass, out result))
                 return result;
 
-            else if (itemClass.IndexOf("IPM.Appointment") >= 0 || itemClass == "IPM.Schedule.Meeting.Request")
+            else if (itemClass.IndexOf("IPM.Appointment") >= 0)
                 return ItemClass.Appointment;
 
-            else if(itemClass.IndexOf("REPORT.IPM.Note.Delayed.DR") >= 0)
+            else if (itemClass.IndexOf("IPM.Note") >= 0 )
             {
+                Log.LogFactory.LogInstance.WriteLog(Log.LogLevel.WARN, string.Format("treat this type {0} as a IPM.Note, please analysis the type, and modify code to support this item type:{0}", itemClass));
                 return ItemClass.Message;
             }
+            else if(itemClass.IndexOf("IPM.Schedule") >= 0)
+            {
+                Log.LogFactory.LogInstance.WriteLog(Log.LogLevel.WARN, string.Format("treat this type {0} as a IPM.Appointment, please analysis the type, and modify code to support this item type:{0}", itemClass));
+                return ItemClass.Appointment;
+            }
+            else if(itemClass.IndexOf("IPM.TASK") >= 0)
+            {
+                Log.LogFactory.LogInstance.WriteLog(Log.LogLevel.WARN, string.Format("treat this type {0} as a IPM.Task, please analysis the type, and modify code to support this item type:{0}", itemClass));
+                return ItemClass.Task;
+            }
             else
-                throw new NotSupportedException(string.Format("Modify code to support this item type:{0}", itemClass));
+            {
+                Log.LogFactory.LogInstance.WriteLog(Log.LogLevel.WARN, string.Format("treat this type {0} as a IPM.None, please analysis the type, and modify code to support this item type:{0}", itemClass));
+                return ItemClass.None;
+            }
         }
 
         public static string GetItemSuffix(this ItemClass itemClass)

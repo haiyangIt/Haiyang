@@ -32,7 +32,7 @@ namespace ExGrtAzure.Tests.SyncBackup
             folder = Path.Combine(folder, "Increment");
             SyncBackupTest.DeleteDirectory(folder);
 
-            CloudConfig.Instance.IsTestForDemo = false;
+            //CloudConfig.Instance.IsTestForDemo = false;
 
             // init backup and full backup
             InitIncrementBackup();

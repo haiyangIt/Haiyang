@@ -32,11 +32,11 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.Backup
         {
             LatestCatalogFile = lastCatalogFolder;
             StorageFolder = storageFolder;
-            if (CloudConfig.Instance.IsTestForDemo)
-            {
-                _catalogDbAccess = new CatalogTestAccess(newCatalogFolder, lastCatalogFolder, organizationName);
-            }
-            else
+            //if (CloudConfig.Instance.IsTestForDemo)
+            //{
+            //    _catalogDbAccess = new CatalogTestAccess(newCatalogFolder, lastCatalogFolder, organizationName);
+            //}
+            //else
                 _catalogDbAccess = new CatalogDbAccess(newCatalogFolder, lastCatalogFolder, organizationName);
             _catalogDbAccess.CloneSyncContext(this);
             _exportItemWriter = new ExportItemWriter(storageFolder);

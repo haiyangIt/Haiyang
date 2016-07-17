@@ -168,5 +168,20 @@ namespace ExGrtAzure.Tests
                 }
             }
         }
+
+        [TestMethod]
+        public void TestGetItemCounts()
+        {
+            var adpapter = CreatAdapter();
+            var org = new Arcserve.Office365.Exchange.Data.Account.OrganizationAdminInfo()
+            {
+                OrganizationName = "arcserve",
+                UserName = "MaopeiAdmin@AppProtection.onmicrosoft.com",
+                
+                UserPassword = "Caworld2@"
+            };
+            adpapter.GetExchangeService("MaopeiAdmin@AppProtection.onmicrosoft.com", org);
+            var result = adpapter.GetAllItemsCount();
+        }
     }
 }

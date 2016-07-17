@@ -93,6 +93,36 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data
             get; set;
         }
 
+        public bool? HasAttachment
+        {
+            get; set;
+        }
+
+        public bool? IsImportant
+        {
+            get; set;
+        }
+
+        public string Sender
+        {
+            get; set;
+        }
+
+        public string Receiver
+        {
+            get; set;
+        }
+
+        public DateTime SendTime
+        {
+            get; set;
+        }
+
+        public DateTime ReceiveTime
+        {
+            get; set;
+        }
+
         public IItemData Clone()
         {
             throw new NotImplementedException();
@@ -123,7 +153,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data
             itemName = string.Format("{0}_{1}.bin", item.CreateTime.Value.ToString("yyyyMMdd_HHmmss"), itemName);
 
             string parentFolderPath = string.Empty;
-            foreach(var folderPathItem in folderPath)
+            foreach (var folderPathItem in folderPath)
             {
                 parentFolderPath = Path.Combine(parentFolderPath, folderPathItem.GetValidFolderName());
             }

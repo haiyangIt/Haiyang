@@ -1,17 +1,31 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Diagnostics;
-using Arcserve.Office365.Exchange.DataProtect.Tool.Result;
-using Arcserve.Office365.Exchange.Tool;
 using System.IO;
-using Arcserve.Office365.Exchange.DataProtect.Tool.Data;
-using Arcserve.Office365.Exchange.Data.Mail;
 
 namespace ExGrtAzure.Tests
 {
     [TestClass]
     public class CmdProcessCallTest
     {
+        public string ProcessPath
+        {
+            get
+            {
+                var path = AppDomain.CurrentDomain.BaseDirectory;
+                DirectoryInfo info = new DirectoryInfo(path);
+                do
+                {
+                    info = info.Parent;
+                } while (info.Name != "Test");
+
+                info = info.Parent;
+                path = Path.Combine(info.FullName, "packages");
+                path = Path.Combine(path, "Arcserve_Office365_dll");
+                return Path.Combine(path, "Arcserve.Office365.Exchange.DataProtect.Tool.exe");
+            }
+        }
+
         [TestMethod]
         public void TestCallGetAllMailbox()
         {
@@ -19,7 +33,7 @@ namespace ExGrtAzure.Tests
                 "GetAllMailbox",
                 "devO365admin@arcservemail.onmicrosoft.com",
                 "JackyMao1!");
-            ProcessStartInfo startInfo = new ProcessStartInfo("Arcserve.Office365.Exchange.DataProtect.Tool.exe", arg);
+            ProcessStartInfo startInfo = new ProcessStartInfo(ProcessPath, arg);
             startInfo.CreateNoWindow = true;
             startInfo.UseShellExecute = false;
             startInfo.RedirectStandardOutput = true;
@@ -41,7 +55,7 @@ namespace ExGrtAzure.Tests
                 "GetAllMailbox",
                 "devO365admin@arcservemail.onmicrosoft.com",
                 "JackyMao1");
-            ProcessStartInfo startInfo = new ProcessStartInfo("Arcserve.Office365.Exchange.DataProtect.Tool.exe", arg);
+            ProcessStartInfo startInfo = new ProcessStartInfo(ProcessPath, arg);
             startInfo.CreateNoWindow = true;
             startInfo.UseShellExecute = false;
             startInfo.RedirectStandardOutput = true;
@@ -63,7 +77,7 @@ namespace ExGrtAzure.Tests
                 "GetAllMailbox",
                 "devO365ad@arcservemail.onmicrosoft.com",
                 "JackyMao1!");
-            ProcessStartInfo startInfo = new ProcessStartInfo("Arcserve.Office365.Exchange.DataProtect.Tool.exe", arg);
+            ProcessStartInfo startInfo = new ProcessStartInfo(ProcessPath, arg);
             startInfo.CreateNoWindow = true;
             startInfo.UseShellExecute = false;
             startInfo.RedirectStandardOutput = true;
@@ -85,7 +99,7 @@ namespace ExGrtAzure.Tests
                 "GetAllMailbox",
                 "devO365admin@arcservemail.onmicrosoft.com",
                 "JackyMao1!");
-            ProcessStartInfo startInfo = new ProcessStartInfo("Arcserve.Office365.Exchange.DataProtect.Tool.exe", arg);
+            ProcessStartInfo startInfo = new ProcessStartInfo(ProcessPath, arg);
             startInfo.CreateNoWindow = true;
             startInfo.UseShellExecute = false;
             startInfo.RedirectStandardOutput = true;
@@ -107,7 +121,7 @@ namespace ExGrtAzure.Tests
                 "GetAllMailbox",
                 "devO365admin@arcservemail.onmicrosoft.com",
                 "JackyMao1!");
-            ProcessStartInfo startInfo = new ProcessStartInfo("Arcserve.Office365.Exchange.DataProtect.Tool.exe", arg);
+            ProcessStartInfo startInfo = new ProcessStartInfo(ProcessPath, arg);
             startInfo.CreateNoWindow = true;
             startInfo.UseShellExecute = false;
             startInfo.RedirectStandardOutput = true;
@@ -123,12 +137,92 @@ namespace ExGrtAzure.Tests
         }
 
         [TestMethod]
-        public void XmlSerialize()
+        public void TestCallValidateUserSuccess()
         {
-            MailboxList list = new MailboxList();
-            list.Add(new Mailbox() { DisplayName = "1", Id = "2", MailAddress = "3", Name = "4" });
-            var result = new GetAllMailboxResult(list);
-            var str = ResultBase.Serialize(result);
+            var arg = string.Format("-JobType:{0} -AdminUserName:{1} -AdminPassword:{2}",
+                   "ValidateUser",
+                   "devO365admin@arcservemail.onmicrosoft.com",
+                   "JackyMao1!");
+            ProcessStartInfo startInfo = new ProcessStartInfo(ProcessPath, arg);
+            startInfo.CreateNoWindow = true;
+            startInfo.UseShellExecute = false;
+            startInfo.RedirectStandardOutput = true;
+            using (var p = Process.Start(startInfo))
+            {
+                using (StreamReader reader = p.StandardOutput)
+                {
+                    var str = reader.ReadToEnd();
+                    Console.WriteLine(str);
+                    Debug.WriteLine(str);
+                }
+            }
+
+        }
+
+        [TestMethod]
+        public void TestCallValidateUserPasswordWrong()
+        {
+            var arg = string.Format("-JobType:{0} -AdminUserName:{1} -AdminPassword:{2}",
+                "ValidateUser",
+                "devO365admin@arcservemail.onmicrosoft.com",
+                "JackyMao1");
+            ProcessStartInfo startInfo = new ProcessStartInfo(ProcessPath, arg);
+            startInfo.CreateNoWindow = true;
+            startInfo.UseShellExecute = false;
+            startInfo.RedirectStandardOutput = true;
+            using (var p = Process.Start(startInfo))
+            {
+                using (StreamReader reader = p.StandardOutput)
+                {
+                    var str = reader.ReadToEnd();
+                    Console.WriteLine(str);
+                    Debug.WriteLine(str);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void TestCallValidateUserUserWrong()
+        {
+            var arg = string.Format("-JobType:{0} -AdminUserName:{1} -AdminPassword:{2}",
+                "ValidateUser",
+                "devO365admi@arcservemail.onmicrosoft.com",
+                "JackyMao1!");
+            ProcessStartInfo startInfo = new ProcessStartInfo(ProcessPath, arg);
+            startInfo.CreateNoWindow = true;
+            startInfo.UseShellExecute = false;
+            startInfo.RedirectStandardOutput = true;
+            using (var p = Process.Start(startInfo))
+            {
+                using (StreamReader reader = p.StandardOutput)
+                {
+                    var str = reader.ReadToEnd();
+                    Console.WriteLine(str);
+                    Debug.WriteLine(str);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void TestCallValidateUserImpersonateWrong()
+        {
+            var arg = string.Format("-JobType:{0} -AdminUserName:{1} -AdminPassword:{2} -ConnectMailbox:{3}",
+                "ValidateUser",
+                "devO365admin@arcservemail.onmicrosoft.com",
+                "JackyMao1", "Hualiang.Wang@arcserve.com");
+            ProcessStartInfo startInfo = new ProcessStartInfo(ProcessPath, arg);
+            startInfo.CreateNoWindow = true;
+            startInfo.UseShellExecute = false;
+            startInfo.RedirectStandardOutput = true;
+            using (var p = Process.Start(startInfo))
+            {
+                using (StreamReader reader = p.StandardOutput)
+                {
+                    var str = reader.ReadToEnd();
+                    Console.WriteLine(str);
+                    Debug.WriteLine(str);
+                }
+            }
         }
     }
 }

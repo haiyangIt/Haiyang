@@ -120,6 +120,11 @@ namespace Arcserve.Office365.Exchange.Tool
         {
             try
             {
+                if (CloudConfig.Instance.ReturnSuccessWithoutBackup)
+                {
+                    return;
+                }
+
                 string lastCatalogFolder = string.Empty;
                 if (IsFull.Value != "1")
                 {
@@ -141,7 +146,7 @@ namespace Arcserve.Office365.Exchange.Tool
                 }
 
                 var tempFolder = Path.GetTempPath();
-                var currentCatalogFolder = Path.Combine(tempFolder, DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss"));
+                var currentCatalogFolder = Path.Combine(tempFolder, Guid.NewGuid().ToString());
                 var newCatalogFolder = Path.Combine(currentCatalogFolder, "New");
                 Directory.CreateDirectory(newCatalogFolder);
                 var oldCatalogFolder = string.Empty;
@@ -154,6 +159,12 @@ namespace Arcserve.Office365.Exchange.Tool
 
                 LogFactory.LogInstance.WriteLog(LogLevel.DEBUG, string.Format("newCatatlogFolder:{0}, oldCatalogFolder:{1}.", newCatalogFolder, oldCatalogFolder));
 
+                var workFolder = WorkFolder.Value;
+                if (CloudConfig.Instance.IsUserWorkFolder)
+                {
+                    workFolder = CloudConfig.Instance.WorkFolder;
+                    LogFactory.LogInstance.WriteLog(LogLevel.DEBUG, string.Format("use work folder in config:{0}.", workFolder));
+                }
                 using (var catalogAccess = new CatalogAccess(newCatalogFolder, oldCatalogFolder, WorkFolder.Value, AdminUserName.Value.GetOrganization()))
                 {
                     var taskSyncContextBase = DataProtectFactory.Instance.NewDefaultTaskSyncContext();
@@ -181,8 +192,10 @@ namespace Arcserve.Office365.Exchange.Tool
 
                 int retry = 0;
                 bool isDelete = false;
-                do {
-                    try {
+                do
+                {
+                    try
+                    {
                         Directory.Delete(currentCatalogFolder, true);
                         isDelete = true;
                     }
@@ -191,8 +204,7 @@ namespace Arcserve.Office365.Exchange.Tool
                         LogFactory.LogInstance.WriteException(LogLevel.DEBUG, "Delete folder error.", e, e.Message);
                         System.Threading.Thread.Sleep(2000);
                     }
-                }
-                while (retry++ < 3);
+                }while (retry++ < 3);
                 if (!isDelete)
                     LogFactory.LogInstance.WriteLog(LogLevel.DEBUG, string.Format("delete folder {0} fails.", currentCatalogFolder));
             }

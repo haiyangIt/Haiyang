@@ -89,8 +89,7 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data
         {
             get; set;
         }
-
-        [NotMapped]
+        
         [MaxLength(512)]
         [CaseSensitive]
         public string RootFolderId

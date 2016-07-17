@@ -102,6 +102,7 @@ namespace Arcserve.Office365.Exchange.Topaz
         {
         }
 
+        public static string RetryMessage = string.Format("Time out, the operation cost more than {0} seconds", CloudConfig.Instance.RequestTimeOut);
         private object evLock = new object();
         public override void DoAction(Action action)
         {
@@ -134,7 +135,7 @@ namespace Arcserve.Office365.Exchange.Topaz
 
                 if (!ev.WaitOne(CloudConfig.Instance.RequestTimeOut))
                 {
-                    exception = new TimeoutException();
+                    exception = new TimeoutException(RetryMessage);
                     LogFactory.LogInstance.WriteException(LogLevel.ERR, GetMessage("time out"), exception, "time out");
                 }
             }
@@ -204,15 +205,16 @@ namespace Arcserve.Office365.Exchange.Topaz
                 }
                 catch (Exception e)
                 {
-                    LogFactory.LogInstance.WriteException(LogLevel.WARN,
-                        GetMessage(string.Format("[{0}]th operation failed.{1}", retryCount, retryCount < 3 ? string.Format("will do [{0}]th try", retryCount + 1) : "")),
-                        e, e.Message);
+
                     ex = e;
 
                     if (_isRetry(e))
                     {
                         if (retryCount < MaxRetryCount)
                         {
+                            LogFactory.LogInstance.WriteException(LogLevel.WARN,
+                        GetMessage(string.Format("[{0}]th operation failed.{1}", retryCount, retryCount < 3 ? string.Format("will do [{0}]th try", retryCount + 1) : "")),
+                        e, e.Message);
                             try
                             {
                                 _afterFail.Invoke(e);
@@ -224,7 +226,12 @@ namespace Arcserve.Office365.Exchange.Topaz
                         }
                     }
                     else
+                    {
+                        LogFactory.LogInstance.WriteException(LogLevel.ERR,
+                        GetMessage(string.Format("[{0}]th operation failed.", retryCount)),
+                        e, e.Message);
                         throw e;
+                    }
                 }
             } while (retryCount < MaxRetryCount && !isSuccess);
 

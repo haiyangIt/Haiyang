@@ -3,6 +3,7 @@ using System.Net;
 using Microsoft.Exchange.WebServices.Data;
 using Arcserve.Office365.Exchange.Log;
 using Arcserve.Office365.Exchange.EwsApi.Interface;
+using Arcserve.Office365.Exchange.Ex;
 
 namespace Arcserve.Office365.Exchange.EwsApi.Impl.Common
 {
@@ -225,6 +226,31 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Common
                 try
                 {
                     TestExchangeService(service);
+                }
+                catch (ServiceRequestException ex)
+                {
+                    if (ex.HResult == -2146233088)
+                    {
+                        if (ex.Message.IndexOf("(401) Unauthorized.") >= 0)
+                        {
+                            throw new AccountErrorException("password invalid.", ex);
+                        }
+                        else if (ex.Message.IndexOf("(404) Not Found") >= 0)
+                        {
+                            throw new AccountErrorException("username invalid.", ex);
+                        }
+                        
+                    }
+                }
+                catch(ServiceResponseException ex)
+                {
+                    if(ex.HResult == -2146233088)
+                    {
+                        if(ex.ErrorCode == ServiceError.ErrorImpersonateUserDenied)
+                        {
+                            throw new AccountImpersonateException(ex.Message, ex);
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {

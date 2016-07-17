@@ -116,7 +116,7 @@ namespace MyInterop
             if (_openFileErrorCode != 0)
                 _rootStorage = null;
             else
-            {
+            {   
                 RootStorage.SetClass(rclsid);
             }
         }

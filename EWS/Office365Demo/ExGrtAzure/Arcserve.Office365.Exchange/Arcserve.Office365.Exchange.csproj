@@ -65,6 +65,12 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>..\packages\Arcserve.Office365.Exchange.Assemly\ArcserveOffice365.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.WindowsAzure.Configuration, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.WindowsAzure.ConfigurationManager.3.2.1\lib\net40\Microsoft.WindowsAzure.Configuration.dll</HintPath>
@@ -84,7 +90,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\packages\Arcserve.Office365.Exchange.Assemly\ArcserveOffice365.snk">
+    </None>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="..\..\H\ARCAssemblyInfo.cs" />
+    <Compile Include="Ex\AccountErrorException.cs" />
     <Compile Include="FactoryBase.cs" />
     <Compile Include="Log\ILog.cs" />
     <Compile Include="Log\Impl\DefaultEwsTraceLog.cs" />

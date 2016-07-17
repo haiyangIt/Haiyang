@@ -119,7 +119,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.AsyncBackup
 
         public ICollection<IMailboxDataSync> GetIntersectionMailboxCollection(ICollection<IMailboxDataSync> mailboxInExchange, ICollection<IMailboxDataSync> mailboxInPlan)
         {
-            if (CloudConfig.Instance.IsTestForDemo)
+            if ( false) //CloudConfig.Instance.IsTestForDemo)
             {
                 var result = new List<IMailboxDataSync>(mailboxInExchange.Count);
 

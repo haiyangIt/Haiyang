@@ -1,0 +1,5 @@
+Arcserve.Office365.Exchange.StorageAccess.MountSession ref.csproj.user
+Arcserve.Office365.Exchange.StorageAccess.MountSession.csproj.user
+.scmignore
+obj
+bin

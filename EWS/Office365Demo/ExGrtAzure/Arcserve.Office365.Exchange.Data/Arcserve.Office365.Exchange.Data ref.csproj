@@ -65,6 +65,12 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>..\packages\Arcserve.Office365.Exchange.Assemly\ArcserveOffice365.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
@@ -88,6 +94,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\packages\Arcserve.Office365.Exchange.Assemly\ArcserveOffice365.snk" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="Account\OrganizationAdminInfo.cs" />
     <Compile Include="..\..\H\ARCAssemblyInfo.cs" />
     <Compile Include="CustomApplicationDbConfiguration.cs" />
@@ -109,6 +118,9 @@
     <Compile Include="Org\ICatalogInfo.cs" />
     <Compile Include="Org\ICatalogJob.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Query\QueryCondition.cs" />
+    <Compile Include="Query\QueryPage.cs" />
+    <Compile Include="Query\QueryResult.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

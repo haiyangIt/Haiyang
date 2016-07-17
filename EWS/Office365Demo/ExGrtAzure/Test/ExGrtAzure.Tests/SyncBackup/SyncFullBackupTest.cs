@@ -36,6 +36,24 @@ namespace ExGrtAzure.Tests
             DeleteDirectory(dir);
         }
 
+        public string ProcessPath
+        {
+            get
+            {
+                var path = AppDomain.CurrentDomain.BaseDirectory;
+                DirectoryInfo info = new DirectoryInfo(path);
+                do
+                {
+                    info = info.Parent;
+                } while (info.Name != "Test");
+
+                info = info.Parent;
+                path = Path.Combine(info.FullName, "packages");
+                path = Path.Combine(path, "Arcserve_Office365_dll");
+                return Path.Combine(path, "Arcserve.Office365.Exchange.DataProtect.Tool.exe");
+            }
+        }
+
         public static void DeleteDirectory(string folder)
         {
             if (Directory.Exists(folder))
@@ -61,20 +79,46 @@ namespace ExGrtAzure.Tests
             string folder = AppDomain.CurrentDomain.BaseDirectory;
             folder = Path.Combine(folder, "Catalog1");
             var workFolder = "\"" + folder + "\"";
+
+            var catalogFolder = Path.Combine(folder, "CAT");
+            var currentCatalogFolder = "\"" + catalogFolder + "\"";
             DeleteDirectory(folder);
-            var arg = string.Format("-JobType:{0} -AdminUserName:{1} -AdminPassword:{2} -Mailboxes:{3} -WorkFolder:{4} -ItemCount:{5}",
+            var arg = string.Format("-JobType:{0} -AdminUserName:{1} -AdminPassword:{2} -Mailboxes:{3} -WorkFolder:{4} -IsFull:1 -CurrentCatalogFolder:{5}",
                 "ExchangeBackup",
-                "devO365admin@arcservemail.onmicrosoft.com",
-                "JackyMao1!",
-                "haiyang.ling@arcserve.com",
-                workFolder,
-                "4");
-            ProcessStartInfo startInfo = new ProcessStartInfo("Arcserve.Office365.Exchange.DataProtect.Tool.exe", arg);
+                "shuo@dreamsoft.onmicrosoft.com", "cnbjrdqa1!",
+                "shuo@dreamsoft.onmicrosoft.com",
+                workFolder, currentCatalogFolder);
+            ProcessStartInfo startInfo = new ProcessStartInfo(ProcessPath, arg);
             var p = Process.Start(startInfo);
             p.WaitForExit();
+            int result = p.ExitCode;
         }
 
-        
+        [TestMethod]
+        public void TestCallBackupProcessWithoutImpersonate()
+        {
+            //var workFolder = String.Format(@"""{0}""", "E:\\10 Test\\01O365Test\\Catalog10");
+
+            string folder = AppDomain.CurrentDomain.BaseDirectory;
+            folder = Path.Combine(folder, "Catalog2");
+            var workFolder = "\"" + folder + "\"";
+
+            var catalogFolder = Path.Combine(folder, "CAT");
+            var currentCatalogFolder = "\"" + catalogFolder + "\"";
+            DeleteDirectory(folder);
+            var arg = string.Format("-JobType:{0} -AdminUserName:{1} -AdminPassword:{2} -Mailboxes:{3} -WorkFolder:{4} -IsFull:1 -CurrentCatalogFolder:{5}",
+                 "ExchangeBackup",
+                "devO365admin@arcservemail.onmicrosoft.com",
+                "JackyMao1!",
+                "jacky.mao@arcserve.com",
+                 workFolder, currentCatalogFolder);
+            ProcessStartInfo startInfo = new ProcessStartInfo(ProcessPath, arg);
+            var p = Process.Start(startInfo);
+            p.WaitForExit();
+            int result = p.ExitCode;
+        }
+
+
         [TestMethod]
         public void TestFullBackup()
         {
@@ -85,13 +129,13 @@ namespace ExGrtAzure.Tests
                 using (var catalogAccess = new CatalogAccess("", "", workFolder, "arcserve"))
                 {
                     var taskSyncContextBase = DataProtectFactory.Instance.NewDefaultTaskSyncContext();
-                    var dataClient = new DataFromClient(null, 4); 
+                    var dataClient = new DataFromClient(null, 4);
                     dataClient.InitTaskSyncContext(taskSyncContextBase);
                     catalogAccess.InitTaskSyncContext(taskSyncContextBase);
 
                     var ewsAdapter = EwsFactory.Instance.NewEwsAdapter();
                     ewsAdapter.InitTaskSyncContext(taskSyncContextBase);
-                    var dataConvert = new DataConvert(); 
+                    var dataConvert = new DataConvert();
                     var adminInfo = new Arcserve.Office365.Exchange.Data.Account.OrganizationAdminInfo()
                     {
                         OrganizationName = "arcserve",
@@ -118,17 +162,71 @@ namespace ExGrtAzure.Tests
         //}
 
         [TestMethod]
-        public void TestSyncBackup()
+        public void TestSync1Backupdreamsoftshuo()
+        {
+            Backup("shuo@dreamsoft.onmicrosoft.com", "cnbjrdqa1!", new DataFromClientWithMailboxes(new List<string>() { "shuo@dreamsoft.onmicrosoft.com" }));
+        }
+
+        [TestMethod]
+        public void TestSync1BackupAppProtection()
+        {
+            Backup("MaopeiAdmin@AppProtection.onmicrosoft.com", "Caworld2@", new DataFromClientWithMailboxes(new List<string>() { "MaopeiAdmin@AppProtection.onmicrosoft.com" }));
+        }
+
+        [TestMethod]
+        public void TestSync1BackupArcserveJacky()
+        {
+            Backup("ArcserveJacky@ArcserveJacky.onmicrosoft.com", "Arcserve1!", new DataFromClientWithMailboxes(new List<string>() { "ArcserveJacky@ArcserveJacky.onmicrosoft.com" }));
+        }
+
+        [TestMethod]
+        public void TestSyncPerBackupJackyTestUS()
+        {
+            Backup("administrator@JackyTestUS.onmicrosoft.com", "Arcserve1!", new DataFromClientWithMailboxes(new List<string>() { "administrator@JackyTestUS.onmicrosoft.com" }));
+        }
+        [TestMethod]
+        public void TestSync1Backupdreamsoftlina()
+        {
+            Backup("lina@dreamsoft.onmicrosoft.com", "cnbjrdqa1!", new DataFromClientWithMailboxes(new List<string>() { "lina@dreamsoft.onmicrosoft.com" }));
+        }
+
+        [TestMethod]
+        public void TestSync2BackupAppOnlineSupport()
+        {
+            Backup("Lina@AppOnlineSupport.onmicrosoft.com", "cnbjrdqa1@", new DataFromClientWithMailboxes(new List<string>() { "Lina@AppOnlineSupport.onmicrosoft.com", "User1@AppOnlineSupport.onmicrosoft.com" }));
+        }
+
+        [TestMethod]
+        public void TestSyncNoUserBackupAppOnlineSupport()
+        {
+            Backup("haiyang.ling@arcserve.com", "LhyWrf5%5", new DataFromClientWithMailboxes(new List<string>() { "jacky.mao@arcserve.com" }));
+        }
+
+        [TestMethod]
+        public void TestSyncImpersonateBackupAppOnlineSupport()
+        {
+            Backup("devO365admin@arcservemail.onmicrosoft.com",
+                "JackyMao1!", new DataFromClientWithMailboxes(new List<string>() { "jacky.mao@arcserve.com" }));
+        }
+
+        public void Backup(string userName, string password, DataFromClient dataFromClient)
         {
             try
             {
-                var newCatalogInfo = GetNewCatalogFile();
-                var oldCatalogInfo = GetOldCatalogFile();
-                ClearEnv(newCatalogInfo);
-                using (var catalogAccess = new CatalogAccess(newCatalogInfo.WorkFolder, oldCatalogInfo.WorkFolder, newCatalogInfo.DataFolder, "arcserve"))
+                string folder = AppDomain.CurrentDomain.BaseDirectory;
+                folder = Path.Combine(folder, "Catalog1");
+
+                var catalogFolder = Path.Combine(folder, "CAT");
+
+                if (Directory.Exists(folder))
+                {
+                    Directory.Delete(folder, true);
+                }
+
+                using (var catalogAccess = new CatalogAccess(catalogFolder, string.Empty, folder, "arcserve"))
                 {
                     var taskSyncContextBase = DataProtectFactory.Instance.NewDefaultTaskSyncContext();
-                    var dataClient = new DataFromClientFilterFolderByDisplayName();
+                    var dataClient = dataFromClient;
                     dataClient.InitTaskSyncContext(taskSyncContextBase);
                     catalogAccess.InitTaskSyncContext(taskSyncContextBase);
 
@@ -138,8 +236,8 @@ namespace ExGrtAzure.Tests
                     var adminInfo = new Arcserve.Office365.Exchange.Data.Account.OrganizationAdminInfo()
                     {
                         OrganizationName = "arcserve",
-                        UserName = "devO365admin@arcservemail.onmicrosoft.com",
-                        UserPassword = "JackyMao1!"
+                        UserName = userName,
+                        UserPassword = password
                     };
                     using (var backupFlow = DataProtectFactory.Instance.NewBackupInstance(catalogAccess, ewsAdapter, dataClient, dataConvert, adminInfo))
                     {
@@ -206,7 +304,7 @@ namespace ExGrtAzure.Tests
                 "Arcserve1!",
                 "ArcserveJacky@ArcserveJacky.onmicrosoft.com;Jacky.Mao@ArcserveJacky.onmicrosoft.com",
                 workFolder);
-            ProcessStartInfo startInfo = new ProcessStartInfo("Arcserve.Office365.Exchange.DataProtect.Tool.exe", arg);
+            ProcessStartInfo startInfo = new ProcessStartInfo(ProcessPath, arg);
             startInfo.CreateNoWindow = true;
             startInfo.UseShellExecute = false;
             startInfo.RedirectStandardOutput = true;
@@ -273,7 +371,7 @@ namespace ExGrtAzure.Tests
                 DataFolder = workFolder,
                 CatalogFilePath = fileName
             };
-            
+
         }
 
         public CatalogInfo GetOldCatalogFile()
@@ -479,6 +577,22 @@ namespace ExGrtAzure.Tests
                 "ArcserveJacky@ArcserveJacky.onmicrosoft.com",
                 "Jacky.Mao@ArcserveJacky.onmicrosoft.com"
             };
+            return funcGetAllMailboxFromExchange(mailboxes);
+        }
+    }
+
+    public class DataFromClientWithMailboxes: DataFromClient
+    {
+        public DataFromClientWithMailboxes(IEnumerable<string> mailboxes)
+        {
+            Mailboxes = mailboxes;
+        }
+
+        private IEnumerable<string> Mailboxes; 
+
+        public override ICollection<IMailboxDataSync> GetAllMailboxFromPlanAndExchange(Func<IEnumerable<string>, ICollection<IMailboxDataSync>> funcGetAllMailboxFromExchange)
+        {
+            var mailboxes = new List<string>(Mailboxes);
             return funcGetAllMailboxFromExchange(mailboxes);
         }
     }

@@ -1,0 +1,5 @@
+bin
+obj
+.scmignore
+Arcserve.Exchange.FastTransferUtil ref.csproj.user
+Arcserve.Exchange.FastTransferUtil.csproj.user

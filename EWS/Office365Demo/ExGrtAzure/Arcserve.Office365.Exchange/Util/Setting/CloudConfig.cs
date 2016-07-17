@@ -416,19 +416,42 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             set { }
         }
 
-        public virtual bool IsTestForDemo
+        public virtual string WorkFolder
         {
             get
             {
-                int result = 1;
-                if (int.TryParse(CloudConfigurationManager.GetSetting("IsTestForDemo"), out result))
+                if (IsUserWorkFolder)
+                {
+                    string result = Path.GetTempPath();
+                    var config = CloudConfigurationManager.GetSetting("WorkFolder");
+                    if (string.IsNullOrEmpty(config))
+                        return result;
+                    return config;
+                }
+                else
+                {
+                    return string.Empty;
+                }
+            }
+            set
+            {
+            }
+        }
+
+        public virtual bool IsUserWorkFolder
+        {
+            get
+            {
+                int result = 0;
+                if (int.TryParse(CloudConfigurationManager.GetSetting("IsUserWorkFolder"), out result))
+                {
                     return result == 1;
+                }
                 return false;
             }
             set { }
         }
 
-        public virtual string WorkFolder { get; set; }
         public virtual int SuspendRequestTimeAfterThrowSpecificException
         {
             get
@@ -454,7 +477,8 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             { }
         }
 
-        public virtual int MaxDegreeOfParallelismForFolderChanges {
+        public virtual int MaxDegreeOfParallelismForFolderChanges
+        {
             get
             {
                 int result = 10;
@@ -466,7 +490,8 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             {
             }
         }
-        public virtual int MaxDegreeOfParallelismForFolder {
+        public virtual int MaxDegreeOfParallelismForFolder
+        {
             get
             {
                 int result = 4;
@@ -479,7 +504,19 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             }
         }
 
-        public virtual int BatchLoadItemsCountForRestore { get; set; }
+        public virtual int BatchLoadItemsCountForRestore
+        {
+            get
+            {
+                int result = 20;
+                if (int.TryParse(CloudConfigurationManager.GetSetting("BatchLoadItemsCountForRestore"), out result))
+                    return result;
+                return 20;
+            }
+            set
+            {
+            }
+        }
         public virtual string SqlServerVersion
         {
             get
@@ -509,7 +546,20 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             {
             }
         }
-        
+
+        public virtual bool ReturnSuccessWithoutBackup
+        {
+            get
+            {
+                int result = 0;
+                if (int.TryParse(CloudConfigurationManager.GetSetting("ReturnSuccessWithoutBackup"), out result))
+                {
+                    return result == 1;
+                }
+                return false;
+            }
+            set { }
+        }
     }
 
     public class CloudConfigCache : CloudConfig
@@ -575,7 +625,6 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             //StorageConnectString = base.StorageConnectString;
 
             IsEwsTraceLog = base.IsEwsTraceLog;
-            IsTestForDemo = base.IsTestForDemo;
             BatchSaveToCatalogCount = base.BatchSaveToCatalogCount;
             WorkFolder = base.WorkFolder;
             SuspendRequestTimeAfterThrowSpecificException = base.SuspendRequestTimeAfterThrowSpecificException;
@@ -584,7 +633,25 @@ namespace Arcserve.Office365.Exchange.Util.Setting
             MaxDegreeOfParallelismForMailbox = base.MaxDegreeOfParallelismForMailbox;
             SqlServerVersion = base.SqlServerVersion;
             DbType = base.DbType;
+            IsUserWorkFolder = base.IsUserWorkFolder;
+            BatchLoadItemsCountForRestore = base.BatchLoadItemsCountForRestore;
+            ReturnSuccessWithoutBackup = base.ReturnSuccessWithoutBackup;
         }
+
+        public override bool ReturnSuccessWithoutBackup
+        {
+            get; set;
+        }
+
+        public override bool IsUserWorkFolder
+        {
+            get; set;
+        }
+        public override int BatchLoadItemsCountForRestore
+        {
+            get; set;
+        }
+
         public override string DbType
         {
             get; set;
@@ -611,10 +678,6 @@ namespace Arcserve.Office365.Exchange.Util.Setting
         }
 
         public override int SuspendRequestTimeAfterThrowSpecificException
-        {
-            get; set;
-        }
-        public override bool IsTestForDemo
         {
             get; set;
         }

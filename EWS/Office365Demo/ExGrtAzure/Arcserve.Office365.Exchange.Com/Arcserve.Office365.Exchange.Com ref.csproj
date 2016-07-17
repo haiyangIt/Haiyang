@@ -20,7 +20,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <RegisterForComInterop>true</RegisterForComInterop>
+    <RegisterForComInterop>false</RegisterForComInterop>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -34,7 +34,7 @@
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>ArcserveOffice365.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>..\packages\Arcserve.Office365.Exchange.Assemly\ArcserveOffice365.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -49,19 +49,34 @@
   <ItemGroup>
     <Compile Include="..\..\H\ARCAssemblyInfo.cs" />
     <Compile Include="IBackupUtil.cs" />
+    <Compile Include="Impl\FolderResultItem.cs" />
+    <Compile Include="Impl\MailboxResultItem.cs" />
+    <Compile Include="Impl\MailResultItem.cs" />
+    <Compile Include="Impl\Office365ComFactory.cs" />
+    <Compile Include="Impl\QueryCatalog.cs" />
+    <Compile Include="Impl\QueryCondition.cs" />
+    <Compile Include="Impl\QueryResult.cs" />
+    <Compile Include="Impl\ResultItem.cs" />
+    <Compile Include="IOffice365ComFactory.cs" />
+    <Compile Include="IQueryCatalog.cs" />
+    <Compile Include="IQueryCondition.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ArcserveOffice365.snk" />
+    <None Include="..\packages\Arcserve.Office365.Exchange.Assemly\ArcserveOffice365.snk" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Arcserve.Office365.Exchange.DataProtect.Interface\Arcserve.Office365.Exchange.DataProtect.Interface ref.csproj">
+      <Project>{6f4d7ebe-74c0-4992-a95c-7cadb41f3590}</Project>
+      <Name>Arcserve.Office365.Exchange.DataProtect.Interface ref</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Arcserve.Office365.Exchange.Data\Arcserve.Office365.Exchange.Data ref.csproj">
       <Project>{2f89d7da-1138-4e24-bed3-caaf1df77465}</Project>
       <Name>Arcserve.Office365.Exchange.Data ref</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Arcserve.Office365.Exchange.EwsApi\Arcserve.Office365.Exchange.EwsApi ref.csproj">
-      <Project>{b732dc73-83af-4884-9d61-2661f7ee7e5f}</Project>
-      <Name>Arcserve.Office365.Exchange.EwsApi ref</Name>
+    <ProjectReference Include="..\Arcserve.Office365.Exchange.StorageAccess.MountSession\Arcserve.Office365.Exchange.StorageAccess.MountSession ref.csproj">
+      <Project>{b8023674-7877-41a0-8ca4-fd34509eb28b}</Project>
+      <Name>Arcserve.Office365.Exchange.StorageAccess.MountSession ref</Name>
     </ProjectReference>
     <ProjectReference Include="..\Arcserve.Office365.Exchange\Arcserve.Office365.Exchange ref.csproj">
       <Project>{454462cc-dae8-48ab-b609-8ec07666f715}</Project>
@@ -69,6 +84,20 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>gacutil /u "$(ProjectDir)..\packages\Arcserve_Office365_dll\$(TargetFileName)"
+
+%25SystemRoot%25\Microsoft.NET\Framework\v4.0.30319\regasm /unregister "$(ProjectDir)..\packages\Arcserve_Office365_dll\$(TargetFileName)"
+
+xcopy  "$(ProjectDir)$(OutDir)*" "$(ProjectDir)..\packages\Arcserve_Office365_dll" /s /i /y
+gacutil /i "$(ProjectDir)..\Arcserve_Office365_dll\$(TargetFileName)"
+
+
+
+
+%25SystemRoot%25\Microsoft.NET\Framework\v4.0.30319\regasm "$(ProjectDir)..\packages\Arcserve_Office365_dll\$(TargetFileName)" /tlb:$(ProjectDir)..\packages\Arcserve.Office365.Exchange.Assemly\$(TargetName).tlb
+</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
