@@ -1,5 +1,0 @@
-bin
-obj
-.scmignore
-Arcserve.Office365.Exchange.DataProtect.Impl ref.csproj.user
-Arcserve.Office365.Exchange.DataProtect.Impl.csproj.user
