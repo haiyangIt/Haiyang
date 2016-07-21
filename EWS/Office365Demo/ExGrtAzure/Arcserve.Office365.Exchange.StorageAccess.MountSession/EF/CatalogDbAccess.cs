@@ -17,6 +17,7 @@ using System.Data.SqlClient;
 using System.Diagnostics;
 using Arcserve.Office365.Exchange.StorageAccess.MountSession.Backup;
 using Arcserve.Office365.Exchange.Log;
+using Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.SqLite;
 
 namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
 {
@@ -171,6 +172,25 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.EF
         public void Dispose()
         {
             DoSaveChanges();
+
+            Int64 maxMailboxUniqueId = _updateContext.Mailboxes.Max(p => p.UniqueId);
+            if(maxMailboxUniqueId != CatalogDbInitialize.MailboxStartIndex)
+            {
+                _updateContext.Database.ExecuteSqlCommand("delete from mailboxsync where uniqueid = '" + CatalogDbInitialize.MailboxStartIndex + "'");
+            }
+
+            Int64 maxFolderUniqueId = _updateContext.Folders.Max(p => p.UniqueId);
+            if (maxMailboxUniqueId != CatalogDbInitialize.FolderStartIndex)
+            {
+                _updateContext.Database.ExecuteSqlCommand("delete from foldersync where uniqueid = '" + CatalogDbInitialize.FolderStartIndex + "'");
+            }
+
+            Int64 maxItemUniqueId = _updateContext.Items.Max(p => p.UniqueId);
+            if (maxMailboxUniqueId != CatalogDbInitialize.ItemStartIndex)
+            {
+                _updateContext.Database.ExecuteSqlCommand("delete from itemsync where uniqueid = '" + CatalogDbInitialize.ItemStartIndex + "'");
+            }
+
             if (_updateContext != null)
             {
                 if (CloudConfig.Instance.DbType.GetDatabaseType() == DatabaseType.SqlServer)

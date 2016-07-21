@@ -163,6 +163,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Controllers\HomeControllerTest.cs" />
     <Compile Include="SyncBackup\SyncIncrementBackup.cs" />
+    <Compile Include="SyncBackup\TestCom.cs" />
     <Compile Include="UnitTest1.cs" />
     <Compile Include="CatalogServiceTest.cs" />
     <Compile Include="RestoreServiceTest.cs" />

@@ -347,6 +347,110 @@
     &lt;/soap:Body&gt;
 &lt;/soap:Envelope&gt;</value>
   </data>
+  <data name="UploadItems_ItemInfoWithCreateNew" xml:space="preserve">
+    <value>&lt;Item CreateAction="##CreateAction##" xmlns="http://schemas.microsoft.com/exchange/services/2006/types"&gt;
+                    &lt;ParentFolderId Id="##ParentFolderId_Id##"  /&gt;
+                    &lt;Data&gt;##Data##&lt;/Data&gt;
+            &lt;/Item&gt;</value>
+  </data>
+  <data name="UploadItems_Items" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+      xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+      xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types"
+      xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages"&gt;
+&lt;soap:Header&gt;
+    &lt;RequestServerVersion Version="##RequestServerVersion##" xmlns="http://schemas.microsoft.com/exchange/services/2006/types" /&gt;
+&lt;/soap:Header&gt;
+&lt;soap:Body&gt;
+    &lt;UploadItems xmlns="http://schemas.microsoft.com/exchange/services/2006/messages"&gt;
+        &lt;Items&gt;
+        ##Items##
+            &lt;/Items&gt;
+        &lt;/UploadItems&gt;
+    &lt;/soap:Body&gt;
+&lt;/soap:Envelope&gt;</value>
+  </data>
+  <data name="UploadItems_ItemsWithImpersonateId" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+      xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+      xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types"
+      xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages"&gt;
+&lt;soap:Header&gt;
+    &lt;RequestServerVersion Version="##RequestServerVersion##" xmlns="http://schemas.microsoft.com/exchange/services/2006/types" /&gt;
+	&lt;t:ExchangeImpersonation&gt;
+	  &lt;t:ConnectingSID&gt;
+	    ##Impersonate##
+	  &lt;/t:ConnectingSID&gt;
+	&lt;/t:ExchangeImpersonation&gt;
+&lt;/soap:Header&gt;
+&lt;soap:Body&gt;
+    &lt;UploadItems xmlns="http://schemas.microsoft.com/exchange/services/2006/messages"&gt;
+        &lt;Items&gt;
+        ##Items##
+            &lt;/Items&gt;
+        &lt;/UploadItems&gt;
+    &lt;/soap:Body&gt;
+&lt;/soap:Envelope&gt;</value>
+  </data>
+  <data name="UploadItems_ItemsWithImpersonatePrincipleName" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+      xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+      xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types"
+      xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages"&gt;
+&lt;soap:Header&gt;
+    &lt;RequestServerVersion Version="##RequestServerVersion##" xmlns="http://schemas.microsoft.com/exchange/services/2006/types" /&gt;
+	&lt;t:ExchangeImpersonation&gt;
+	  &lt;t:ConnectingSID&gt;
+	    &lt;t:PrincipalName&gt;##Impersonate##&lt;/t:PrincipalName&gt;
+	  &lt;/t:ConnectingSID&gt;
+	&lt;/t:ExchangeImpersonation&gt;
+&lt;/soap:Header&gt;
+&lt;soap:Body&gt;
+    &lt;UploadItems xmlns="http://schemas.microsoft.com/exchange/services/2006/messages"&gt;
+        &lt;Items&gt;
+       ##Items##
+            &lt;/Items&gt;
+        &lt;/UploadItems&gt;
+    &lt;/soap:Body&gt;
+&lt;/soap:Envelope&gt;</value>
+  </data>
+  <data name="UploadItems_ItemsWithImpersonateSmtpAddress" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+      xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+      xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types"
+      xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages"&gt;
+&lt;soap:Header&gt;
+    &lt;RequestServerVersion Version="##RequestServerVersion##" xmlns="http://schemas.microsoft.com/exchange/services/2006/types" /&gt;
+	&lt;t:ExchangeImpersonation&gt;
+	  &lt;t:ConnectingSID&gt;
+	    &lt;t:PrimarySmtpAddress&gt;##Impersonate##&lt;/t:PrimarySmtpAddress&gt;
+	  &lt;/t:ConnectingSID&gt;
+	&lt;/t:ExchangeImpersonation&gt;
+&lt;/soap:Header&gt;
+&lt;soap:Body&gt;
+    &lt;UploadItems xmlns="http://schemas.microsoft.com/exchange/services/2006/messages"&gt;
+        &lt;Items&gt;
+        ##Items##
+            &lt;/Items&gt;
+        &lt;/UploadItems&gt;
+    &lt;/soap:Body&gt;
+&lt;/soap:Envelope&gt;</value>
+  </data>
+  <data name="UploadItems_ItemWithUpdate" xml:space="preserve">
+    <value>&lt;Item CreateAction="##CreateAction##" xmlns="http://schemas.microsoft.com/exchange/services/2006/types"&gt;
+                    &lt;ParentFolderId Id="##ParentFolderId_Id##"  /&gt;
+                    &lt;ItemId Id="##ItemId##"/&gt;
+                    &lt;Data&gt;##Data##&lt;/Data&gt;
+                &lt;/Item&gt;</value>
+  </data>
   <data name="UploadItems_Update" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"

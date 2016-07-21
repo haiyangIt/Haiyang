@@ -6,10 +6,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Arcserve.Office365.Exchange.Data.Increment;
 using Arcserve.Office365.Exchange.Data.Query;
+using Arcserve.Office365.Exchange.EwsApi.Interface;
 
 namespace Arcserve.Office365.Exchange.DataProtect.Interface.Restore
 {
-    public interface ICatalogAccessForRestore<ProgressType> : ITaskSyncContext<ProgressType>
+    public interface ICatalogAccessForRestore<ProgressType> : ITaskSyncContext<ProgressType> , IImportItemsOper
     {
         ItemList GetFolderItemsFromCatalog(IFolderDataSync folder, int offset, int pageCount);
 

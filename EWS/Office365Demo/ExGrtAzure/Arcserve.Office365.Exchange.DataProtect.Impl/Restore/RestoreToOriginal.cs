@@ -9,6 +9,7 @@ using Arcserve.Office365.Exchange.Thread;
 using Arcserve.Office365.Exchange.Data.Increment;
 using Microsoft.Exchange.WebServices.Data;
 using Arcserve.Office365.Exchange.Data;
+using Arcserve.Office365.Exchange.EwsApi.Interface;
 
 namespace Arcserve.Office365.Exchange.DataProtect.Impl.Restore
 {
@@ -74,9 +75,9 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Restore
             return result;
         }
 
-        public override void ImportItems(IEnumerable<ImportItemStatus> partition, IRestoreDestinationFolder folder)
+        public override void ImportItems(IEnumerable<ImportItemStatus> partition, IImportItemsOper importOper, IRestoreDestinationFolder folder)
         {
-            ExchangeAccessForRestore.EwsServiceAdapter.ImportItems(partition, ((RestoreServerDestinationFolder)folder).Folder);
+            ExchangeAccessForRestore.EwsServiceAdapter.ImportItems(partition, importOper, ((RestoreServerDestinationFolder)folder).Folder);
         }
 
         public override IEnumerable<string> GetNotExistItems(IRestoreDestinationFolder destinationFolder, IFolderDataSync folderInCatalog)

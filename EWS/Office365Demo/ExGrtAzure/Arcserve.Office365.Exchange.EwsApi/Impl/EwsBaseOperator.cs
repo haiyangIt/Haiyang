@@ -305,10 +305,9 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
             return ExportUploadHelper.ExportItemsPost(Enum.GetName(typeof(ExchangeVersion), service.RequestedServerVersion), items, EwsArgument, exportItemOper);
         }
 
-        internal void ImportItems(IEnumerable<ImportItemStatus> partition, Folder folder)
+        internal void ImportItems(IEnumerable<ImportItemStatus> partition, IImportItemsOper importOper, Folder folder)
         {
-            throw new NotImplementedException();
-            //return ExportUploadHelper.UploadItemsPost(Enum.GetName(typeof(ExchangeVersion), service.RequestedServerVersion), items, EwsArgument, exportItemOper);
+            //ExportUploadHelper.UploadItemsPost(Enum.GetName(typeof(ExchangeVersion), service.RequestedServerVersion), partition, EwsArgument, importOper, folder);
         }
 
         public virtual void ImportItem(string parentFolderId, Stream stream)

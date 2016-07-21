@@ -286,9 +286,9 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Increment
             throw new NotImplementedException();
         }
 
-        public void ImportItems(IEnumerable<ImportItemStatus> partition, Folder folder)
+        public void ImportItems(IEnumerable<ImportItemStatus> partition, IImportItemsOper importOper, Folder folder)
         {
-            throw new NotImplementedException();
+            _ewsOperator.ImportItems(partition, importOper, folder);
         }
 
         public int GetAllItemsCount()

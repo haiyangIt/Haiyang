@@ -115,7 +115,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Restore
 
         protected virtual void RestoreEachPartition(IEnumerable<ImportItemStatus> partition)
         {
-            RestoreToPosition.ImportItems(partition, FolderForRestore);
+            RestoreToPosition.ImportItems(partition, CatalogAccess, FolderForRestore);
         }
     }
 }

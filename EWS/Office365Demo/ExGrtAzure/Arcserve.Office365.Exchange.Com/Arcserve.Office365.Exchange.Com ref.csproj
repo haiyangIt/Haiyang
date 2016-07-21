@@ -20,7 +20,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <RegisterForComInterop>false</RegisterForComInterop>
+    <RegisterForComInterop>true</RegisterForComInterop>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -74,6 +74,10 @@
       <Project>{2f89d7da-1138-4e24-bed3-caaf1df77465}</Project>
       <Name>Arcserve.Office365.Exchange.Data ref</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Arcserve.Office365.Exchange.EwsApi\Arcserve.Office365.Exchange.EwsApi ref.csproj">
+      <Project>{b732dc73-83af-4884-9d61-2661f7ee7e5f}</Project>
+      <Name>Arcserve.Office365.Exchange.EwsApi ref</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Arcserve.Office365.Exchange.StorageAccess.MountSession\Arcserve.Office365.Exchange.StorageAccess.MountSession ref.csproj">
       <Project>{b8023674-7877-41a0-8ca4-fd34509eb28b}</Project>
       <Name>Arcserve.Office365.Exchange.StorageAccess.MountSession ref</Name>
@@ -90,13 +94,11 @@
 %25SystemRoot%25\Microsoft.NET\Framework\v4.0.30319\regasm /unregister "$(ProjectDir)..\packages\Arcserve_Office365_dll\$(TargetFileName)"
 
 xcopy  "$(ProjectDir)$(OutDir)*" "$(ProjectDir)..\packages\Arcserve_Office365_dll" /s /i /y
-gacutil /i "$(ProjectDir)..\Arcserve_Office365_dll\$(TargetFileName)"
+gacutil /i "$(ProjectDir)..\packages\Arcserve_Office365_dll\$(TargetFileName)"
 
+%25SystemRoot%25\Microsoft.NET\Framework\v4.0.30319\regasm "$(ProjectDir)..\packages\Arcserve_Office365_dll\$(TargetFileName)" /tlb:$(ProjectDir)..\packages\Arcserve_Office365_dll\$(TargetName).tlb /codebase
 
-
-
-%25SystemRoot%25\Microsoft.NET\Framework\v4.0.30319\regasm "$(ProjectDir)..\packages\Arcserve_Office365_dll\$(TargetFileName)" /tlb:$(ProjectDir)..\packages\Arcserve.Office365.Exchange.Assemly\$(TargetName).tlb
-</PostBuildEvent>
+xcopy  "$(ProjectDir)..\packages\Arcserve_Office365_dll\$(TargetName).tlb" "$(ProjectDir)..\packages\Arcserve.Office365.Exchange.Assemly\" /s /i /y</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

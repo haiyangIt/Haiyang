@@ -150,7 +150,7 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Common
             }
 
             int size = 0;
-            foreach(var value in dic.Values)
+            foreach (var value in dic.Values)
             {
                 size += value.ActualSize;
             }
@@ -372,27 +372,27 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Common
             return result;
         }
 
-        private static string GetImportSOAPXml(EwsServiceArgument argument, bool isCreateNew, ref HttpWebRequest webRequest)
+        private static string GetImportSOAPXml(EwsServiceArgument argument, bool isCreateNew, ref HttpWebRequest webRequest, bool isMultiItems = false)
         {
             string result;
             if (isCreateNew)
             {
                 if (argument.UserToImpersonate == null)
                 {
-                    result = TemplateEwsRequests.UploadItems_CreateNew;
+                    result = isMultiItems ? TemplateEwsRequests.UploadItems_Items : TemplateEwsRequests.UploadItems_CreateNew;
                 }
                 else
                 {
                     switch (argument.UserToImpersonate.IdType)
                     {
                         case ConnectingIdType.PrincipalName:
-                            result = TemplateEwsRequests.UploadItems_CreateNewWithImpersonatePrincipleName;
+                            result = isMultiItems ? TemplateEwsRequests.UploadItems_ItemsWithImpersonatePrincipleName : TemplateEwsRequests.UploadItems_CreateNewWithImpersonatePrincipleName;
                             break;
                         case ConnectingIdType.SID:
-                            result = TemplateEwsRequests.UploadItems_CreateNewWithImpersonateId;
+                            result = isMultiItems ? TemplateEwsRequests.UploadItems_ItemsWithImpersonateId : TemplateEwsRequests.UploadItems_CreateNewWithImpersonateId;
                             break;
                         case ConnectingIdType.SmtpAddress:
-                            result = TemplateEwsRequests.UploadItems_CreateNewWithImpersonateSMTPAddress;
+                            result = isMultiItems ? TemplateEwsRequests.UploadItems_ItemsWithImpersonateSmtpAddress : TemplateEwsRequests.UploadItems_CreateNewWithImpersonateSMTPAddress;
                             break;
                         default:
                             throw new NotSupportedException();
@@ -407,20 +407,20 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Common
             {
                 if (argument.UserToImpersonate == null)
                 {
-                    result = TemplateEwsRequests.UploadItems_Update;
+                    result = isMultiItems ? TemplateEwsRequests.UploadItems_Items : TemplateEwsRequests.UploadItems_Update;
                 }
                 else
                 {
                     switch (argument.UserToImpersonate.IdType)
                     {
                         case ConnectingIdType.PrincipalName:
-                            result = TemplateEwsRequests.UploadItems_UpdateWithImpersonatePrincipleName;
+                            result = isMultiItems ? TemplateEwsRequests.UploadItems_ItemsWithImpersonatePrincipleName : TemplateEwsRequests.UploadItems_UpdateWithImpersonatePrincipleName;
                             break;
                         case ConnectingIdType.SID:
-                            result = TemplateEwsRequests.UploadItems_UpdateWithImpersonateId;
+                            result = isMultiItems ? TemplateEwsRequests.UploadItems_ItemsWithImpersonateId : TemplateEwsRequests.UploadItems_UpdateWithImpersonateId;
                             break;
                         case ConnectingIdType.SmtpAddress:
-                            result = TemplateEwsRequests.UploadItems_UpdateWithImpersonateSMTPAddress;
+                            result = isMultiItems ? TemplateEwsRequests.UploadItems_ItemsWithImpersonateSmtpAddress : TemplateEwsRequests.UploadItems_UpdateWithImpersonateSMTPAddress;
                             break;
                         default:
                             throw new NotSupportedException();
@@ -539,6 +539,98 @@ namespace Arcserve.Office365.Exchange.EwsApi.Impl.Common
             FileStream oFileStream = new FileStream(sFile, FileMode.Open, FileAccess.Read);
 
             return UploadItemPost(ServerVersion, ParentFolderId, oCreateActionType, sItemId, oFileStream, argument);
+        }
+
+        public static void UploadItemPost(string serverVersion, IEnumerable<ImportItemStatus> partition, EwsServiceArgument argument, IImportItemsOper importItemOper, Folder parentFolder)
+        {
+            try
+            {
+                string sResponseText = string.Empty;
+                System.Net.HttpWebRequest oHttpWebRequest = null;
+                EwsProxyFactory.CreateHttpWebRequest(ref oHttpWebRequest, argument);
+
+                string ewsRequest = string.Empty;
+
+                ewsRequest = GetImportSOAPXml(argument, false, ref oHttpWebRequest);
+
+                ewsRequest = ewsRequest.Replace("##RequestServerVersion##", serverVersion);
+
+                StringBuilder sb = new StringBuilder();
+                foreach (var item in partition)
+                {
+                    var itemStr = TemplateEwsRequests.UploadItems_ItemWithUpdate;
+                    itemStr = itemStr.Replace("##CreateAction##", "UpdateOrCreate");
+                    itemStr = itemStr.Replace("##ParentFolderId_Id##", parentFolder.Id.UniqueId);
+                    if (!string.IsNullOrEmpty(item.Item.ItemId))
+                        itemStr = itemStr.Replace("##ItemId##", item.Item.ItemId);
+
+                    using (MemoryStream stream = new MemoryStream(item.Item.Size + 2000))
+                    {
+                        byte[] buffer = new byte[1024];
+                        int actualReadLength = 0;
+
+                        do
+                        {
+                            actualReadLength = importItemOper.ReadDataFromStorage(item.Item, buffer, 0, 1024);
+                            stream.Write(buffer, 0, actualReadLength);
+                        } while (actualReadLength != 1024);
+
+                        string sBase64Data = string.Empty;
+                        sBase64Data = FileHelper.GetBinaryFileAsBase64(stream);
+                        itemStr = itemStr.Replace("##Data##", sBase64Data);
+                    }
+                    sb.Append(itemStr);
+                }
+
+                ewsRequest = ewsRequest.Replace("##Items##", sb.ToString());
+                sb.Length = 0;
+
+                // Now inject the base64 body into the stream:
+
+                byte[] bytes = Encoding.UTF8.GetBytes(ewsRequest);
+                oHttpWebRequest.ContentLength = bytes.Length;
+                ewsRequest = string.Empty;
+
+                using (Stream requestStream = oHttpWebRequest.GetRequestStream())
+                {
+                    requestStream.Write(bytes, 0, bytes.Length);
+                    requestStream.Flush();
+                    requestStream.Close();
+                }
+
+                // Get response
+                HttpWebResponse oHttpWebResponse = (HttpWebResponse)oHttpWebRequest.GetResponse();
+
+                StreamReader oStreadReader = new StreamReader(oHttpWebResponse.GetResponseStream());
+                sResponseText = oStreadReader.ReadToEnd();
+                
+                if (oHttpWebResponse.StatusCode == HttpStatusCode.OK)
+                {
+                    string responseCode = GetFirstResponseCode(sResponseText);
+
+                    if (responseCode != "NoError")
+                    {
+                        string messageText = GetFirstMessageText(sResponseText);
+                        LogFactory.LogInstance.WriteLog(LogLevel.ERR, "Import Failed", "Import ftstream failed with error stream, the detail of response is:{0}.", sResponseText);
+                        //return messageText;
+                    }
+                    else
+                    {
+                        //return string.Empty;
+                    }
+                }
+                else
+                {
+                    LogFactory.LogInstance.WriteLog(LogLevel.ERR, "Import Failed", "Import ftstream failed with error response status code, the detail of response is:{0}.", sResponseText);
+
+                    //return oHttpWebResponse.StatusCode.ToString();
+                }
+            }
+            catch (Exception e)
+            {
+                LogFactory.LogInstance.WriteException(LogLevel.ERR, "Import Failed", e, string.Empty);
+                //return e.Message;
+            }
         }
 
         private static string GetFirstResponseCode(string xmlStr)

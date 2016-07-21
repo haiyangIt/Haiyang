@@ -242,6 +242,95 @@ namespace Arcserve.Office365.Exchange.EwsApi.Resource {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &lt;Item CreateAction=&quot;##CreateAction##&quot; xmlns=&quot;http://schemas.microsoft.com/exchange/services/2006/types&quot;&gt;
+        ///                    &lt;ParentFolderId Id=&quot;##ParentFolderId_Id##&quot;  /&gt;
+        ///                    &lt;Data&gt;##Data##&lt;/Data&gt;
+        ///            &lt;/Item&gt;.
+        /// </summary>
+        internal static string UploadItems_ItemInfoWithCreateNew {
+            get {
+                return ResourceManager.GetString("UploadItems_ItemInfoWithCreateNew", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+        ///&lt;soap:Envelope xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+        ///      xmlns:xsd=&quot;http://www.w3.org/2001/XMLSchema&quot;
+        ///      xmlns:soap=&quot;http://schemas.xmlsoap.org/soap/envelope/&quot;
+        ///      xmlns:t=&quot;http://schemas.microsoft.com/exchange/services/2006/types&quot;
+        ///      xmlns:m=&quot;http://schemas.microsoft.com/exchange/services/2006/messages&quot;&gt;
+        ///&lt;soap:Header&gt;
+        ///    &lt;RequestServerVersion Version=&quot;##RequestServerVersion##&quot; xmlns=&quot;http://schemas.microsoft.com/exchange/services/2006 [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string UploadItems_Items {
+            get {
+                return ResourceManager.GetString("UploadItems_Items", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+        ///&lt;soap:Envelope xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+        ///      xmlns:xsd=&quot;http://www.w3.org/2001/XMLSchema&quot;
+        ///      xmlns:soap=&quot;http://schemas.xmlsoap.org/soap/envelope/&quot;
+        ///      xmlns:t=&quot;http://schemas.microsoft.com/exchange/services/2006/types&quot;
+        ///      xmlns:m=&quot;http://schemas.microsoft.com/exchange/services/2006/messages&quot;&gt;
+        ///&lt;soap:Header&gt;
+        ///    &lt;RequestServerVersion Version=&quot;##RequestServerVersion##&quot; xmlns=&quot;http://schemas.microsoft.com/exchange/services/2006 [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string UploadItems_ItemsWithImpersonateId {
+            get {
+                return ResourceManager.GetString("UploadItems_ItemsWithImpersonateId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+        ///&lt;soap:Envelope xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+        ///      xmlns:xsd=&quot;http://www.w3.org/2001/XMLSchema&quot;
+        ///      xmlns:soap=&quot;http://schemas.xmlsoap.org/soap/envelope/&quot;
+        ///      xmlns:t=&quot;http://schemas.microsoft.com/exchange/services/2006/types&quot;
+        ///      xmlns:m=&quot;http://schemas.microsoft.com/exchange/services/2006/messages&quot;&gt;
+        ///&lt;soap:Header&gt;
+        ///    &lt;RequestServerVersion Version=&quot;##RequestServerVersion##&quot; xmlns=&quot;http://schemas.microsoft.com/exchange/services/2006 [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string UploadItems_ItemsWithImpersonatePrincipleName {
+            get {
+                return ResourceManager.GetString("UploadItems_ItemsWithImpersonatePrincipleName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+        ///&lt;soap:Envelope xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+        ///      xmlns:xsd=&quot;http://www.w3.org/2001/XMLSchema&quot;
+        ///      xmlns:soap=&quot;http://schemas.xmlsoap.org/soap/envelope/&quot;
+        ///      xmlns:t=&quot;http://schemas.microsoft.com/exchange/services/2006/types&quot;
+        ///      xmlns:m=&quot;http://schemas.microsoft.com/exchange/services/2006/messages&quot;&gt;
+        ///&lt;soap:Header&gt;
+        ///    &lt;RequestServerVersion Version=&quot;##RequestServerVersion##&quot; xmlns=&quot;http://schemas.microsoft.com/exchange/services/2006 [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string UploadItems_ItemsWithImpersonateSmtpAddress {
+            get {
+                return ResourceManager.GetString("UploadItems_ItemsWithImpersonateSmtpAddress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;Item CreateAction=&quot;##CreateAction##&quot; xmlns=&quot;http://schemas.microsoft.com/exchange/services/2006/types&quot;&gt;
+        ///                    &lt;ParentFolderId Id=&quot;##ParentFolderId_Id##&quot;  /&gt;
+        ///                    &lt;ItemId Id=&quot;##ItemId##&quot;/&gt;
+        ///                    &lt;Data&gt;##Data##&lt;/Data&gt;
+        ///                &lt;/Item&gt;.
+        /// </summary>
+        internal static string UploadItems_ItemWithUpdate {
+            get {
+                return ResourceManager.GetString("UploadItems_ItemWithUpdate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
         ///&lt;soap:Envelope xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
         ///      xmlns:xsd=&quot;http://www.w3.org/2001/XMLSchema&quot;

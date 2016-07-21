@@ -11,7 +11,20 @@ namespace Arcserve.Office365.Exchange.Data.Query
         public int TotalCount { get; set; }
         public QueryPage PageInfo { get; set; }
         public QueryCondition Condition { get; set; }
-        public IEnumerable<T> Items { get; set; }
+
+        private List<T> _items;
+        public IEnumerable<T> Items
+        {
+            get
+            {
+                return _items;
+            }
+
+            set
+            {
+                _items = value.ToList();
+            }
+        }
         public Int64 ParentId { get; set; }
 
         private int _count = -1;

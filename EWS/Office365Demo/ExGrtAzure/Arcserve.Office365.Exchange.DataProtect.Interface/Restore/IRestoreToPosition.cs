@@ -7,6 +7,7 @@ using Arcserve.Office365.Exchange.Data.Account;
 using Arcserve.Office365.Exchange.Data.Increment;
 using Microsoft.Exchange.WebServices.Data;
 using Arcserve.Office365.Exchange.Thread;
+using Arcserve.Office365.Exchange.EwsApi.Interface;
 
 namespace Arcserve.Office365.Exchange.DataProtect.Interface.Restore
 {
@@ -18,7 +19,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Interface.Restore
 
         void ConnectExchangeService();
         IRestoreDestinationFolder GetAndCreateFolderIfFolderNotExist(IFolderDataSync folder, IRestoreDestinationFolder parentFolder);
-        void ImportItems(IEnumerable<ImportItemStatus> partition, IRestoreDestinationFolder folder);
+        void ImportItems(IEnumerable<ImportItemStatus> partition, IImportItemsOper importItemOper, IRestoreDestinationFolder folder);
 
         IRestoreToPosition<ProgressType> NewRestoreToPosition(IMailboxDataSync currentRestoreMailbox);
         IEnumerable<string> GetNotExistItems(IRestoreDestinationFolder destinationFolder, IFolderDataSync folderInCatalog);

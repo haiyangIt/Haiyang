@@ -50,7 +50,7 @@ namespace Arcserve.Office365.Exchange.EwsApi.Interface
         void FolderCreate(string folderName, string folderType, Folder parentFolder);
         Folder CreateFolder(string folderName, string folderType, FolderId parentFolderId);
         Folder CreateFolder(string folderName, string folderType);
-        void ImportItems(IEnumerable<ImportItemStatus> partition, Folder folder);
+        void ImportItems(IEnumerable<ImportItemStatus> partition, IImportItemsOper importOper, Folder folder);
 
         //
         // Summary:

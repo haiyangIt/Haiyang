@@ -7,6 +7,8 @@ using System.Runtime.InteropServices;
 using Arcserve.Office365.Exchange.StorageAccess.MountSession.Restore;
 using Arcserve.Office365.Exchange.Data.Query;
 using Arcserve.Office365.Exchange.Data.Increment;
+using System.Diagnostics;
+using Arcserve.Office365.Exchange.Log.Impl;
 
 namespace Arcserve.Office365.Exchange.Com.Impl
 {
@@ -15,33 +17,48 @@ namespace Arcserve.Office365.Exchange.Com.Impl
     [ComVisible(true)]
     public class QueryCatalog : IQueryCatalog
     {
+        
+
         private string _catalogFilePath;
         public IQueryResult Query(IQueryCondition query, int hParentId, int lParentId, uint startIndex, uint pageCount)
         {
-            using (CatalogAccess catalogAccess = new CatalogAccess(_catalogFilePath))
+            try
             {
-                Data.Query.QueryCondition queryCondition;
-                QueryPage queryPage;
-                Int64 id = (Int64)(hParentId << 32) | lParentId;
-                ParseQueryCondition(query, (int)startIndex, (int)pageCount, out queryCondition, out queryPage);
-                switch (query.ContentFilter)
+                //WriteToLog.WriteLog("Begin");
+                //WriteToLog.WriteLog(AppDomain.CurrentDomain.BaseDirectory);
+                return null;
+                Log.LogFactory.LogInstance.WriteLog(Log.LogLevel.DEBUG, string.Format("path:{0}", _catalogFilePath));
+                
+                using (CatalogAccess catalogAccess = new CatalogAccess(_catalogFilePath))
                 {
-                    case ContentFilter.CONTENT_ALL:
-                        var allMailbox = catalogAccess.GetMailboxesForCom(queryCondition, queryPage);
-                        return ConvertMailboxResult(allMailbox);
-                        break;
-                    case ContentFilter.CONTENT_FOLDER:
-                        var allFolder = catalogAccess.GetFoldersForCom(id, queryCondition, queryPage);
-                        return ConvertFolderResult(allFolder);
-                        break;
-                    case ContentFilter.CONTENT_MAIL:
-                        var allMails = catalogAccess.GetItemsForCom(id, queryCondition, queryPage);
-                        return ConvertMailsResult(allMails);
-                        break;
-                    default:
-                        throw new NotSupportedException("");
+                    Data.Query.QueryCondition queryCondition;
+                    QueryPage queryPage;
+                    Int64 id = (Int64)(hParentId << 32) | lParentId;
+                    ParseQueryCondition(query, (int)startIndex, (int)pageCount, out queryCondition, out queryPage);
+                    switch (query.ContentFilter)
+                    {
+                        case ContentFilter.CONTENT_ALL:
+                            var allMailbox = catalogAccess.GetMailboxesForCom(queryCondition, queryPage);
+                            return ConvertMailboxResult(allMailbox);
+                            break;
+                        case ContentFilter.CONTENT_FOLDER:
+                            var allFolder = catalogAccess.GetFoldersForCom(id, queryCondition, queryPage);
+                            return ConvertFolderResult(allFolder);
+                            break;
+                        case ContentFilter.CONTENT_MAIL:
+                            var allMails = catalogAccess.GetItemsForCom(id, queryCondition, queryPage);
+                            return ConvertMailsResult(allMails);
+                            break;
+                        default:
+                            throw new NotSupportedException("");
+                    }
+                    throw new NotImplementedException();
                 }
-                throw new NotImplementedException();
+            }
+            catch (Exception e)
+            {
+                Log.LogFactory.LogInstance.WriteException(Log.LogLevel.ERR, "Query Error", e, e.Message);
+                throw e;
             }
         }
 
@@ -53,7 +70,7 @@ namespace Arcserve.Office365.Exchange.Com.Impl
             result.Results = new List<IResult>(0);
             return result;
         }
-        
+
 
         private IQueryResult ConvertMailsResult(QueryResult<IItemDataSync> allMails)
         {
@@ -91,7 +108,7 @@ namespace Arcserve.Office365.Exchange.Com.Impl
             return result;
         }
 
-        
+
 
         private void ParseQueryCondition(IQueryCondition query, int startIndex, int pageCount, out Data.Query.QueryCondition queryCondition, out QueryPage queryPage)
         {
@@ -111,7 +128,7 @@ namespace Arcserve.Office365.Exchange.Com.Impl
 
             if (!string.IsNullOrEmpty(query.SearchString))
             {
-                
+
                 var search = new SearchCondition();
                 search.FieldName = "displayName";
                 search.SearchValue = query.SearchString.Trim('*');

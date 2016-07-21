@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -36,6 +37,7 @@ namespace Arcserve.Office365.Exchange
                 if (string.IsNullOrEmpty(_libPath))
                 {
                     var directory = AppDomain.CurrentDomain.BaseDirectory;
+                    Debug.WriteLine(string.Format("libPath : {0}",_libPath));
 
                     var temp = Path.Combine(directory, "bin");
                     if (Directory.Exists(temp))

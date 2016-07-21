@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Arcserve.Office365.Exchange.Data.Account;
 using Arcserve.Office365.Exchange.Data.Increment;
 using System.Threading;
+using Arcserve.Office365.Exchange.EwsApi.Interface;
 
 namespace Arcserve.Office365.Exchange.DataProtect.Impl.Restore
 {
@@ -53,7 +54,7 @@ namespace Arcserve.Office365.Exchange.DataProtect.Impl.Restore
 
         public abstract bool ImportExistItems();
 
-        public abstract void ImportItems(IEnumerable<ImportItemStatus> partition, IRestoreDestinationFolder folder);
+        public abstract void ImportItems(IEnumerable<ImportItemStatus> partition, IImportItemsOper importOper, IRestoreDestinationFolder folder);
 
         public abstract bool ImportNotExistItems();
 

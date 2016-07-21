@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using Arcserve.Office365.Exchange.Data.Query;
 using Arcserve.Office365.Exchange.Data.Increment;
+using Arcserve.Office365.Exchange.Data;
 
 namespace Arcserve.Office365.Exchange.Com.Impl
 {
@@ -72,16 +73,16 @@ namespace Arcserve.Office365.Exchange.Com.Impl
             else if(Mailboxes != null)
             {
                 IMailboxResult result = new MailboxResultItem();
-                var parentId = Items.ParentId;
+                var parentId = Mailboxes.ParentId;
 
-                if (index >= 0 && index < Items.Count)
+                if (index >= 0 && index < Mailboxes.Count)
                 {
-                    var item = Items.Items.ElementAt((int)index);
+                    var item = Mailboxes.Items.ElementAt((int)index);
                     var id = item.UniqueId;
                     result.DisplayName = item.DisplayName;
                     int hId;
                     int lId;
-                    GetHLIds(Items.ParentId, out hId, out lId);
+                    GetHLIds(Mailboxes.ParentId, out hId, out lId);
                     result.HParentId = hId;
                     result.LParentId = lId;
                     GetHLIds(item.UniqueId, out hId, out lId);
@@ -95,16 +96,16 @@ namespace Arcserve.Office365.Exchange.Com.Impl
             else if (Folders != null)
             {
                 IFolderResult result = new FolderResultItem();
-                var parentId = Items.ParentId;
+                var parentId = Folders.ParentId;
 
-                if (index >= 0 && index < Items.Count)
+                if (index >= 0 && index < Folders.Count)
                 {
-                    var item = Items.Items.ElementAt((int)index);
+                    var item = Folders.Items.ElementAt((int)index);
                     var id = item.UniqueId;
-                    result.DisplayName = item.DisplayName;
+                    result.DisplayName = ((IItemBase)item).DisplayName;
                     int hId;
                     int lId;
-                    GetHLIds(Items.ParentId, out hId, out lId);
+                    GetHLIds(Folders.ParentId, out hId, out lId);
                     result.HParentId = hId;
                     result.LParentId = lId;
                     GetHLIds(item.UniqueId, out hId, out lId);

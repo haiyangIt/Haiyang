@@ -11,6 +11,8 @@ using Arcserve.Office365.Exchange.StorageAccess.MountSession.EF;
 using Arcserve.Office365.Exchange.Data.Query;
 using Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.SqLite;
 using Arcserve.Office365.Exchange.Data;
+using System.Data.SQLite;
+using Arcserve.Office365.Exchange.StorageAccess.MountSession.EF.Data;
 
 namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.Restore
 {
@@ -77,32 +79,11 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.Restore
         public QueryResult<IMailboxDataSync> GetMailboxesForCom(QueryCondition queryCondition, QueryPage queryPage, bool isOnlyGetCount = false)
         {
             // todo order by
-            IQueryable<IMailboxDataSync> result = from m in _queryContext.Mailboxes select m;
-            if (queryCondition != null && queryCondition.SortFields.Count > 0)
-            {
-                foreach (var orderCondition in queryCondition.SortFields)
-                {
 
-                    if (orderCondition.isDescend)
-                    {
-                        switch (orderCondition.FieldName.ToLower())
-                        {
-                            case "displayname":
-                                result = result.OrderByDescending(m => m.DisplayName);
-                                break;
-                        }
-                    }
-                    else
-                    {
-                        switch (orderCondition.FieldName.ToLower())
-                        {
-                            case "displayname":
-                                result = result.OrderBy(m => m.DisplayName);
-                                break;
-                        }
-                    }
-                }
-            }
+            StringBuilder sqlBuilder = new StringBuilder();
+            sqlBuilder.Append(" select * from mailboxsync ");
+            List<SQLiteParameter> paramters = new List<SQLiteParameter>();
+
 
             if (queryCondition != null && queryCondition.SearchField != null)
             {
@@ -111,52 +92,166 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.Restore
                     switch (queryCondition.SearchField.FieldName.ToLower())
                     {
                         case "displayname":
-                            result = from m in result where m.DisplayName.Contains(queryCondition.SearchField.SearchValue) select m;
+                            var paramterName = string.Format("@{0}", queryCondition.SearchField.FieldName);
+                            sqlBuilder.Append(" where displayname like %").Append(paramterName).Append("%");
+                            paramters.Add(new SQLiteParameter(paramterName, queryCondition.SearchField.SearchValue));
                             break;
-                        default:
-                            throw new NotSupportedException(string.Format("not support {0} [{1}] search", queryCondition.SearchField.FieldName, queryCondition.SearchField.SearchValue));
                     }
                 }
             }
 
-            var count = result.Count();
+
+            if (queryCondition != null && queryCondition.SortFields.Count > 0)
+            {
+                sqlBuilder.Append(" order by ");
+                string[] orderbyArray = new string[queryCondition.SortFields.Count];
+                int i = 0;
+                foreach (var orderCondition in queryCondition.SortFields)
+                {
+                    switch (orderCondition.FieldName.ToLower())
+                    {
+                        case "displayname":
+                            orderbyArray[i] = string.Format(" {0} {1} ", orderCondition.FieldName, orderCondition.isDescend ? "desc" : "asc");
+                            break;
+                    }
+                }
+
+                sqlBuilder.Append(string.Join(",", orderbyArray));
+            }
+            else
+            {
+                sqlBuilder.Append(" order by displayname asc ");
+            }
+
+            string countSql = string.Format(" select count(*) from ({0})", sqlBuilder);
+
+            var count = _queryContext.Database.SqlQuery<int>(countSql, paramters.ToArray()).FirstOrDefault();
+
             if (!isOnlyGetCount)
             {
-                IEnumerable<IMailboxDataSync> items;
+                IEnumerable<MailboxSyncModel> items;
                 if (queryPage != null)
                 {
-                    items = result.Skip(queryPage.StartIndex).Take(queryPage.PageCount);
-                    return new QueryResult<IMailboxDataSync>()
+                    string pageSql = string.Format("select * from ({0}) LIMIT {1} OFFSET {2} ", sqlBuilder, queryPage.PageCount, queryPage.StartIndex);
+
+                    items = _queryContext.Database.SqlQuery<MailboxSyncModel>(pageSql, paramters.ToArray());
+                    return Convert<MailboxSyncModel, IMailboxDataSync>(new QueryResult<MailboxSyncModel>()
                     {
                         TotalCount = count,
                         Condition = queryCondition,
                         PageInfo = queryPage,
                         Items = items,
-                        ParentId = CatalogDbInitialize.MailStartIndex
-                    };
+                        ParentId = CatalogDbInitialize.MailboxStartIndex
+                    });
                 }
                 else
                 {
-                    return new QueryResult<IMailboxDataSync>()
+                    items = _queryContext.Database.SqlQuery<MailboxSyncModel>(sqlBuilder.ToString(), paramters.ToArray());
+                    return Convert<MailboxSyncModel, IMailboxDataSync>(new QueryResult<MailboxSyncModel>()
                     {
                         TotalCount = count,
                         Condition = queryCondition,
                         PageInfo = queryPage,
-                        Items = result,
-                        ParentId = CatalogDbInitialize.MailStartIndex
-                    };
+                        Items = items,
+                        ParentId = CatalogDbInitialize.MailboxStartIndex
+                    });
                 }
             }
             else
             {
-                return new QueryResult<IMailboxDataSync>()
+                return Convert<MailboxSyncModel, IMailboxDataSync>(new QueryResult<MailboxSyncModel>()
                 {
                     TotalCount = count,
                     Condition = queryCondition,
                     PageInfo = queryPage,
-                    ParentId = CatalogDbInitialize.MailStartIndex
-                };
+                    ParentId = CatalogDbInitialize.MailboxStartIndex
+                });
             }
+
+
+            //IQueryable<IMailboxDataSync> result = from m in _queryContext.Mailboxes select m;
+
+            //if (queryCondition != null && queryCondition.SearchField != null)
+            //{
+            //    if (!string.IsNullOrEmpty(queryCondition.SearchField.SearchValue))
+            //    {
+            //        switch (queryCondition.SearchField.FieldName.ToLower())
+            //        {
+            //            case "displayname":
+            //                result = from m in result where m.DisplayName.Contains(queryCondition.SearchField.SearchValue) select m;
+            //                break;
+            //            default:
+            //                throw new NotSupportedException(string.Format("not support {0} [{1}] search", queryCondition.SearchField.FieldName, queryCondition.SearchField.SearchValue));
+            //        }
+            //    }
+            //}
+
+            //if (queryCondition != null && queryCondition.SortFields.Count > 0)
+            //{
+            //    foreach (var orderCondition in queryCondition.SortFields)
+            //    {
+
+            //        if (orderCondition.isDescend)
+            //        {
+            //            switch (orderCondition.FieldName.ToLower())
+            //            {
+            //                case "displayname":
+            //                    result = result.OrderByDescending(m => m.DisplayName);
+            //                    break;
+            //            }
+            //        }
+            //        else
+            //        {
+            //            switch (orderCondition.FieldName.ToLower())
+            //            {
+            //                case "displayname":
+            //                    result = result.OrderBy(m => m.DisplayName);
+            //                    break;
+            //            }
+            //        }
+            //    }
+            //}
+
+
+
+            //var count = result.Count();
+            //if (!isOnlyGetCount)
+            //{
+            //    IEnumerable<IMailboxDataSync> items;
+            //    if (queryPage != null)
+            //    {
+            //        items = result.Skip(queryPage.StartIndex).Take(queryPage.PageCount);
+            //        return new QueryResult<IMailboxDataSync>()
+            //        {
+            //            TotalCount = count,
+            //            Condition = queryCondition,
+            //            PageInfo = queryPage,
+            //            Items = items,
+            //            ParentId = CatalogDbInitialize.MailboxStartIndex
+            //        };
+            //    }
+            //    else
+            //    {
+            //        return new QueryResult<IMailboxDataSync>()
+            //        {
+            //            TotalCount = count,
+            //            Condition = queryCondition,
+            //            PageInfo = queryPage,
+            //            Items = result,
+            //            ParentId = CatalogDbInitialize.MailboxStartIndex
+            //        };
+            //    }
+            //}
+            //else
+            //{
+            //    return new QueryResult<IMailboxDataSync>()
+            //    {
+            //        TotalCount = count,
+            //        Condition = queryCondition,
+            //        PageInfo = queryPage,
+            //        ParentId = CatalogDbInitialize.MailboxStartIndex
+            //    };
+            //}
         }
 
         public int QueryCountForCom(Int64 id, QueryCondition queryCondition)
@@ -185,27 +280,34 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.Restore
             }
         }
 
+
         public QueryResult<IFolderDataSync> GetFoldersForCom(Int64 id, QueryCondition queryCondition, QueryPage queryPage, bool isOnlyGetCount = false)
         {
-            IQueryable<IFolderDataSync> result = from m in _queryContext.Folders select m;
+            StringBuilder sqlBuilder = new StringBuilder();
+            sqlBuilder.Append(" select * from foldersync ");
+            List<SQLiteParameter> paramters = new List<SQLiteParameter>();
 
+            List<string> whereSql = new List<string>();
             if (CatalogSyncDbContext.IsInFolder(id))
             {
                 var parentFolder = (from m in _queryContext.Folders where m.UniqueId == id select m).FirstOrDefault();
                 if (parentFolder == null)
                 {
-                    return new QueryResult<IFolderDataSync>()
+                    return Convert<FolderSyncModel, IFolderDataSync>(new QueryResult<FolderSyncModel>()
                     {
                         TotalCount = 0,
                         Condition = queryCondition,
                         PageInfo = queryPage,
-                        Items = new List<IFolderDataSync>(0),
+                        Items = new List<FolderSyncModel>(0),
                         ParentId = id
-                    };
+                    });
                 }
                 else
                 {
-                    result = from m in result where m.ParentFolderId == parentFolder.FolderId select m;
+                    var pName = string.Format("@ParentFolderId");
+                    var p = new SQLiteParameter(pName, parentFolder.FolderId);
+                    paramters.Add(p);
+                    whereSql.Add(string.Format("{0} = {1}", "ParentFolderId", pName));
                 }
             }
             else
@@ -213,44 +315,21 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.Restore
                 var mailbox = (from m in _queryContext.Mailboxes where m.UniqueId == id select m).FirstOrDefault();
                 if (mailbox == null)
                 {
-                    return new QueryResult<IFolderDataSync>()
+                    return Convert<FolderSyncModel, IFolderDataSync>(new QueryResult<FolderSyncModel>()
                     {
                         TotalCount = 0,
                         Condition = queryCondition,
                         PageInfo = queryPage,
-                        Items = new List<IFolderDataSync>(0),
+                        Items = new List<FolderSyncModel>(0),
                         ParentId = id
-                    };
+                    });
                 }
                 else
                 {
-                    result = from m in result where m.ParentFolderId == mailbox.RootFolderId select m;
-                }
-            }
-
-            if (queryCondition != null && queryCondition.SortFields.Count > 0)
-            {
-                foreach (var orderCondition in queryCondition.SortFields)
-                {
-
-                    if (orderCondition.isDescend)
-                    {
-                        switch (orderCondition.FieldName.ToLower())
-                        {
-                            case "displayname":
-                                result = result.OrderByDescending(m => ((IItemBase)m).DisplayName);
-                                break;
-                        }
-                    }
-                    else
-                    {
-                        switch (orderCondition.FieldName.ToLower())
-                        {
-                            case "displayname":
-                                result = result.OrderBy(m => ((IItemBase)m).DisplayName);
-                                break;
-                        }
-                    }
+                    var pName = string.Format("@ParentFolderId");
+                    var p = new SQLiteParameter(pName, mailbox.RootFolderId);
+                    whereSql.Add(string.Format("{0} = {1}", "ParentFolderId", pName));
+                    paramters.Add(p);
                 }
             }
 
@@ -261,93 +340,255 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.Restore
                     switch (queryCondition.SearchField.FieldName.ToLower())
                     {
                         case "displayname":
-                            result = from m in result where ((IItemBase)m).DisplayName.Contains(queryCondition.SearchField.SearchValue) select m;
+                            var paramterName = string.Format("@{0}", queryCondition.SearchField.FieldName);
+                            whereSql.Add(string.Format(" displayname like %{0}% ", paramterName));
+                            var p = new SQLiteParameter(paramterName, queryCondition.SearchField.SearchValue);
+                            paramters.Add(p);
                             break;
-                        default:
-                            throw new NotSupportedException(string.Format("not support {0} [{1}] search", queryCondition.SearchField.FieldName, queryCondition.SearchField.SearchValue));
                     }
                 }
             }
 
-            var totalCount = result.Count();
+            if (whereSql.Count > 0)
+            {
+                sqlBuilder.Append(" where ").Append(string.Join(" and ", whereSql)).Append(" ");
+            }
+
+
+            if (queryCondition != null && queryCondition.SortFields.Count > 0)
+            {
+                sqlBuilder.Append(" order by ");
+                string[] orderbyArray = new string[queryCondition.SortFields.Count];
+                int i = 0;
+                foreach (var orderCondition in queryCondition.SortFields)
+                {
+                    switch (orderCondition.FieldName.ToLower())
+                    {
+                        case "displayname":
+                            orderbyArray[i] = string.Format(" {0} {1} ", orderCondition.FieldName, orderCondition.isDescend ? "desc" : "asc");
+                            break;
+                    }
+                }
+
+                sqlBuilder.Append(string.Join(",", orderbyArray));
+            }
+            else
+            {
+                sqlBuilder.Append(" order by displayname asc ");
+            }
+
+            string countSql = string.Format(" select count(*) from ({0})", sqlBuilder);
+
+            var count = _queryContext.Database.SqlQuery<int>(countSql, paramters.ToArray()).FirstOrDefault();
 
             if (!isOnlyGetCount)
             {
+                IEnumerable<FolderSyncModel> items;
                 if (queryPage != null)
                 {
-                    return new QueryResult<IFolderDataSync>()
+                    string pageSql = string.Format("select * from ({0}) LIMIT {1} OFFSET {2} ", sqlBuilder, queryPage.PageCount, queryPage.StartIndex);
+
+                    items = _queryContext.Database.SqlQuery<FolderSyncModel>(pageSql, paramters.ToArray());
+                    return Convert<FolderSyncModel, IFolderDataSync>(new QueryResult<FolderSyncModel>()
                     {
-                        TotalCount = totalCount,
+                        TotalCount = count,
                         Condition = queryCondition,
                         PageInfo = queryPage,
-                        Items = result.Skip(queryPage.StartIndex).Take(queryPage.PageCount),
+                        Items = items,
                         ParentId = id
-                    };
+                    });
                 }
                 else
                 {
-                    return new QueryResult<IFolderDataSync>()
+                    items = _queryContext.Database.SqlQuery<FolderSyncModel>(sqlBuilder.ToString(), paramters.ToArray());
+                    return Convert<FolderSyncModel, IFolderDataSync>(new QueryResult<FolderSyncModel>()
                     {
-                        TotalCount = totalCount,
+                        TotalCount = count,
                         Condition = queryCondition,
                         PageInfo = queryPage,
-                        Items = result,
+                        Items = items,
                         ParentId = id
-                    };
+                    });
                 }
             }
             else
             {
-                return new QueryResult<IFolderDataSync>()
+                return Convert<FolderSyncModel, IFolderDataSync>(new QueryResult<FolderSyncModel>()
                 {
-                    TotalCount = totalCount,
+                    TotalCount = count,
                     Condition = queryCondition,
                     PageInfo = queryPage,
                     ParentId = id
-                };
+                });
             }
+
+
+            //IQueryable<IFolderDataSync> result = from m in _queryContext.Folders select m;
+
+            //if (CatalogSyncDbContext.IsInFolder(id))
+            //{
+            //    var parentFolder = (from m in _queryContext.Folders where m.UniqueId == id select m).FirstOrDefault();
+            //    if (parentFolder == null)
+            //    {
+            //        return new QueryResult<IFolderDataSync>()
+            //        {
+            //            TotalCount = 0,
+            //            Condition = queryCondition,
+            //            PageInfo = queryPage,
+            //            Items = new List<IFolderDataSync>(0),
+            //            ParentId = id
+            //        };
+            //    }
+            //    else
+            //    {
+            //        result = from m in result where m.ParentFolderId == parentFolder.FolderId select m;
+            //    }
+            //}
+            //else
+            //{
+            //    var mailbox = (from m in _queryContext.Mailboxes where m.UniqueId == id select m).FirstOrDefault();
+            //    if (mailbox == null)
+            //    {
+            //        return new QueryResult<IFolderDataSync>()
+            //        {
+            //            TotalCount = 0,
+            //            Condition = queryCondition,
+            //            PageInfo = queryPage,
+            //            Items = new List<IFolderDataSync>(0),
+            //            ParentId = id
+            //        };
+            //    }
+            //    else
+            //    {
+            //        result = from m in result where m.ParentFolderId == mailbox.RootFolderId select m;
+            //    }
+            //}
+
+            //if (queryCondition != null && queryCondition.SearchField != null)
+            //{
+            //    if (!string.IsNullOrEmpty(queryCondition.SearchField.SearchValue))
+            //    {
+            //        switch (queryCondition.SearchField.FieldName.ToLower())
+            //        {
+            //            case "displayname":
+            //                result = from m in result where ((IItemBase)m).DisplayName.Contains(queryCondition.SearchField.SearchValue) select m;
+            //                break;
+            //            default:
+            //                throw new NotSupportedException(string.Format("not support {0} [{1}] search", queryCondition.SearchField.FieldName, queryCondition.SearchField.SearchValue));
+            //        }
+            //    }
+            //}
+
+            //if (queryCondition != null && queryCondition.SortFields.Count > 0)
+            //{
+            //    foreach (var orderCondition in queryCondition.SortFields)
+            //    {
+            //        if (orderCondition.isDescend)
+            //        {
+            //            switch (orderCondition.FieldName.ToLower())
+            //            {
+            //                case "displayname":
+            //                    result = from m in result orderby ((IItemBase)m).DisplayName descending select m;
+            //                    break;
+            //            }
+            //        }
+            //        else
+            //        {
+            //            switch (orderCondition.FieldName.ToLower())
+            //            {
+            //                case "displayname":
+            //                    result = from m in result orderby ((IItemBase)m).DisplayName select m;
+            //                    break;
+            //            }
+            //        }
+            //    }
+            //}
+
+
+
+            //var totalCount = result.Count();
+
+            //if (!isOnlyGetCount)
+            //{
+            //    if (queryPage != null)
+            //    {
+            //        return new QueryResult<IFolderDataSync>()
+            //        {
+            //            TotalCount = totalCount,
+            //            Condition = queryCondition,
+            //            PageInfo = queryPage,
+            //            Items = result.Skip(queryPage.StartIndex).Take(queryPage.PageCount),
+            //            ParentId = id
+            //        };
+            //    }
+            //    else
+            //    {
+            //        return new QueryResult<IFolderDataSync>()
+            //        {
+            //            TotalCount = totalCount,
+            //            Condition = queryCondition,
+            //            PageInfo = queryPage,
+            //            Items = result,
+            //            ParentId = id
+            //        };
+            //    }
+            //}
+            //else
+            //{
+            //    return new QueryResult<IFolderDataSync>()
+            //    {
+            //        TotalCount = totalCount,
+            //        Condition = queryCondition,
+            //        PageInfo = queryPage,
+            //        ParentId = id
+            //    };
+            //}
         }
 
-        public QueryResult<IItemDataSync> GetItemsForCom(Int64 folderId, QueryCondition queryCondition, QueryPage queryPage, bool isOnlyGetCount = false)
+        private QueryResult<IT> Convert<T, IT>(QueryResult<T> impl) where T : IT
         {
-            var folder = (from m in _queryContext.Folders where m.UniqueId == folderId select m).FirstOrDefault();
-            if (folder == null)
+            var result = new QueryResult<IT>()
             {
-                return new QueryResult<IItemDataSync>()
+                TotalCount = impl.TotalCount,
+                Condition = impl.Condition,
+                PageInfo = impl.PageInfo,
+                ParentId = impl.ParentId
+            };
+
+            var resultItems = new List<IT>();
+            foreach (var item in impl.Items)
+            {
+                resultItems.Add(item);
+            }
+            result.Items = resultItems;
+            return result;
+        }
+
+        public QueryResult<IItemDataSync> GetItemsForCom(Int64 id, QueryCondition queryCondition, QueryPage queryPage, bool isOnlyGetCount = false)
+        {
+            StringBuilder sqlBuilder = new StringBuilder();
+            sqlBuilder.Append(" select * from itemsync ");
+            List<SQLiteParameter> paramters = new List<SQLiteParameter>();
+
+            List<string> whereSql = new List<string>();
+            var parentFolder = (from m in _queryContext.Folders where m.UniqueId == id select m).FirstOrDefault();
+            if (parentFolder == null)
+            {
+                return Convert<ItemSyncModel, IItemDataSync>(new QueryResult<ItemSyncModel>()
                 {
                     TotalCount = 0,
                     Condition = queryCondition,
                     PageInfo = queryPage,
-                    Items = new List<IItemDataSync>(0),
-                    ParentId = folderId
-                };
+                    Items = new List<ItemSyncModel>(0),
+                    ParentId = id
+                });
             }
-
-            var result = from m in _queryContext.Items where m.ParentFolderId == folder.ParentFolderId select m;
-            if (queryCondition != null && queryCondition.SortFields.Count > 0)
+            else
             {
-                foreach (var orderCondition in queryCondition.SortFields)
-                {
-
-                    if (orderCondition.isDescend)
-                    {
-                        switch (orderCondition.FieldName.ToLower())
-                        {
-                            case "displayname":
-                                result = result.OrderByDescending(m => m.DisplayName);
-                                break;
-                        }
-                    }
-                    else
-                    {
-                        switch (orderCondition.FieldName.ToLower())
-                        {
-                            case "displayname":
-                                result = result.OrderBy(m => m.DisplayName);
-                                break;
-                        }
-                    }
-                }
+                var pName = string.Format("@ParentFolderId");
+                var p = new SQLiteParameter(pName, parentFolder.FolderId);
+                paramters.Add(p);
+                whereSql.Add(string.Format("{0} = {1}", "ParentFolderId", pName));
             }
 
             if (queryCondition != null && queryCondition.SearchField != null)
@@ -357,51 +598,193 @@ namespace Arcserve.Office365.Exchange.StorageAccess.MountSession.Restore
                     switch (queryCondition.SearchField.FieldName.ToLower())
                     {
                         case "displayname":
-                            result = from m in result where ((IItemBase)m).DisplayName.Contains(queryCondition.SearchField.SearchValue) select m;
+                            var paramterName = string.Format("@{0}", queryCondition.SearchField.FieldName);
+                            whereSql.Add(string.Format(" displayname like %{0}% ", paramterName));
+                            var p = new SQLiteParameter(paramterName, queryCondition.SearchField.SearchValue);
+                            paramters.Add(p);
                             break;
-                        default:
-                            throw new NotSupportedException(string.Format("not support {0} [{1}] search", queryCondition.SearchField.FieldName, queryCondition.SearchField.SearchValue));
                     }
                 }
             }
 
-            var totalCount = result.Count();
+            if (whereSql.Count > 0)
+            {
+                sqlBuilder.Append(" where ").Append(string.Join(" and ", whereSql)).Append(" ");
+            }
+
+
+            if (queryCondition != null && queryCondition.SortFields.Count > 0)
+            {
+                sqlBuilder.Append(" order by ");
+                string[] orderbyArray = new string[queryCondition.SortFields.Count];
+                int i = 0;
+                foreach (var orderCondition in queryCondition.SortFields)
+                {
+                    switch (orderCondition.FieldName.ToLower())
+                    {
+                        case "displayname":
+                            orderbyArray[i] = string.Format(" {0} {1} ", orderCondition.FieldName, orderCondition.isDescend ? "desc" : "asc");
+                            break;
+                    }
+                }
+
+                sqlBuilder.Append(string.Join(",", orderbyArray));
+            }
+            else
+            {
+                sqlBuilder.Append(" order by displayname asc ");
+            }
+
+            string countSql = string.Format(" select count(*) from ({0})", sqlBuilder);
+
+            var count = _queryContext.Database.SqlQuery<int>(countSql, paramters.ToArray()).FirstOrDefault();
 
             if (!isOnlyGetCount)
             {
+                IEnumerable<ItemSyncModel> items;
                 if (queryPage != null)
                 {
-                    return new QueryResult<IItemDataSync>()
+                    string pageSql = string.Format("select * from ({0}) LIMIT {1} OFFSET {2} ", sqlBuilder, queryPage.PageCount, queryPage.StartIndex);
+
+                    items = _queryContext.Database.SqlQuery<ItemSyncModel>(pageSql, paramters.ToArray());
+                    return Convert<ItemSyncModel, IItemDataSync>(new QueryResult<ItemSyncModel>()
                     {
-                        TotalCount = totalCount,
+                        TotalCount = count,
                         Condition = queryCondition,
                         PageInfo = queryPage,
-                        Items = result.Skip(queryPage.StartIndex).Take(queryPage.PageCount),
-                        ParentId = folderId
-                    };
+                        Items = items,
+                        ParentId = id
+                    });
                 }
                 else
                 {
-                    return new QueryResult<IItemDataSync>()
+                    items = _queryContext.Database.SqlQuery<ItemSyncModel>(sqlBuilder.ToString(), paramters.ToArray());
+                    return Convert<ItemSyncModel, IItemDataSync>(new QueryResult<ItemSyncModel>()
                     {
-                        TotalCount = totalCount,
+                        TotalCount = count,
                         Condition = queryCondition,
                         PageInfo = queryPage,
-                        Items = result,
-                        ParentId = folderId
-                    };
+                        Items = items,
+                        ParentId = id
+                    });
                 }
             }
             else
             {
-                return new QueryResult<IItemDataSync>()
+                return Convert<ItemSyncModel, IItemDataSync>(new QueryResult<ItemSyncModel>()
                 {
-                    TotalCount = totalCount,
+                    TotalCount = count,
                     Condition = queryCondition,
                     PageInfo = queryPage,
-                    ParentId = CatalogDbInitialize.MailStartIndex
-                };
+                    ParentId = id
+                });
             }
+
+
+
+            //var folder = (from m in _queryContext.Folders where m.UniqueId == folderId select m).FirstOrDefault();
+            //if (folder == null)
+            //{
+            //    return new QueryResult<IItemDataSync>()
+            //    {
+            //        TotalCount = 0,
+            //        Condition = queryCondition,
+            //        PageInfo = queryPage,
+            //        Items = new List<IItemDataSync>(0),
+            //        ParentId = folderId
+            //    };
+            //}
+
+            //var result = from m in _queryContext.Items where m.ParentFolderId == folder.ParentFolderId select m;
+
+            //if (queryCondition != null && queryCondition.SearchField != null)
+            //{
+            //    if (!string.IsNullOrEmpty(queryCondition.SearchField.SearchValue))
+            //    {
+            //        switch (queryCondition.SearchField.FieldName.ToLower())
+            //        {
+            //            case "displayname":
+            //                result = from m in result where ((IItemBase)m).DisplayName.Contains(queryCondition.SearchField.SearchValue) select m;
+            //                break;
+            //            default:
+            //                throw new NotSupportedException(string.Format("not support {0} [{1}] search", queryCondition.SearchField.FieldName, queryCondition.SearchField.SearchValue));
+            //        }
+            //    }
+            //}
+
+            //if (queryCondition != null && queryCondition.SortFields.Count > 0)
+            //{
+            //    foreach (var orderCondition in queryCondition.SortFields)
+            //    {
+
+            //        if (orderCondition.isDescend)
+            //        {
+            //            switch (orderCondition.FieldName.ToLower())
+            //            {
+            //                case "displayname":
+            //                    result = from m in result orderby ((IItemBase)m).DisplayName descending select m;
+            //                    break;
+            //            }
+            //        }
+            //        else
+            //        {
+            //            switch (orderCondition.FieldName.ToLower())
+            //            {
+            //                case "displayname":
+            //                    result = from m in result orderby ((IItemBase)m).DisplayName select m;
+            //                    break;
+            //            }
+            //        }
+            //    }
+            //}
+
+            //var totalCount = result.Count();
+
+            //if (!isOnlyGetCount)
+            //{
+            //    if (queryPage != null)
+            //    {
+            //        return new QueryResult<IItemDataSync>()
+            //        {
+            //            TotalCount = totalCount,
+            //            Condition = queryCondition,
+            //            PageInfo = queryPage,
+            //            Items = result.Skip(queryPage.StartIndex).Take(queryPage.PageCount),
+            //            ParentId = folderId
+            //        };
+            //    }
+            //    else
+            //    {
+            //        return new QueryResult<IItemDataSync>()
+            //        {
+            //            TotalCount = totalCount,
+            //            Condition = queryCondition,
+            //            PageInfo = queryPage,
+            //            Items = result,
+            //            ParentId = folderId
+            //        };
+            //    }
+            //}
+            //else
+            //{
+            //    return new QueryResult<IItemDataSync>()
+            //    {
+            //        TotalCount = totalCount,
+            //        Condition = queryCondition,
+            //        PageInfo = queryPage,
+            //        ParentId = CatalogDbInitialize.MailboxStartIndex
+            //    };
+            //}
+        }
+
+        public int ReadDataFromStorage(IItemDataSync item, byte[] buffer, int offset, int length)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ImportItemError(EwsResponseException ewsResponseError)
+        {
+            throw new NotImplementedException();
         }
     }
 }

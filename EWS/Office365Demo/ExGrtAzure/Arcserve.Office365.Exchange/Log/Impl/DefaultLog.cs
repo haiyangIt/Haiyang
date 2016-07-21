@@ -16,6 +16,8 @@ namespace Arcserve.Office365.Exchange.Log.Impl
     internal class DefaultLog : ILog
     {
 
+
+
         private static object _lock = new object();
         private LogToStreamManage _instance = null;
         private LogToStreamManage Instance
@@ -76,6 +78,9 @@ namespace Arcserve.Office365.Exchange.Log.Impl
                         Directory.CreateDirectory(logFolder);
                     }
                     _logFolder = logFolder;
+
+                    WriteToLog.WriteLog(string.Format("appPath:{0}", AppDomain.CurrentDomain.BaseDirectory));
+                    WriteToLog.WriteLog(string.Format("Path:{0}", _logFolder));
                     //var logPath = Path.Combine(logFolder, LogFileNameFormat);
                     //_logPath = logPath;
 
@@ -95,6 +100,7 @@ namespace Arcserve.Office365.Exchange.Log.Impl
             {
                 return;
             }
+            WriteToLog.WriteLog(logDetail);
             Instance.WriteToLog(logDetail);
         }
 
@@ -104,6 +110,7 @@ namespace Arcserve.Office365.Exchange.Log.Impl
             {
                 return;
             }
+            WriteToLog.WriteLog(logDetail);
             Instance.WriteToLog(logDetail);
         }
 
@@ -686,4 +693,22 @@ namespace Arcserve.Office365.Exchange.Log.Impl
     //        Debug.WriteLine(information);
     //    }
     //}
+
+    public class WriteToLog
+    {
+        private static object _obj = new object();
+        private static FileStream _fileStream;// = new FileStream(string.Format(@"C:\Program Files\Arcserve\Unified Data Protection\Engine\Logs\Office365Log\{0}.txt", DateTime.Now.ToString("yyyyMMdd_HHmmss")), FileMode.Create);
+        //private static StreamWriter _writer = new StreamWriter(_fileStream);
+        public static void WriteLog(string msg)
+        {
+            lock (_obj)
+            {
+                using (StreamWriter writer = new StreamWriter(string.Format(@"C:\Program Files\Arcserve\Unified Data Protection\Engine\Logs\Office365Log\{0}.txt", DateTime.Now.ToString("yyyyMMdd_HH")), true))
+                {
+                    writer.WriteLine(msg);
+                }
+            }
+
+        }
+    }
 }
